@@ -1,5 +1,5 @@
-rootProject.name = "rauth"
+rootProject.name = "ratauth"
 
 //## start includes ####
-include 'app'
+include 'server'
 //## end includes ######

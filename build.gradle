@@ -13,7 +13,7 @@ buildscript {
   }
 }
 
-group = "ru.rauth"
+group = "ru.ratauth"
 version = "0.0.1"
 
 allprojects {
@@ -56,7 +56,6 @@ subprojects {
 
   dependencies {
     compile 'org.codehaus.groovy:groovy-all'
-    compile 'com.google.guava:guava'
 
     provided 'org.projectlombok:lombok'
 
