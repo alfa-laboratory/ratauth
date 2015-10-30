@@ -1,0 +1,4 @@
+#!/bin/bash
+
+./gradlew app:dB
+docker-compose up -d

@@ -1,0 +1,5 @@
+rootProject.name = "rauth"
+
+//## start includes ####
+include 'app'
+//## end includes ######

@@ -1,0 +1,8 @@
+#registrator:
+#  image: gliderlabs/registrator
+#  container_name: registrator
+#  net: "host"
+#  volumes:
+#    - "/var/run/docker.sock:/tmp/docker.sock"
+#  command: "-ip 192.168.99.100 consul://192.168.99.100:8500"
+#  restart: always
