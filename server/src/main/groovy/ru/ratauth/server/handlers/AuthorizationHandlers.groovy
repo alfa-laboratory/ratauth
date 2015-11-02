@@ -4,6 +4,7 @@ import io.netty.handler.codec.http.HttpResponseStatus
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import ratpack.exec.Blocking
 import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
@@ -24,7 +25,9 @@ class AuthorizationHandlers {
     chain {
       prefix('oauth/authorize') {
         get { Context ctx ->
-          ctx.redirect(HttpResponseStatus.FOUND.code() ,authorizeService.authenticate(ctx.request))
+          Blocking.get {
+            authorizeService.authenticate(ctx.request)
+          } then { res -> ctx.redirect(HttpResponseStatus.FOUND.code() ,authorizeService.authenticate(ctx.request)) }
         }
       }
     }
