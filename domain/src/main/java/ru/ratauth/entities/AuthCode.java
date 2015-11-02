@@ -1,4 +1,4 @@
-package ru.ratauth.server.database.entities;
+package ru.ratauth.entities;
 
 import groovy.transform.builder.Builder;
 import lombok.AllArgsConstructor;

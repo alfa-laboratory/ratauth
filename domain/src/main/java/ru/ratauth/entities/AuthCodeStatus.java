@@ -1,4 +1,4 @@
-package ru.ratauth.server.database.entities;
+package ru.ratauth.entities;
 
 /**
  * @author mgorelikov

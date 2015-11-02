@@ -3,3 +3,5 @@ rootProject.name = "ratauth"
 //## start includes ####
 include 'server'
 //## end includes ######
+include 'domain'
+

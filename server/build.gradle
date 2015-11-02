@@ -1,8 +1,19 @@
+buildscript {
+  repositories {
+    jcenter()
+  }
+  dependencies {
+    classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+  }
+}
+
 plugins {
   id 'io.ratpack.ratpack-groovy' version "1.1.1"
 }
 
 apply plugin: 'io.ratpack.ratpack-java'
+apply plugin: 'spring-boot'
+apply plugin: 'io.spring.dependency-management'
 
 version = "0.0.1"
 
@@ -12,4 +23,17 @@ dependencies {
   compile ratpack.dependency('spring-boot')
 
   compile 'org.apache.oltu.oauth2:org.apache.oltu.oauth2.common'
+  compile project(':domain')
+}
+
+task dockerBuild << {
+  exec {
+    commandLine 'docker', 'build', '--force-rm=true', "--tag='${project.name}'", '.'
+  }
+}
+
+dockerBuild.dependsOn build
+
+springBoot {
+  executable = true
 }

@@ -43,7 +43,6 @@ import java.util.List;
 @EnableConfigurationProperties
 public class RatpackSpringEndpointsAutoConfiguration {
 
-
 	@Bean
 	@ConditionalOnMissingBean
 	public ManagementServerProperties managementServerProperties() {

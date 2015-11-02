@@ -42,6 +42,7 @@ allprojects {
       dependency 'org.codehaus.groovy:groovy-all:2.4.5'
       dependency 'org.spockframework:spock-core:1.0-groovy-2.4'
       dependency 'org.spockframework:spock-spring:1.0-groovy-2.4'
+      dependency 'org.projectlombok:lombok:1.16.2'
 
       dependencySet (group: 'org.apache.oltu.oauth2', version:'1.0.1') {
         entry 'org.apache.oltu.oauth2.common'
@@ -53,7 +54,6 @@ allprojects {
 subprojects {
   apply plugin: 'java'
   apply plugin: 'groovy'
-  apply plugin: 'spring-boot'
 
   sourceCompatibility = 1.8
   targetCompatibility = 1.8
@@ -66,7 +66,7 @@ subprojects {
   dependencies {
     compile 'org.codehaus.groovy:groovy-all'
 
-    provided 'org.projectlombok:lombok'
+    compile 'org.projectlombok:lombok'
 
     testCompile 'org.springframework.boot:spring-boot-starter-test'
     testCompile 'org.spockframework:spock-core', {
@@ -75,18 +75,6 @@ subprojects {
     testCompile 'org.spockframework:spock-spring', {
       exclude module: "groovy-all"
     }
-  }
-
-  task dockerBuild << {
-    exec {
-      commandLine 'docker', 'build', '--force-rm=true', "--tag='${project.name}'", '.'
-    }
-  }
-
-  dockerBuild.dependsOn build
-
-  springBoot {
-    executable = true
   }
 }
 

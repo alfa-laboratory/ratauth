@@ -1,11 +1,9 @@
-package ru.ratauth.server.database.entities;
+package ru.ratauth.entities;
 
 import groovy.transform.builder.Builder;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Date;
 
 /**
  * @author mgorelikov
@@ -15,9 +13,10 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Token {
-  private String token;
-  private Date created;
-  private String codeId;//identifier
-  private Integer TTL;
+public class RelyingParty {
+  private String id;
+  private String name;//description name
+  private String login;
+  private String password;
+  private String redirectURL;
 }

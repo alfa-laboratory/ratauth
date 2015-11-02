@@ -1,4 +1,4 @@
-package ru.ratauth.server.database.entities;
+package ru.ratauth.entities;
 
 import groovy.transform.builder.Builder;
 import lombok.AllArgsConstructor;
@@ -7,14 +7,14 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author mgorelikov
- * @since 02/11/15
+ * @since 01/11/15
  */
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthProvider {
+public class ResourceServer {
   private String id;
   private String name;
-  private String type;
+  private String redirectURL;
 }
