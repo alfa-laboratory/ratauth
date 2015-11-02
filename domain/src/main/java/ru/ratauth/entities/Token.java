@@ -1,11 +1,10 @@
 package ru.ratauth.entities;
 
-import groovy.transform.builder.Builder;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author mgorelikov
@@ -19,5 +18,14 @@ public class Token {
   private String token;
   private Date created;
   private String codeId;//identifier
-  private Integer TTL;
+  private Long TTL;
+  private @Singular("scope") Set<String> scopes;
+  private String relyingParty;//identifier
+  private String resourceServer;//identifier
+  private String identityProvider;//identifier
+  private String user;//external identifier
+
+  public Long expiresIn() {
+    return created.getTime() + TTL;
+  }
 }

@@ -1,8 +1,9 @@
-package ru.ratauth.server.providers;
+package ru.ratauth.providers;
 
 /**
  * @author mgorelikov
  * @since 01/11/15
+ * interface for authentication providers
  */
 public interface AuthProvider {
   /**

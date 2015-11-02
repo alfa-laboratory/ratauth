@@ -1,11 +1,10 @@
 package ru.ratauth.entities;
 
-import groovy.transform.builder.Builder;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author mgorelikov
@@ -20,10 +19,14 @@ public class AuthCode {
   private String code;
   private Date created;
   private Date used;
-  private Integer TTL;
-  private String resourceConsumer;//identifier
-  private String resourceProvider;//identifier
-  private String authProvider;//identifier
-  private String user;//external identifier
+  private Long TTL;
+  private @Singular("scope")
+  Set<String> scopes;
+  private String relyingParty;//identifier
+  private String identityProvider;//identifier
   private AuthCodeStatus status;
+
+  public Long expiresIn() {
+    return created.getTime() + TTL;
+  }
 }

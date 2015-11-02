@@ -16,8 +16,6 @@ buildscript {
 group = "ru.ratauth"
 version = "0.0.1"
 
-
-
 allprojects {
   apply plugin: 'idea'
   apply plugin: 'io.spring.dependency-management'
@@ -43,9 +41,9 @@ allprojects {
       dependency 'org.spockframework:spock-core:1.0-groovy-2.4'
       dependency 'org.spockframework:spock-spring:1.0-groovy-2.4'
       dependency 'org.projectlombok:lombok:1.16.2'
-
       dependencySet (group: 'org.apache.oltu.oauth2', version:'1.0.1') {
         entry 'org.apache.oltu.oauth2.common'
+        entry 'org.apache.oltu.oauth2.authzserver'
       }
     }
   }
@@ -62,10 +60,8 @@ subprojects {
     archiveName = project.name + ".jar"
   }
 
-
   dependencies {
     compile 'org.codehaus.groovy:groovy-all'
-
     compile 'org.projectlombok:lombok'
 
     testCompile 'org.springframework.boot:spring-boot-starter-test'

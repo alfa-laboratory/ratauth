@@ -1,7 +1,7 @@
 package ru.ratauth.entities;
 
-import groovy.transform.builder.Builder;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,5 +16,4 @@ import lombok.NoArgsConstructor;
 public class ResourceServer {
   private String id;
   private String name;
-  private String redirectURL;
 }

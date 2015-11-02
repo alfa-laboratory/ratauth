@@ -23,7 +23,9 @@ dependencies {
   compile ratpack.dependency('spring-boot')
 
   compile 'org.apache.oltu.oauth2:org.apache.oltu.oauth2.common'
+  compile 'org.apache.oltu.oauth2:org.apache.oltu.oauth2.authzserver'
   compile project(':domain')
+  provided 'javax.servlet:javax.servlet-api'
 }
 
 task dockerBuild << {

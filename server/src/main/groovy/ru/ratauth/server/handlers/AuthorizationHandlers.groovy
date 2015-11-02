@@ -1,9 +1,14 @@
 package ru.ratauth.server.handlers
 
+import io.netty.handler.codec.http.HttpResponseStatus
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import ratpack.func.Action
 import ratpack.handling.Chain
+import ratpack.handling.Context
+import ru.ratauth.server.services.AuthorizeService
+import ratpack.http.Status;
 
 /**
  * @author mgorelikov
@@ -11,11 +16,16 @@ import ratpack.handling.Chain
  */
 @Configuration
 class AuthorizationHandlers {
+  @Autowired
+  private AuthorizeService authorizeService
+
   @Bean
   Action<Chain> authChain() {
     chain {
-      prefix('oauth') {
-
+      prefix('oauth/authorize') {
+        get { Context ctx ->
+          ctx.redirect(HttpResponseStatus.FOUND.code() ,authorizeService.authenticate(ctx.request))
+        }
       }
     }
   }

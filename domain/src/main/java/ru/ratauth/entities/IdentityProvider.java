@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthProvider {
+public class IdentityProvider {
   private String id;
   private String name;
   private String type;

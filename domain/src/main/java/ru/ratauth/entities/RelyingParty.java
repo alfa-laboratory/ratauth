@@ -1,9 +1,11 @@
 package ru.ratauth.entities;
 
-import groovy.transform.builder.Builder;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Date;
 
 /**
  * @author mgorelikov
@@ -16,7 +18,11 @@ import lombok.NoArgsConstructor;
 public class RelyingParty {
   private String id;
   private String name;//description name
-  private String login;
-  private String password;
+  private String secret;
+  private Date created;
+  private Date updated;
+  private Integer secretTTL;
   private String redirectURL;
+  private ApplicationType applicationType;
+  private String identityProvider;//identifier
 }
