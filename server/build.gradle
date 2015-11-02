@@ -9,7 +9,6 @@ version = "0.0.1"
 dependencies {
   compile 'org.springframework.boot:spring-boot-starter-actuator'
   compile 'org.springframework.boot:spring-boot-starter-web'
-  compile 'org.springframework.boot:spring-boot-starter-data-mongodb'
   compile ratpack.dependency('spring-boot')
 
   compile 'org.apache.oltu.oauth2:org.apache.oltu.oauth2.common'
