@@ -8,8 +8,14 @@ import ratpack.exec.Blocking
 import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
+import ru.ratauth.server.handlers.dto.CheckTokenDTO
+import ru.ratauth.server.handlers.dto.TokenDTO
+import ru.ratauth.server.services.AuthTokenService
 import ru.ratauth.server.services.AuthorizeService
-import ratpack.http.Status;
+
+import static ratpack.groovy.Groovy.chain
+import static ratpack.jackson.Jackson.json
+
 
 /**
  * @author mgorelikov
@@ -19,15 +25,35 @@ import ratpack.http.Status;
 class AuthorizationHandlers {
   @Autowired
   private AuthorizeService authorizeService
+  @Autowired
+  private AuthTokenService authTokenService
 
   @Bean
   Action<Chain> authChain() {
     chain {
-      prefix('oauth/authorize') {
-        get { Context ctx ->
+      prefix('oauth') {
+        prefix('authorize') {
+          get { Context ctx ->
+            Blocking.get {
+              authorizeService.authenticate(ctx.request)
+            } then { res -> ctx.redirect(HttpResponseStatus.FOUND.code() ,authorizeService.authenticate(ctx.request)) }
+          }
+        }
+
+        prefix('token') {
+          post { Context ctx ->
+            Blocking.get {
+              authTokenService.getToken(ctx.request)
+            } then { res -> ctx.render json(new TokenDTO(res)) }
+          }
+        }
+      }
+
+      prefix('check_token') {
+        post { Context ctx ->
           Blocking.get {
-            authorizeService.authenticate(ctx.request)
-          } then { res -> ctx.redirect(HttpResponseStatus.FOUND.code() ,authorizeService.authenticate(ctx.request)) }
+            authTokenService.checkToken(ctx.request)
+          } then { res -> ctx.render json(new CheckTokenDTO(res)) }
         }
       }
     }

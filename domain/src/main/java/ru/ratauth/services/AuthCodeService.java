@@ -8,4 +8,11 @@ import ru.ratauth.entities.AuthCode;
  */
 public interface AuthCodeService {
   AuthCode save(AuthCode code);
+
+  /**
+   *
+   * @param code
+   * @return code entity if it was found, otherwise must return null
+   */
+  AuthCode get(String code);
 }

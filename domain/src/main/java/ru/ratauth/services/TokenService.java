@@ -8,4 +8,5 @@ import ru.ratauth.entities.Token;
  */
 public interface TokenService {
   Token save(Token token);
+  Token get(String token);
 }

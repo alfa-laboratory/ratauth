@@ -1,11 +1,9 @@
 package ru.ratauth.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
+import java.util.Set;
 
 /**
  * @author mgorelikov
@@ -25,4 +23,6 @@ public class RelyingParty {
   private String redirectURL;
   private ApplicationType applicationType;
   private String identityProvider;//identifier
+  private @Singular Set<String> resourceServers;
+  private ServiceStatus status;
 }

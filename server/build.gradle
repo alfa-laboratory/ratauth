@@ -24,6 +24,9 @@ dependencies {
 
   compile 'org.apache.oltu.oauth2:org.apache.oltu.oauth2.common'
   compile 'org.apache.oltu.oauth2:org.apache.oltu.oauth2.authzserver'
+  compile 'org.apache.oltu.oauth2:org.apache.oltu.oauth2.resourceserver'
+  compile 'org.apache.oltu.oauth2:org.apache.oltu.oauth2.jwt'
+  compile 'org.apache.oltu.jose:org.apache.oltu.jose.jws'
   compile project(':domain')
   provided 'javax.servlet:javax.servlet-api'
 }

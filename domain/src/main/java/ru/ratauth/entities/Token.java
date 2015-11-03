@@ -3,7 +3,6 @@ package ru.ratauth.entities;
 import lombok.*;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -21,9 +20,9 @@ public class Token {
   private Long TTL;
   private @Singular("scope") Set<String> scopes;
   private String relyingParty;//identifier
-  private String resourceServer;//identifier
   private String identityProvider;//identifier
   private String user;//external identifier
+  private String tokenId;
 
   public Long expiresIn() {
     return created.getTime() + TTL;
