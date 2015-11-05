@@ -1,26 +1,22 @@
 package ru.ratauth.server.services;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.oltu.oauth2.as.issuer.MD5Generator;
-import org.apache.oltu.oauth2.as.issuer.OAuthIssuerImpl;
-import org.apache.oltu.oauth2.as.request.OAuthAuthzRequest;
-import org.apache.oltu.oauth2.as.response.OAuthASResponse;
-import org.apache.oltu.oauth2.common.OAuth;
-import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
-import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.ratauth.entities.AuthCode;
 import ru.ratauth.entities.AuthCodeStatus;
 import ru.ratauth.entities.RelyingParty;
+import ru.ratauth.interaction.AuthzRequest;
+import ru.ratauth.interaction.AuthzResponse;
+import ru.ratauth.server.secutiry.MD5Generator;
+import ru.ratauth.server.secutiry.OAuthIssuerImpl;
+import ru.ratauth.server.secutiry.OAuthSystemException;
 import ru.ratauth.server.utils.StringUtils;
 import ru.ratauth.services.AuthCodeService;
 import ru.ratauth.services.RelyingPartyService;
 import ru.ratauth.services.TokenService;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.Set;
@@ -42,26 +38,21 @@ public class OpenIdAuthorizeService implements AuthorizeService {
 
   //TODO think about response type code
   @Override
-  public String authenticate(HttpServletRequest request) throws URISyntaxException, OAuthSystemException, OAuthProblemException {
-    OAuthAuthzRequest oauthRequest = new OAuthAuthzRequest(request);
+  public AuthzResponse authenticate(AuthzRequest oauthRequest) throws URISyntaxException, OAuthSystemException {
 
     RelyingParty relyingParty = relyingPartyService.getRelyingParty(oauthRequest.getClientId());
-    OAuthASResponse.OAuthAuthorizationResponseBuilder builder = OAuthASResponse
-        .authorizationResponse(request, HttpServletResponse.SC_FOUND);
-
     //only for response type TOKEN
     AuthCode authCode = saveCode(codeGenerator.authorizationCode(), relyingParty, oauthRequest.getScopes());
 
-    String redirectURI = oauthRequest.getParam(OAuth.OAUTH_REDIRECT_URI);
+    String redirectURI = oauthRequest.getRedirectURI();
     if(StringUtils.isBlank(redirectURI)) {
       redirectURI = relyingParty.getRedirectURL();
     }
 
-    return builder.setCode(authCode.getCode())
-        .setExpiresIn(authCode.expiresIn())
-        .location(redirectURI)
-        .buildQueryMessage()
-        .getLocationUri();
+    return AuthzResponse.builder()
+        .code(authCode.getCode())
+        .expiresIn(authCode.expiresIn())
+        .location(redirectURI).build();
   }
 
   private AuthCode saveCode(String code, RelyingParty relyingParty, Set<String> scopes) {

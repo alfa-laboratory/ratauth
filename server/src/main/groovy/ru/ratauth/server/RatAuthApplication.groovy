@@ -3,9 +3,11 @@ package ru.ratauth.server
 import groovy.util.logging.Slf4j
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import ratpack.spring.config.EnableRatpack
 
 @Slf4j
 @SpringBootApplication
+@EnableRatpack
 public class RatAuthApplication {
   public static final int DEFAULT_PADDING = 50
 

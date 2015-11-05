@@ -1,14 +1,11 @@
 package ru.ratauth.server.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
-import org.apache.oltu.jose.jws.JWS;
-import org.apache.oltu.jose.jws.signature.SignatureMethod;
-import org.apache.oltu.jose.jws.signature.impl.SignatureMethodsHMAC256Impl;
-import org.apache.oltu.jose.jws.signature.impl.SymmetricKeyImpl;
-import org.apache.oltu.oauth2.jwt.JWT;
-import org.apache.oltu.oauth2.jwt.io.JWTWriter;
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,6 +13,8 @@ import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.entities.Token;
 
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -25,35 +24,39 @@ import java.util.Map;
 @Service
 public class HS256TokenGenerator implements TokenGenerator {
   private final String keyString;
-  private final SignatureMethod signMethod;
-  private final SymmetricKeyImpl key;
   private final ObjectMapper jacksonObjectMapper;
+  private final JWSSigner signer;
 
+  @Autowired
   public HS256TokenGenerator(@Value("${auth.key}") String keyString,
-                             ObjectMapper jacksonObjectMapper) {
+                             ObjectMapper jacksonObjectMapper) throws KeyLengthException {
     this.keyString = keyString;
     this.jacksonObjectMapper = jacksonObjectMapper;
-    this.signMethod = new SignatureMethodsHMAC256Impl();
-    this.key = new SymmetricKeyImpl(Base64Coder.decodeLines(keyString));
+    // Create HMAC signer
+    this.signer= new MACSigner(Base64Coder.decodeLines(keyString));
   }
 
 
   @Override
-  public String createToken(RelyingParty relyingParty, Token token, Map<String,String> userInfo) throws JsonProcessingException {
-    String signature = new JWS.Builder()
-        .setType("JWT")
-        .setAlgorithm(signMethod.getAlgorithm())
-        .setPayload(jacksonObjectMapper.writeValueAsString(userInfo))
-        .sign(signMethod, key)
-        .build().getSignature();
+  public String createToken(RelyingParty relyingParty, Token token, Map<String, String> userInfo) throws JOSEException {
 
-   JWT jwt =  new JWT.Builder()
-        .setHeaderAlgorithm("RS256")
-        .setClaimsSetAudiences(Arrays.asList(relyingParty.getName()))
-        .setClaimsSetIssuer("ratauth.ru")
-        .setClaimsSetExpirationTime(token.getCreated().getTime())
-        .setClaimsSetIssuedAt(token.expiresIn())
-        .setSignature(signature).build();
-    return new JWTWriter().write(jwt);
+// Prepare JWT with claims set
+    JWTClaimsSet.Builder jwtBuilder =  new JWTClaimsSet.Builder()
+      .issuer("http://ratauth.ru")
+      .expirationTime(new Date(token.expiresIn()))
+      .audience(relyingParty.getName())
+      .jwtID(token.getToken())
+      .issueTime(token.getCreated());
+    userInfo.forEach((key,value) -> jwtBuilder.claim(key, value));
+
+    SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), jwtBuilder.build());
+
+// Apply the HMAC protection
+    signedJWT.sign(signer);
+
+// Serialize to compact form, produces something like
+// eyJhbGciOiJIUzI1NiJ9.SGVsbG8sIHdvcmxkIQ.onO9Ihudz3WkiauDO2Uhyuz0Y18UASXlSc1eS0NkWyA
+    return signedJWT.serialize();
   }
+
 }

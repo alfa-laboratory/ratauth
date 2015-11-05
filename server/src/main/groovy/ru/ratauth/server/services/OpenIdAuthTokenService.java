@@ -1,30 +1,22 @@
 package ru.ratauth.server.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.nimbusds.jose.JOSEException;
 import lombok.RequiredArgsConstructor;
-import org.apache.oltu.oauth2.as.issuer.OAuthIssuerImpl;
-import org.apache.oltu.oauth2.as.issuer.UUIDValueGenerator;
-import org.apache.oltu.oauth2.as.request.OAuthTokenRequest;
-import org.apache.oltu.oauth2.common.OAuth;
-import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
-import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
-import org.apache.oltu.oauth2.common.message.types.ParameterStyle;
-import org.apache.oltu.oauth2.common.message.types.TokenType;
-import org.apache.oltu.oauth2.rs.request.OAuthAccessResourceRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.ratauth.entities.AuthCode;
 import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.entities.Token;
-import ru.ratauth.interaction.CheckTokenResponse;
-import ru.ratauth.interaction.TokenResponse;
+import ru.ratauth.interaction.*;
 import ru.ratauth.providers.AuthProvider;
+import ru.ratauth.server.secutiry.OAuthIssuerImpl;
+import ru.ratauth.server.secutiry.OAuthSystemException;
+import ru.ratauth.server.secutiry.UUIDValueGenerator;
 import ru.ratauth.services.AuthCodeService;
 import ru.ratauth.services.RelyingPartyService;
 import ru.ratauth.services.TokenService;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.Map;
 
@@ -45,15 +37,14 @@ public class OpenIdAuthTokenService implements AuthTokenService {
   @Value("${auth.token.ttl}")
   private Long tokenTTL;
 
-  @Value("${auth.signature}")
+  @Value("${auth.key}")
   private String signature;
 
   //TODO refresh token
   @Override
-  public TokenResponse getToken(HttpServletRequest request) throws OAuthProblemException, OAuthSystemException, JsonProcessingException {
+  public TokenResponse getToken(TokenRequest oauthRequest) throws OAuthSystemException, JOSEException {
     TokenResponse response = null;
-    OAuthTokenRequest oauthRequest = new OAuthTokenRequest(request);
-    AuthCode authCode = authCodeService.get(oauthRequest.getParam(OAuth.OAUTH_CODE));
+    AuthCode authCode = authCodeService.get(oauthRequest.getCode());
     if(authCode != null ){
       RelyingParty relyingParty = relyingPartyService.getRelyingParty(authCode.getRelyingParty());
       if(oauthRequest.getClientId().equals(relyingParty.getId()) && oauthRequest.getClientSecret().equals(relyingParty.getSecret())) {
@@ -76,11 +67,9 @@ public class OpenIdAuthTokenService implements AuthTokenService {
   }
 
   @Override
-  public CheckTokenResponse checkToken(HttpServletRequest request) throws OAuthProblemException, OAuthSystemException {
+  public CheckTokenResponse checkToken(CheckTokenRequest oauthRequest) {
     CheckTokenResponse checkTokenResponse = null;
-    OAuthAccessResourceRequest oauthRequest = new OAuthAccessResourceRequest(request,
-        ParameterStyle.BODY);
-    String accessToken = oauthRequest.getAccessToken();
+    String accessToken = oauthRequest.getToken();
     Token token = tokenService.get(accessToken);
     if(token != null && token.expiresIn() > System.currentTimeMillis()) {
       RelyingParty relyingParty = relyingPartyService.getRelyingParty(token.getRelyingParty());

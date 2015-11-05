@@ -22,11 +22,7 @@ dependencies {
   compile 'org.springframework.boot:spring-boot-starter-web'
   compile ratpack.dependency('spring-boot')
 
-  compile 'org.apache.oltu.oauth2:org.apache.oltu.oauth2.common'
-  compile 'org.apache.oltu.oauth2:org.apache.oltu.oauth2.authzserver'
-  compile 'org.apache.oltu.oauth2:org.apache.oltu.oauth2.resourceserver'
-  compile 'org.apache.oltu.oauth2:org.apache.oltu.oauth2.jwt'
-  compile 'org.apache.oltu.jose:org.apache.oltu.jose.jws'
+  compile 'com.nimbusds:nimbus-jose-jwt'
   compile project(':domain')
   provided 'javax.servlet:javax.servlet-api'
 }
