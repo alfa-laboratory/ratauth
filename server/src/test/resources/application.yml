@@ -1,0 +1,4 @@
+auth.secret.ttl = 2678400
+auth.token.ttl = 86400
+auth.code.ttl = 86400
+auth.key = HdC4t2Wpjn/obYj9JHLVwmGzSqQ5SlatYqMF6zuAL0s=

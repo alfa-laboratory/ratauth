@@ -15,31 +15,30 @@ import static ratpack.groovy.Groovy.chain
  * @since 30/10/15
  */
 @CompileStatic
-@EnableRatpack
 @Configuration
 class RatpackConfiguration {
 
   Logger log = LoggerFactory.getLogger(RatpackConfiguration)
 
-  @Bean
-  Action<Chain> all() {
-    chain {
-      all { Context ctx ->
-        log.info 'all handler'
-        ctx.next()
-      }
-    }
-  }
-
-  @Bean
-  Action<Chain> home() {
-    chain {
-      prefix('all') {
-        all { Context ctx ->
-          log.info 'all'
-          ctx.render 'hello'
-        }
-      }
-    }
-  }
+//  @Bean
+//  Action<Chain> all() {
+//    chain {
+//      all { Context ctx ->
+//        log.info 'all handler'
+//        ctx.next()
+//      }
+//    }
+//  }
+//
+//  @Bean
+//  Action<Chain> home() {
+//    chain {
+//      prefix('all') {
+//        all { Context ctx ->
+//          log.info 'all'
+//          ctx.render 'hello'
+//        }
+//      }
+//    }
+//  }
 }
