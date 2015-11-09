@@ -1,5 +1,6 @@
 package ru.ratauth.server.configuration
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -24,8 +25,9 @@ class ProvidersConfiguration {
   public static final String TOKEN = 'sometoken'
   public static final String TOKEN_ID = 'sometoken_id'
 
+
   @Bean
-  public RelyingPartyService relyingPartyService() {
+  public RelyingPartyService relyingPartyService(@Value('${auth.secret}') String secret) {
     return new RelyingPartyService() {
       @Override
       RelyingParty getRelyingParty(String id) {
@@ -33,7 +35,8 @@ class ProvidersConfiguration {
           .redirectURL('token?response_type=token&username=login&password=password')
           .id('id')
           .identityProvider('BANK')
-          .secret('secret')
+          .secret(secret)
+          .password('secret')
           .build()
       }
     }

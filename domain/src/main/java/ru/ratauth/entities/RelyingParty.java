@@ -16,6 +16,7 @@ import java.util.Set;
 public class RelyingParty {
   private String id;
   private String name;//description name
+  private String password;
   private String secret;
   private Date created;
   private Date updated;

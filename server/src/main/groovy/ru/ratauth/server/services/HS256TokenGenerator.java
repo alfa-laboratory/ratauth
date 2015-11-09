@@ -6,6 +6,7 @@ import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,24 +23,13 @@ import java.util.Map;
  * @since 03/11/15
  */
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HS256TokenGenerator implements TokenGenerator {
-  private final String keyString;
   private final ObjectMapper jacksonObjectMapper;
-  private final JWSSigner signer;
-
-  @Autowired
-  public HS256TokenGenerator(@Value("${auth.key}") String keyString,
-                             ObjectMapper jacksonObjectMapper) throws KeyLengthException {
-    this.keyString = keyString;
-    this.jacksonObjectMapper = jacksonObjectMapper;
-    // Create HMAC signer
-    this.signer= new MACSigner(Base64Coder.decodeLines(keyString));
-  }
-
 
   @Override
   public String createToken(RelyingParty relyingParty, Token token, Map<String, String> userInfo) throws JOSEException {
-
+    final JWSSigner signer = new MACSigner(Base64Coder.decodeLines(relyingParty.getSecret()));
 // Prepare JWT with claims set
     JWTClaimsSet.Builder jwtBuilder =  new JWTClaimsSet.Builder()
       .issuer("http://ratauth.ru")

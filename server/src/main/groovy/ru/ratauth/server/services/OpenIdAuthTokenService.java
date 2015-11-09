@@ -37,9 +37,6 @@ public class OpenIdAuthTokenService implements AuthTokenService {
   @Value("${auth.token.ttl}")
   private Long tokenTTL;
 
-  @Value("${auth.key}")
-  private String signature;
-
   //TODO refresh token
   @Override
   public TokenResponse getToken(TokenRequest oauthRequest) throws OAuthSystemException, JOSEException {
@@ -47,7 +44,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     AuthCode authCode = authCodeService.get(oauthRequest.getCode());
     if(authCode != null ){
       RelyingParty relyingParty = relyingPartyService.getRelyingParty(authCode.getRelyingParty());
-      if(oauthRequest.getClientId().equals(relyingParty.getId()) && oauthRequest.getClientSecret().equals(relyingParty.getSecret())) {
+      if(oauthRequest.getClientId().equals(relyingParty.getId()) && oauthRequest.getClientSecret().equals(relyingParty.getPassword())) {
         Map<String, String> userInfo = authProviders.get(relyingParty.getIdentityProvider())
             .checkCredentials(oauthRequest.getUsername(), oauthRequest.getPassword());
         if(userInfo != null) {
