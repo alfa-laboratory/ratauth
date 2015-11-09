@@ -1,10 +1,9 @@
 package ru.ratauth.server.handlers.readers
 
-import ratpack.http.Request
 import ratpack.util.MultiValueMap
 import ru.ratauth.interaction.AuthzRequest
 import ru.ratauth.interaction.AuthzResponseType
-import ru.ratauth.server.utils.StringUtils
+import ru.ratauth.utils.StringUtils
 
 /**
  * @author djassan

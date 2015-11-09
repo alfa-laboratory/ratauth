@@ -1,4 +1,4 @@
-package ru.ratauth.server.utils;
+package ru.ratauth.utils;
 
 /**
  * @author mgorelikov

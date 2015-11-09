@@ -12,7 +12,7 @@ import ru.ratauth.interaction.AuthzResponse;
 import ru.ratauth.server.secutiry.MD5Generator;
 import ru.ratauth.server.secutiry.OAuthIssuerImpl;
 import ru.ratauth.server.secutiry.OAuthSystemException;
-import ru.ratauth.server.utils.StringUtils;
+import ru.ratauth.utils.StringUtils;
 import ru.ratauth.services.AuthCodeService;
 import ru.ratauth.services.RelyingPartyService;
 import ru.ratauth.services.TokenService;

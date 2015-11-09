@@ -2,12 +2,11 @@ package ru.ratauth.server.handlers.readers
 
 import ratpack.form.Form
 import ratpack.http.Headers
-import ratpack.http.Request
 import ratpack.util.MultiValueMap
 import ru.ratauth.interaction.AuthzResponseType
 import ru.ratauth.interaction.CheckTokenRequest
 import ru.ratauth.interaction.TokenRequest
-import ru.ratauth.server.utils.StringUtils
+import ru.ratauth.utils.StringUtils
 
 /**
  * @author djassan

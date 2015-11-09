@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import ratpack.spring.config.EnableRatpack
 import ru.ratauth.entities.AuthCode
+import ru.ratauth.entities.AuthCodeStatus
 import ru.ratauth.entities.RelyingParty
 import ru.ratauth.entities.Token
 import ru.ratauth.providers.AuthProvider
@@ -59,7 +60,8 @@ class ProvidersConfiguration {
             relyingParty: 'sense',
             identityProvider: 'BANK',
             scopes: ['read'],
-            resourceServers: ['stub'])
+            resourceServers: ['stub'],
+            status: AuthCodeStatus.NEW)
       }
     }
   }

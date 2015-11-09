@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.ratauth.entities.AuthCode;
+import ru.ratauth.entities.AuthCodeStatus;
 import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.entities.Token;
 import ru.ratauth.interaction.*;
@@ -42,7 +43,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
   public TokenResponse getToken(TokenRequest oauthRequest) throws OAuthSystemException, JOSEException {
     TokenResponse response = null;
     AuthCode authCode = authCodeService.get(oauthRequest.getCode());
-    if(authCode != null ){
+    if(authCode != null && authCode.getStatus() == AuthCodeStatus.NEW) {
       RelyingParty relyingParty = relyingPartyService.getRelyingParty(authCode.getRelyingParty());
       if(oauthRequest.getClientId().equals(relyingParty.getId())
           && oauthRequest.getClientSecret().equals(relyingParty.getPassword())
@@ -53,6 +54,8 @@ public class OpenIdAuthTokenService implements AuthTokenService {
           Token token = createToken(codeGenerator.accessToken(), authCode, userInfo.get(AuthProvider.USER_ID));
           token.setTokenId(tokenGenerator.createToken(relyingParty, token, userInfo));
           tokenService.save(token);
+          authCode.setStatus(AuthCodeStatus.USED);
+          authCodeService.save(authCode);
           return TokenResponse.builder()
               .accessToken(token.getToken())
               .expiresIn(token.expiresIn())
