@@ -44,7 +44,9 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     AuthCode authCode = authCodeService.get(oauthRequest.getCode());
     if(authCode != null ){
       RelyingParty relyingParty = relyingPartyService.getRelyingParty(authCode.getRelyingParty());
-      if(oauthRequest.getClientId().equals(relyingParty.getId()) && oauthRequest.getClientSecret().equals(relyingParty.getPassword())) {
+      if(oauthRequest.getClientId().equals(relyingParty.getId())
+          && oauthRequest.getClientSecret().equals(relyingParty.getPassword())
+          && relyingParty.getResourceServers().containsAll(authCode.getResourceServers())) {
         Map<String, String> userInfo = authProviders.get(relyingParty.getIdentityProvider())
             .checkCredentials(oauthRequest.getUsername(), oauthRequest.getPassword());
         if(userInfo != null) {
@@ -69,11 +71,10 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     String accessToken = oauthRequest.getToken();
     Token token = tokenService.get(accessToken);
     if(token != null && token.expiresIn() > System.currentTimeMillis()) {
-      RelyingParty relyingParty = relyingPartyService.getRelyingParty(token.getRelyingParty());
       checkTokenResponse = CheckTokenResponse.builder()
           .tokenId(token.getTokenId())
           .clientId(token.getRelyingParty())
-          .resourceServers(relyingParty.getResourceServers())
+          .resourceServers(token.getResourceServers())
           .expiresIn(token.expiresIn())
           .userId(token.getUser())
           .scopes(token.getScopes())

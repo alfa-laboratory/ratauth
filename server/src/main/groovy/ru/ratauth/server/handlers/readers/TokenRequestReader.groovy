@@ -32,8 +32,6 @@ class TokenRequestReader {
       .clientId(auth[0])
       .clientSecret(auth[1])
       .build()
-
-
   }
 
   static CheckTokenRequest readCheckTokenRequest(Form form, Headers headers) {

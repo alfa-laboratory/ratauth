@@ -24,6 +24,7 @@ public class AuthCode {
   Set<String> scopes;
   private String relyingParty;//identifier
   private String identityProvider;//identifier
+  private @Singular Set<String> resourceServers;//identifiers
   private AuthCodeStatus status;
 
   public Long expiresIn() {

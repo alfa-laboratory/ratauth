@@ -37,6 +37,8 @@ class ProvidersConfiguration {
           .identityProvider('BANK')
           .secret(secret)
           .password('secret')
+          .resourceServer('stub')
+          .resourceServer('stub2')
           .build()
       }
     }
@@ -56,7 +58,8 @@ class ProvidersConfiguration {
           return new AuthCode(code: code,
             relyingParty: 'sense',
             identityProvider: 'BANK',
-            scopes: ['read'])
+            scopes: ['read'],
+            resourceServers: ['stub'])
       }
     }
   }
@@ -76,7 +79,8 @@ class ProvidersConfiguration {
             TTL: 36000l,
             created: new Date(),
           tokenId: TOKEN_ID,
-          scopes: ['read'])
+          scopes: ['read'],
+          resourceServers: ['stub'])
       }
     }
   }
