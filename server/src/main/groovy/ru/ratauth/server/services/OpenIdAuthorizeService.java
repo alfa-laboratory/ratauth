@@ -43,21 +43,22 @@ public class OpenIdAuthorizeService implements AuthorizeService {
   @SneakyThrows
   public Observable<AuthzResponse> authenticate(AuthzRequest oauthRequest) {
 
-    Observable<RelyingParty> relyingPartyObs = relyingPartyService.getRelyingParty(oauthRequest.getClientId()).cache();
+    final RelyingParty relyingParty = relyingPartyService.getRelyingParty(oauthRequest.getClientId()).toBlocking().single();
+    if (relyingParty == null)
+      throw new AuthorizationException("RelyingParty not found");
 
-    return relyingPartyObs.flatMap(relyingParty ->
-        saveCode(generateCode(), relyingParty, oauthRequest.getScopes())//only for response type TOKEN
-    ).map(authCode -> {
-      String redirectURI = oauthRequest.getRedirectURI();
-      if (StringUtils.isBlank(redirectURI)) {
-        redirectURI = relyingPartyObs.toBlocking().single().getRedirectURL();
-      }
+    return saveCode(generateCode(), relyingParty, oauthRequest.getScopes())//only for response type TOKEN
+      .map(authCode -> {
+        String redirectURI = oauthRequest.getRedirectURI();
+        if (StringUtils.isBlank(redirectURI)) {
+          redirectURI = relyingParty.getRedirectURL();
+        }
 
-      return AuthzResponse.builder()
+        return AuthzResponse.builder()
           .code(authCode.getCode())
           .expiresIn(authCode.expiresIn())
           .location(redirectURI).build();
-    }).switchIfEmpty(Observable.error(new OAuthSystemException("Relying party not found")));
+      }).switchIfEmpty(Observable.error(new AuthorizationException("Authorization error")));
   }
 
   @SneakyThrows
@@ -67,14 +68,14 @@ public class OpenIdAuthorizeService implements AuthorizeService {
 
   private Observable<AuthCode> saveCode(String code, RelyingParty relyingParty, Set<String> scopes) {
     return authCodeService.save(
-        AuthCode.builder()
-            .code(code)
-            .created(new Date())
-            .TTL(codeTTL)
-            .relyingParty(relyingParty.getId())
-            .identityProvider(relyingParty.getIdentityProvider())
-            .scopes(scopes)
-            .status(AuthCodeStatus.NEW)
-            .build());
+      AuthCode.builder()
+        .code(code)
+        .created(new Date())
+        .TTL(codeTTL)
+        .relyingParty(relyingParty.getId())
+        .identityProvider(relyingParty.getIdentityProvider())
+        .scopes(scopes)
+        .status(AuthCodeStatus.NEW)
+        .build());
   }
 }

@@ -44,59 +44,58 @@ public class OpenIdAuthTokenService implements AuthTokenService {
   @Override
   @SneakyThrows
   public Observable<TokenResponse> getToken(TokenRequest oauthRequest) throws OAuthSystemException, JOSEException {
-    final Observable<AuthCode> authCodeObs = authCodeService.get(oauthRequest.getCode()).cache();
+    final AuthCode authCode = authCodeService.get(oauthRequest.getCode()).toBlocking().single();
 
-    return authCodeObs.flatMap(authCode -> {
-      if (authCode.getStatus() == AuthCodeStatus.NEW)
-        return relyingPartyService.getRelyingParty(authCode.getRelyingParty());
+    if (authCode == null || authCode.getStatus() != AuthCodeStatus.NEW)
       throw new AuthorizationException("Auth code not found");
-    }).flatMap(relyingParty -> {
-      AuthCode authCode = authCodeObs.toBlocking().single();
-      if (!oauthRequest.getClientId().equals(relyingParty.getId())
+
+    return relyingPartyService.getRelyingParty(authCode.getRelyingParty())
+      .flatMap(relyingParty -> {
+        if (!oauthRequest.getClientId().equals(relyingParty.getId())
           || !oauthRequest.getClientSecret().equals(relyingParty.getPassword())
           || !relyingParty.getResourceServers().containsAll(authCode.getResourceServers()))
-        throw new AuthorizationException("Auth code does not belong to relying party");
+          throw new AuthorizationException("Auth code does not belong to relying party");
 
-      //persist auth code
-      authCode.setStatus(AuthCodeStatus.USED);
-      authCode.setUsed(new Date());
-      Observable<AuthCode> authCodeSaveObs = authCodeService.save(authCode);
+        //persist auth code
+        authCode.setStatus(AuthCodeStatus.USED);
+        authCode.setUsed(new Date());
+        Observable<AuthCode> authCodeSaveObs = authCodeService.save(authCode);
 
-      Observable<Map<String, String>> userInfoObs = authProviders.get(relyingParty.getIdentityProvider())
+        Observable<Map<String, String>> userInfoObs = authProviders.get(relyingParty.getIdentityProvider())
           .checkCredentials(oauthRequest.getUsername(), oauthRequest.getPassword());
-      return Observable.zip(userInfoObs, authCodeSaveObs,
+        return Observable.zip(userInfoObs, authCodeSaveObs,
           (userInfo, code) -> {
             Token token = createToken(generateToken(), authCode, userInfo.get(AuthProvider.USER_ID));
             token.setTokenId(tokenGenerator.createToken(relyingParty, token, userInfo));
             return token;
           });
-    }).flatMap(token -> tokenService.save(token))
-        .map(token -> TokenResponse.builder()
-            .accessToken(token.getToken())
-            .expiresIn(token.expiresIn())
-            .tokenType(TokenType.BEARER.toString())
-            .idToken(token.getTokenId())
-            .build())
-        .switchIfEmpty(Observable.error(new AuthorizationException()));
+      }).flatMap(token -> tokenService.save(token))
+      .map(token -> TokenResponse.builder()
+        .accessToken(token.getToken())
+        .expiresIn(token.expiresIn())
+        .tokenType(TokenType.BEARER.toString())
+        .idToken(token.getTokenId())
+        .build())
+      .switchIfEmpty(Observable.error(new AuthorizationException()));
   }
 
   @Override
   public Observable<CheckTokenResponse> checkToken(CheckTokenRequest oauthRequest) {
     String accessToken = oauthRequest.getToken();
     return tokenService.get(accessToken).map(token -> {
-          if (token != null && token.expiresIn() > System.currentTimeMillis()) {
-            return CheckTokenResponse.builder()
-                .tokenId(token.getTokenId())
-                .clientId(token.getRelyingParty())
-                .resourceServers(token.getResourceServers())
-                .expiresIn(token.expiresIn())
-                .userId(token.getUser())
-                .scopes(token.getScopes())
-                .build();
-          } else {
-            throw new CheckTokenException("Token has been expired");
-          }
+        if (token != null && token.expiresIn() > System.currentTimeMillis()) {
+          return CheckTokenResponse.builder()
+            .tokenId(token.getTokenId())
+            .clientId(token.getRelyingParty())
+            .resourceServers(token.getResourceServers())
+            .expiresIn(token.expiresIn())
+            .userId(token.getUser())
+            .scopes(token.getScopes())
+            .build();
+        } else {
+          throw new CheckTokenException("Token has been expired");
         }
+      }
     );
 
   }
@@ -118,14 +117,14 @@ public class OpenIdAuthTokenService implements AuthTokenService {
 
   private Token createToken(String token, AuthCode authCode, String userId) {
     return Token.builder()
-        .codeId(authCode.getId())
-        .token(token)
-        .created(new Date())
-        .TTL(tokenTTL)
-        .relyingParty(authCode.getRelyingParty())
-        .identityProvider(authCode.getIdentityProvider())
-        .scopes(authCode.getScopes())
-        .user(userId)
-        .build();
+      .codeId(authCode.getId())
+      .token(token)
+      .created(new Date())
+      .TTL(tokenTTL)
+      .relyingParty(authCode.getRelyingParty())
+      .identityProvider(authCode.getIdentityProvider())
+      .scopes(authCode.getScopes())
+      .user(userId)
+      .build();
   }
 }
