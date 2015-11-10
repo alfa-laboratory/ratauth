@@ -1,3 +1,8 @@
-auth.secret.ttl = 2678400
-auth.token.ttl = 86400
-auth.code.ttl = 86400
+auth:
+ secret:
+  ttl: 2678400
+ token:
+  ttl: 86400
+  issuer: "http://ratauth.ru"
+ code:
+  ttl: 86400

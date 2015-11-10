@@ -28,7 +28,7 @@ class ProvidersConfiguration {
 
 
   @Bean
-  public RelyingPartyService relyingPartyService(@Value('${auth.secret}') String secret) {
+  public RelyingPartyService relyingPartyService(@Value('${auth.secret.code }') String secret) {
     return new RelyingPartyService() {
       @Override
       RelyingParty getRelyingParty(String id) {

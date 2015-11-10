@@ -13,10 +13,7 @@ import org.springframework.stereotype.Service;
 import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.entities.Token;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author mgorelikov
@@ -27,17 +24,20 @@ import java.util.Map;
 public class HS256TokenGenerator implements TokenGenerator {
   private final ObjectMapper jacksonObjectMapper;
 
+  @Value("${auth.token.issuer}")
+  private String issuer;//final
+
   @Override
   public String createToken(RelyingParty relyingParty, Token token, Map<String, String> userInfo) throws JOSEException {
     final JWSSigner signer = new MACSigner(Base64Coder.decodeLines(relyingParty.getSecret()));
 // Prepare JWT with claims set
-    JWTClaimsSet.Builder jwtBuilder =  new JWTClaimsSet.Builder()
-      .issuer("http://ratauth.ru")
-      .expirationTime(new Date(token.expiresIn()))
-      .audience(relyingParty.getName())
-      .jwtID(token.getToken())
-      .issueTime(token.getCreated());
-    userInfo.forEach((key,value) -> jwtBuilder.claim(key, value));
+    JWTClaimsSet.Builder jwtBuilder = new JWTClaimsSet.Builder()
+        .issuer(issuer)
+        .expirationTime(new Date(token.expiresIn()))
+        .audience(new ArrayList<>(token.getResourceServers()))
+        .jwtID(token.getToken())
+        .issueTime(token.getCreated());
+    userInfo.forEach((key, value) -> jwtBuilder.claim(key, value));
 
     SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), jwtBuilder.build());
 
