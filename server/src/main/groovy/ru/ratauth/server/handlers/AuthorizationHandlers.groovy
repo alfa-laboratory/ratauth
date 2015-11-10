@@ -1,7 +1,6 @@
 package ru.ratauth.server.handlers
 
 import io.netty.handler.codec.http.HttpResponseStatus
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import ratpack.exec.Blocking
@@ -17,6 +16,7 @@ import ru.ratauth.server.services.AuthorizeService
 
 import static ratpack.groovy.Groovy.chain
 import static ratpack.jackson.Jackson.json
+import static ratpack.rx.RxRatpack.observe
 import static ru.ratauth.server.handlers.readers.TokenRequestReader.*
 import static ru.ratauth.server.handlers.readers.AuthzRequestReader.*
 
@@ -36,17 +36,17 @@ class AuthorizationHandlers {
           byMethod {
             get {
               def authorizeService = ctx.get(AuthorizeService.class)
-              Blocking.get {
-                authorizeService.authenticate readAuthzRequest(request.queryParams)
-              } then { res -> ctx.redirect(HttpResponseStatus.FOUND.code() ,res.buildURL()) }
+              authorizeService.authenticate readAuthzRequest(request.queryParams) subscribe {
+                res -> ctx.redirect(HttpResponseStatus.FOUND.code() ,res.buildURL())
+              }
             }
             post {
               def authorizeService = ctx.get(AuthorizeService.class)
-              Promise<Form> form = parse(Form.class);
-              form.then { Form params ->
-                Blocking.get {
-                  authorizeService.authenticate readAuthzRequest(params)
-                } then { res -> ctx.redirect(HttpResponseStatus.FOUND.code() ,res.buildURL()) }
+              Promise<Form> formPromise = parse(Form.class);
+              observe(formPromise).flatMap { params ->
+                authorizeService.authenticate readAuthzRequest(params)
+              } subscribe {
+                res -> ctx.redirect(HttpResponseStatus.FOUND.code() ,res.buildURL())
               }
             }
           }
@@ -55,11 +55,11 @@ class AuthorizationHandlers {
         prefix('token') {
           post { Context ctx ->
             def authTokenService = ctx.get(AuthTokenService.class)
-            Promise<Form> form = ctx.parse(Form.class);
-            form.then { Form params ->
-              Blocking.get {
-                authTokenService.getToken readTokenRequest(params, ctx.request.headers)
-              } then { res -> ctx.render json(new TokenDTO(res)) }
+            Promise<Form> formPromise = ctx.parse(Form.class);
+            observe(formPromise).flatMap { params ->
+              authTokenService.getToken readTokenRequest(params, ctx.request.headers)
+            } subscribe {
+              res -> ctx.render json(new TokenDTO(res))
             }
           }
         }
@@ -68,11 +68,11 @@ class AuthorizationHandlers {
       prefix('check_token') {
         post { Context ctx ->
           def authTokenService = ctx.get(AuthTokenService.class)
-          Promise<Form> form = ctx.parse(Form.class);
-          form.then { Form params ->
-            Blocking.get {
-              authTokenService.checkToken readCheckTokenRequest(params, ctx.request.headers)
-            } then { res -> ctx.render json(new CheckTokenDTO(res)) }
+          Promise<Form> formPromise = ctx.parse(Form.class);
+          observe(formPromise).flatMap { params ->
+            authTokenService.checkToken readCheckTokenRequest(params, ctx.request.headers)
+          } subscribe {
+            res -> ctx.render json(new CheckTokenDTO(res))
           }
         }
       }

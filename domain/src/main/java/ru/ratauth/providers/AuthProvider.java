@@ -1,5 +1,7 @@
 package ru.ratauth.providers;
 
+import rx.Observable;
+
 import java.util.Map;
 
 /**
@@ -18,5 +20,5 @@ public interface AuthProvider {
    * @param password
    * @return map of user data provided by concrete identity provider
    */
-  Map<String, String> checkCredentials(String login, String password);
+  Observable<Map<String, String>> checkCredentials(String login, String password);
 }

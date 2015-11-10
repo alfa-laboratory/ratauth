@@ -7,6 +7,7 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,8 @@ public class HS256TokenGenerator implements TokenGenerator {
   private String issuer;//final
 
   @Override
-  public String createToken(RelyingParty relyingParty, Token token, Map<String, String> userInfo) throws JOSEException {
+  @SneakyThrows
+  public String createToken(RelyingParty relyingParty, Token token, Map<String, String> userInfo) {
     final JWSSigner signer = new MACSigner(Base64Coder.decodeLines(relyingParty.getSecret()));
 // Prepare JWT with claims set
     JWTClaimsSet.Builder jwtBuilder = new JWTClaimsSet.Builder()

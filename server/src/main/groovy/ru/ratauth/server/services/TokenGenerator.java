@@ -11,5 +11,5 @@ import java.util.Map;
  * @since 03/11/15
  */
 public interface TokenGenerator {
-  String createToken(RelyingParty relyingParty, Token token, Map<String,String> userInfo) throws JOSEException;
+  String createToken(RelyingParty relyingParty, Token token, Map<String,String> userInfo);
 }

@@ -2,6 +2,7 @@ package ru.ratauth.server.services;
 
 import com.nimbusds.jose.JOSEException;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import ru.ratauth.server.secutiry.UUIDValueGenerator;
 import ru.ratauth.services.AuthCodeService;
 import ru.ratauth.services.RelyingPartyService;
 import ru.ratauth.services.TokenService;
+import rx.Observable;
 
 import java.util.Date;
 import java.util.Map;
@@ -40,62 +42,90 @@ public class OpenIdAuthTokenService implements AuthTokenService {
 
   //TODO refresh token
   @Override
-  public TokenResponse getToken(TokenRequest oauthRequest) throws OAuthSystemException, JOSEException {
-    TokenResponse response = null;
-    AuthCode authCode = authCodeService.get(oauthRequest.getCode());
-    if(authCode != null && authCode.getStatus() == AuthCodeStatus.NEW) {
-      RelyingParty relyingParty = relyingPartyService.getRelyingParty(authCode.getRelyingParty());
-      if(oauthRequest.getClientId().equals(relyingParty.getId())
-          && oauthRequest.getClientSecret().equals(relyingParty.getPassword())
-          && relyingParty.getResourceServers().containsAll(authCode.getResourceServers())) {
-        Map<String, String> userInfo = authProviders.get(relyingParty.getIdentityProvider())
-            .checkCredentials(oauthRequest.getUsername(), oauthRequest.getPassword());
-        if(userInfo != null) {
-          Token token = createToken(codeGenerator.accessToken(), authCode, userInfo.get(AuthProvider.USER_ID));
-          token.setTokenId(tokenGenerator.createToken(relyingParty, token, userInfo));
-          tokenService.save(token);
-          authCode.setStatus(AuthCodeStatus.USED);
-          authCodeService.save(authCode);
-          return TokenResponse.builder()
-              .accessToken(token.getToken())
-              .expiresIn(token.expiresIn())
-              .tokenType(TokenType.BEARER.toString())
-              .idToken(token.getTokenId())
-              .build();
-        }
-      }
-    }
-    return response;
+  @SneakyThrows
+  public Observable<TokenResponse> getToken(TokenRequest oauthRequest) throws OAuthSystemException, JOSEException {
+    final Observable<AuthCode> authCodeObs = authCodeService.get(oauthRequest.getCode()).cache();
+
+    return authCodeObs.flatMap(authCode -> {
+      if (authCode.getStatus() == AuthCodeStatus.NEW)
+        return relyingPartyService.getRelyingParty(authCode.getRelyingParty());
+      throw new AuthorizationException("Auth code not found");
+    }).flatMap(relyingParty -> {
+      AuthCode authCode = authCodeObs.toBlocking().single();
+      if (!oauthRequest.getClientId().equals(relyingParty.getId())
+          || !oauthRequest.getClientSecret().equals(relyingParty.getPassword())
+          || !relyingParty.getResourceServers().containsAll(authCode.getResourceServers()))
+        throw new AuthorizationException("Auth code does not belong to relying party");
+
+      //persist auth code
+      authCode.setStatus(AuthCodeStatus.USED);
+      authCode.setUsed(new Date());
+      Observable<AuthCode> authCodeSaveObs = authCodeService.save(authCode);
+
+      Observable<Map<String, String>> userInfoObs = authProviders.get(relyingParty.getIdentityProvider())
+          .checkCredentials(oauthRequest.getUsername(), oauthRequest.getPassword());
+      return Observable.zip(userInfoObs, authCodeSaveObs,
+          (userInfo, code) -> {
+            Token token = createToken(generateToken(), authCode, userInfo.get(AuthProvider.USER_ID));
+            token.setTokenId(tokenGenerator.createToken(relyingParty, token, userInfo));
+            return token;
+          });
+    }).flatMap(token -> tokenService.save(token))
+        .map(token -> TokenResponse.builder()
+            .accessToken(token.getToken())
+            .expiresIn(token.expiresIn())
+            .tokenType(TokenType.BEARER.toString())
+            .idToken(token.getTokenId())
+            .build())
+        .switchIfEmpty(Observable.error(new AuthorizationException()));
   }
 
   @Override
-  public CheckTokenResponse checkToken(CheckTokenRequest oauthRequest) {
-    CheckTokenResponse checkTokenResponse = null;
+  public Observable<CheckTokenResponse> checkToken(CheckTokenRequest oauthRequest) {
     String accessToken = oauthRequest.getToken();
-    Token token = tokenService.get(accessToken);
-    if(token != null && token.expiresIn() > System.currentTimeMillis()) {
-      checkTokenResponse = CheckTokenResponse.builder()
-          .tokenId(token.getTokenId())
-          .clientId(token.getRelyingParty())
-          .resourceServers(token.getResourceServers())
-          .expiresIn(token.expiresIn())
-          .userId(token.getUser())
-          .scopes(token.getScopes())
-          .build();
+    return tokenService.get(accessToken).map(token -> {
+          if (token != null && token.expiresIn() > System.currentTimeMillis()) {
+            return CheckTokenResponse.builder()
+                .tokenId(token.getTokenId())
+                .clientId(token.getRelyingParty())
+                .resourceServers(token.getResourceServers())
+                .expiresIn(token.expiresIn())
+                .userId(token.getUser())
+                .scopes(token.getScopes())
+                .build();
+          } else {
+            throw new CheckTokenException("Token has been expired");
+          }
+        }
+    );
+
+  }
+
+  private static class TokenData {
+    final AuthCode authCode;
+    final Map<String, String> userInfo;
+
+    public TokenData(AuthCode authCode, Map<String, String> userInfo) {
+      this.authCode = authCode;
+      this.userInfo = userInfo;
     }
-    return checkTokenResponse;
+  }
+
+  @SneakyThrows
+  private String generateToken() {
+    return codeGenerator.accessToken();
   }
 
   private Token createToken(String token, AuthCode authCode, String userId) {
     return Token.builder()
-            .codeId(authCode.getId())
-            .token(token)
-            .created(new Date())
-            .TTL(tokenTTL)
-            .relyingParty(authCode.getRelyingParty())
-            .identityProvider(authCode.getIdentityProvider())
-            .scopes(authCode.getScopes())
-            .user(userId)
-            .build();
+        .codeId(authCode.getId())
+        .token(token)
+        .created(new Date())
+        .TTL(tokenTTL)
+        .relyingParty(authCode.getRelyingParty())
+        .identityProvider(authCode.getIdentityProvider())
+        .scopes(authCode.getScopes())
+        .user(userId)
+        .build();
   }
 }

@@ -3,6 +3,7 @@ package ru.ratauth.server.services;
 import ru.ratauth.interaction.AuthzRequest;
 import ru.ratauth.interaction.AuthzResponse;
 import ru.ratauth.server.secutiry.OAuthSystemException;
+import rx.Observable;
 
 import java.net.URISyntaxException;
 
@@ -11,5 +12,5 @@ import java.net.URISyntaxException;
  * @since 02/11/15
  */
 public interface AuthorizeService {
-  AuthzResponse authenticate(AuthzRequest request) throws URISyntaxException, OAuthSystemException;
+  Observable<AuthzResponse> authenticate(AuthzRequest request);
 }

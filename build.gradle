@@ -43,7 +43,8 @@ allprojects {
       dependency 'org.spockframework:spock-spring:1.0-groovy-2.4'
       dependency 'org.projectlombok:lombok:1.16.2'
       dependency 'com.nimbusds:nimbus-jose-jwt:4.3.1'
-
+      dependency 'io.reactivex:rxjava:1.0.15'
+      dependency 'io.ratpack:ratpack-rx:1.1.1'
     }
   }
 }
@@ -62,6 +63,7 @@ subprojects {
   dependencies {
     compile 'org.codehaus.groovy:groovy-all'
     compile 'org.projectlombok:lombok'
+    compile 'io.reactivex:rxjava'
 
     testCompile 'org.springframework.boot:spring-boot-starter-test'
     testCompile 'org.spockframework:spock-core', {

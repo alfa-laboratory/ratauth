@@ -6,6 +6,7 @@ import ru.ratauth.interaction.CheckTokenResponse;
 import ru.ratauth.interaction.TokenRequest;
 import ru.ratauth.interaction.TokenResponse;
 import ru.ratauth.server.secutiry.OAuthSystemException;
+import rx.Observable;
 
 
 /**
@@ -13,6 +14,6 @@ import ru.ratauth.server.secutiry.OAuthSystemException;
  * @since 03/11/15
  */
 public interface AuthTokenService {
-  TokenResponse getToken(TokenRequest oauthRequest) throws OAuthSystemException, JOSEException;
-  CheckTokenResponse checkToken(CheckTokenRequest oauthRequest);
+  Observable<TokenResponse> getToken(TokenRequest oauthRequest) throws OAuthSystemException, JOSEException;
+  Observable<CheckTokenResponse> checkToken(CheckTokenRequest oauthRequest);
 }

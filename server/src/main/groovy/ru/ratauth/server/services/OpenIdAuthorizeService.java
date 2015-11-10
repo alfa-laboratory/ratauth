@@ -1,6 +1,7 @@
 package ru.ratauth.server.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import ru.ratauth.utils.StringUtils;
 import ru.ratauth.services.AuthCodeService;
 import ru.ratauth.services.RelyingPartyService;
 import ru.ratauth.services.TokenService;
+import rx.Observable;
 
 import java.net.URISyntaxException;
 import java.util.Date;
@@ -38,24 +40,32 @@ public class OpenIdAuthorizeService implements AuthorizeService {
 
   //TODO think about response type code
   @Override
-  public AuthzResponse authenticate(AuthzRequest oauthRequest) throws URISyntaxException, OAuthSystemException {
+  @SneakyThrows
+  public Observable<AuthzResponse> authenticate(AuthzRequest oauthRequest) {
 
-    RelyingParty relyingParty = relyingPartyService.getRelyingParty(oauthRequest.getClientId());
-    //only for response type TOKEN
-    AuthCode authCode = saveCode(codeGenerator.authorizationCode(), relyingParty, oauthRequest.getScopes());
+    Observable<RelyingParty> relyingPartyObs = relyingPartyService.getRelyingParty(oauthRequest.getClientId()).cache();
 
-    String redirectURI = oauthRequest.getRedirectURI();
-    if(StringUtils.isBlank(redirectURI)) {
-      redirectURI = relyingParty.getRedirectURL();
-    }
+    return relyingPartyObs.flatMap(relyingParty ->
+        saveCode(generateCode(), relyingParty, oauthRequest.getScopes())//only for response type TOKEN
+    ).map(authCode -> {
+      String redirectURI = oauthRequest.getRedirectURI();
+      if (StringUtils.isBlank(redirectURI)) {
+        redirectURI = relyingPartyObs.toBlocking().single().getRedirectURL();
+      }
 
-    return AuthzResponse.builder()
-        .code(authCode.getCode())
-        .expiresIn(authCode.expiresIn())
-        .location(redirectURI).build();
+      return AuthzResponse.builder()
+          .code(authCode.getCode())
+          .expiresIn(authCode.expiresIn())
+          .location(redirectURI).build();
+    }).switchIfEmpty(Observable.error(new OAuthSystemException("Relying party not found")));
   }
 
-  private AuthCode saveCode(String code, RelyingParty relyingParty, Set<String> scopes) {
+  @SneakyThrows
+  private String generateCode() {
+    return codeGenerator.authorizationCode();
+  }
+
+  private Observable<AuthCode> saveCode(String code, RelyingParty relyingParty, Set<String> scopes) {
     return authCodeService.save(
         AuthCode.builder()
             .code(code)

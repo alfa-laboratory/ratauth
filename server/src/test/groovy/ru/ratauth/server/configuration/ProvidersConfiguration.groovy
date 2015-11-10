@@ -13,6 +13,7 @@ import ru.ratauth.providers.AuthProvider
 import ru.ratauth.services.AuthCodeService
 import ru.ratauth.services.RelyingPartyService
 import ru.ratauth.services.TokenService
+import rx.Observable
 
 /**
  * @author mgorelikov
@@ -28,19 +29,19 @@ class ProvidersConfiguration {
 
 
   @Bean
-  public RelyingPartyService relyingPartyService(@Value('${auth.secret.code }') String secret) {
+  public RelyingPartyService relyingPartyService(@Value('${auth.secret.code}') String secret) {
     return new RelyingPartyService() {
       @Override
-      RelyingParty getRelyingParty(String id) {
-        return RelyingParty.builder()
-          .redirectURL('token?response_type=token&username=login&password=password')
-          .id('id')
-          .identityProvider('BANK')
-          .secret(secret)
-          .password('secret')
-          .resourceServer('stub')
-          .resourceServer('stub2')
-          .build()
+      Observable<RelyingParty> getRelyingParty(String id) {
+        return Observable.just(RelyingParty.builder()
+            .redirectURL('token?response_type=token&username=login&password=password')
+            .id('id')
+            .identityProvider('BANK')
+            .secret(secret)
+            .password('secret')
+            .resourceServer('stub')
+            .resourceServer('stub2')
+            .build())
       }
     }
   }
@@ -49,19 +50,19 @@ class ProvidersConfiguration {
   public AuthCodeService authCodeService() {
     return new AuthCodeService() {
       @Override
-      AuthCode save(AuthCode code) {
-        return code
+      Observable<AuthCode> save(AuthCode code) {
+        return Observable.just(code)
       }
 
       @Override
-      AuthCode get(String code) {
-        if(code == '1234')
-          return new AuthCode(code: code,
-            relyingParty: 'sense',
-            identityProvider: 'BANK',
-            scopes: ['read'],
-            resourceServers: ['stub'],
-            status: AuthCodeStatus.NEW)
+      Observable<AuthCode> get(String code) {
+        if (code == '1234')
+          return Observable.just(new AuthCode(code: code,
+              relyingParty: 'sense',
+              identityProvider: 'BANK',
+              scopes: ['read'],
+              resourceServers: ['stub'],
+              status: AuthCodeStatus.NEW))
       }
     }
   }
@@ -70,19 +71,19 @@ class ProvidersConfiguration {
   public TokenService tokenService() {
     return new TokenService() {
       @Override
-      Token save(Token token) {
-        return token
+      Observable<Token> save(Token token) {
+        return Observable.just(token)
       }
 
       @Override
-      Token get(String token) {
-        if(token == TOKEN)
-          return new Token(token: TOKEN,
-            TTL: 36000l,
-            created: new Date(),
-          tokenId: TOKEN_ID,
-          scopes: ['read'],
-          resourceServers: ['stub'])
+      Observable<Token> get(String token) {
+        if (token == TOKEN)
+          return Observable.just(new Token(token: TOKEN,
+              TTL: 36000l,
+              created: new Date(),
+              tokenId: TOKEN_ID,
+              scopes: ['read'],
+              resourceServers: ['stub']))
       }
     }
   }
@@ -91,9 +92,9 @@ class ProvidersConfiguration {
   public AuthProvider authProvider() {
     return new AuthProvider() {
       @Override
-      Map<String, String> checkCredentials(String login, String password) {
-        if(login =='login' && password == 'password')
-        return [(AuthProvider.USER_ID) : 'user_id'] as Map
+      Observable<Map<String, String>> checkCredentials(String login, String password) {
+        if (login == 'login' && password == 'password')
+          return Observable.just([(AuthProvider.USER_ID): 'user_id'] as Map)
       }
     }
   }
