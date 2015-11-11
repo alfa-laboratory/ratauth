@@ -20,5 +20,5 @@ public class AuthzRequest {
   private String redirectURI;
   private String username;
   private String password;
-  private String aud;
+  private @Singular Set<String> auds;
 }

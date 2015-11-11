@@ -18,6 +18,8 @@ import ru.ratauth.interaction.TokenResponse;
 public class TokenDTO {
   @JsonProperty("access_token")
   private String accessToken;
+  @JsonProperty("refresh_token")
+  private String refreshToken;
   @JsonProperty("token_type")
   private String tokenType;
   @JsonProperty("id_token")
@@ -27,6 +29,7 @@ public class TokenDTO {
 
   public TokenDTO(TokenResponse response) {
     this.accessToken = response.getAccessToken();
+    this.refreshToken = response.getRefreshToken();
     this.tokenType = response.getTokenType();
     this.idToken = response.getIdToken();
     this.expiresIn = response.getExpiresIn();

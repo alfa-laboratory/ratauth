@@ -39,7 +39,7 @@ class AuthorizationAPISpec extends Specification {
 
   def 'request authorization code'() {
     given:
-    def query = 'response_type=code&client_id=www&scope=read'
+    def query = 'response_type=code&client_id=www&scope=read&username=login&password=password&aud=stub'
     HttpHeaders requestHeaders = new HttpHeaders();
     requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
     HttpEntity<String> requestEntity =
@@ -55,7 +55,25 @@ class AuthorizationAPISpec extends Specification {
 
   def 'request token'() {
     given:
-    def query = 'response_type=token&username=login&password=password&code=1234'
+    def query = 'grant_type=authorization_code&response_type=token&code=1234'
+    HttpHeaders requestHeaders = new HttpHeaders();
+    requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+    HttpEntity<String> requestEntity =
+      new HttpEntity<String>(query, createHeaders('id', 'secret'));
+    when:
+    ResponseEntity<String> answer = client.exchange('http://localhost:' + port + '/oauth/token',
+      HttpMethod.POST,
+      requestEntity,
+      String.class)
+    TokenDTO token = objectMapper.readValue(answer.body, TokenDTO.class)
+    then:
+    assert answer.statusCode == HttpStatus.OK
+    assert token.accessToken
+  }
+
+  def 'refresh token'() {
+    given:
+    def query = 'grant_type=refresh_token&response_type=token&refresh_token=1234'
     HttpHeaders requestHeaders = new HttpHeaders();
     requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
     HttpEntity<String> requestEntity =

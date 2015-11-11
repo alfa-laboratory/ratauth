@@ -24,7 +24,7 @@ class TokenRequestReader {
 
   static TokenRequest readTokenRequest(Form form, Headers headers) {
     def auth = extractAuth(headers)
-    GrantType grantType = GrantType.valueOf(extractField(form, GRANT_TYPE, true))
+    GrantType grantType = GrantType.valueOf(extractField(form, GRANT_TYPE, true).toUpperCase())
     def builder = TokenRequest.builder()
         .responseType(AuthzResponseType.valueOf(extractField(form, RESPONSE_TYPE, true).toUpperCase()))
         .grantType(grantType)

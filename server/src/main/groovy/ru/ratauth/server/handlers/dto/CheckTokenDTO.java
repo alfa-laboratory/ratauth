@@ -20,17 +20,14 @@ public class CheckTokenDTO {
   private Long exp;
   @JsonProperty("client_id")
   private String clientId;
-  @JsonProperty("user_id")
-  private String userId;
   @JsonProperty("scope")
   private @Singular Set<String> scopes;
 
   public CheckTokenDTO(CheckTokenResponse response) {
-    this.jti = response.getTokenId();
+    this.jti = response.getIdToken();
     this.aud = response.getResourceServers();
     this.exp = response.getExpiresIn();
     this.clientId = response.getClientId();
-    this.userId = response.getUserId();
     this.scopes = response.getScopes();
   }
 }

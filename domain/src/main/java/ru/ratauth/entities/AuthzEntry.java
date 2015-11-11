@@ -2,6 +2,7 @@ package ru.ratauth.entities;
 
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +28,12 @@ public class AuthzEntry {
   private @Singular Set<String> resourceServers;//identifiers
   private String baseJWT;//base jwt
   private @Singular List<Token> tokens;
+
+  public void addToken(Token token) {
+    if(this.tokens == null)
+      this.tokens = new ArrayList<>();
+    tokens.add(token);
+  }
 
   public Long codeExpiresIn() {
     return created.getTime() + codeTTL;

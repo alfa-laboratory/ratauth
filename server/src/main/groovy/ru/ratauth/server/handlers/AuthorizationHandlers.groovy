@@ -36,7 +36,7 @@ class AuthorizationHandlers {
           byMethod {
             get {
               def authorizeService = ctx.get(AuthorizeService.class)
-              authorizeService.authenticate readAuthzRequest(request.queryParams) subscribe {
+              authorizeService.authenticate readAuthzRequest(request.queryParams,  ctx.request.headers) subscribe {
                 res -> ctx.redirect(HttpResponseStatus.FOUND.code() ,res.buildURL())
               }
             }
@@ -44,7 +44,7 @@ class AuthorizationHandlers {
               def authorizeService = ctx.get(AuthorizeService.class)
               Promise<Form> formPromise = parse(Form.class);
               observe(formPromise).flatMap { params ->
-                authorizeService.authenticate readAuthzRequest(params)
+                authorizeService.authenticate readAuthzRequest(params, ctx.request.headers)
               } subscribe {
                 res -> ctx.redirect(HttpResponseStatus.FOUND.code() ,res.buildURL())
               }

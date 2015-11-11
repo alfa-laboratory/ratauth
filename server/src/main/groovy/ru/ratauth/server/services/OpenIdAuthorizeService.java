@@ -42,42 +42,43 @@ public class OpenIdAuthorizeService implements AuthorizeService {
   @SneakyThrows
   public Observable<AuthzResponse> authenticate(AuthzRequest oauthRequest) {
 
-    final RelyingParty relyingParty = relyingPartyService.getRelyingParty(oauthRequest.getClientId()).toBlocking().single();
-    if (relyingParty == null)
-      throw new AuthorizationException("RelyingParty not found");
+    final RelyingParty relyingParty = relyingPartyService.getRelyingParty(oauthRequest.getClientId())
+      .filter(rp -> oauthRequest.getAuds() == null || rp.getResourceServers().containsAll(oauthRequest.getAuds()))//if aud is empty we will get relyingParty resourceServers
+      .switchIfEmpty(Observable.error(new AuthorizationException("RelyingParty not found")))
+      .toBlocking().single();
+
 
     return authProviders.get(relyingParty.getIdentityProvider())
-        .checkCredentials(oauthRequest.getUsername(), oauthRequest.getPassword())
-        .flatMap(userInfo -> {
-          Date now = new Date();
-          //create entry
-          AuthzEntry authzEntry = AuthzEntry.builder()
-              .authCode(codeGenerator.authorizationCode())
-              .created(new Date())
-              .codeTTL(codeTTL)
-              .refreshToken(codeGenerator.refreshToken())
-              .refreshTokenTTL(refreshTokenTTL)
-              .relyingParty(relyingParty.getId())
-              .identityProvider(relyingParty.getIdentityProvider())
-              .scopes(oauthRequest.getScopes())
-              .resourceServer(oauthRequest.getAud()).build();
-          //create base JWT
-          String userJWT = tokenProcessor.createToken(relyingParty.getSecret(), relyingParty.getBaseAddress(),
-              now, authzEntry.codeExpiresIn(), authzEntry.getAuthCode(),
-              authzEntry.getResourceServers(), userInfo);
-          authzEntry.setBaseJWT(userJWT);
-          return authzEntryService.save(authzEntry);
-        }).map(entry -> {
-          String redirectURI = oauthRequest.getRedirectURI();
-          if (StringUtils.isBlank(redirectURI)) {
-            redirectURI = relyingParty.getRedirectURL();
-          }
-
-          return AuthzResponse.builder()
-              .code(entry.getAuthCode())
-              .expiresIn(entry.codeExpiresIn())
-              .expiresIn(entry.codeExpiresIn())
-              .location(redirectURI).build();
-        }).switchIfEmpty(Observable.error(new AuthorizationException("Authorization error")));
+      .checkCredentials(oauthRequest.getUsername(), oauthRequest.getPassword())
+      .flatMap(userInfo -> {
+        Date now = new Date();
+        //create entry
+        AuthzEntry authzEntry = AuthzEntry.builder()
+          .authCode(codeGenerator.authorizationCode())
+          .created(new Date())
+          .codeTTL(codeTTL)
+          .refreshToken(codeGenerator.refreshToken())
+          .refreshTokenTTL(refreshTokenTTL)
+          .relyingParty(relyingParty.getId())
+          .identityProvider(relyingParty.getIdentityProvider())
+          .scopes(oauthRequest.getScopes())
+          .resourceServers(oauthRequest.getAuds() == null ? relyingParty.getResourceServers() : oauthRequest.getAuds())
+          .build();
+        //create base JWT
+        String userJWT = tokenProcessor.createToken(relyingParty.getSecret(), relyingParty.getBaseAddress(),
+          now, authzEntry.codeExpiresIn(), authzEntry.getAuthCode(),
+          authzEntry.getResourceServers(), userInfo);
+        authzEntry.setBaseJWT(userJWT);
+        return authzEntryService.save(authzEntry);
+      }).map(entry -> {
+        String redirectURI = oauthRequest.getRedirectURI();
+        if (StringUtils.isBlank(redirectURI)) {
+          redirectURI = relyingParty.getRedirectURL();
+        }
+        return AuthzResponse.builder()
+          .code(entry.getAuthCode())
+          .expiresIn(entry.codeExpiresIn())
+          .location(redirectURI).build();
+      }).switchIfEmpty(Observable.error(new AuthorizationException("Authorization error")));
   }
 }

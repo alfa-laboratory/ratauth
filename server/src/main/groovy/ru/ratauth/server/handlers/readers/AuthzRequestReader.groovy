@@ -26,7 +26,7 @@ class AuthzRequestReader {
     def builder = AuthzRequest.builder()
         .responseType(responseType)
         .scopes(extractField(params, SCOPE, true).split(" ").toList())
-        .aud(extractField(params, AUD, false))
+        .auds(extractField(params, AUD, false)?.split(" ")?.toList())
         .username(extractField(params, USERNAME, true))
         .password(extractField(params, PASSWORD, true))
         .redirectURI(extractField(params, REDIRECT_URI, false))

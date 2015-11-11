@@ -60,8 +60,8 @@ public class HS256TokenProcessor implements TokenProcessor {
   public Map<String, Object> extractUserInfo(String jwt, String secret) {
     SignedJWT signedJWT = SignedJWT.parse(jwt);
     final JWSVerifier verifier = new MACVerifier(Base64Coder.decodeLines(secret));
-    if(signedJWT.verify(verifier))
-      throw new JWTVerificationError("User info extraction error");
+    if(!signedJWT.verify(verifier))
+      throw new JWTVerificationException("User info extraction error");
     Map<String,Object> result = new HashMap<>();
     signedJWT.getJWTClaimsSet().getClaims().forEach((key,value) -> {
       if(key.startsWith(INT_PREFIX))
