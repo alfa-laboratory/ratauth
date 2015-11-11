@@ -1,61 +1,46 @@
 package ru.ratauth.server.handlers.readers
 
+import groovy.transform.CompileStatic
 import ratpack.form.Form
 import ratpack.http.Headers
-import ratpack.util.MultiValueMap
 import ru.ratauth.interaction.AuthzResponseType
 import ru.ratauth.interaction.CheckTokenRequest
+import ru.ratauth.interaction.GrantType
 import ru.ratauth.interaction.TokenRequest
-import ru.ratauth.utils.StringUtils
+import static ru.ratauth.server.utils.RequestUtil.*
 
 /**
  * @author djassan
  * @since 06/11/15
  */
+@CompileStatic
 class TokenRequestReader {
   private static final String RESPONSE_TYPE = "response_type"
-  private static final String USERNAME = "username"
-  private static final String PASSWORD = "password"
+  private static final String GRANT_TYPE = "grant_type"
   private static final String CODE = "code"
   private static final String TOKEN = "token"
-  private static final String AUTHORIZATION = "Authorization"
+  private static final String REFRESH_TOKEN = "refresh_token"
 
 
   static TokenRequest readTokenRequest(Form form, Headers headers) {
     def auth = extractAuth(headers)
-    TokenRequest.builder()
-      .responseType(AuthzResponseType.valueOf(extractField(form, RESPONSE_TYPE).toUpperCase()))
-      .username(extractField(form, USERNAME))
-      .password(extractField(form,PASSWORD))
-      .code(extractField(form,CODE))
-      .clientId(auth[0])
-      .clientSecret(auth[1])
-      .build()
+    GrantType grantType = GrantType.valueOf(extractField(form, GRANT_TYPE, true))
+    def builder = TokenRequest.builder()
+        .responseType(AuthzResponseType.valueOf(extractField(form, RESPONSE_TYPE, true).toUpperCase()))
+        .grantType(grantType)
+        .clientId(auth[0])
+        .clientSecret(auth[1])
+    if (grantType == GrantType.AUTHORIZATION_CODE) {
+      builder.authzCode(extractField(form, CODE, true))
+    } else {
+      builder.refreshToken(extractField(form, REFRESH_TOKEN, true))
+    }
+    builder.build()
   }
 
   static CheckTokenRequest readCheckTokenRequest(Form form, Headers headers) {
-    CheckTokenRequest.builder().token(extractField(form, TOKEN)).build();
+    CheckTokenRequest.builder().token(extractField(form, TOKEN, true)).build();
   }
 
-  private static String extractField(MultiValueMap<String, String> params, String name) {
-    String value = params.get(name)
-    if(StringUtils.isBlank(value))
-      throw new ReadRequestException(name)
-    value
-  }
-
-  private static String [] extractAuth(Headers headers) {
-    def authHeader = headers?.get(AUTHORIZATION)
-    if(!authHeader)
-      throw new ReadRequestException(AUTHORIZATION)
-    def encodedValue = authHeader.split(" ")[1]
-    def decodedValue = new String(encodedValue.decodeBase64())?.split(":")
-    // do some sort of validation here
-    if (decodedValue[0] && decodedValue[1]) {
-      decodedValue
-    } else {
-      throw new ReadRequestException(AUTHORIZATION)
-    }
-  }
 
 }

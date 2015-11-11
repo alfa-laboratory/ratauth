@@ -5,12 +5,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import ratpack.spring.config.EnableRatpack
-import ru.ratauth.entities.AuthCode
 import ru.ratauth.entities.AuthCodeStatus
+import ru.ratauth.entities.AuthzEntry
 import ru.ratauth.entities.RelyingParty
 import ru.ratauth.entities.Token
 import ru.ratauth.providers.AuthProvider
-import ru.ratauth.services.AuthCodeService
+import ru.ratauth.services.AuthzEntryService
 import ru.ratauth.services.RelyingPartyService
 import ru.ratauth.services.TokenService
 import rx.Observable
@@ -48,17 +48,17 @@ class ProvidersConfiguration {
   }
 
   @Bean
-  public AuthCodeService authCodeService() {
-    return new AuthCodeService() {
+  public AuthzEntryService authCodeService() {
+    return new AuthzEntryService() {
       @Override
-      Observable<AuthCode> save(AuthCode code) {
+      Observable<AuthzEntry> save(AuthzEntry code) {
         return Observable.just(code)
       }
 
       @Override
-      Observable<AuthCode> get(String code) {
+      Observable<AuthzEntry> get(String code) {
         if (code == '1234')
-          return Observable.just(new AuthCode(code: code,
+          return Observable.just(new AuthzEntry(code: code,
               relyingParty: 'sense',
               identityProvider: 'BANK',
               scopes: ['read'],

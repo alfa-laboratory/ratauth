@@ -4,5 +4,7 @@ auth:
  token:
   ttl: 86400
   issuer: "http://ratauth.ru"
+ refresh_token:
+  ttl: 36000
  code:
   ttl: 86400

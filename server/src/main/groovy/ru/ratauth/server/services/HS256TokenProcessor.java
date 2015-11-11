@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
@@ -11,8 +12,6 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ru.ratauth.entities.RelyingParty;
-import ru.ratauth.entities.Token;
 
 import java.util.*;
 
@@ -22,26 +21,29 @@ import java.util.*;
  */
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class HS256TokenGenerator implements TokenGenerator {
+public class HS256TokenProcessor implements TokenProcessor {
   private final ObjectMapper jacksonObjectMapper;
   private static final String RP_BASE_ADDRESS = "rp_base_address";
+  public static final String INT_PREFIX="i_";
 
   @Value("${auth.token.issuer}")
   private String issuer;//final
 
   @Override
   @SneakyThrows
-  public String createToken(RelyingParty relyingParty, Token token, Map<String, String> userInfo) {
-    final JWSSigner signer = new MACSigner(Base64Coder.decodeLines(relyingParty.getSecret()));
+  public String createToken(String secret, Set<String> baseAddress,
+                            Date created, Long expiresIn, String token,
+                            Set<String> resourceServers, Map<String, Object> userInfo) {
+    final JWSSigner signer = new MACSigner(Base64Coder.decodeLines(secret));
 // Prepare JWT with claims set
     JWTClaimsSet.Builder jwtBuilder = new JWTClaimsSet.Builder()
         .issuer(issuer)
-        .expirationTime(new Date(token.expiresIn()))
-        .audience(new ArrayList<>(token.getResourceServers()))
-        .jwtID(token.getToken())
-        .issueTime(token.getCreated());
-    jwtBuilder.claim(RP_BASE_ADDRESS, relyingParty.getBaseAddress());
-    userInfo.forEach((key, value) -> jwtBuilder.claim(key, value));
+        .expirationTime(new Date(expiresIn))
+        .audience(new ArrayList<>(resourceServers))
+        .jwtID(token)
+        .issueTime(created);
+    jwtBuilder.claim(RP_BASE_ADDRESS, baseAddress);
+    userInfo.forEach((key, value) -> jwtBuilder.claim(INT_PREFIX + key, value));
 
     SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), jwtBuilder.build());
 
@@ -53,4 +55,18 @@ public class HS256TokenGenerator implements TokenGenerator {
     return signedJWT.serialize();
   }
 
+  @Override
+  @SneakyThrows
+  public Map<String, Object> extractUserInfo(String jwt, String secret) {
+    SignedJWT signedJWT = SignedJWT.parse(jwt);
+    final JWSVerifier verifier = new MACVerifier(Base64Coder.decodeLines(secret));
+    if(signedJWT.verify(verifier))
+      throw new JWTVerificationError("User info extraction error");
+    Map<String,Object> result = new HashMap<>();
+    signedJWT.getJWTClaimsSet().getClaims().forEach((key,value) -> {
+      if(key.startsWith(INT_PREFIX))
+        result.put(key,value);
+    });
+    return result;
+  }
 }

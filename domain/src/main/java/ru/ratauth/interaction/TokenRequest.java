@@ -14,10 +14,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TokenRequest {
-  private String code;
-  private String username;
-  private String password;
+  private String authzCode; //optional
+  private String refreshToken;//optional
   private String clientId;
   private String clientSecret;
+  private GrantType grantType;
   private AuthzResponseType responseType;
 }

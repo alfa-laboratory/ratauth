@@ -13,10 +13,9 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CheckTokenResponse {
-  private String tokenId;
+  private String idToken;
   private @Singular Set<String> resourceServers;
   private Long expiresIn;
   private String clientId;
-  private String userId;
   private @Singular Set<String> scopes;
 }

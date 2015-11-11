@@ -21,7 +21,7 @@ public class RelyingParty {
   private String secret;
   private Date created;
   private Date updated;
-  private @Singular("baseAddress") List<String> baseAddress;//optional field for relying party interconnection
+  private @Singular("baseAddress") Set<String> baseAddress;//optional field for relying party interconnection
   private Integer secretTTL;
   private String redirectURL;
   private ApplicationType applicationType;

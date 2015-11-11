@@ -1,5 +1,8 @@
 package ru.ratauth.server.secutiry;
 
+
+import lombok.SneakyThrows;
+
 public class OAuthIssuerImpl implements OAuthIssuer {
 
     private ValueGenerator vg;
@@ -8,15 +11,18 @@ public class OAuthIssuerImpl implements OAuthIssuer {
         this.vg = vg;
     }
 
-    public String accessToken() throws OAuthSystemException {
+    @SneakyThrows
+    public String accessToken()  {
         return vg.generateValue();
     }
 
-    public String refreshToken() throws OAuthSystemException {
+    @SneakyThrows
+    public String refreshToken()  {
         return vg.generateValue();
     }
 
-    public String authorizationCode() throws OAuthSystemException {
+    @SneakyThrows
+    public String authorizationCode() {
         return vg.generateValue();
     }
 }

@@ -16,14 +16,8 @@ import java.util.Set;
 public class Token {
   private String token;
   private Date created;
-  private String codeId;//identifier
   private Long TTL;
-  private @Singular("scope") Set<String> scopes;
-  private String relyingParty;//identifier
-  private String identityProvider;//identifier
-  private @Singular Set<String> resourceServers;//identifiers
-  private String user;//external identifier
-  private String tokenId;
+  private String idToken;//optional jwt
 
   public Long expiresIn() {
     return created.getTime() + TTL;

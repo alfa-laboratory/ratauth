@@ -20,5 +20,5 @@ public interface AuthProvider {
    * @param password
    * @return map of user data provided by concrete identity provider
    */
-  Observable<Map<String, String>> checkCredentials(String login, String password);
+  Observable<Map<String, Object>> checkCredentials(String login, String password);
 }

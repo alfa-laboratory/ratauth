@@ -16,5 +16,9 @@ public class AuthzRequest {
   private AuthzResponseType responseType;
   private @Singular Set<String> scopes;
   private String clientId;
+  private String clientSecret;
   private String redirectURI;
+  private String username;
+  private String password;
+  private String aud;
 }
