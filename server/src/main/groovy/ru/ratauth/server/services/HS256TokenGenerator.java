@@ -24,6 +24,7 @@ import java.util.*;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HS256TokenGenerator implements TokenGenerator {
   private final ObjectMapper jacksonObjectMapper;
+  private static final String RP_BASE_ADDRESS = "rp_base_address";
 
   @Value("${auth.token.issuer}")
   private String issuer;//final
@@ -39,6 +40,7 @@ public class HS256TokenGenerator implements TokenGenerator {
         .audience(new ArrayList<>(token.getResourceServers()))
         .jwtID(token.getToken())
         .issueTime(token.getCreated());
+    jwtBuilder.claim(RP_BASE_ADDRESS, relyingParty.getBaseAddress());
     userInfo.forEach((key, value) -> jwtBuilder.claim(key, value));
 
     SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), jwtBuilder.build());

@@ -3,6 +3,7 @@ package ru.ratauth.entities;
 import lombok.*;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -20,6 +21,7 @@ public class RelyingParty {
   private String secret;
   private Date created;
   private Date updated;
+  private @Singular("baseAddress") List<String> baseAddress;//optional field for relying party interconnection
   private Integer secretTTL;
   private String redirectURL;
   private ApplicationType applicationType;

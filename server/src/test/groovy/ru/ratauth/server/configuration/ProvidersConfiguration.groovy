@@ -41,6 +41,7 @@ class ProvidersConfiguration {
             .password('secret')
             .resourceServer('stub')
             .resourceServer('stub2')
+            .baseAddress('http://ratauth.ru')
             .build())
       }
     }
