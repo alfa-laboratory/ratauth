@@ -19,7 +19,7 @@ public interface AuthzEntryService {
    * Loads AuthzEntry by code with expiration date check
    * @param code code value
    * @param now current date
-   * @return Observable of single AuthzEntry or Observable.empty()
+   * @return Observable of single AuthzEntry or Observable.empty if code not found or Observable.error if code has expired
    */
   Observable<AuthzEntry> getByValidCode(String code, Date now);
 
@@ -27,7 +27,7 @@ public interface AuthzEntryService {
    * Loads AuthzEntry by refreshToken with expiration date check
    * @param token refreshToken value
    * @param now current date
-   * @return Observable of single AuthzEntry or Observable.empty()
+   * @return Observable of single AuthzEntry or Observable.empty if refresh token not found or Observable.error if refresh token has expired
    */
   Observable<AuthzEntry> getByValidRefreshToken(String token, Date now);
 
@@ -35,7 +35,7 @@ public interface AuthzEntryService {
    * Loads AuthzEntry by refreshToken with expiration date check. AuthzEntry must be loaded with only one token entity
    * @param token access token value
    * @param now current date
-   * @return Observable of single AuthzEntry or Observable.empty()
+   * @return Observable of single AuthzEntry or Observable.empty if token not found or Observable.error if token has expired
    */
   Observable<AuthzEntry> getByValidToken(String token, Date now);
 }

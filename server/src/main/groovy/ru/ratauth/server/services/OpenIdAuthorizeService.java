@@ -68,7 +68,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         String userJWT = tokenProcessor.createToken(relyingParty.getSecret(), relyingParty.getBaseAddress(),
           now, authzEntry.codeExpiresIn(), authzEntry.getAuthCode(),
           authzEntry.getResourceServers(), userInfo);
-        authzEntry.setBaseJWT(userJWT);
+        authzEntry.setUserInfo(userJWT);
         return authzEntryService.save(authzEntry);
       }).map(entry -> {
         String redirectURI = oauthRequest.getRedirectURI();

@@ -2,10 +2,7 @@ package ru.ratauth.entities;
 
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author mgorelikov
@@ -26,12 +23,12 @@ public class AuthzEntry {
   private String relyingParty;//identifier
   private String identityProvider;//identifier
   private @Singular Set<String> resourceServers;//identifiers
-  private String baseJWT;//base jwt
-  private @Singular List<Token> tokens;
+  private String userInfo;//base jwt
+  private @Singular Set<Token> tokens;
 
   public void addToken(Token token) {
     if(this.tokens == null)
-      this.tokens = new ArrayList<>();
+      this.tokens = new HashSet<>();
     tokens.add(token);
   }
 

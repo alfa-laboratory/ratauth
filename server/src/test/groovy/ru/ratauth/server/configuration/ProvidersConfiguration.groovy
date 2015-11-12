@@ -1,5 +1,6 @@
 package ru.ratauth.server.configuration
 
+import groovy.transform.CompileStatic
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.context.annotation.Bean
@@ -20,6 +21,7 @@ import rx.Observable
 @EnableRatpack
 @Configuration
 @SpringBootApplication
+@CompileStatic
 class ProvidersConfiguration {
 
   public static final String TOKEN = 'sometoken'
@@ -59,9 +61,9 @@ class ProvidersConfiguration {
           return Observable.just(new AuthzEntry(authCode: code,
             relyingParty: 'sense',
             identityProvider: 'BANK',
-            scopes: ['read'],
-            resourceServers: ['stub'],
-            baseJWT: 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJzZW5zZSIsImlfdXNlcl9pZCI6InVzZXJfaWQiLCJpc3MiOiJodHRwOlwvXC9yYXRhdXRoLnJ1IiwiZXhwIjoxNDQ3MjcwMDYzLCJpYXQiOjE0NDcyNjk5NzYsInJwX2Jhc2VfYWRkcmVzcyI6WyJodHRwOlwvXC9yYXRhdXRoLnJ1Il0sImp0aSI6ImJkNjM2OTI4LTcxOTYtMzlhNy04OWY2LTc4Zjk0Njc2NTRlYiJ9.YP-bMI6QQ7OBrjHWqQUAIKcG_ME7Ipbbtqp8To_oyf0'
+            scopes: ['read'] as Set,
+            resourceServers: ['stub'] as Set,
+            userInfo: 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJzZW5zZSIsImlfdXNlcl9pZCI6InVzZXJfaWQiLCJpc3MiOiJodHRwOlwvXC9yYXRhdXRoLnJ1IiwiZXhwIjoxNDQ3MjcwMDYzLCJpYXQiOjE0NDcyNjk5NzYsInJwX2Jhc2VfYWRkcmVzcyI6WyJodHRwOlwvXC9yYXRhdXRoLnJ1Il0sImp0aSI6ImJkNjM2OTI4LTcxOTYtMzlhNy04OWY2LTc4Zjk0Njc2NTRlYiJ9.YP-bMI6QQ7OBrjHWqQUAIKcG_ME7Ipbbtqp8To_oyf0'
           ))
       }
 
@@ -72,14 +74,14 @@ class ProvidersConfiguration {
           return Observable.just(new AuthzEntry(authCode: 'code',
             relyingParty: 'sense',
             identityProvider: 'BANK',
-            scopes: ['read'],
-            resourceServers: ['stub'],
+            scopes: ['read'] as Set,
+            resourceServers: ['stub'] as Set,
             refreshToken: '1234',
-            baseJWT: 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJzZW5zZSIsImlfdXNlcl9pZCI6InVzZXJfaWQiLCJpc3MiOiJodHRwOlwvXC9yYXRhdXRoLnJ1IiwiZXhwIjoxNDQ3MjcwMDYzLCJpYXQiOjE0NDcyNjk5NzYsInJwX2Jhc2VfYWRkcmVzcyI6WyJodHRwOlwvXC9yYXRhdXRoLnJ1Il0sImp0aSI6ImJkNjM2OTI4LTcxOTYtMzlhNy04OWY2LTc4Zjk0Njc2NTRlYiJ9.YP-bMI6QQ7OBrjHWqQUAIKcG_ME7Ipbbtqp8To_oyf0',
+            userInfo: 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJzZW5zZSIsImlfdXNlcl9pZCI6InVzZXJfaWQiLCJpc3MiOiJodHRwOlwvXC9yYXRhdXRoLnJ1IiwiZXhwIjoxNDQ3MjcwMDYzLCJpYXQiOjE0NDcyNjk5NzYsInJwX2Jhc2VfYWRkcmVzcyI6WyJodHRwOlwvXC9yYXRhdXRoLnJ1Il0sImp0aSI6ImJkNjM2OTI4LTcxOTYtMzlhNy04OWY2LTc4Zjk0Njc2NTRlYiJ9.YP-bMI6QQ7OBrjHWqQUAIKcG_ME7Ipbbtqp8To_oyf0',
             tokens: [new Token(token: TOKEN,
               TTL: 36000l,
               created: new Date(),
-              idToken: TOKEN_ID)]
+              idToken: TOKEN_ID)] as Set
           ))
       }
 
@@ -89,12 +91,12 @@ class ProvidersConfiguration {
           return Observable.just(new AuthzEntry(authCode: 'code',
             relyingParty: 'sense',
             identityProvider: 'BANK',
-            scopes: ['read'],
-            resourceServers: ['stub'],
+            scopes: ['read'] as Set,
+            resourceServers: ['stub'] as Set,
             tokens: [new Token(token: TOKEN,
               TTL: 36000l,
               created: new Date(),
-              idToken: TOKEN_ID)]
+              idToken: TOKEN_ID)] as Set
           ))
       }
     }
