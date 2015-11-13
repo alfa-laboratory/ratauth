@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
 import ratpack.spring.config.EnableRatpack
 import ru.ratauth.entities.AuthzEntry
 import ru.ratauth.entities.RelyingParty
@@ -29,6 +30,7 @@ class ProvidersConfiguration {
 
 
   @Bean
+  @Primary
   public RelyingPartyService relyingPartyService(@Value('${auth.secret.code}') String secret) {
     return new RelyingPartyService() {
       @Override
@@ -48,6 +50,7 @@ class ProvidersConfiguration {
   }
 
   @Bean
+  @Primary
   public AuthzEntryService authCodeService() {
     return new AuthzEntryService() {
       @Override
@@ -103,6 +106,7 @@ class ProvidersConfiguration {
   }
 
   @Bean(name = 'BANK')
+  @Primary
   public AuthProvider authProvider() {
     return new AuthProvider() {
       @Override

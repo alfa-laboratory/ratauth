@@ -45,7 +45,7 @@ class AuthorizationAPISpec extends Specification {
     HttpEntity<String> requestEntity =
       new HttpEntity<String>(query, requestHeaders);
     when:
-    ResponseEntity<String> answer = client.exchange('http://localhost:' + port + '/oauth/authorize',
+    ResponseEntity<String> answer = client.exchange('http://localhost:' + port + '/authorize',
       HttpMethod.POST,
       requestEntity,
       String.class)
@@ -61,7 +61,7 @@ class AuthorizationAPISpec extends Specification {
     HttpEntity<String> requestEntity =
       new HttpEntity<String>(query, createHeaders('id', 'secret'));
     when:
-    ResponseEntity<String> answer = client.exchange('http://localhost:' + port + '/oauth/token',
+    ResponseEntity<String> answer = client.exchange('http://localhost:' + port + '/token',
       HttpMethod.POST,
       requestEntity,
       String.class)
@@ -79,7 +79,7 @@ class AuthorizationAPISpec extends Specification {
     HttpEntity<String> requestEntity =
       new HttpEntity<String>(query, createHeaders('id', 'secret'));
     when:
-    ResponseEntity<String> answer = client.exchange('http://localhost:' + port + '/oauth/token',
+    ResponseEntity<String> answer = client.exchange('http://localhost:' + port + '/token',
       HttpMethod.POST,
       requestEntity,
       String.class)
