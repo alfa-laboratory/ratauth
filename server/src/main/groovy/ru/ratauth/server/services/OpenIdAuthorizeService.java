@@ -7,8 +7,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.ratauth.entities.AuthzEntry;
 import ru.ratauth.entities.RelyingParty;
+import ru.ratauth.entities.Token;
 import ru.ratauth.interaction.AuthzRequest;
 import ru.ratauth.interaction.AuthzResponse;
+import ru.ratauth.interaction.AuthzResponseType;
+import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.AuthProvider;
 import ru.ratauth.server.secutiry.OAuthIssuerImpl;
 import ru.ratauth.server.secutiry.UUIDValueGenerator;
@@ -31,6 +34,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
   private final AuthzEntryService authzEntryService;
   private final Map<String, AuthProvider> authProviders;
   private final TokenProcessor tokenProcessor;
+  private final AuthTokenService authTokenService;
   private final OAuthIssuerImpl codeGenerator = new OAuthIssuerImpl(new UUIDValueGenerator());
 
   @Value("${auth.code.ttl}")
@@ -43,10 +47,10 @@ public class OpenIdAuthorizeService implements AuthorizeService {
   public Observable<AuthzResponse> authenticate(AuthzRequest oauthRequest) {
 
     final RelyingParty relyingParty = relyingPartyService.getRelyingParty(oauthRequest.getClientId())
-      .filter(rp -> oauthRequest.getAuds() == null || rp.getResourceServers().containsAll(oauthRequest.getAuds()))//if aud is empty we will get relyingParty resourceServers
+      .filter(rp -> authRelyingParty(oauthRequest,rp))
+      .filter(rp -> oauthRequest.getAuds() == null || rp.getResourceServers().containsAll(oauthRequest.getAuds()))//check rights
       .switchIfEmpty(Observable.error(new AuthorizationException("RelyingParty not found")))
       .toBlocking().single();
-
 
     return authProviders.get(relyingParty.getIdentityProvider())
       .checkCredentials(oauthRequest.getUsername(), oauthRequest.getPassword())
@@ -54,31 +58,51 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         Date now = new Date();
         //create entry
         AuthzEntry authzEntry = AuthzEntry.builder()
-          .authCode(codeGenerator.authorizationCode())
-          .created(new Date())
-          .codeTTL(codeTTL)
-          .refreshToken(codeGenerator.refreshToken())
-          .refreshTokenTTL(refreshTokenTTL)
-          .relyingParty(relyingParty.getId())
-          .identityProvider(relyingParty.getIdentityProvider())
-          .scopes(oauthRequest.getScopes())
-          .resourceServers(oauthRequest.getAuds() == null ? relyingParty.getResourceServers() : oauthRequest.getAuds())
-          .build();
+            .authCode(codeGenerator.authorizationCode())
+            .created(new Date())
+            .codeTTL(codeTTL)
+            .refreshToken(codeGenerator.refreshToken())
+            .refreshTokenTTL(refreshTokenTTL)
+            .relyingParty(relyingParty.getId())
+            .identityProvider(relyingParty.getIdentityProvider())
+            .scopes(oauthRequest.getScopes())
+            .resourceServers(oauthRequest.getAuds() == null ? relyingParty.getResourceServers() : oauthRequest.getAuds())
+            .build();
         //create base JWT
         String userJWT = tokenProcessor.createToken(relyingParty.getSecret(), relyingParty.getBaseAddress(),
-          now, authzEntry.codeExpiresIn(), authzEntry.getAuthCode(),
-          authzEntry.getResourceServers(), userInfo);
+            now, authzEntry.codeExpiresIn(), authzEntry.getAuthCode(),
+            authzEntry.getResourceServers(), userInfo);
         authzEntry.setUserInfo(userJWT);
         return authzEntryService.save(authzEntry);
-      }).map(entry -> {
-        String redirectURI = oauthRequest.getRedirectURI();
-        if (StringUtils.isBlank(redirectURI)) {
-          redirectURI = relyingParty.getRedirectURL();
-        }
-        return AuthzResponse.builder()
-          .code(entry.getAuthCode())
-          .expiresIn(entry.codeExpiresIn())
-          .location(redirectURI).build();
-      }).switchIfEmpty(Observable.error(new AuthorizationException("Authorization error")));
+      }).flatMap(entry -> {
+          if (oauthRequest.getResponseType() == AuthzResponseType.TOKEN)
+            return authTokenService.createToken(entry, relyingParty);
+          else
+            return Observable.just(entry);
+        }).map(entry -> buildResponse(oauthRequest,entry,relyingParty)
+        ).switchIfEmpty(Observable.error(new AuthorizationException("Authorization error")));
+  }
+
+  private static AuthzResponse buildResponse(AuthzRequest oauthRequest, AuthzEntry entry, RelyingParty relyingParty) {
+    String redirectURI = StringUtils.isBlank(oauthRequest.getRedirectURI())? oauthRequest.getRedirectURI() : relyingParty.getRedirectURL();
+    AuthzResponse resp = AuthzResponse.builder()
+        .location(redirectURI).build();
+    Token token = entry.getLatestToken();
+    if(token != null) {
+      resp.setToken(token.getToken());
+      resp.setTokenType(TokenType.BEARER);
+      resp.setRefreshToken(entry.getRefreshToken());
+      resp.setExpiresIn(token.expiresIn());
+    } else {
+      resp.setCode(entry.getAuthCode());
+      resp.setExpiresIn(entry.codeExpiresIn());
+    }
+    return resp;
+  }
+
+  private boolean authRelyingParty(AuthzRequest oauthRequest, RelyingParty relyingParty) {
+    return oauthRequest.getResponseType() == AuthzResponseType.CODE
+        || oauthRequest.getClientId().equals(relyingParty.getId())
+        && oauthRequest.getClientSecret().equals(relyingParty.getPassword());
   }
 }

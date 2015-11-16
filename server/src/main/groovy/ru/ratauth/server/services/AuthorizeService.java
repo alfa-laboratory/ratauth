@@ -2,7 +2,6 @@ package ru.ratauth.server.services;
 
 import ru.ratauth.interaction.AuthzRequest;
 import ru.ratauth.interaction.AuthzResponse;
-import ru.ratauth.server.secutiry.OAuthSystemException;
 import rx.Observable;
 
 import java.net.URISyntaxException;

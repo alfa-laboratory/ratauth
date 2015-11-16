@@ -51,6 +51,7 @@ class AuthorizationAPISpec extends Specification {
       String.class)
     then:
     assert answer.statusCode == HttpStatus.FOUND
+    assert answer.getHeaders().get("LOCATION").first().contains("code=")
   }
 
   def 'request token'() {
@@ -69,6 +70,23 @@ class AuthorizationAPISpec extends Specification {
     then:
     assert answer.statusCode == HttpStatus.OK
     assert token.accessToken
+  }
+
+  def 'implicit request token'() {
+    given:
+    def query = 'response_type=token&scope=read&username=login&password=password&aud=stub'
+    HttpHeaders requestHeaders = new HttpHeaders();
+    requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+    HttpEntity<String> requestEntity =
+        new HttpEntity<String>(query, createHeaders('id', 'secret'));
+    when:
+    ResponseEntity<String> answer = client.exchange('http://localhost:' + port + '/authorize',
+        HttpMethod.POST,
+        requestEntity,
+        String.class)
+    then:
+    assert answer.statusCode == HttpStatus.FOUND
+    assert answer.getHeaders().get("LOCATION").first().contains("token=")
   }
 
   def 'refresh token'() {
@@ -106,8 +124,6 @@ class AuthorizationAPISpec extends Specification {
     assert answer.statusCode == HttpStatus.OK
     assert token.jti == ProvidersConfiguration.TOKEN_ID
   }
-
-
 
   private HttpHeaders createHeaders(String username, String password) {
     return new HttpHeaders() {

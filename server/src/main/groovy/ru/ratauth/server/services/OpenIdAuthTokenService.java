@@ -44,21 +44,9 @@ public class OpenIdAuthTokenService implements AuthTokenService {
 
     return relyingPartyService.getRelyingParty(authzEntry.getRelyingParty())
       .filter(relyingParty -> authRelyingParty(oauthRequest, authzEntry, relyingParty))
-      .flatMap(relyingParty -> {
-        Date now = new Date();
-        Token token = Token.builder()
-          .created(now)
-          .token(codeGenerator.accessToken())
-          .TTL(tokenTTL).build();
-        //create jwt token
-        String idToken = tokenProcessor.createToken(relyingParty.getSecret(), relyingParty.getBaseAddress(),
-          now, token.expiresIn(), token.getToken(),
-          authzEntry.getResourceServers(), tokenProcessor.extractUserInfo(authzEntry.getUserInfo(), relyingParty.getSecret()));
-        token.setIdToken(idToken);
-        authzEntry.addToken(token);
-        return authzEntryService.save(authzEntry);
-      }).map(entry -> {
-        Token token = authzEntry.getTokens().iterator().next();
+      .flatMap(relyingParty -> createToken(authzEntry, relyingParty)
+      ).map(entry -> {
+        Token token = authzEntry.getLatestToken();
         return TokenResponse.builder()
           .accessToken(token.getToken())
           .expiresIn(token.expiresIn())
@@ -67,6 +55,22 @@ public class OpenIdAuthTokenService implements AuthTokenService {
           .refreshToken(authzEntry.getRefreshToken())
           .build();
       }).switchIfEmpty(Observable.error(new AuthorizationException()));
+  }
+
+  @Override
+  public Observable<AuthzEntry> createToken(AuthzEntry authzEntry, RelyingParty relyingParty) {
+    Date now = new Date();
+    Token token = Token.builder()
+      .created(now)
+      .token(codeGenerator.accessToken())
+      .TTL(tokenTTL).build();
+    //create jwt token
+    String idToken = tokenProcessor.createToken(relyingParty.getSecret(), relyingParty.getBaseAddress(),
+      now, token.expiresIn(), token.getToken(),
+      authzEntry.getResourceServers(), tokenProcessor.extractUserInfo(authzEntry.getUserInfo(), relyingParty.getSecret()));
+    token.setIdToken(idToken);
+    authzEntry.addToken(token);
+    return authzEntryService.save(authzEntry);
   }
 
   private AuthzEntry loadAuthzEntry(TokenRequest oauthRequest) {

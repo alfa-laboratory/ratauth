@@ -27,15 +27,24 @@ public class AuthzEntry {
   private @Singular Set<Token> tokens;
 
   public void addToken(Token token) {
-    if(this.tokens == null)
+    if(this.tokens == null  || this.tokens.isEmpty())
       this.tokens = new HashSet<>();
-    tokens.add(token);
+    this.tokens.add(token);
   }
 
   public Long codeExpiresIn() {
     return created.getTime() + codeTTL;
   }
+
   public Long refreshTokenExpiresIn() {
     return created.getTime() + refreshTokenTTL;
+  }
+
+  public Token getLatestToken() {
+    if(tokens == null)
+      return null;
+    return tokens.stream()
+        .sorted((el1,el2) -> el1.expiresIn().compareTo(el2.expiresIn()))
+        .findFirst().orElse(null);
   }
 }

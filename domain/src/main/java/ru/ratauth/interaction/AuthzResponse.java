@@ -21,6 +21,7 @@ public class AuthzResponse {
   private Long expiresIn;
   private String location;
   private String token;
+  private TokenType tokenType;
   private String refreshToken;
 
   public String buildURL() {
@@ -33,9 +34,11 @@ public class AuthzResponse {
     }
     if(!StringUtils.isBlank(token)) {
       joiner.add("token="+token);
+      joiner.add("token_type="+tokenType);
+
     }
     if(!StringUtils.isBlank(refreshToken)) {
-      joiner.add("refresh_token="+refreshToken);
+      joiner.add("refresh_token="+refreshToken.toString());
     }
     return location + "?" + joiner.toString();
   }
