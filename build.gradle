@@ -45,6 +45,9 @@ allprojects {
       dependency 'com.nimbusds:nimbus-jose-jwt:4.3.1'
       dependency 'io.reactivex:rxjava:1.0.15'
       dependency 'io.ratpack:ratpack-rx:1.1.1'
+      dependency 'io.ratpack:ratpack-spring-boot:1.1.1'
+      dependency 'io.ratpack:ratpack-groovy:1.1.1'
+      dependency 'io.ratpack:ratpack-test:1.1.1'
     }
   }
 }
@@ -72,6 +75,7 @@ subprojects {
     testCompile 'org.spockframework:spock-spring', {
       exclude module: "groovy-all"
     }
+    testCompile 'io.ratpack:ratpack-test'
   }
 }
 

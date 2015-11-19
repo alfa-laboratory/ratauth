@@ -7,11 +7,6 @@ buildscript {
   }
 }
 
-plugins {
-  id 'io.ratpack.ratpack-groovy' version "1.1.1"
-}
-
-apply plugin: 'io.ratpack.ratpack-java'
 apply plugin: 'spring-boot'
 apply plugin: 'io.spring.dependency-management'
 
@@ -21,7 +16,8 @@ dependencies {
   compile 'org.springframework.boot:spring-boot-starter-actuator'
   compile 'org.springframework.boot:spring-boot-starter-web'
   compile 'io.ratpack:ratpack-rx'
-  compile ratpack.dependency('spring-boot')
+  compile 'io.ratpack:ratpack-spring-boot'
+  compile 'io.ratpack:ratpack-groovy'
 
   compile 'com.nimbusds:nimbus-jose-jwt'
   compile project(':domain')
