@@ -3,6 +3,7 @@ package ru.ratauth.server
 import groovy.util.logging.Slf4j
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.context.annotation.ComponentScan
 import ratpack.spring.config.EnableRatpack
 
@@ -15,7 +16,9 @@ public class RatAuthApplication {
 
   public static void main(String[] args) {
     log.debug 'Starting'.center(DEFAULT_PADDING, '=')
-    SpringApplication.run RatAuthApplication, args
+    new SpringApplicationBuilder(RatAuthApplication.class)
+        .web(false)
+        .run(args);
     log.debug 'Started'.center(DEFAULT_PADDING, '=')
   }
 

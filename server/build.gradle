@@ -12,6 +12,10 @@ apply plugin: 'io.spring.dependency-management'
 
 version = "0.0.1"
 
+bootRepackage {
+  mainClass = 'ru.ratauth.server.RatAuthApplication'
+}
+
 dependencies {
   compile 'org.springframework.boot:spring-boot-starter-actuator'
   compile 'org.springframework.boot:spring-boot-starter-web'
@@ -32,6 +36,3 @@ task dockerBuild << {
 
 dockerBuild.dependsOn build
 
-springBoot {
-  executable = true
-}
