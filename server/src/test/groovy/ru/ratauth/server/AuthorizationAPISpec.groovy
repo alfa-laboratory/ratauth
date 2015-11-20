@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.TestPropertySource
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import ru.ratauth.server.configuration.ProvidersConfiguration
 import ru.ratauth.server.handlers.dto.CheckTokenDTO
@@ -54,6 +55,40 @@ class AuthorizationAPISpec extends Specification {
     assert answer.getHeaders().get("LOCATION").first().contains("code=")
   }
 
+  def 'bad request authorization code'() {
+    given:
+    def query = 'username=login&password=password&aud=stub'
+    HttpHeaders requestHeaders = new HttpHeaders();
+    requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+    HttpEntity<String> requestEntity =
+        new HttpEntity<String>(query, requestHeaders);
+    when:
+    ResponseEntity<String> answer = client.exchange('http://localhost:' + port + '/authorize',
+        HttpMethod.POST,
+        requestEntity,
+        String.class)
+    then:
+    def e = thrown(HttpClientErrorException)
+    e.getMessage().contains('400')
+  }
+
+  def 'bad requisites for authorization code'() {
+    given:
+    def query = 'response_type=code&client_id=www&scope=read&username=login&password=bad&aud=stub'
+    HttpHeaders requestHeaders = new HttpHeaders();
+    requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+    HttpEntity<String> requestEntity =
+        new HttpEntity<String>(query, requestHeaders);
+    when:
+    ResponseEntity<String> answer = client.exchange('http://localhost:' + port + '/authorize',
+        HttpMethod.POST,
+        requestEntity,
+        String.class)
+    then:
+    def e = thrown(HttpClientErrorException)
+    e.getMessage().contains('403')
+  }
+
   def 'request token'() {
     given:
     def query = 'grant_type=authorization_code&response_type=token&code=1234'
@@ -70,6 +105,23 @@ class AuthorizationAPISpec extends Specification {
     then:
     assert answer.statusCode == HttpStatus.OK
     assert token.accessToken
+  }
+
+  def 'request token by expired code'() {
+    given:
+    def query = 'grant_type=authorization_code&response_type=token&code=1111'
+    HttpHeaders requestHeaders = new HttpHeaders();
+    requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+    HttpEntity<String> requestEntity =
+        new HttpEntity<String>(query, createHeaders('id', 'secret'));
+    when:
+    client.exchange('http://localhost:' + port + '/token',
+        HttpMethod.POST,
+        requestEntity,
+        String.class)
+    then:
+    def e = thrown(HttpClientErrorException)
+    e.getMessage().contains('419')
   }
 
   def 'implicit request token'() {

@@ -10,6 +10,7 @@ import ratpack.spring.config.EnableRatpack
 import ru.ratauth.entities.AuthzEntry
 import ru.ratauth.entities.RelyingParty
 import ru.ratauth.entities.Token
+import ru.ratauth.exception.ExpiredException
 import ru.ratauth.providers.AuthProvider
 import ru.ratauth.services.AuthzEntryService
 import ru.ratauth.services.RelyingPartyService
@@ -68,6 +69,8 @@ class ProvidersConfiguration {
             resourceServers: ['stub'] as Set,
             userInfo: 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJzZW5zZSIsImlfdXNlcl9pZCI6InVzZXJfaWQiLCJpc3MiOiJodHRwOlwvXC9yYXRhdXRoLnJ1IiwiZXhwIjoxNDQ3MjcwMDYzLCJpYXQiOjE0NDcyNjk5NzYsInJwX2Jhc2VfYWRkcmVzcyI6WyJodHRwOlwvXC9yYXRhdXRoLnJ1Il0sImp0aSI6ImJkNjM2OTI4LTcxOTYtMzlhNy04OWY2LTc4Zjk0Njc2NTRlYiJ9.YP-bMI6QQ7OBrjHWqQUAIKcG_ME7Ipbbtqp8To_oyf0'
           ))
+        else
+          return Observable.error(new ExpiredException())
       }
 
 
@@ -113,6 +116,8 @@ class ProvidersConfiguration {
       Observable<Map<String, String>> checkCredentials(String login, String password) {
         if (login == 'login' && password == 'password')
           return Observable.just([(AuthProvider.USER_ID): 'user_id'] as Map)
+        else
+          return Observable.empty();
       }
     }
   }
