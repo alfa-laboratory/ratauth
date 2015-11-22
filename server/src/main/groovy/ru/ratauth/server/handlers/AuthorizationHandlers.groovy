@@ -21,6 +21,7 @@ import ru.ratauth.server.services.AuthorizationException
 import ru.ratauth.server.services.AuthorizeService
 
 import static ratpack.groovy.Groovy.chain
+import static ratpack.groovy.Groovy.groovyTemplate
 import static ratpack.jackson.Jackson.json
 import static ratpack.rx.RxRatpack.observe
 import static ru.ratauth.server.handlers.readers.TokenRequestReader.*
@@ -81,6 +82,14 @@ class AuthorizationHandlers {
           }
         }
       }
+      prefix('login') {
+//        setProperty('templateRoot','ratpack/templates')
+
+        get{ Context ctx ->
+          render groovyTemplate('login.html')
+        }
+      }
+      fileSystem 'public', { f -> f.files() }
     }
   }
 
