@@ -65,7 +65,7 @@ public class HS256TokenProcessor implements TokenProcessor {
     Map<String,Object> result = new HashMap<>();
     signedJWT.getJWTClaimsSet().getClaims().forEach((key,value) -> {
       if(key.startsWith(INT_PREFIX))
-        result.put(key,value);
+        result.put(key.substring(INT_PREFIX.length(), key.length()),value);
     });
     return result;
   }
