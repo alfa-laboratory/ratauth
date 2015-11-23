@@ -23,6 +23,7 @@ public class AuthzResponse {
   private String token;
   private TokenType tokenType;
   private String refreshToken;
+  private String idToken;
 
   public String buildURL() {
     StringJoiner joiner = new StringJoiner("&");
@@ -39,6 +40,9 @@ public class AuthzResponse {
     }
     if(!StringUtils.isBlank(refreshToken)) {
       joiner.add("refresh_token="+refreshToken.toString());
+    }
+    if(!StringUtils.isBlank(idToken)) {
+      joiner.add("id_token="+idToken.toString());
     }
     return location + "?" + joiner.toString();
   }
