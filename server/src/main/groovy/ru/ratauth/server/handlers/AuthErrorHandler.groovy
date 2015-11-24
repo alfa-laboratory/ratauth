@@ -6,7 +6,7 @@ import ratpack.error.ServerErrorHandler
 import ratpack.handling.Context
 import ru.ratauth.exception.ExpiredException
 import ru.ratauth.server.handlers.readers.ReadRequestException
-import ru.ratauth.server.services.AuthorizationException
+import ru.ratauth.exception.AuthorizationException
 
 /**
  * @author mgorelikov

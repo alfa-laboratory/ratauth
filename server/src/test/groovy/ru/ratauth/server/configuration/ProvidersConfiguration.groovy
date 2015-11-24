@@ -39,7 +39,7 @@ class ProvidersConfiguration {
         return Observable.just(RelyingParty.builder()
           .redirectURL('token?response_type=token&username=login&password=password')
           .id('id')
-          .identityProvider('BANK')
+          .identityProvider('STUB')
           .secret(secret)
           .password('secret')
           .resourceServer('stub')
@@ -63,8 +63,8 @@ class ProvidersConfiguration {
       Observable<AuthzEntry> getByValidCode(String code, Date now) {
         if (code == '1234')
           return Observable.just(new AuthzEntry(authCode: code,
-            relyingParty: 'sense',
-            identityProvider: 'BANK',
+            relyingParty: 'mine',
+            identityProvider: 'STUB',
             scopes: ['read'] as Set,
             resourceServers: ['stub'] as Set,
             userInfo: 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJzZW5zZSIsImlfdXNlcl9pZCI6InVzZXJfaWQiLCJpc3MiOiJodHRwOlwvXC9yYXRhdXRoLnJ1IiwiZXhwIjoxNDQ3MjcwMDYzLCJpYXQiOjE0NDcyNjk5NzYsInJwX2Jhc2VfYWRkcmVzcyI6WyJodHRwOlwvXC9yYXRhdXRoLnJ1Il0sImp0aSI6ImJkNjM2OTI4LTcxOTYtMzlhNy04OWY2LTc4Zjk0Njc2NTRlYiJ9.YP-bMI6QQ7OBrjHWqQUAIKcG_ME7Ipbbtqp8To_oyf0'
@@ -78,8 +78,8 @@ class ProvidersConfiguration {
       Observable<AuthzEntry> getByValidRefreshToken(String token, Date now) {
         if (token == '1234')
           return Observable.just(new AuthzEntry(authCode: 'code',
-            relyingParty: 'sense',
-            identityProvider: 'BANK',
+            relyingParty: 'mine',
+            identityProvider: 'STUB',
             scopes: ['read'] as Set,
             resourceServers: ['stub'] as Set,
             refreshToken: '1234',
@@ -95,8 +95,8 @@ class ProvidersConfiguration {
       Observable<AuthzEntry> getByValidToken(String token, Date now) {
         if (token == TOKEN)
           return Observable.just(new AuthzEntry(authCode: 'code',
-            relyingParty: 'sense',
-            identityProvider: 'BANK',
+            relyingParty: 'mine',
+            identityProvider: 'STUB',
             scopes: ['read'] as Set,
             resourceServers: ['stub'] as Set,
             tokens: [new Token(token: TOKEN,
@@ -108,7 +108,7 @@ class ProvidersConfiguration {
     }
   }
 
-  @Bean(name = 'BANK')
+  @Bean(name = 'STUB')
   @Primary
   public AuthProvider authProvider() {
     return new AuthProvider() {

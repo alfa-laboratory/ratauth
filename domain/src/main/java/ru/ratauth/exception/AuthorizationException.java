@@ -1,4 +1,4 @@
-package ru.ratauth.server.services;
+package ru.ratauth.exception;
 
 /**
  * @author mgorelikov

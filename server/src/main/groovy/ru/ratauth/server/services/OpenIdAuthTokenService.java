@@ -10,6 +10,7 @@ import org.springframework.util.CollectionUtils;
 import ru.ratauth.entities.AuthzEntry;
 import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.entities.Token;
+import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.interaction.*;
 import ru.ratauth.server.secutiry.OAuthIssuerImpl;
 import ru.ratauth.server.secutiry.OAuthSystemException;
@@ -19,7 +20,6 @@ import ru.ratauth.services.RelyingPartyService;
 import rx.Observable;
 
 import java.util.Date;
-import java.util.Map;
 
 /**
  * @author mgorelikov

@@ -18,7 +18,8 @@ public interface AuthProvider {
    *
    * @param login
    * @param password
-   * @return map of user data provided by concrete identity provider
+   * @return map of user data provided by concrete identity provider or Observable.empty
+   * @throws ru.ratauth.exception.AuthorizationException by Observable.error
    */
   Observable<Map<String, Object>> checkCredentials(String login, String password);
 }

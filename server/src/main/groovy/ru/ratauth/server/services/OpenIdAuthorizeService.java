@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ru.ratauth.entities.AuthzEntry;
 import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.entities.Token;
+import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.interaction.AuthzRequest;
 import ru.ratauth.interaction.AuthzResponse;
 import ru.ratauth.interaction.AuthzResponseType;
