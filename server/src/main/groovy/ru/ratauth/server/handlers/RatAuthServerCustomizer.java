@@ -2,6 +2,8 @@ package ru.ratauth.server.handlers;
 
 import org.springframework.stereotype.Component;
 import ratpack.func.Action;
+import ratpack.groovy.template.MarkupTemplateModule;
+import ratpack.groovy.template.TextTemplateModule;
 import ratpack.guice.BindingsSpec;
 import ratpack.handling.Chain;
 import ratpack.server.ServerConfigBuilder;
@@ -25,6 +27,8 @@ public class RatAuthServerCustomizer implements RatpackServerCustomizer {
   public Action<BindingsSpec> getBindings() {
     return spec -> {
       spec.bind(AuthErrorHandler.class);
+      spec.module(MarkupTemplateModule.class);
+      spec.module(TextTemplateModule.class, (TextTemplateModule.Config config) -> config.setStaticallyCompile(true));
     };
   }
 
