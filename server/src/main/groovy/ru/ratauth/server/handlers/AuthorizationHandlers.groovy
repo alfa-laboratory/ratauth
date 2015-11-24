@@ -1,31 +1,26 @@
 package ru.ratauth.server.handlers
 
-import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import io.netty.handler.codec.http.HttpResponseStatus
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import ratpack.error.ServerErrorHandler
-import ratpack.exec.Blocking
 import ratpack.exec.Promise
 import ratpack.form.Form
 import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
-import ru.ratauth.exception.ExpiredException
 import ru.ratauth.server.handlers.dto.CheckTokenDTO
 import ru.ratauth.server.handlers.dto.TokenDTO
-import ru.ratauth.server.handlers.readers.ReadRequestException
 import ru.ratauth.server.services.AuthTokenService
-import ru.ratauth.server.services.AuthorizationException
 import ru.ratauth.server.services.AuthorizeService
 
 import static ratpack.groovy.Groovy.chain
-import static ratpack.groovy.Groovy.groovyTemplate
 import static ratpack.jackson.Jackson.json
 import static ratpack.rx.RxRatpack.observe
 import static ru.ratauth.server.handlers.readers.TokenRequestReader.*
 import static ru.ratauth.server.handlers.readers.AuthzRequestReader.*
+
+import static ratpack.groovy.Groovy.groovyMarkupTemplate
 
 
 /**
@@ -82,13 +77,23 @@ class AuthorizationHandlers {
           }
         }
       }
-      prefix('login') {
-//        setProperty('templateRoot','ratpack/templates')
 
-        get{ Context ctx ->
-          render groovyTemplate('login.html')
+      prefix('login') {
+        get { Context ctx ->
+          render groovyMarkupTemplate('login.gtpl',
+              title: 'Authorization',
+              error: null,
+              method: 'post',
+              action: '/authorize',
+              audValue: request.queryParams.get('aud'),
+              scope: request.queryParams.get('scope'),
+              clientId: request.queryParams.get('client_id'),
+              responseType: 'code',
+              redirectUri: request.queryParams.get('redirect_uri')
+          )
         }
       }
+
       fileSystem 'public', { f -> f.files() }
     }
   }

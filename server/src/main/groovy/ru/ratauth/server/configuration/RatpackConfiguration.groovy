@@ -22,14 +22,4 @@ import javax.annotation.PostConstruct
 class RatpackConfiguration {
 
   Logger log = LoggerFactory.getLogger(RatpackConfiguration)
-
-  @Autowired
-  ratpack.spring.config.RatpackProperties properties
-
-  //TODO temporary fix for ratpack error. Ratpack application could not be executed from jar
-  @PostConstruct
-  void fixBaseDir() {
-    properties.basedir =  new FileSystemResource("server/src/main/resources");
-  }
-
 }
