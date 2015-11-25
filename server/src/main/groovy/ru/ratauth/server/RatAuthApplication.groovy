@@ -3,8 +3,12 @@ package ru.ratauth.server
 import groovy.util.logging.Slf4j
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.builder.SpringApplicationBuilder
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient
+import org.springframework.cloud.netflix.hystrix.EnableHystrix
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.ComponentScan
+import org.springframework.retry.annotation.EnableRetry
 import ratpack.spring.config.EnableRatpack
 import ru.ratauth.server.configuration.RatAuthProperties
 
@@ -12,6 +16,10 @@ import ru.ratauth.server.configuration.RatAuthProperties
 @SpringBootApplication
 @EnableRatpack
 @ComponentScan(["ru.ratauth"])
+@EnableHystrix
+@EnableEurekaClient
+@EnableRetry
+@EnableDiscoveryClient
 @EnableConfigurationProperties(RatAuthProperties.class)
 public class RatAuthApplication {
   public static final int DEFAULT_PADDING = 50

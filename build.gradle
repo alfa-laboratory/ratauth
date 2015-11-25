@@ -9,6 +9,7 @@ buildscript {
   dependencies {
     classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
     classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+'
+    classpath "org.jfrog.buildinfo:build-info-extractor-gradle:3.1.1"
   }
 }
 
@@ -47,6 +48,16 @@ allprojects {
       dependency 'io.ratpack:ratpack-spring-boot:1.1.1'
       dependency 'io.ratpack:ratpack-groovy:1.1.1'
       dependency 'io.ratpack:ratpack-test:1.1.1'
+      dependency 'ru.ratauth.providers:ratauth-mongo:+'
+      dependency 'ru.ratauth.providers:ratauth-identity-mongo:+'
+      dependency 'ru.alfabank.providers:provider-dca:+'
+
+      dependency 'net.logstash.logback:logstash-logback-encoder:4.5.1'
+
+      dependencySet(group:'org.springframework.cloud', version:'1.0.2.RELEASE') {
+        entry 'spring-cloud-config-client'
+        entry 'spring-cloud-starter-eureka'
+      }
     }
   }
 }
@@ -54,12 +65,46 @@ allprojects {
 subprojects {
   apply plugin: 'java'
   apply plugin: 'groovy'
+  apply plugin: 'maven-publish'
+  apply plugin: 'com.jfrog.artifactory'
 
   sourceCompatibility = 1.8
   targetCompatibility = 1.8
 
   jar {
     archiveName = project.name + ".jar"
+  }
+
+  publishing {
+    publications {
+      mavenJava(MavenPublication) {
+        from components.java
+      }
+    }
+  }
+
+  String repo = version.endsWith('SNAPSHOT') ? 'snapshots' : 'releases'
+  artifactory {
+    contextUrl = "${artifactory_contextUrl}"
+    publish {
+      repository {
+        repoKey = repo
+        username = "${artifactory_user}"
+        password = "${artifactory_password}"
+        maven = true
+      }
+      defaults {
+        publications('mavenJava')
+      }
+    }
+    resolve {
+      repository {
+        repoKey = 'public'
+        username = "${artifactory_user}"
+        password = "${artifactory_password}"
+        maven = true
+      }
+    }
   }
 
   dependencies {

@@ -3,8 +3,16 @@ auth:
   ttl: 2678400
  token:
   ttl: 86400
-  issuer: "http://ratauth.ru"
+  issuer: "http://auth.alfabank.ru"
  refresh_token:
   ttl: 36000
  code:
   ttl: 86400
+ dca:
+  ws:
+   channel: S1
+   timeout: 10000
+   userId: WSAS
+   externalSystemCode: ALSE
+   externalUserCode: SENSE
+   branchNumber: "0000"

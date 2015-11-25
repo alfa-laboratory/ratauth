@@ -17,6 +17,7 @@ import org.springframework.web.client.RestTemplate
 import ru.ratauth.server.configuration.ProvidersConfiguration
 import ru.ratauth.server.handlers.dto.CheckTokenDTO
 import ru.ratauth.server.handlers.dto.TokenDTO
+import spock.lang.Ignore
 import spock.lang.Specification
 import org.springframework.http.HttpEntity
 
@@ -27,6 +28,7 @@ import java.nio.charset.Charset
  * @since 03/11/15
  */
 
+@Ignore
 @SpringApplicationConfiguration(classes = RatAuthApplication.class)
 @IntegrationTest(['server.port=50505', 'management.port=0'])
 @TestPropertySource(locations = "classpath:application.yml")

@@ -1,0 +1,30 @@
+spring:
+ config:
+  retry:
+   maxAttempts: 100
+   initialInterval: 500
+   maxInterval: 5000
+ application:
+  name: ${APPLICATION_NAME:auth-server}
+ cloud:
+  config:
+   enabled: true
+   failFast: true
+   discovery:
+    enabled: true
+    serviceId: ${CONFIG_SERV:config-server}
+
+server:
+ port: ${PORT:5050}
+
+eureka:
+ client:
+  registryFetchIntervalSeconds: 5
+  serviceUrl:
+   defaultZone: ${EUREKA_SERV:http://127.0.0.1:8761/eureka/}
+ instance:
+  leaseRenewalIntervalInSeconds: 10
+  appname: ${spring.application.name}
+  virtualHostName : ${spring.application.name}
+  metadataMap:
+   instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}

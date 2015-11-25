@@ -9,3 +9,16 @@ auth:
   ttl: 36000
  code:
   ttl: 86400
+ dca:
+  ws:
+   channel: channel
+   timeout: 10000
+   userId: user_id
+   externalSystemCode: syscode
+   externalUserCode: usercode
+   branchNumber: "0000"
+spring:
+ data:
+  mongodb:
+   dbname: auth
+   dbhosts: localhost:27017

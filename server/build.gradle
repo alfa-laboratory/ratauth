@@ -19,11 +19,21 @@ bootRepackage {
 dependencies {
   compile 'org.springframework.boot:spring-boot-starter-actuator'
   compile 'org.springframework.boot:spring-boot-starter-web'
+  compile 'org.springframework.cloud:spring-cloud-starter-eureka'
+  compile 'org.springframework.cloud:spring-cloud-config-client'
+  compile 'org.springframework.retry:spring-retry'
+
   compile 'io.ratpack:ratpack-rx'
   compile 'io.ratpack:ratpack-spring-boot'
   compile 'io.ratpack:ratpack-groovy'
 
+  compile 'ru.ratauth.providers:ratauth-mongo'
+  compile 'ru.ratauth.providers:ratauth-identity-mongo'
+  compile 'ru.alfabank.providers:provider-dca'
+  
   compile 'com.nimbusds:nimbus-jose-jwt'
+
+  compile 'net.logstash.logback:logstash-logback-encoder'
   compile project(':domain')
   provided 'javax.servlet:javax.servlet-api'
 }
