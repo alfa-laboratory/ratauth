@@ -27,8 +27,8 @@ dependencies {
   compile 'io.ratpack:ratpack-spring-boot'
   compile 'io.ratpack:ratpack-groovy'
 
-  compile 'ru.ratauth.providers:ratauth-mongo'
-  compile 'ru.ratauth.providers:ratauth-identity-mongo'
+  compile 'ru.ratauth.providers:auth-mongo'
+  compile 'ru.ratauth.providers:auth-identity-mongo'
   compile 'ru.alfabank.providers:provider-dca'
   
   compile 'com.nimbusds:nimbus-jose-jwt'

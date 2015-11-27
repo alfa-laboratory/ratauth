@@ -48,8 +48,8 @@ allprojects {
       dependency 'io.ratpack:ratpack-spring-boot:1.1.1'
       dependency 'io.ratpack:ratpack-groovy:1.1.1'
       dependency 'io.ratpack:ratpack-test:1.1.1'
-      dependency 'ru.ratauth.providers:ratauth-mongo:+'
-      dependency 'ru.ratauth.providers:ratauth-identity-mongo:+'
+      dependency 'ru.ratauth.providers:auth-mongo:+'
+      dependency 'ru.ratauth.providers:auth-identity-mongo:+'
       dependency 'ru.alfabank.providers:provider-dca:+'
 
       dependency 'net.logstash.logback:logstash-logback-encoder:4.5.1'
