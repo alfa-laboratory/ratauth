@@ -13,7 +13,6 @@ buildscript {
 }
 
 group = "ru.ratauth"
-version = "0.0.1"
 
 allprojects {
   apply plugin: 'idea'
@@ -45,7 +44,7 @@ allprojects {
       dependency 'io.reactivex:rxjava:1.0.15'
       dependency 'io.ratpack:ratpack-rx:1.1.1'
       dependency 'io.ratpack:ratpack-spring-boot:1.1.1'
-      dependency 'io.ratpack:ratpack-groovy:1.1.1'
+      dependency 'io.ratpack:ratpack-groovy:1.2.0-SNAPSHOT'
       dependency 'io.ratpack:ratpack-test:1.1.1'
     }
   }
@@ -54,6 +53,7 @@ allprojects {
 subprojects {
   apply plugin: 'java'
   apply plugin: 'groovy'
+  version = "0.0.1"
 
   sourceCompatibility = 1.8
   targetCompatibility = 1.8

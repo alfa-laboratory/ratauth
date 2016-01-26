@@ -10,8 +10,6 @@ buildscript {
 apply plugin: 'spring-boot'
 apply plugin: 'io.spring.dependency-management'
 
-version = "0.0.1"
-
 bootRepackage {
   mainClass = 'ru.ratauth.server.RatAuthApplication'
 }
