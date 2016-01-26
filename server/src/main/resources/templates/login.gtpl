@@ -8,7 +8,7 @@ layout 'layout.gtpl',
             yield 'Sign in to continue'
           }
           div(class: 'account-wall') {
-            img(class: 'profile-img', src: 'https://lh5.googleusercontent.com/-b0-k99FZlyE/AAAAAAAAAAI/AAAAAAAAAAA/eu7opA4byxI/photo.jpg?sz=120')
+            img(class: 'profile-img', src: 'images/ic_launcher.png')
             form(class: 'form-signin', role: "form", method: method, action: action) {
               input(class: 'form-control', placeholder: 'Login', name: 'username', required, autofocus)
               input(type: 'password', class: 'form-control', placeholder: 'Password', name: 'password', required)

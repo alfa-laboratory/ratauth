@@ -14,7 +14,6 @@ buildscript {
 }
 
 group = "ru.ratauth"
-version = "0.0.1"
 
 allprojects {
   apply plugin: 'idea'
@@ -46,7 +45,7 @@ allprojects {
       dependency 'io.reactivex:rxjava:1.0.15'
       dependency 'io.ratpack:ratpack-rx:1.1.1'
       dependency 'io.ratpack:ratpack-spring-boot:1.1.1'
-      dependency 'io.ratpack:ratpack-groovy:1.1.1'
+      dependency 'io.ratpack:ratpack-groovy:1.2.0-SNAPSHOT'
       dependency 'io.ratpack:ratpack-test:1.1.1'
       dependency 'ru.ratauth.providers:auth-mongo:+'
       dependency 'ru.ratauth.providers:auth-identity-mongo:+'
@@ -67,6 +66,7 @@ subprojects {
   apply plugin: 'groovy'
   apply plugin: 'maven-publish'
   apply plugin: 'com.jfrog.artifactory'
+  version = "0.0.3"
 
   sourceCompatibility = 1.8
   targetCompatibility = 1.8

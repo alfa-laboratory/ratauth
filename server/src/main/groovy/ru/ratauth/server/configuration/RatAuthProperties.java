@@ -34,6 +34,7 @@ public class RatAuthProperties extends RatpackProperties {
     try {
       if (classPath.getURL().toString().startsWith("jar:")) {
         this.setBasedir(classPath);
+        return;
       }
     } catch (IOException e) {
       // Ignore
