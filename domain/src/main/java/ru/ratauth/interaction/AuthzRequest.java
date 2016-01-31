@@ -2,6 +2,7 @@ package ru.ratauth.interaction;
 
 import lombok.*;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -18,7 +19,6 @@ public class AuthzRequest {
   private String clientId;
   private String clientSecret;
   private String redirectURI;
-  private String username;
-  private String password;
+  private Map<String, String> authData;
   private @Singular Set<String> auds;
 }

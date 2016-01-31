@@ -1,0 +1,14 @@
+@startuml
+Client -> AuthServer: authorize (login(some identifier),\npassword(optional),client_id,\n aud, scope(optional))
+AuthServer -> AuthServer: defineAuthProvider
+AuthServer -> AuthProvider: checkCredentials
+AuthServer <- AuthProvider: checkCredentials
+AuthServer -> AuthServer: checkAuds
+AuthServer --> Client: authCode
+Client -> RP: authorize(authCode)
+AuthServer <- RP : (authCode, client_id, client_secret, grant_type, response_type)
+AuthServer -> AuthServer: checkAuthCode
+AuthServer -> AuthServer: checkRPcredentials
+AuthServer -> AuthServer: createTokens
+AuthServer --> RP: tokens (idToken, token, refreshToken)
+@enduml

@@ -17,9 +17,8 @@ class AuthzRequestReader {
   private static final String CLIENT_ID = "client_id"
   private static final String SCOPE = "scope"
   private static final String REDIRECT_URI = "redirect_uri"
-  private static final String USERNAME = "username"
-  private static final String PASSWORD = "password"
   private static final String AUD = "aud"
+  private static final Set<String> BASE_FIELDS = new HashSet<String>(Arrays.asList(RESPONSE_TYPE, CLIENT_ID, SCOPE, REDIRECT_URI, AUD));
 
   static AuthzRequest readAuthzRequest(MultiValueMap<String, String> params, Headers headers) {
     AuthzResponseType responseType = AuthzResponseType.valueOf(extractField(params, RESPONSE_TYPE, true).toUpperCase())
@@ -27,8 +26,6 @@ class AuthzRequestReader {
         .responseType(responseType)
         .scopes(extractField(params, SCOPE, true).split(" ").toList())
         .auds(extractField(params, AUD, false)?.split(" ")?.toList())
-        .username(extractField(params, USERNAME, true))
-        .password(extractField(params, PASSWORD, true))
         .redirectURI(extractField(params, REDIRECT_URI, false))
 
     if (responseType == AuthzResponseType.TOKEN) {
@@ -38,6 +35,7 @@ class AuthzRequestReader {
     } else {
       builder.clientId(extractField(params, CLIENT_ID, true))
     }
+    builder.authData(extractRest(params, BASE_FIELDS))
     builder.build()
   }
 

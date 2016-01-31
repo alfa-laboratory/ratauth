@@ -3,6 +3,7 @@ package ru.ratauth.server.handlers.readers
 import groovy.transform.CompileStatic
 import ratpack.form.Form
 import ratpack.http.Headers
+import ru.ratauth.exception.AuthorizationException
 import ru.ratauth.interaction.AuthzResponseType
 import ru.ratauth.interaction.CheckTokenRequest
 import ru.ratauth.interaction.GrantType
@@ -16,6 +17,7 @@ import static ru.ratauth.server.utils.RequestUtil.*
 @CompileStatic
 class TokenRequestReader {
   private static final String RESPONSE_TYPE = "response_type"
+  private static final String AUD = "aud"
   private static final String GRANT_TYPE = "grant_type"
   private static final String CODE = "code"
   private static final String TOKEN = "token"
@@ -30,10 +32,13 @@ class TokenRequestReader {
         .grantType(grantType)
         .clientId(auth[0])
         .clientSecret(auth[1])
-    if (grantType == GrantType.AUTHORIZATION_CODE) {
-      builder.authzCode(extractField(form, CODE, true))
-    } else {
-      builder.refreshToken(extractField(form, REFRESH_TOKEN, true))
+    switch(grantType){
+      case GrantType.AUTHORIZATION_CODE: builder.authzCode(extractField(form, CODE, true))
+        break
+      case GrantType.AUTHENTICATION_TOKEN: builder.auds(extractField(form, AUD, true)?.split(" ")?.toList()) //WATCH IT! There is no break here.
+      case GrantType.REFRESH_TOKEN: builder.refreshToken(extractField(form, REFRESH_TOKEN, true))
+        break;
+      default: throw new AuthorizationException("Grant type is not supported");
     }
     builder.build()
   }

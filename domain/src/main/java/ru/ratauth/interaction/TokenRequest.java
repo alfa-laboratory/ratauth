@@ -1,9 +1,8 @@
 package ru.ratauth.interaction;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.Set;
 
 /**
  * @author djassan
@@ -20,4 +19,5 @@ public class TokenRequest {
   private String clientSecret;
   private GrantType grantType;
   private AuthzResponseType responseType;
+  private @Singular Set<String> auds;
 }

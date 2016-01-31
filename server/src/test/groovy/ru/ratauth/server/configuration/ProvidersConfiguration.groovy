@@ -11,7 +11,9 @@ import ru.ratauth.entities.AuthzEntry
 import ru.ratauth.entities.RelyingParty
 import ru.ratauth.entities.Token
 import ru.ratauth.exception.ExpiredException
-import ru.ratauth.providers.AuthProvider
+import ru.ratauth.providers.auth.AuthProvider
+import ru.ratauth.providers.auth.dto.AuthInput
+import ru.ratauth.providers.auth.dto.BaseAuthFields
 import ru.ratauth.services.AuthzEntryService
 import ru.ratauth.services.RelyingPartyService
 import rx.Observable
@@ -113,11 +115,16 @@ class ProvidersConfiguration {
   public AuthProvider authProvider() {
     return new AuthProvider() {
       @Override
-      Observable<Map<String, String>> checkCredentials(String login, String password) {
-        if (login == 'login' && password == 'password')
+      Observable<Map<String, Object>> authenticate(AuthInput input) {
+        if (input.getData().get(BaseAuthFields.LOGIN) == 'login' && input.getData().get(BaseAuthFields.PASSWORD) == 'password')
           return Observable.just([(AuthProvider.USER_ID): 'user_id'] as Map)
         else
           return Observable.empty();
+      }
+
+      @Override
+      boolean isAuthCodeSupported() {
+        return false
       }
     }
   }

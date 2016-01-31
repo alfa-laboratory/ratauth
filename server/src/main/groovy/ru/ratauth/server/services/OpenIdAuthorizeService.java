@@ -13,7 +13,8 @@ import ru.ratauth.interaction.AuthzRequest;
 import ru.ratauth.interaction.AuthzResponse;
 import ru.ratauth.interaction.AuthzResponseType;
 import ru.ratauth.interaction.TokenType;
-import ru.ratauth.providers.AuthProvider;
+import ru.ratauth.providers.auth.AuthProvider;
+import ru.ratauth.providers.auth.dto.AuthInput;
 import ru.ratauth.server.secutiry.OAuthIssuerImpl;
 import ru.ratauth.server.secutiry.UUIDValueGenerator;
 import ru.ratauth.utils.StringUtils;
@@ -47,14 +48,16 @@ public class OpenIdAuthorizeService implements AuthorizeService {
   @SneakyThrows
   public Observable<AuthzResponse> authenticate(AuthzRequest oauthRequest) {
 
+    //load corresponding relying party
     final RelyingParty relyingParty = relyingPartyService.getRelyingParty(oauthRequest.getClientId())
       .filter(rp -> authRelyingParty(oauthRequest,rp))
       .filter(rp -> oauthRequest.getAuds() == null || rp.getResourceServers().containsAll(oauthRequest.getAuds()))//check rights
       .switchIfEmpty(Observable.error(new AuthorizationException("RelyingParty not found")))
       .toBlocking().single();
 
+    //authorize
     return authProviders.get(relyingParty.getIdentityProvider())
-      .checkCredentials(oauthRequest.getUsername(), oauthRequest.getPassword())
+      .authenticate(AuthInput.builder().data(oauthRequest.getAuthData()).relyingParty(relyingParty.getName()).build())
       .flatMap(userInfo -> {
         Date now = new Date();
         //create entry
@@ -72,7 +75,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         //create base JWT
         String userJWT = tokenProcessor.createToken(relyingParty.getSecret(), relyingParty.getBaseAddress(),
             now, authzEntry.codeExpiresIn(), authzEntry.getAuthCode(),
-            authzEntry.getResourceServers(), userInfo);
+            authzEntry.getResourceServers(), userInfo.getData());
         authzEntry.setUserInfo(userJWT);
         return authzEntryService.save(authzEntry);
       }).flatMap(entry -> {
