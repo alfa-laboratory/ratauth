@@ -39,15 +39,15 @@ class ProvidersConfiguration {
       @Override
       Observable<RelyingParty> getRelyingParty(String id) {
         return Observable.just(RelyingParty.builder()
-          .redirectURL('token?response_type=token&username=login&password=password')
-          .id('id')
-          .identityProvider('STUB')
-          .secret(secret)
-          .password('secret')
-          .resourceServer('stub')
-          .resourceServer('stub2')
-          .baseAddress('http://ratauth.ru')
-          .build())
+            .redirectURL('token?response_type=token&username=login&password=password')
+            .id('id')
+            .identityProvider('STUB')
+            .secret(secret)
+            .password('secret')
+            .resourceServer('stub')
+            .resourceServer('stub2')
+            .baseAddress('http://ratauth.ru')
+            .build())
       }
     }
   }
@@ -65,11 +65,11 @@ class ProvidersConfiguration {
       Observable<AuthzEntry> getByValidCode(String code, Date now) {
         if (code == '1234')
           return Observable.just(new AuthzEntry(authCode: code,
-            relyingParty: 'mine',
-            identityProvider: 'STUB',
-            scopes: ['read'] as Set,
-            resourceServers: ['stub'] as Set,
-            userInfo: 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJzZW5zZSIsImlfdXNlcl9pZCI6InVzZXJfaWQiLCJpc3MiOiJodHRwOlwvXC9yYXRhdXRoLnJ1IiwiZXhwIjoxNDQ3MjcwMDYzLCJpYXQiOjE0NDcyNjk5NzYsInJwX2Jhc2VfYWRkcmVzcyI6WyJodHRwOlwvXC9yYXRhdXRoLnJ1Il0sImp0aSI6ImJkNjM2OTI4LTcxOTYtMzlhNy04OWY2LTc4Zjk0Njc2NTRlYiJ9.YP-bMI6QQ7OBrjHWqQUAIKcG_ME7Ipbbtqp8To_oyf0'
+              relyingParty: 'mine',
+              identityProvider: 'STUB',
+              scopes: ['read'] as Set,
+              resourceServers: ['stub'] as Set,
+              userInfo: 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJzZW5zZSIsImlfdXNlcl9pZCI6InVzZXJfaWQiLCJpc3MiOiJodHRwOlwvXC9yYXRhdXRoLnJ1IiwiZXhwIjoxNDQ3MjcwMDYzLCJpYXQiOjE0NDcyNjk5NzYsInJwX2Jhc2VfYWRkcmVzcyI6WyJodHRwOlwvXC9yYXRhdXRoLnJ1Il0sImp0aSI6ImJkNjM2OTI4LTcxOTYtMzlhNy04OWY2LTc4Zjk0Njc2NTRlYiJ9.YP-bMI6QQ7OBrjHWqQUAIKcG_ME7Ipbbtqp8To_oyf0'
           ))
         else
           return Observable.error(new ExpiredException())
@@ -80,16 +80,16 @@ class ProvidersConfiguration {
       Observable<AuthzEntry> getByValidRefreshToken(String token, Date now) {
         if (token == '1234')
           return Observable.just(new AuthzEntry(authCode: 'code',
-            relyingParty: 'mine',
-            identityProvider: 'STUB',
-            scopes: ['read'] as Set,
-            resourceServers: ['stub'] as Set,
-            refreshToken: '1234',
-            userInfo: 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJzZW5zZSIsImlfdXNlcl9pZCI6InVzZXJfaWQiLCJpc3MiOiJodHRwOlwvXC9yYXRhdXRoLnJ1IiwiZXhwIjoxNDQ3MjcwMDYzLCJpYXQiOjE0NDcyNjk5NzYsInJwX2Jhc2VfYWRkcmVzcyI6WyJodHRwOlwvXC9yYXRhdXRoLnJ1Il0sImp0aSI6ImJkNjM2OTI4LTcxOTYtMzlhNy04OWY2LTc4Zjk0Njc2NTRlYiJ9.YP-bMI6QQ7OBrjHWqQUAIKcG_ME7Ipbbtqp8To_oyf0',
-            tokens: [new Token(token: TOKEN,
-              TTL: 36000l,
-              created: new Date(),
-              idToken: TOKEN_ID)] as Set
+              relyingParty: 'mine',
+              identityProvider: 'STUB',
+              scopes: ['read'] as Set,
+              resourceServers: ['stub'] as Set,
+              refreshToken: '1234',
+              userInfo: 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJzZW5zZSIsImlfdXNlcl9pZCI6InVzZXJfaWQiLCJpc3MiOiJodHRwOlwvXC9yYXRhdXRoLnJ1IiwiZXhwIjoxNDQ3MjcwMDYzLCJpYXQiOjE0NDcyNjk5NzYsInJwX2Jhc2VfYWRkcmVzcyI6WyJodHRwOlwvXC9yYXRhdXRoLnJ1Il0sImp0aSI6ImJkNjM2OTI4LTcxOTYtMzlhNy04OWY2LTc4Zjk0Njc2NTRlYiJ9.YP-bMI6QQ7OBrjHWqQUAIKcG_ME7Ipbbtqp8To_oyf0',
+              tokens: [new Token(token: TOKEN,
+                  TTL: 36000l,
+                  created: new Date(),
+                  idToken: TOKEN_ID)] as Set
           ))
       }
 
@@ -97,14 +97,14 @@ class ProvidersConfiguration {
       Observable<AuthzEntry> getByValidToken(String token, Date now) {
         if (token == TOKEN)
           return Observable.just(new AuthzEntry(authCode: 'code',
-            relyingParty: 'mine',
-            identityProvider: 'STUB',
-            scopes: ['read'] as Set,
-            resourceServers: ['stub'] as Set,
-            tokens: [new Token(token: TOKEN,
-              TTL: 36000l,
-              created: new Date(),
-              idToken: TOKEN_ID)] as Set
+              relyingParty: 'mine',
+              identityProvider: 'STUB',
+              scopes: ['read'] as Set,
+              resourceServers: ['stub'] as Set,
+              tokens: [new Token(token: TOKEN,
+                  TTL: 36000l,
+                  created: new Date(),
+                  idToken: TOKEN_ID)] as Set
           ))
       }
     }
@@ -117,7 +117,7 @@ class ProvidersConfiguration {
       @Override
       Observable<Map<String, Object>> authenticate(AuthInput input) {
         if (input.getData().get(BaseAuthFields.LOGIN) == 'login' && input.getData().get(BaseAuthFields.PASSWORD) == 'password')
-          return Observable.just([(AuthProvider.USER_ID): 'user_id'] as Map)
+          return Observable.just([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
         else
           return Observable.empty();
       }

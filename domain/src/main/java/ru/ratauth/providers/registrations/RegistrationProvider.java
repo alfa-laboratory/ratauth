@@ -18,4 +18,10 @@ public interface RegistrationProvider {
    * @throws ru.ratauth.exception.AuthorizationException by Observable.error
    */
   public Observable<RegResult> register(RegInput input);
+
+  /**
+   * Must return true in case of authProvider uses it's own storage of auth code and supports two phase registration code flow.
+   * Otherwise RatAuth provides authorization code flow by itself
+   */
+  boolean isRegCodeSupported();
 }

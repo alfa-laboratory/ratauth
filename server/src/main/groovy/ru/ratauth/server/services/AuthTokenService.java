@@ -19,4 +19,5 @@ public interface AuthTokenService {
   Observable<TokenResponse> getToken(TokenRequest oauthRequest) throws OAuthSystemException, JOSEException;
   Observable<CheckTokenResponse> checkToken(CheckTokenRequest oauthRequest);
   Observable<AuthzEntry> createToken(AuthzEntry authzEntry, RelyingParty relyingParty);
+  Observable<TokenResponse> createTokenResponse(AuthzEntry authzEntry, RelyingParty relyingParty);
 }

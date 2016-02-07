@@ -6,7 +6,7 @@ package ru.ratauth.providers.registrations.dto;
  */
 public enum BaseRegFields {
   LOGIN,
-  REGCODE;
+  CODE;
 
   public String val() {
     return super.name().toLowerCase();

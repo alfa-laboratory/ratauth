@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author mgorelikov
@@ -17,6 +18,10 @@ import java.util.Map;
 @NoArgsConstructor
 public class RegistrationRequest {
   private String clientId;
+  private String clientSecret;
+  private String authCode;
   private AuthzResponseType responseType;
+  private GrantType grantType;
   private Map<String,String> data;
+  private Set<String> auds;
 }

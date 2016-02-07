@@ -15,6 +15,7 @@ import ru.ratauth.interaction.AuthzResponseType;
 import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.AuthProvider;
 import ru.ratauth.providers.auth.dto.AuthInput;
+import ru.ratauth.providers.auth.dto.AuthResult;
 import ru.ratauth.server.secutiry.OAuthIssuerImpl;
 import ru.ratauth.server.secutiry.UUIDValueGenerator;
 import ru.ratauth.utils.StringUtils;
@@ -22,8 +23,10 @@ import ru.ratauth.services.AuthzEntryService;
 import ru.ratauth.services.RelyingPartyService;
 import rx.Observable;
 
+import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author mgorelikov
@@ -50,41 +53,45 @@ public class OpenIdAuthorizeService implements AuthorizeService {
 
     //load corresponding relying party
     final RelyingParty relyingParty = relyingPartyService.getRelyingParty(oauthRequest.getClientId())
-      .filter(rp -> authRelyingParty(oauthRequest,rp))
-      .filter(rp -> oauthRequest.getAuds() == null || rp.getResourceServers().containsAll(oauthRequest.getAuds()))//check rights
-      .switchIfEmpty(Observable.error(new AuthorizationException("RelyingParty not found")))
-      .toBlocking().single();
+        .filter(rp -> authRelyingParty(oauthRequest,rp))
+        .filter(rp -> oauthRequest.getAuds() == null || rp.getResourceServers().containsAll(oauthRequest.getAuds()))//check rights
+        .switchIfEmpty(Observable.error(new AuthorizationException("RelyingParty not found")))
+        .toBlocking().single();
 
     //authorize
     return authProviders.get(relyingParty.getIdentityProvider())
-      .authenticate(AuthInput.builder().data(oauthRequest.getAuthData()).relyingParty(relyingParty.getName()).build())
-      .flatMap(userInfo -> {
-        Date now = new Date();
-        //create entry
-        AuthzEntry authzEntry = AuthzEntry.builder()
-            .authCode(codeGenerator.authorizationCode())
-            .created(new Date())
-            .codeTTL(codeTTL)
-            .refreshToken(codeGenerator.refreshToken())
-            .refreshTokenTTL(refreshTokenTTL)
-            .relyingParty(relyingParty.getId())
-            .identityProvider(relyingParty.getIdentityProvider())
-            .scopes(oauthRequest.getScopes())
-            .resourceServers(oauthRequest.getAuds() == null ? relyingParty.getResourceServers() : oauthRequest.getAuds())
-            .build();
-        //create base JWT
-        String userJWT = tokenProcessor.createToken(relyingParty.getSecret(), relyingParty.getBaseAddress(),
-            now, authzEntry.codeExpiresIn(), authzEntry.getAuthCode(),
-            authzEntry.getResourceServers(), userInfo.getData());
-        authzEntry.setUserInfo(userJWT);
-        return authzEntryService.save(authzEntry);
-      }).flatMap(entry -> {
+        .authenticate(AuthInput.builder().data(oauthRequest.getAuthData()).relyingParty(relyingParty.getName()).build())
+        .flatMap(userInfo ->
+                createEntry(relyingParty, oauthRequest.getAuds(), oauthRequest.getScopes(), userInfo.getData())
+        ).flatMap(entry -> {
           if (oauthRequest.getResponseType() == AuthzResponseType.TOKEN)
             return authTokenService.createToken(entry, relyingParty);
           else
             return Observable.just(entry);
-        }).map(entry -> buildResponse(oauthRequest,entry,relyingParty)
+        }).map(entry -> buildResponse(oauthRequest, entry, relyingParty)
         ).switchIfEmpty(Observable.error(new AuthorizationException("Authorization error")));
+  }
+
+  public Observable<AuthzEntry> createEntry(RelyingParty relyingParty,Set<String> auds, Set<String> scopes, Map<String, Object> userInfo) {
+    Date now = new Date();
+    //create entry
+    AuthzEntry authzEntry = AuthzEntry.builder()
+        .authCode(codeGenerator.authorizationCode())
+        .created(new Date())
+        .codeTTL(codeTTL)
+        .refreshToken(codeGenerator.refreshToken())
+        .refreshTokenTTL(refreshTokenTTL)
+        .relyingParty(relyingParty.getId())
+        .identityProvider(relyingParty.getIdentityProvider())
+        .scopes(scopes)
+        .resourceServers(auds == null ? relyingParty.getResourceServers() : auds)
+        .build();
+    //create base JWT
+    String userJWT = tokenProcessor.createToken(relyingParty.getSecret(), relyingParty.getBaseAddress(),
+        now, authzEntry.codeExpiresIn(), authzEntry.getAuthCode(),
+        authzEntry.getResourceServers(), userInfo);
+    authzEntry.setUserInfo(userJWT);
+    return authzEntryService.save(authzEntry);
   }
 
   private static AuthzResponse buildResponse(AuthzRequest oauthRequest, AuthzEntry entry, RelyingParty relyingParty) {

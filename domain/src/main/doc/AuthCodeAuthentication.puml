@@ -4,10 +4,19 @@ AuthServer -> AuthServer: defineAuthProvider
 AuthServer -> AuthProvider: checkCredentials
 AuthServer <- AuthProvider: checkCredentials
 AuthServer -> AuthServer: checkAuds
-AuthServer --> Client: authCode
+alt authProvider provides authCode
+ Client <-- AuthProvider: authCode(email, sms, etc.)
+else authServer providers authCode
+ Client <-- AuthServer: authCode
+end
 Client -> RP: authorize(authCode)
 AuthServer <- RP : (authCode, client_id, client_secret, grant_type, response_type)
-AuthServer -> AuthServer: checkAuthCode
+alt authProvider provides authCode
+ AuthServer -> AuthProvider: checkAuthCode
+ AuthServer <-- AuthProvider: checkAuthCodeResult
+else authServer providers authCode
+ AuthServer -> AuthServer: checkAuthCode
+end
 AuthServer -> AuthServer: checkRPcredentials
 AuthServer -> AuthServer: createTokens
 AuthServer --> RP: tokens (idToken, token, refreshToken)

@@ -11,10 +11,6 @@ import rx.Observable;
  */
 public interface AuthProvider {
   /**
-   * constants for standard user info
-   */
-  public final String USER_ID = "user_id";
-  /**
    * Authenticate user by some credentials
    * @param input input fields container
    * @return map of user data provided by concrete identity provider or Observable.empty

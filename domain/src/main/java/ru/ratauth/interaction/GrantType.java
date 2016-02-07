@@ -14,5 +14,6 @@ public enum GrantType {
    * So refresh token can be used as authentication.
    */
   AUTHENTICATION_TOKEN,
+  INTERNAL_AUTH_CODE,
   PASSWORD
 }

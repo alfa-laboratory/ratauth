@@ -14,7 +14,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class RegResult {
   private Status status;
-  private String data;
+  private Map<String, Object> data;//login
 
   public enum Status {
     SUCCESS,

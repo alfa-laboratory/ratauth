@@ -3,19 +3,15 @@ Client -> AuthServer: register (registration data, client_id)
 AuthServer -> AuthServer: defineAuthProvider
 AuthServer -> AuthProvider: register (register data)
 Client <- AuthProvider: regAuthCode
-AuthServer <- AuthProvider: userIdentifier
+AuthServer <-- AuthProvider: userIdentifier
 Client <-- AuthServer: userIdentifier
-Client -> AuthServer: register (regAuthCode, userIdentifier)
+Client -> RP: register (regAuthCode, userIdentifier)
+AuthServer <- RP: register(regAuthCode,userIdentifier, client_id, client_secret)
+AuthServer -> AuthServer: checkRPcredentials
 AuthServer -> AuthServer: defineAuthProvider
 AuthServer -> AuthProvider: register (regAuthCode, userIdentifier)
 AuthServer <-- AuthProvider: userInfo
 AuthServer -> AuthServer: createAuthCode
-Client <-- AuthServer: authCode
-== Authorization ==
-Client -> RP: authorize (authCode)
-AuthServer <- RP : (authCode, client_id, client_secret, grant_type, response_type)
-AuthServer -> AuthServer: checkAuthCode
-AuthServer -> AuthServer: checkRPcredentials
 AuthServer -> AuthServer: createTokens
 AuthServer --> RP: tokens (idToken, token, refreshToken)
 @enduml

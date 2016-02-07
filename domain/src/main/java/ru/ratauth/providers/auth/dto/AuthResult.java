@@ -17,4 +17,12 @@ public class AuthResult {
   //some abstract data map that could contain any registration data(login, personal code etc.)
   @Singular("field")
   private Map<String, Object> data;
+
+  private Status status;
+
+  public enum Status {
+    SUCCESS,
+    FAILED,
+    NEED_APPROVAL
+  }
 }

@@ -43,34 +43,42 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     final AuthzEntry authzEntry = loadAuthzEntry(oauthRequest);
 
     return relyingPartyService.getRelyingParty(authzEntry.getRelyingParty())
-      .filter(relyingParty -> authRelyingParty(oauthRequest, authzEntry, relyingParty))
-      .flatMap(relyingParty -> createToken(authzEntry, relyingParty)
-      ).map(entry -> {
-        Token token = authzEntry.getLatestToken();
-        return TokenResponse.builder()
-          .accessToken(token.getToken())
-          .expiresIn(token.expiresIn())
-          .tokenType(TokenType.BEARER.toString())
-          .idToken(token.getIdToken())
-          .refreshToken(authzEntry.getRefreshToken())
-          .build();
-      }).switchIfEmpty(Observable.error(new AuthorizationException()));
+        .filter(relyingParty -> authRelyingParty(oauthRequest, authzEntry, relyingParty))
+        .flatMap(relyingParty -> createTokenResponse(authzEntry, relyingParty));
+  }
+
+  @Override
+  public Observable<TokenResponse> createTokenResponse(AuthzEntry authzEntry, RelyingParty relyingParty) {
+    return createToken(authzEntry, relyingParty)
+        .map(entry -> convertToResponse(authzEntry))
+        .switchIfEmpty(Observable.error(new AuthorizationException()));
   }
 
   @Override
   public Observable<AuthzEntry> createToken(AuthzEntry authzEntry, RelyingParty relyingParty) {
     Date now = new Date();
     Token token = Token.builder()
-      .created(now)
-      .token(codeGenerator.accessToken())
-      .TTL(tokenTTL).build();
+        .created(now)
+        .token(codeGenerator.accessToken())
+        .TTL(tokenTTL).build();
     //create jwt token
     String idToken = tokenProcessor.createToken(relyingParty.getSecret(), relyingParty.getBaseAddress(),
-      now, token.expiresIn(), token.getToken(),
-      authzEntry.getResourceServers(), tokenProcessor.extractUserInfo(authzEntry.getUserInfo(), relyingParty.getSecret()));
+        now, token.expiresIn(), token.getToken(),
+        authzEntry.getResourceServers(), tokenProcessor.extractUserInfo(authzEntry.getUserInfo(), relyingParty.getSecret()));
     token.setIdToken(idToken);
     authzEntry.addToken(token);
     return authzEntryService.save(authzEntry);
+  }
+
+  private TokenResponse convertToResponse(AuthzEntry authzEntry) {
+    Token token = authzEntry.getLatestToken();
+    return TokenResponse.builder()
+        .accessToken(token.getToken())
+        .expiresIn(token.expiresIn())
+        .tokenType(TokenType.BEARER.toString())
+        .idToken(token.getIdToken())
+        .refreshToken(authzEntry.getRefreshToken())
+        .build();
   }
 
   private AuthzEntry loadAuthzEntry(TokenRequest oauthRequest) {
@@ -81,30 +89,30 @@ public class OpenIdAuthTokenService implements AuthTokenService {
       authObs = authzEntryService.getByValidRefreshToken(oauthRequest.getRefreshToken(), new Date());
     else throw new AuthorizationException("Invalid grant type");
     return authObs.switchIfEmpty(Observable.error(new AuthorizationException("Authz entry not found")))
-      .toBlocking().single();
+        .toBlocking().single();
   }
 
   private boolean authRelyingParty(TokenRequest oauthRequest, AuthzEntry authCode, RelyingParty relyingParty) {
     return oauthRequest.getClientId().equals(relyingParty.getId())
-      && oauthRequest.getClientSecret().equals(relyingParty.getPassword())
-      && relyingParty.getResourceServers().containsAll(authCode.getResourceServers());
+        && oauthRequest.getClientSecret().equals(relyingParty.getPassword())
+        && relyingParty.getResourceServers().containsAll(authCode.getResourceServers());
   }
 
   @Override
   public Observable<CheckTokenResponse> checkToken(CheckTokenRequest oauthRequest) {
     String accessToken = oauthRequest.getToken();
     return authzEntryService.getByValidToken(accessToken, new Date())
-      .filter(authzEntry -> !CollectionUtils.isEmpty(authzEntry.getTokens()))
-      .map(entry -> {
-            Token token = entry.getTokens().iterator().next();
-            return CheckTokenResponse.builder()
-                .idToken(token.getIdToken())
-                .clientId(entry.getRelyingParty())
-                .resourceServers(entry.getResourceServers())
-                .expiresIn(token.expiresIn())
-                .scopes(entry.getScopes())
-                .build();
-          }
-      ).switchIfEmpty(Observable.error(new AuthorizationException("Token not found")));
+        .filter(authzEntry -> !CollectionUtils.isEmpty(authzEntry.getTokens()))
+        .map(entry -> {
+              Token token = entry.getTokens().iterator().next();
+              return CheckTokenResponse.builder()
+                  .idToken(token.getIdToken())
+                  .clientId(entry.getRelyingParty())
+                  .resourceServers(entry.getResourceServers())
+                  .expiresIn(token.expiresIn())
+                  .scopes(entry.getScopes())
+                  .build();
+            }
+        ).switchIfEmpty(Observable.error(new AuthorizationException("Token not found")));
   }
 }

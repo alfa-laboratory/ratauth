@@ -9,7 +9,10 @@ import ratpack.form.Form
 import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
+import ru.ratauth.interaction.GrantType
+import ru.ratauth.providers.registrations.dto.RegResult
 import ru.ratauth.server.handlers.dto.CheckTokenDTO
+import ru.ratauth.server.handlers.dto.RegisterDTO
 import ru.ratauth.server.handlers.dto.TokenDTO
 import ru.ratauth.server.services.AuthTokenService
 import ru.ratauth.server.services.AuthorizeService
@@ -85,9 +88,17 @@ class AuthorizationHandlers {
           def registerService = ctx.get(RegistrationService.class)
           Promise<Form> formPromise = ctx.parse(Form.class);
           observe(formPromise).flatMap { params ->
-            registerService.register readRegistrationRequest(params, ctx.request.headers)
+            def request = readRegistrationRequest(params, ctx.request.headers)
+            if (GrantType.AUTHORIZATION_CODE == request.getGrantType())
+              registerService.register(request)
+            else
+              registerService.finishRegister(request)
           } subscribe {
-            res -> ctx.render json(res)
+            res ->
+              if (res instanceof RegResult)
+                ctx.render json(new RegisterDTO(res))
+              else
+                ctx.render json(new CheckTokenDTO(res))
           }
         }
       }
@@ -111,5 +122,4 @@ class AuthorizationHandlers {
       fileSystem 'public', { f -> f.files() }
     }
   }
-
 }
