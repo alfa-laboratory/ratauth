@@ -22,7 +22,7 @@ class TokenRequestReader {
   private static final String CODE = "code"
   private static final String TOKEN = "token"
   private static final String REFRESH_TOKEN = "refresh_token"
-
+  private static final Set<String> BASE_FIELDS = [RESPONSE_TYPE, AUD, GRANT_TYPE, CODE, TOKEN, REFRESH_TOKEN] as Set
 
   static TokenRequest readTokenRequest(Form form, Headers headers) {
     def auth = extractAuth(headers)
@@ -40,12 +40,11 @@ class TokenRequestReader {
         break;
       default: throw new AuthorizationException("Grant type is not supported");
     }
+    builder.authData(extractRest(form, BASE_FIELDS))
     builder.build()
   }
 
   static CheckTokenRequest readCheckTokenRequest(Form form, Headers headers) {
     CheckTokenRequest.builder().token(extractField(form, TOKEN, true)).build();
   }
-
-
 }

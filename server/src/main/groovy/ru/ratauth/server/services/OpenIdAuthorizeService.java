@@ -53,16 +53,20 @@ public class OpenIdAuthorizeService implements AuthorizeService {
 
     //load corresponding relying party
     final RelyingParty relyingParty = relyingPartyService.getRelyingParty(oauthRequest.getClientId())
-        .filter(rp -> authRelyingParty(oauthRequest,rp))
+        .filter(rp -> authRelyingParty(oauthRequest, rp))
         .filter(rp -> oauthRequest.getAuds() == null || rp.getResourceServers().containsAll(oauthRequest.getAuds()))//check rights
         .switchIfEmpty(Observable.error(new AuthorizationException("RelyingParty not found")))
         .toBlocking().single();
+    AuthProvider provider = authProviders.get(relyingParty.getIdentityProvider());
 
     //authorize
-    return authProviders.get(relyingParty.getIdentityProvider())
-        .authenticate(AuthInput.builder().data(oauthRequest.getAuthData()).relyingParty(relyingParty.getName()).build())
-        .flatMap(userInfo ->
-                createEntry(relyingParty, oauthRequest.getAuds(), oauthRequest.getScopes(), userInfo.getData())
+    return provider.authenticate(AuthInput.builder().data(oauthRequest.getAuthData()).relyingParty(relyingParty.getName()).build())
+        .flatMap(userInfo ->{
+              if(provider.isAuthCodeSupported())
+                return Observable.just(new AuthzEntry());
+              else
+                return createEntry(relyingParty, oauthRequest.getAuds(), oauthRequest.getScopes(), userInfo.getData());
+            }
         ).flatMap(entry -> {
           if (oauthRequest.getResponseType() == AuthzResponseType.TOKEN)
             return authTokenService.createToken(entry, relyingParty);

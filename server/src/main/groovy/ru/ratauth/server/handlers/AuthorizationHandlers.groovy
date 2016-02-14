@@ -98,7 +98,7 @@ class AuthorizationHandlers {
               if (res instanceof RegResult)
                 ctx.render json(new RegisterDTO(res))
               else
-                ctx.render json(new CheckTokenDTO(res))
+                ctx.render json(new TokenDTO(res))
           }
         }
       }
@@ -122,4 +122,5 @@ class AuthorizationHandlers {
       fileSystem 'public', { f -> f.files() }
     }
   }
+
 }

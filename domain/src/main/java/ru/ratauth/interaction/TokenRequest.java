@@ -2,6 +2,7 @@ package ru.ratauth.interaction;
 
 import lombok.*;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -20,4 +21,5 @@ public class TokenRequest {
   private GrantType grantType;
   private AuthzResponseType responseType;
   private @Singular Set<String> auds;
+  private Map<String, String> authData;
 }
