@@ -1,0 +1,15 @@
+@startuml
+Client -> RPa: crossAuth (refresh_tokenA, aud)
+AuthServer <- RPa : authorize (refresh_tokenA, client_idA, secretA)
+AuthServer -> AuthServer: checkToken
+AuthServer -> AuthServer: checkRPcredentials
+AuthServer -> AuthServer: createAuthCode
+AuthServer --> RPa: authCode
+Client <-- RPa: authCode
+Client -> RPb: authorize (authCode)
+AuthServer <- RPb : getToken (authCode, client_idB, secretB)
+AuthServer -> AuthServer: checkAuthCode
+AuthServer -> AuthServer: checkRPcredentials
+AuthServer -> AuthServer: generateToken
+AuthServer --> RPb: token (tokenB, refreshTokenB)
+@enduml

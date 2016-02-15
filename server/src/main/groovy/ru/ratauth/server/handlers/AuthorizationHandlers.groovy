@@ -9,16 +9,21 @@ import ratpack.form.Form
 import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
+import ru.ratauth.interaction.GrantType
+import ru.ratauth.providers.registrations.dto.RegResult
 import ru.ratauth.server.handlers.dto.CheckTokenDTO
+import ru.ratauth.server.handlers.dto.RegisterDTO
 import ru.ratauth.server.handlers.dto.TokenDTO
 import ru.ratauth.server.services.AuthTokenService
 import ru.ratauth.server.services.AuthorizeService
+import ru.ratauth.server.services.RegistrationService
 
 import static ratpack.groovy.Groovy.chain
 import static ratpack.jackson.Jackson.json
 import static ratpack.rx.RxRatpack.observe
 import static ru.ratauth.server.handlers.readers.TokenRequestReader.*
 import static ru.ratauth.server.handlers.readers.AuthzRequestReader.*
+import static ru.ratauth.server.handlers.readers.RegistrationRequestReader.*
 
 import static ratpack.groovy.Groovy.groovyMarkupTemplate
 
@@ -74,6 +79,26 @@ class AuthorizationHandlers {
             authTokenService.checkToken readCheckTokenRequest(params, ctx.request.headers)
           } subscribe {
             res -> ctx.render json(new CheckTokenDTO(res))
+          }
+        }
+      }
+
+      prefix('register') {
+        post { Context ctx ->
+          def registerService = ctx.get(RegistrationService.class)
+          Promise<Form> formPromise = ctx.parse(Form.class);
+          observe(formPromise).flatMap { params ->
+            def request = readRegistrationRequest(params, ctx.request.headers)
+            if (GrantType.AUTHORIZATION_CODE == request.getGrantType())
+              registerService.register(request)
+            else
+              registerService.finishRegister(request)
+          } subscribe {
+            res ->
+              if (res instanceof RegResult)
+                ctx.render json(new RegisterDTO(res))
+              else
+                ctx.render json(new TokenDTO(res))
           }
         }
       }

@@ -33,6 +33,8 @@ public class AuthzEntry {
   }
 
   public Long codeExpiresIn() {
+    if(created == null || codeTTL == null)
+      return null;
     return created.getTime() + codeTTL;
   }
 

@@ -1,18 +1,7 @@
 package ru.ratauth.server.configuration
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.io.FileSystemResource
-import ru.ratauth.entities.AuthzEntry
-import ru.ratauth.entities.RelyingParty
-import ru.ratauth.providers.AuthProvider
-import ru.ratauth.services.AuthzEntryService
-import ru.ratauth.services.RelyingPartyService
-import rx.Observable
-
-import javax.annotation.PostConstruct
 
 /**
  * @author tolkv

@@ -1,0 +1,17 @@
+@startuml
+Client -> AuthServer: register (registration data, client_id)
+AuthServer -> AuthServer: defineAuthProvider
+AuthServer -> AuthProvider: register (register data)
+Client <- AuthProvider: regAuthCode
+AuthServer <-- AuthProvider: userIdentifier
+Client <-- AuthServer: userIdentifier
+Client -> RP: register (regAuthCode, userIdentifier)
+AuthServer <- RP: register(regAuthCode,userIdentifier, client_id, client_secret)
+AuthServer -> AuthServer: checkRPcredentials
+AuthServer -> AuthServer: defineAuthProvider
+AuthServer -> AuthProvider: register (regAuthCode, userIdentifier)
+AuthServer <-- AuthProvider: userInfo
+AuthServer -> AuthServer: createAuthCode
+AuthServer -> AuthServer: createTokens
+AuthServer --> RP: tokens (idToken, token, refreshToken)
+@enduml
