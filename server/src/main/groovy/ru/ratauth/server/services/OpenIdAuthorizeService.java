@@ -39,8 +39,10 @@ public class OpenIdAuthorizeService implements AuthorizeService {
   private final AuthzEntryService authzEntryService;
   private final Map<String, AuthProvider> authProviders;
   private final TokenProcessor tokenProcessor;
-  private final AuthTokenService authTokenService;
   private final OAuthIssuerImpl codeGenerator = new OAuthIssuerImpl(new UUIDValueGenerator());
+
+  @Autowired
+  private AuthTokenService authTokenService;//TODO temp fix - must be removed during refactoring
 
   @Value("${auth.code.ttl}")
   private Long codeTTL;//final
@@ -92,8 +94,8 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         .build();
     //create base JWT
     String userJWT = tokenProcessor.createToken(relyingParty.getSecret(), relyingParty.getBaseAddress(),
-        now, authzEntry.codeExpiresIn(), authzEntry.getAuthCode(),
-        authzEntry.getResourceServers(), userInfo);
+      now, authzEntry.codeExpiresIn(), authzEntry.getAuthCode(),
+      authzEntry.getResourceServers(), userInfo);
     authzEntry.setUserInfo(userJWT);
     return authzEntryService.save(authzEntry);
   }

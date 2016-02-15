@@ -40,7 +40,7 @@ class AuthorizationAPISpec extends Specification {
 
   def 'request authorization code'() {
     given:
-    def query = 'response_type=code&client_id=www&scope=read&username=login&password=password&aud=stub'
+    def query = 'response_type=code&client_id=www&scope=read&login=login&password=password&aud=stub'
     HttpHeaders requestHeaders = new HttpHeaders();
     requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
     HttpEntity<String> requestEntity =
@@ -57,7 +57,7 @@ class AuthorizationAPISpec extends Specification {
 
   def 'bad request authorization code'() {
     given:
-    def query = 'username=login&password=password&aud=stub'
+    def query = 'login=login&password=password&aud=stub'
     HttpHeaders requestHeaders = new HttpHeaders();
     requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
     HttpEntity<String> requestEntity =
@@ -74,7 +74,7 @@ class AuthorizationAPISpec extends Specification {
 
   def 'bad requisites for authorization code'() {
     given:
-    def query = 'response_type=code&client_id=www&scope=read&username=login&password=bad&aud=stub'
+    def query = 'response_type=code&client_id=www&scope=read&login=login&password=bad&aud=stub'
     HttpHeaders requestHeaders = new HttpHeaders();
     requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
     HttpEntity<String> requestEntity =
@@ -126,7 +126,7 @@ class AuthorizationAPISpec extends Specification {
 
   def 'implicit request token'() {
     given:
-    def query = 'response_type=token&scope=read&username=login&password=password&aud=stub'
+    def query = 'response_type=token&scope=read&login=login&password=password&aud=stub'
     HttpHeaders requestHeaders = new HttpHeaders();
     requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
     HttpEntity<String> requestEntity =

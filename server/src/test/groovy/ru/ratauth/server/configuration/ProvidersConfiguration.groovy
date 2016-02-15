@@ -13,7 +13,11 @@ import ru.ratauth.entities.Token
 import ru.ratauth.exception.ExpiredException
 import ru.ratauth.providers.auth.AuthProvider
 import ru.ratauth.providers.auth.dto.AuthInput
+import ru.ratauth.providers.auth.dto.AuthResult
 import ru.ratauth.providers.auth.dto.BaseAuthFields
+import ru.ratauth.providers.registrations.RegistrationProvider
+import ru.ratauth.providers.registrations.dto.RegInput
+import ru.ratauth.providers.registrations.dto.RegResult
 import ru.ratauth.services.AuthzEntryService
 import ru.ratauth.services.RelyingPartyService
 import rx.Observable
@@ -30,6 +34,8 @@ class ProvidersConfiguration {
 
   public static final String TOKEN = 'sometoken'
   public static final String TOKEN_ID = 'sometoken_id'
+
+  abstract class AbstractAuthProvider implements AuthProvider, RegistrationProvider {}
 
 
   @Bean
@@ -112,18 +118,31 @@ class ProvidersConfiguration {
 
   @Bean(name = 'STUB')
   @Primary
-  public AuthProvider authProvider() {
-    return new AuthProvider() {
+  public AbstractAuthProvider authProvider() {
+    return new AbstractAuthProvider() {
       @Override
-      Observable<Map<String, Object>> authenticate(AuthInput input) {
-        if (input.getData().get(BaseAuthFields.LOGIN) == 'login' && input.getData().get(BaseAuthFields.PASSWORD) == 'password')
-          return Observable.just([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
+      Observable<AuthResult> authenticate(AuthInput input) {
+        if (input.data.get(BaseAuthFields.LOGIN.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
+          return Observable.just(AuthResult.builder().data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map).status(AuthResult.Status.SUCCESS).build())
         else
           return Observable.empty();
       }
 
       @Override
       boolean isAuthCodeSupported() {
+        return false
+      }
+
+      @Override
+      Observable<RegResult> register(RegInput input) {
+        if (input.data.get(BaseAuthFields.LOGIN.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
+          return Observable.just(RegResult.builder().data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map).status(RegResult.Status.SUCCESS).build())
+        else
+          return Observable.empty();
+      }
+
+      @Override
+      boolean isRegCodeSupported() {
         return false
       }
     }
