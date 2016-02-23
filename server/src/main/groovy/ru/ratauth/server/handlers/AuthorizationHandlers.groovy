@@ -19,13 +19,13 @@ import ru.ratauth.server.services.AuthorizeService
 import ru.ratauth.server.services.RegistrationService
 
 import static ratpack.groovy.Groovy.chain
+import static ratpack.groovy.Groovy.groovyMarkupTemplate
 import static ratpack.jackson.Jackson.json
 import static ratpack.rx.RxRatpack.observe
-import static ru.ratauth.server.handlers.readers.TokenRequestReader.*
-import static ru.ratauth.server.handlers.readers.AuthzRequestReader.*
-import static ru.ratauth.server.handlers.readers.RegistrationRequestReader.*
-
-import static ratpack.groovy.Groovy.groovyMarkupTemplate
+import static ru.ratauth.server.handlers.readers.AuthzRequestReader.readAuthzRequest
+import static ru.ratauth.server.handlers.readers.RegistrationRequestReader.readRegistrationRequest
+import static ru.ratauth.server.handlers.readers.TokenRequestReader.readCheckTokenRequest
+import static ru.ratauth.server.handlers.readers.TokenRequestReader.readTokenRequest
 
 
 /**
@@ -51,7 +51,11 @@ class AuthorizationHandlers {
             def authorizeService = ctx.get(AuthorizeService.class)
             Promise<Form> formPromise = parse(Form.class);
             observe(formPromise).flatMap { params ->
-              authorizeService.authenticate readAuthzRequest(params, ctx.request.headers)
+              def authRequest = readAuthzRequest(params, ctx.request.headers)
+              if(GrantType.AUTHENTICATION_TOKEN == authRequest.grantType)
+                authorizeService.crossAuthenticate(authRequest)
+              else
+                authorizeService.authenticate(authRequest)
             } subscribe {
               res -> ctx.redirect(HttpResponseStatus.FOUND.code(), res.buildURL())
             }

@@ -2,13 +2,10 @@ package ru.ratauth.server.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ru.ratauth.entities.AuthzEntry;
-import ru.ratauth.entities.RelyingParty;
-import ru.ratauth.entities.Token;
-import ru.ratauth.exception.AuthorizationException;
+import ru.ratauth.entities.*;
 import ru.ratauth.interaction.AuthzRequest;
 import ru.ratauth.interaction.AuthzResponse;
 import ru.ratauth.interaction.AuthzResponseType;
@@ -16,17 +13,11 @@ import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.AuthProvider;
 import ru.ratauth.providers.auth.dto.AuthInput;
 import ru.ratauth.providers.auth.dto.AuthResult;
-import ru.ratauth.server.secutiry.OAuthIssuerImpl;
-import ru.ratauth.server.secutiry.UUIDValueGenerator;
-import ru.ratauth.utils.StringUtils;
-import ru.ratauth.services.AuthzEntryService;
-import ru.ratauth.services.RelyingPartyService;
 import rx.Observable;
 
-import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 
 /**
  * @author mgorelikov
@@ -35,92 +26,89 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OpenIdAuthorizeService implements AuthorizeService {
-  private final RelyingPartyService relyingPartyService;
-  private final AuthzEntryService authzEntryService;
+  private final AuthClientService clientService;
+  private final TokenCacheService tokenCacheService;
+  private final AuthSessionService sessionService;
   private final Map<String, AuthProvider> authProviders;
-  private final TokenProcessor tokenProcessor;
-  private final OAuthIssuerImpl codeGenerator = new OAuthIssuerImpl(new UUIDValueGenerator());
-
-  @Autowired
-  private AuthTokenService authTokenService;//TODO temp fix - must be removed during refactoring
-
-  @Value("${auth.code.ttl}")
-  private Long codeTTL;//final
-  @Value("${auth.refresh_token.ttl}")
-  private Long refreshTokenTTL;//final
 
   @Override
   @SneakyThrows
-  public Observable<AuthzResponse> authenticate(AuthzRequest oauthRequest) {
-
-    //load corresponding relying party
-    final RelyingParty relyingParty = relyingPartyService.getRelyingParty(oauthRequest.getClientId())
-        .filter(rp -> authRelyingParty(oauthRequest, rp))
-        .filter(rp -> oauthRequest.getAuds() == null || rp.getResourceServers().containsAll(oauthRequest.getAuds()))//check rights
-        .switchIfEmpty(Observable.error(new AuthorizationException("RelyingParty not found")))
-        .toBlocking().single();
-    AuthProvider provider = authProviders.get(relyingParty.getIdentityProvider());
-
-    //authorize
-    return provider.authenticate(AuthInput.builder().data(oauthRequest.getAuthData()).relyingParty(relyingParty.getName()).build())
-        .flatMap(userInfo ->{
-              if(provider.isAuthCodeSupported())
-                return Observable.just(new AuthzEntry());
-              else
-                return createEntry(relyingParty, oauthRequest.getAuds(), oauthRequest.getScopes(), userInfo.getData());
-            }
-        ).flatMap(entry -> {
-          if (oauthRequest.getResponseType() == AuthzResponseType.TOKEN)
-            return authTokenService.createToken(entry, relyingParty);
-          else
-            return Observable.just(entry);
-        }).map(entry -> buildResponse(oauthRequest, entry, relyingParty)
-        ).switchIfEmpty(Observable.error(new AuthorizationException("Authorization error")));
+  public Observable<AuthzResponse> authenticate(AuthzRequest request) {
+    return clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(),
+        request.getResponseType() != AuthzResponseType.CODE)
+        .flatMap(rp ->
+            authenticateUser(request.getAuthData(), rp.getIdentityProvider(), rp.getName())
+                .map(authRes -> new ImmutablePair<>(rp, authRes)))
+        .flatMap(rpAuth ->
+            createSession(request, rpAuth.getRight(), rpAuth.getLeft())
+                .map(ses -> new ImmutablePair<>(rpAuth.getLeft(), ses)))
+        .flatMap(rpSession ->
+                createIdToken(rpSession.getLeft(), rpSession.getRight())
+                    .map(idToken -> new ImmutablePair<>(rpSession.getRight(), idToken))
+        )
+        .map(sessionToken -> buildResponse(request.getRedirectURI(), request.getClientId(), sessionToken.getLeft(), sessionToken.right));
   }
 
-  public Observable<AuthzEntry> createEntry(RelyingParty relyingParty,Set<String> auds, Set<String> scopes, Map<String, Object> userInfo) {
-    Date now = new Date();
-    //create entry
-    AuthzEntry authzEntry = AuthzEntry.builder()
-        .authCode(codeGenerator.authorizationCode())
-        .created(new Date())
-        .codeTTL(codeTTL)
-        .refreshToken(codeGenerator.refreshToken())
-        .refreshTokenTTL(refreshTokenTTL)
-        .relyingParty(relyingParty.getId())
-        .identityProvider(relyingParty.getIdentityProvider())
-        .scopes(scopes)
-        .resourceServers(auds == null ? relyingParty.getResourceServers() : auds)
-        .build();
-    //create base JWT
-    String userJWT = tokenProcessor.createToken(relyingParty.getSecret(), relyingParty.getBaseAddress(),
-      now, authzEntry.codeExpiresIn(), authzEntry.getAuthCode(),
-      authzEntry.getResourceServers(), userInfo);
-    authzEntry.setUserInfo(userJWT);
-    return authzEntryService.save(authzEntry);
+  @Override
+  public Observable<AuthzResponse> crossAuthenticate(AuthzRequest request) {
+    return  Observable.zip(
+        clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), true),
+        clientService.loadRelyingParty(request.getExternalClientId()),
+        sessionService.getByValidRefreshToken(request.getRefreshToken(), new Date()),
+        (oldRP, newRP, session) -> new ImmutablePair<>(newRP, session))
+        .flatMap(rpSession -> sessionService.addEntry(rpSession.getRight(), rpSession.getLeft(), request.getScopes(), request.getRedirectURI()))
+        .map(session -> buildResponse(request.getRedirectURI(), request.getExternalClientId(), session, null));
   }
 
-  private static AuthzResponse buildResponse(AuthzRequest oauthRequest, AuthzEntry entry, RelyingParty relyingParty) {
-    String redirectURI = StringUtils.isBlank(oauthRequest.getRedirectURI())? oauthRequest.getRedirectURI() : relyingParty.getRedirectURL();
+  private Observable<TokenCache> createIdToken(RelyingParty relyingParty, Session session) {
+    Optional<AuthEntry> entry = session.getEntry(relyingParty.getName());
+    Optional<Token> token = entry.flatMap(el -> el.getLatestToken());
+    if (session != null && token.isPresent())
+      return tokenCacheService.getToken(session, relyingParty, entry.get());
+    else
+      return Observable.just((TokenCache) null);
+  }
+
+  private Observable<Session> createSession(AuthzRequest oauthRequest, AuthResult authResult, RelyingParty relyingParty) {
+    if (AuthResult.Status.SUCCESS == authResult.getStatus())
+      if (AuthzResponseType.TOKEN == oauthRequest.getResponseType())//implicit auth
+        return sessionService.createSession(relyingParty, authResult.getData(), oauthRequest.getScopes(), oauthRequest.getRedirectURI());
+      else//auth code auth
+        return sessionService.initSession(relyingParty, authResult.getData(), oauthRequest.getScopes(), oauthRequest.getRedirectURI());
+    else
+      return Observable.just((Session) null);//authCode provided by external Auth provider
+  }
+
+  private Observable<AuthResult> authenticateUser(Map<String, String> authData, String identityProvider, String relyingPartyName) {
+    return authProviders.get(identityProvider).authenticate(
+        AuthInput.builder().
+            data(authData)
+            .relyingParty(relyingPartyName).build());
+  }
+
+  private static AuthzResponse buildResponse(String redirectURL, String clientId, Session session, TokenCache tokenCache) {
+    //in case of autCode sent by authProvider
+    if (session == null) {
+      return AuthzResponse.builder()
+          .location(redirectURL).build();
+    }
+
+    AuthEntry entry = session.getEntry(clientId).get();
     AuthzResponse resp = AuthzResponse.builder()
-        .location(redirectURI).build();
-    Token token = entry.getLatestToken();
-    if(token != null) {
+        .location(entry.getRedirectUrl()).build();
+    final Optional<Token> tokenOptional = entry.getLatestToken();
+    //implicit auth
+    if (tokenOptional.isPresent()) {
+      final Token token = tokenOptional.get();
       resp.setToken(token.getToken());
-      resp.setIdToken(token.getIdToken());
+      resp.setIdToken(tokenCache.getIdToken());
       resp.setTokenType(TokenType.BEARER);
       resp.setRefreshToken(entry.getRefreshToken());
-      resp.setExpiresIn(token.expiresIn());
-    } else {
+      resp.setExpiresIn(token.getExpiresIn().getTime());
+    } else {//auth code authorization
       resp.setCode(entry.getAuthCode());
-      resp.setExpiresIn(entry.codeExpiresIn());
+      resp.setExpiresIn(entry.getCodeExpiresIn().getTime());
     }
     return resp;
-  }
-
-  private boolean authRelyingParty(AuthzRequest oauthRequest, RelyingParty relyingParty) {
-    return oauthRequest.getResponseType() == AuthzResponseType.CODE
-        || oauthRequest.getClientId().equals(relyingParty.getId())
-        && oauthRequest.getClientSecret().equals(relyingParty.getPassword());
   }
 }

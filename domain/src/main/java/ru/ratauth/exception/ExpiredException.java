@@ -5,7 +5,7 @@ package ru.ratauth.exception;
  * @since 12/11/15
  * Entity expired exception
  */
-public class ExpiredException extends RuntimeException {
+public class ExpiredException extends BaseAuthServerException {
   public ExpiredException() {
   }
 
@@ -19,9 +19,5 @@ public class ExpiredException extends RuntimeException {
 
   public ExpiredException(Throwable cause) {
     super(cause);
-  }
-
-  public ExpiredException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-    super(message, cause, enableSuppression, writableStackTrace);
   }
 }

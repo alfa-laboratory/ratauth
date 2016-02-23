@@ -1,8 +1,11 @@
-package ru.ratauth.server.services;
+package ru.ratauth.server.secutiry;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
-import com.nimbusds.jose.*;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -23,27 +26,28 @@ import java.util.*;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HS256TokenProcessor implements TokenProcessor {
   private final ObjectMapper jacksonObjectMapper;
-  private static final String RP_BASE_ADDRESS = "rp_base_address";
-  public static final String INT_PREFIX="i_";
+  private static final String SCOPE = "scope";
 
   @Value("${auth.token.issuer}")
   private String issuer;//final
 
   @Override
   @SneakyThrows
-  public String createToken(String secret, Set<String> baseAddress,
-                            Date created, Long expiresIn, String token,
-                            Set<String> resourceServers, Map<String, Object> userInfo) {
+  public String createToken(String secret, String identifier,
+                            Date created, Date expiresIn,
+                            Set<String> audience, Set<String> scopes,
+                            String userId, Map<String, Object> userInfo) {
     final JWSSigner signer = new MACSigner(Base64Coder.decodeLines(secret));
 // Prepare JWT with claims set
     JWTClaimsSet.Builder jwtBuilder = new JWTClaimsSet.Builder()
         .issuer(issuer)
-        .expirationTime(new Date(expiresIn))
-        .audience(new ArrayList<>(resourceServers))
-        .jwtID(token)
+        .subject(userId)
+        .expirationTime(expiresIn)
+        .audience(new ArrayList<>(audience))
+        .claim(SCOPE, scopes)
+        .jwtID(identifier)
         .issueTime(created);
-    jwtBuilder.claim(RP_BASE_ADDRESS, baseAddress);
-    userInfo.forEach((key, value) -> jwtBuilder.claim(INT_PREFIX + key, value));
+    userInfo.forEach((key, value) -> jwtBuilder.claim(key, value));
 
     SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), jwtBuilder.build());
 
@@ -64,8 +68,8 @@ public class HS256TokenProcessor implements TokenProcessor {
       throw new JWTVerificationException("User info extraction error");
     Map<String,Object> result = new HashMap<>();
     signedJWT.getJWTClaimsSet().getClaims().forEach((key,value) -> {
-      if(key.startsWith(INT_PREFIX))
-        result.put(key.substring(INT_PREFIX.length(), key.length()),value);
+      if(!JWTClaimsSet.getRegisteredNames().contains(key))
+        result.put(key, value);
     });
     return result;
   }

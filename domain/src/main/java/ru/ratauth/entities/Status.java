@@ -2,9 +2,9 @@ package ru.ratauth.entities;
 
 /**
  * @author mgorelikov
- * @since 03/11/15
+ * @since 16/02/16
  */
-public enum ServiceStatus {
+public enum Status {
   ACTIVE,
   BLOCKED
 }

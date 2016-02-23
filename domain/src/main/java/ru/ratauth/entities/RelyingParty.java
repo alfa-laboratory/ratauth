@@ -2,30 +2,31 @@ package ru.ratauth.entities;
 
 import lombok.*;
 
-import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 /**
  * @author mgorelikov
  * @since 01/11/15
  */
-@Builder
+
 @Data
-@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-public class RelyingParty {
-  private String id;
-  private String name;//description name
-  private String password;
-  private String secret;
-  private Date created;
-  private Date updated;
-  private @Singular("baseAddress") Set<String> baseAddress;//optional field for relying party interconnection
-  private Integer secretTTL;
+@AllArgsConstructor
+public class RelyingParty extends AuthClient {
   private String redirectURL;
   private ApplicationType applicationType;
-  private String identityProvider;//identifier
-  private @Singular Set<String> resourceServers;
-  private ServiceStatus status;
+  /**
+   * unique name
+   */
+  private String identityProvider;
+  private Long codeTTL;
+  private Long tokenTTL;
+  private Long refreshTokenTTL;
+  private Long sessionTTL;
+  /**
+   * Set of unique grants (means only internal grants, it's not resource server scope)
+   */
+  @Singular
+  private Set<String> grants;
 }
