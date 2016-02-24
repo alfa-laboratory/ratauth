@@ -24,14 +24,20 @@ class AuthErrorHandler implements ServerErrorHandler {
     def exception = ExceptionUtils.getThrowable(throwable, BaseAuthServerException.class, MAX_EXCEPTION_DEPTH)
 
     if (exception in ExpiredException.class)
-      context.clientError(AUTHENTICATION_TIMEOUT)
+      sendError(context, AUTHENTICATION_TIMEOUT, exception.getMessage())
     else if (exception in ReadRequestException.class)
-      context.clientError(HttpResponseStatus.BAD_REQUEST.code())
+      sendError(context, HttpResponseStatus.BAD_REQUEST.code(), exception.getMessage())
     else if (exception in AuthorizationException.class)
-      context.clientError(HttpResponseStatus.FORBIDDEN.code())
-
+      sendError(context, HttpResponseStatus.FORBIDDEN.code(), exception.getMessage())
+    else
+      context.error(exception)
 
     log.error("Auth error: " + throwable.getMessage())
     log.debug("Error stacktrace:", throwable)
+  }
+
+  private static void sendError(Context context, int code, String body) {
+    context.response.status(code)
+    context.response.send(body)
   }
 }
