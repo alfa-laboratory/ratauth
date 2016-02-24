@@ -56,7 +56,7 @@ public interface SessionService {
   /**
    * Adds new entry into existing session
    * @param sessionId session identifier
-   * @param relyingParty relying party to find corresponding entry within session
+   * @param relyingParty relying party unique name to find corresponding entry within session
    * @param token new token
    */
   Observable<Boolean> addToken(String sessionId, String relyingParty, Token token);

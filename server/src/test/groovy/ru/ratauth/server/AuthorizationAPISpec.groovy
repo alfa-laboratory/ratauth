@@ -82,6 +82,7 @@ class AuthorizationAPISpec extends Specification {
     then:
     def e = thrown(HttpClientErrorException)
     e.getMessage().contains('403')
+    e.getMessage().contains('response_type')
   }
 
   def 'request token'() {
@@ -188,6 +189,26 @@ class AuthorizationAPISpec extends Specification {
     then:
     assert answer.statusCode == HttpStatus.OK
     assert token.jti.split('\\.').length == 3
+    assert token.clientId == ProvidersConfiguration.CLIENT_NAME
+  }
+
+  def 'get jwt token for external resource server'() {
+    given:
+    def query = 'token=' + ProvidersConfiguration.TOKEN + '&client_id='+ProvidersConfiguration.CLIENT_NAME+'3'
+    HttpHeaders requestHeaders = new HttpHeaders();
+    requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+    HttpEntity<String> requestEntity =
+        new HttpEntity<String>(query, createHeaders(ProvidersConfiguration.CLIENT_NAME, ProvidersConfiguration.PASSWORD));
+    when:
+    ResponseEntity<String> answer = client.exchange('http://localhost:' + port + '/check_token',
+        HttpMethod.POST,
+        requestEntity,
+        String.class)
+    CheckTokenDTO token = objectMapper.readValue(answer.body, CheckTokenDTO.class)
+    then:
+    assert answer.statusCode == HttpStatus.OK
+    assert token.jti.split('\\.').length == 3
+    assert token.clientId == ProvidersConfiguration.CLIENT_NAME+'3'
   }
 
   private HttpHeaders createHeaders(String username, String password) {

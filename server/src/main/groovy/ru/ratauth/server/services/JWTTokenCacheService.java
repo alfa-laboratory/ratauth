@@ -29,6 +29,7 @@ public class JWTTokenCacheService implements TokenCacheService {
         .created(new Date())
         .session(session.getId())
         .token(token.getToken())
+        .client(authClient.getName())
         .idToken(tokenProcessor.createToken(
             authClient.getSecret(), token.getToken(), token.getCreated(), token.getExpiresIn(),
             authEntry.getScopes(), extractAudience(authEntry.getScopes()),

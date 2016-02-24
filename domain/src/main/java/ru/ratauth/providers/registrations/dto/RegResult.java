@@ -21,7 +21,6 @@ public class RegResult {
 
   public enum Status {
     SUCCESS,
-    FAILED,
     NEED_APPROVAL
   }
 }

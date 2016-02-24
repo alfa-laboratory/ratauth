@@ -30,4 +30,9 @@ public class TokenCache {
   private String session;
 
   private Date created;
+
+  /**
+   * unique name
+   */
+  private String client;
 }

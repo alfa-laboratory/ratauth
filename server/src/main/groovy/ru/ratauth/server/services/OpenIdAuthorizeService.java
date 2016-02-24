@@ -51,11 +51,11 @@ public class OpenIdAuthorizeService implements AuthorizeService {
 
   @Override
   public Observable<AuthzResponse> crossAuthenticate(AuthzRequest request) {
-    return  Observable.zip(
-        clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), true),
-        clientService.loadRelyingParty(request.getExternalClientId()),
-        sessionService.getByValidRefreshToken(request.getRefreshToken(), new Date()),
-        (oldRP, newRP, session) -> new ImmutablePair<>(newRP, session))
+    return Observable.zip(
+          clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), true),
+          clientService.loadRelyingParty(request.getExternalClientId()),
+          sessionService.getByValidRefreshToken(request.getRefreshToken(), new Date()),
+          (oldRP, newRP, session) -> new ImmutablePair<>(newRP, session))
         .flatMap(rpSession -> sessionService.addEntry(rpSession.getRight(), rpSession.getLeft(), request.getScopes(), request.getRedirectURI()))
         .map(session -> buildResponse(request.getRedirectURI(), request.getExternalClientId(), session, null));
   }

@@ -59,14 +59,14 @@ public class OpenIdAuthTokenService implements AuthTokenService {
           //load idToken(jwt) from cache or create new
           AuthEntry entry = sessionClient.getLeft().getEntries().iterator().next();
           return tokenCacheService.getToken(sessionClient.getLeft(), sessionClient.getRight(), entry)
-              .map(token -> new ImmutablePair<>(entry, token.getIdToken()));
+              .map(token -> new ImmutablePair<>(entry, token));
         })
         .map(entryToken -> {
               AuthEntry entry = entryToken.getLeft();
               Token token = entry.getTokens().iterator().next();
               return CheckTokenResponse.builder()
-                  .idToken(entryToken.getRight())
-                  .clientId(entry.getRelyingParty())
+                  .idToken(entryToken.getRight().getIdToken())
+                  .clientId(entryToken.getRight().getClient())
                   .expiresIn(token.getExpiresIn().getTime())
                   .scopes(entry.getScopes())
                   .build();

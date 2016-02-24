@@ -70,7 +70,7 @@ class ProvidersConfiguration {
         else
           return Observable.just(new RelyingParty(
               id: 'id2',
-              name: CLIENT_NAME+'2',
+              name: CLIENT_NAME + '2',
               identityProvider: 'STUB2',
               secret: CLIENT_SECRET,
               password: PASSWORD,
@@ -84,12 +84,20 @@ class ProvidersConfiguration {
 
       @Override
       Observable<AuthClient> getClient(String name) {
-        return Observable.just(new AuthClient(
-            id: 'id',
-            name: CLIENT_NAME,
-            secret: CLIENT_SECRET,
-            password: PASSWORD
-        ))
+        if (name == CLIENT_NAME)
+          return Observable.just(new AuthClient(
+              id: 'id',
+              name: CLIENT_NAME,
+              secret: CLIENT_SECRET,
+              password: PASSWORD
+          ))
+        else
+          return Observable.just(new AuthClient(
+              id: 'id',
+              name: CLIENT_NAME + '3',
+              secret: CLIENT_SECRET,
+              password: PASSWORD
+          ))
       }
     }
   }
