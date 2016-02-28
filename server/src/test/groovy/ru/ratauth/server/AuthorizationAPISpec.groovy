@@ -10,7 +10,7 @@ import org.springframework.http.*
 import org.springframework.test.context.TestPropertySource
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
-import ru.ratauth.server.configuration.ProvidersConfiguration
+import ru.ratauth.server.configuration.PersistenceServiceStubConfiguration
 import ru.ratauth.server.handlers.dto.CheckTokenDTO
 import ru.ratauth.server.handlers.dto.TokenDTO
 import spock.lang.Specification
@@ -35,7 +35,7 @@ class AuthorizationAPISpec extends Specification {
 
   def 'request authorization code'() {
     given:
-    def query = 'response_type=code&client_id='+ProvidersConfiguration.CLIENT_NAME+'&scope=rs.read&login=login&password=password'
+    def query = 'response_type=code&client_id='+PersistenceServiceStubConfiguration.CLIENT_NAME+'&scope=rs.read&login=login&password=password'
     HttpHeaders requestHeaders = new HttpHeaders();
     requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
     HttpEntity<String> requestEntity =
@@ -65,11 +65,12 @@ class AuthorizationAPISpec extends Specification {
     then:
     def e = thrown(HttpClientErrorException)
     e.getMessage().contains('400')
+    e.getResponseBodyAsString().contains('response_type')
   }
 
   def 'bad requisites for authorization code'() {
     given:
-    def query = 'response_type=code&client_id='+ProvidersConfiguration.CLIENT_NAME+'&scope=rs.read&login=login&password=bad'
+    def query = 'response_type=code&client_id='+PersistenceServiceStubConfiguration.CLIENT_NAME+'&scope=rs.read&login=login&password=bad'
     HttpHeaders requestHeaders = new HttpHeaders();
     requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
     HttpEntity<String> requestEntity =
@@ -82,16 +83,16 @@ class AuthorizationAPISpec extends Specification {
     then:
     def e = thrown(HttpClientErrorException)
     e.getMessage().contains('403')
-    e.getMessage().contains('response_type')
+    e.getResponseBodyAsString().contains('Authorization failed')
   }
 
   def 'request token'() {
     given:
-    def query = 'grant_type=authorization_code&response_type=token&code='+ ProvidersConfiguration.CODE
+    def query = 'grant_type=authorization_code&response_type=token&code='+ PersistenceServiceStubConfiguration.CODE
     HttpHeaders requestHeaders = new HttpHeaders();
     requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
     HttpEntity<String> requestEntity =
-      new HttpEntity<String>(query, createHeaders(ProvidersConfiguration.CLIENT_NAME, ProvidersConfiguration.PASSWORD));
+      new HttpEntity<String>(query, createHeaders(PersistenceServiceStubConfiguration.CLIENT_NAME, PersistenceServiceStubConfiguration.PASSWORD));
     when:
     ResponseEntity<String> answer = client.exchange('http://localhost:' + port + '/token',
       HttpMethod.POST,
@@ -109,7 +110,7 @@ class AuthorizationAPISpec extends Specification {
     HttpHeaders requestHeaders = new HttpHeaders();
     requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
     HttpEntity<String> requestEntity =
-        new HttpEntity<String>(query, createHeaders(ProvidersConfiguration.CLIENT_NAME, ProvidersConfiguration.PASSWORD));
+        new HttpEntity<String>(query, createHeaders(PersistenceServiceStubConfiguration.CLIENT_NAME, PersistenceServiceStubConfiguration.PASSWORD));
     when:
     client.exchange('http://localhost:' + port + '/token',
         HttpMethod.POST,
@@ -118,6 +119,7 @@ class AuthorizationAPISpec extends Specification {
     then:
     def e = thrown(HttpClientErrorException)
     e.getMessage().contains('419')
+    e.getResponseBodyAsString().contains('expired')
   }
 
   def 'implicit request token'() {
@@ -126,7 +128,7 @@ class AuthorizationAPISpec extends Specification {
     HttpHeaders requestHeaders = new HttpHeaders();
     requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
     HttpEntity<String> requestEntity =
-        new HttpEntity<String>(query, createHeaders(ProvidersConfiguration.CLIENT_NAME, ProvidersConfiguration.PASSWORD));
+        new HttpEntity<String>(query, createHeaders(PersistenceServiceStubConfiguration.CLIENT_NAME, PersistenceServiceStubConfiguration.PASSWORD));
     when:
     ResponseEntity<String> answer = client.exchange('http://localhost:' + port + '/authorize',
         HttpMethod.POST,
@@ -139,11 +141,11 @@ class AuthorizationAPISpec extends Specification {
 
   def 'refresh token'() {
     given:
-    def query = 'grant_type=refresh_token&response_type=token&refresh_token='+ProvidersConfiguration.REFRESH_TOKEN
+    def query = 'grant_type=refresh_token&response_type=token&refresh_token='+PersistenceServiceStubConfiguration.REFRESH_TOKEN
     HttpHeaders requestHeaders = new HttpHeaders();
     requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
     HttpEntity<String> requestEntity =
-      new HttpEntity<String>(query, createHeaders(ProvidersConfiguration.CLIENT_NAME, ProvidersConfiguration.PASSWORD));
+      new HttpEntity<String>(query, createHeaders(PersistenceServiceStubConfiguration.CLIENT_NAME, PersistenceServiceStubConfiguration.PASSWORD));
     when:
     ResponseEntity<String> answer = client.exchange('http://localhost:' + port + '/token',
       HttpMethod.POST,
@@ -157,12 +159,12 @@ class AuthorizationAPISpec extends Specification {
 
   def 'request cross-authorization code'() {
     given:
-    def query = 'grant_type=authentication_token&response_type=code&client_id='+ProvidersConfiguration.CLIENT_NAME+ '2' +
-        '&scope=rs.read&refresh_token='+ProvidersConfiguration.REFRESH_TOKEN
+    def query = 'grant_type=authentication_token&response_type=code&client_id='+PersistenceServiceStubConfiguration.CLIENT_NAME+ '2' +
+        '&scope=rs.read&refresh_token='+PersistenceServiceStubConfiguration.REFRESH_TOKEN
     HttpHeaders requestHeaders = new HttpHeaders();
     requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
     HttpEntity<String> requestEntity =
-        new HttpEntity<String>(query, createHeaders(ProvidersConfiguration.CLIENT_NAME, ProvidersConfiguration.PASSWORD));
+        new HttpEntity<String>(query, createHeaders(PersistenceServiceStubConfiguration.CLIENT_NAME, PersistenceServiceStubConfiguration.PASSWORD));
     when:
     ResponseEntity<String> answer = client.exchange('http://localhost:' + port + '/authorize',
         HttpMethod.POST,
@@ -175,11 +177,11 @@ class AuthorizationAPISpec extends Specification {
 
   def 'check token'() {
     given:
-    def query = 'token=' + ProvidersConfiguration.TOKEN
+    def query = 'token=' + PersistenceServiceStubConfiguration.TOKEN
     HttpHeaders requestHeaders = new HttpHeaders();
     requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
     HttpEntity<String> requestEntity =
-      new HttpEntity<String>(query, createHeaders(ProvidersConfiguration.CLIENT_NAME, ProvidersConfiguration.PASSWORD));
+      new HttpEntity<String>(query, createHeaders(PersistenceServiceStubConfiguration.CLIENT_NAME, PersistenceServiceStubConfiguration.PASSWORD));
     when:
     ResponseEntity<String> answer = client.exchange('http://localhost:' + port + '/check_token',
       HttpMethod.POST,
@@ -189,16 +191,16 @@ class AuthorizationAPISpec extends Specification {
     then:
     assert answer.statusCode == HttpStatus.OK
     assert token.jti.split('\\.').length == 3
-    assert token.clientId == ProvidersConfiguration.CLIENT_NAME
+    assert token.clientId == PersistenceServiceStubConfiguration.CLIENT_NAME
   }
 
   def 'get jwt token for external resource server'() {
     given:
-    def query = 'token=' + ProvidersConfiguration.TOKEN + '&client_id='+ProvidersConfiguration.CLIENT_NAME+'3'
+    def query = 'token=' + PersistenceServiceStubConfiguration.TOKEN + '&client_id='+PersistenceServiceStubConfiguration.CLIENT_NAME+'3'
     HttpHeaders requestHeaders = new HttpHeaders();
     requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
     HttpEntity<String> requestEntity =
-        new HttpEntity<String>(query, createHeaders(ProvidersConfiguration.CLIENT_NAME, ProvidersConfiguration.PASSWORD));
+        new HttpEntity<String>(query, createHeaders(PersistenceServiceStubConfiguration.CLIENT_NAME, PersistenceServiceStubConfiguration.PASSWORD));
     when:
     ResponseEntity<String> answer = client.exchange('http://localhost:' + port + '/check_token',
         HttpMethod.POST,
@@ -208,7 +210,7 @@ class AuthorizationAPISpec extends Specification {
     then:
     assert answer.statusCode == HttpStatus.OK
     assert token.jti.split('\\.').length == 3
-    assert token.clientId == ProvidersConfiguration.CLIENT_NAME+'3'
+    assert token.clientId == PersistenceServiceStubConfiguration.CLIENT_NAME+'3'
   }
 
   private HttpHeaders createHeaders(String username, String password) {

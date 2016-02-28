@@ -1,22 +1,16 @@
 package ru.ratauth.server.configuration
 
-import groovy.transform.CompileStatic
-import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
-import ratpack.spring.config.EnableRatpack
-import ru.ratauth.entities.*
-import ru.ratauth.exception.AuthorizationException
+import ru.ratauth.entities.AuthClient
+import ru.ratauth.entities.AuthEntry
+import ru.ratauth.entities.RelyingParty
+import ru.ratauth.entities.Session
+import ru.ratauth.entities.Status
+import ru.ratauth.entities.Token
+import ru.ratauth.entities.TokenCache
 import ru.ratauth.exception.ExpiredException
-import ru.ratauth.exception.RegistrationException
-import ru.ratauth.providers.auth.AuthProvider
-import ru.ratauth.providers.auth.dto.AuthInput
-import ru.ratauth.providers.auth.dto.AuthResult
-import ru.ratauth.providers.auth.dto.BaseAuthFields
-import ru.ratauth.providers.registrations.RegistrationProvider
-import ru.ratauth.providers.registrations.dto.RegInput
-import ru.ratauth.providers.registrations.dto.RegResult
 import ru.ratauth.server.utils.DateUtils
 import ru.ratauth.services.ClientService
 import ru.ratauth.services.SessionService
@@ -27,26 +21,20 @@ import java.time.LocalDateTime
 
 /**
  * @author mgorelikov
- * @since 03/11/15
+ * @since 25/02/16
  */
-@EnableRatpack
 @Configuration
-@SpringBootApplication
-@CompileStatic
-class ProvidersConfiguration {
-
+class PersistenceServiceStubConfiguration {
+  public static final String TOKEN_ID = 'sometoken_id'
+  public static final String CLIENT_SECRET = 'HdC4t2Wpjn/obYj9JHLVwmGzSqQ5SlatYqMF6zuAL0s='
+  public static final String CLIENT_NAME = 'mine'
+  public static final String PASSWORD = 'password'
   public static final String TOKEN = '1234'
   public static final String REFRESH_TOKEN = '12345'
   public static final String CODE = '123'
-  public static final String TOKEN_ID = 'sometoken_id'
-  public static final String PASSWORD = 'password'
-  public static final String CLIENT_NAME = 'mine'
-  public static final String CLIENT_SECRET = 'HdC4t2Wpjn/obYj9JHLVwmGzSqQ5SlatYqMF6zuAL0s='
 
   private static final LocalDateTime NOW = LocalDateTime.now()
   private static final LocalDateTime TOMORROW = NOW.plusDays(1)
-
-  abstract class AbstractAuthProvider implements AuthProvider, RegistrationProvider {}
 
   @Bean
   @Primary
@@ -141,7 +129,7 @@ class ProvidersConfiguration {
                       )] as Set)
           )
         else
-          return Observable.error(new ExpiredException())
+          return Observable.error(new ExpiredException('Auth code expired'))
       }
 
 
@@ -208,38 +196,6 @@ class ProvidersConfiguration {
       @Override
       Observable<Boolean> invalidateForClient(String clientId) {
         return null
-      }
-    }
-  }
-
-  @Bean(name = 'STUB')
-  @Primary
-  public AbstractAuthProvider authProvider() {
-    return new AbstractAuthProvider() {
-      @Override
-      Observable<AuthResult> authenticate(AuthInput input) {
-        if (input.data.get(BaseAuthFields.LOGIN.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
-          return Observable.just(AuthResult.builder().data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map).status(AuthResult.Status.SUCCESS).build())
-        else
-          return Observable.error(new AuthorizationException("Authorization failed"));
-      }
-
-      @Override
-      boolean isAuthCodeSupported() {
-        return false
-      }
-
-      @Override
-      Observable<RegResult> register(RegInput input) {
-        if (input.data.get(BaseAuthFields.LOGIN.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
-          return Observable.just(RegResult.builder().data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map).status(RegResult.Status.SUCCESS).build())
-        else
-          return Observable.error(new RegistrationException("Registration failed"));
-      }
-
-      @Override
-      boolean isRegCodeSupported() {
-        return false
       }
     }
   }
