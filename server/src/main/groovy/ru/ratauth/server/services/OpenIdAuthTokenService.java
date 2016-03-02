@@ -3,22 +3,17 @@ package ru.ratauth.server.services;
 import com.nimbusds.jose.JOSEException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import ru.ratauth.entities.AuthzEntry;
-import ru.ratauth.entities.RelyingParty;
-import ru.ratauth.entities.Token;
+import org.springframework.util.StringUtils;
+import ru.ratauth.entities.*;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.interaction.*;
+import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.AuthProvider;
 import ru.ratauth.providers.auth.dto.AuthInput;
-import ru.ratauth.server.secutiry.OAuthIssuerImpl;
 import ru.ratauth.server.secutiry.OAuthSystemException;
-import ru.ratauth.server.secutiry.UUIDValueGenerator;
-import ru.ratauth.services.AuthzEntryService;
-import ru.ratauth.services.RelyingPartyService;
 import rx.Observable;
 
 import java.util.Date;
@@ -31,106 +26,94 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OpenIdAuthTokenService implements AuthTokenService {
-  private final RelyingPartyService relyingPartyService;
-  private final AuthzEntryService authzEntryService;
   private final Map<String, AuthProvider> authProviders;
-  private final AuthorizeService authorizeService;
-  private final TokenProcessor tokenProcessor;
-  private final OAuthIssuerImpl codeGenerator = new OAuthIssuerImpl(new UUIDValueGenerator());
+  private final AuthSessionService authSessionService;
+  private final TokenCacheService tokenCacheService;
+  private final AuthClientService clientService;
 
-  @Value("${auth.token.ttl}")
-  private Long tokenTTL;
-
-  //TODO refresh token
   @Override
   @SneakyThrows
   public Observable<TokenResponse> getToken(TokenRequest oauthRequest) throws OAuthSystemException, JOSEException {
-    final AuthzEntry authzEntry = loadAuthzEntry(oauthRequest);
-
-    return relyingPartyService.getRelyingParty(authzEntry.getRelyingParty())
-        .filter(relyingParty -> authRelyingParty(oauthRequest, authzEntry, relyingParty))
-        .flatMap(relyingParty -> createTokenResponse(authzEntry, relyingParty));
+    final Observable<RelyingParty> relyingPartyObservable = clientService.loadAndAuthRelyingParty(oauthRequest.getClientId(), oauthRequest.getClientSecret(), true);
+    return relyingPartyObservable
+        .flatMap(rp -> loadSession(oauthRequest, rp).map(ses -> new ImmutablePair<>(rp, ses)))
+        .doOnNext(rpSess -> authSessionService.addToken(rpSess.getRight(), rpSess.getLeft()))
+        .flatMap(rpSess -> createIdTokenAndResponse(rpSess.getRight(), rpSess.getLeft()));
   }
 
   @Override
-  public Observable<TokenResponse> createTokenResponse(AuthzEntry authzEntry, RelyingParty relyingParty) {
-    return createToken(authzEntry, relyingParty)
-        .map(entry -> convertToResponse(authzEntry))
+  public Observable<TokenResponse> createIdTokenAndResponse(Session session, RelyingParty relyingParty) {
+    AuthEntry entry = session.getEntry(relyingParty.getName()).get();
+    return tokenCacheService.getToken(session, relyingParty, entry)
+        .map(idToken -> new ImmutablePair<>(entry, idToken))
+        .map(entryToken -> convertToResponse(entryToken.getLeft(), entryToken.getRight().getIdToken()))
         .switchIfEmpty(Observable.error(new AuthorizationException()));
   }
 
   @Override
-  public Observable<AuthzEntry> createToken(AuthzEntry authzEntry, RelyingParty relyingParty) {
-    Date now = new Date();
-    Token token = Token.builder()
-        .created(now)
-        .token(codeGenerator.accessToken())
-        .TTL(tokenTTL).build();
-    //create jwt token
-    String idToken = tokenProcessor.createToken(relyingParty.getSecret(), relyingParty.getBaseAddress(),
-        now, token.expiresIn(), token.getToken(),
-        authzEntry.getResourceServers(), tokenProcessor.extractUserInfo(authzEntry.getUserInfo(), relyingParty.getSecret()));
-    token.setIdToken(idToken);
-    authzEntry.addToken(token);
-    return authzEntryService.save(authzEntry);
-  }
-
-  private TokenResponse convertToResponse(AuthzEntry authzEntry) {
-    Token token = authzEntry.getLatestToken();
-    return TokenResponse.builder()
-        .accessToken(token.getToken())
-        .expiresIn(token.expiresIn())
-        .tokenType(TokenType.BEARER.toString())
-        .idToken(token.getIdToken())
-        .refreshToken(authzEntry.getRefreshToken())
-        .build();
-  }
-
-  private AuthzEntry loadAuthzEntry(TokenRequest oauthRequest) {
-    Observable<AuthzEntry> authObs;
-    RelyingParty relyingParty = loadRelyingParty(oauthRequest);
-    AuthProvider provider = authProviders.get(relyingParty.getIdentityProvider());
-    if (provider.isAuthCodeSupported()) {
-      authObs = provider.authenticate(AuthInput.builder().relyingParty(relyingParty.getName()).data(oauthRequest.getAuthData()).build())
-          .flatMap(res -> authorizeService.createEntry(relyingParty, oauthRequest.getAuds(), null , res.getData()));
-    } else if (oauthRequest.getGrantType() == GrantType.AUTHORIZATION_CODE)
-      authObs = authzEntryService.getByValidCode(oauthRequest.getAuthzCode(), new Date());
-    else if (oauthRequest.getGrantType() == GrantType.REFRESH_TOKEN || oauthRequest.getGrantType() == GrantType.AUTHENTICATION_TOKEN)
-      authObs = authzEntryService.getByValidRefreshToken(oauthRequest.getRefreshToken(), new Date());
-    else throw new AuthorizationException("Invalid grant type");
-    return authObs.switchIfEmpty(Observable.error(new AuthorizationException("Authz entry not found")))
-        .toBlocking().single();
-  }
-
-  private boolean authRelyingParty(TokenRequest oauthRequest, AuthzEntry authCode, RelyingParty relyingParty) {
-    return oauthRequest.getClientId().equals(relyingParty.getId())
-        && oauthRequest.getClientSecret().equals(relyingParty.getPassword())
-        && (authCode == null || relyingParty.getResourceServers().containsAll(authCode.getResourceServers()));
-  }
-
-  private RelyingParty loadRelyingParty(TokenRequest request) {
-    return relyingPartyService.getRelyingParty(request.getClientId())
-        .filter(rp -> authRelyingParty(request,null,rp))
-        .filter(rp -> request.getAuds() == null || rp.getResourceServers().containsAll(request.getAuds()))//check rights
-        .switchIfEmpty(Observable.error(new AuthorizationException("RelyingParty not found")))
-        .toBlocking().single();
-  }
-
-  @Override
   public Observable<CheckTokenResponse> checkToken(CheckTokenRequest oauthRequest) {
-    String accessToken = oauthRequest.getToken();
-    return authzEntryService.getByValidToken(accessToken, new Date())
-        .filter(authzEntry -> !CollectionUtils.isEmpty(authzEntry.getTokens()))
-        .map(entry -> {
+    return authSessionService.getByValidToken(oauthRequest.getToken(), new Date())
+        .zipWith(loadRelyingParty(oauthRequest),
+            (session, client) -> new ImmutablePair<>(session, client))
+        .flatMap(sessionClient -> {
+          //load idToken(jwt) from cache or create new
+          AuthEntry entry = sessionClient.getLeft().getEntries().iterator().next();
+          return tokenCacheService.getToken(sessionClient.getLeft(), sessionClient.getRight(), entry)
+              .map(token -> new ImmutablePair<>(entry, token));
+        })
+        .map(entryToken -> {
+              AuthEntry entry = entryToken.getLeft();
               Token token = entry.getTokens().iterator().next();
               return CheckTokenResponse.builder()
-                  .idToken(token.getIdToken())
-                  .clientId(entry.getRelyingParty())
-                  .resourceServers(entry.getResourceServers())
-                  .expiresIn(token.expiresIn())
+                  .idToken(entryToken.getRight().getIdToken())
+                  .clientId(entryToken.getRight().getClient())
+                  .expiresIn(token.getExpiresIn().getTime())
                   .scopes(entry.getScopes())
                   .build();
             }
-        ).switchIfEmpty(Observable.error(new AuthorizationException("Token not found")));
+        )
+        .switchIfEmpty(Observable.error(new AuthorizationException("Token not found")));
+  }
+
+
+  private TokenResponse convertToResponse(AuthEntry authEntry, String idToken) {
+    final Token token = authEntry.getLatestToken().get();
+    return TokenResponse.builder()
+        .accessToken(token.getToken())
+        .expiresIn(token.getExpiresIn().getTime())
+        .tokenType(TokenType.BEARER.toString())
+        .idToken(idToken)
+        .refreshToken(authEntry.getRefreshToken())
+        .build();
+  }
+
+  private Observable<Session> loadSession(TokenRequest oauthRequest, RelyingParty relyingParty) {
+    Observable<Session> authObs;
+    AuthProvider provider = authProviders.get(relyingParty.getIdentityProvider());
+    if (provider.isAuthCodeSupported()) {
+      authObs = provider.authenticate(AuthInput.builder().relyingParty(relyingParty.getName()).data(oauthRequest.getAuthData()).build())
+          .flatMap(res -> authSessionService.createSession(relyingParty, res.getData(), oauthRequest.getScopes(), null));
+    } else if (oauthRequest.getGrantType() == GrantType.AUTHORIZATION_CODE)
+      authObs = authSessionService.getByValidCode(oauthRequest.getAuthzCode(), new Date());
+    else if (oauthRequest.getGrantType() == GrantType.REFRESH_TOKEN || oauthRequest.getGrantType() == GrantType.AUTHENTICATION_TOKEN)
+      authObs = authSessionService.getByValidRefreshToken(oauthRequest.getRefreshToken(), new Date());
+    else throw new AuthorizationException("Invalid grant type");
+    return authObs.switchIfEmpty(Observable.error(new AuthorizationException("Session not found")));
+  }
+
+  /**
+   * Loads and authenticate requester(authClient) and authClient identified by externalClientId
+   *
+   * @param request input checkTokenRequest
+   * @return requester or externalClientId in case it is defined in request
+   */
+  private Observable<AuthClient> loadRelyingParty(CheckTokenRequest request) {
+    Observable<AuthClient> res = clientService.loadAndAuthClient(request.getClientId(), request.getClientSecret(), true);
+    if (!StringUtils.isEmpty(request.getExternalClientId()))
+      //since we want only to authenticate requester
+      return res.zipWith(clientService.loadClient(request.getExternalClientId()),
+          (client, externalClient) -> externalClient);
+    else
+      return res;
   }
 }

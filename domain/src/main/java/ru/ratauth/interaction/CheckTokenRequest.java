@@ -15,4 +15,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CheckTokenRequest {
   private String token;
+  private String clientId;
+  private String clientSecret;
+  private String externalClientId;
+
 }

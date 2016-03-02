@@ -4,7 +4,7 @@ package ru.ratauth.exception;
  * @author mgorelikov
  * @since 10/11/15
  */
-public class AuthorizationException extends RuntimeException{
+public class AuthorizationException extends BaseAuthServerException{
 
   public AuthorizationException() {
   }
@@ -19,9 +19,5 @@ public class AuthorizationException extends RuntimeException{
 
   public AuthorizationException(Throwable cause) {
     super(cause);
-  }
-
-  public AuthorizationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-    super(message, cause, enableSuppression, writableStackTrace);
   }
 }

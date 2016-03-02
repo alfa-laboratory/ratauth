@@ -20,5 +20,9 @@ public class AuthzRequest {
   private String clientSecret;
   private String redirectURI;
   private Map<String, String> authData;
-  private @Singular Set<String> auds;
+  //fields for cross-authorization
+  private GrantType grantType;
+  private String refreshToken;
+  private String externalClientId;
+
 }

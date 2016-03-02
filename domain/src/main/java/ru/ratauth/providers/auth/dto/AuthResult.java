@@ -22,7 +22,6 @@ public class AuthResult {
 
   public enum Status {
     SUCCESS,
-    FAILED,
     NEED_APPROVAL
   }
 }

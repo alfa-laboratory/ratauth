@@ -3,23 +3,23 @@ package ru.ratauth.entities;
 import lombok.*;
 
 import java.util.Date;
-import java.util.Set;
 
 /**
  * @author mgorelikov
  * @since 01/11/15
+ *
+ * Entity for access token
  */
 @Builder
 @Data
+@EqualsAndHashCode(exclude = {"created", "expiresIn"})
 @AllArgsConstructor
 @NoArgsConstructor
 public class Token {
+  /**
+   * unique
+   */
   private String token;
   private Date created;
-  private Long TTL;
-  private String idToken;//optional jwt
-
-  public Long expiresIn() {
-    return created.getTime() + TTL;
-  }
+  private Date expiresIn;
 }

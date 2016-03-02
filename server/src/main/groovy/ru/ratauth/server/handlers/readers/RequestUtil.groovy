@@ -1,8 +1,7 @@
-package ru.ratauth.server.utils
+package ru.ratauth.server.handlers.readers
 
 import ratpack.http.Headers
 import ratpack.util.MultiValueMap
-import ru.ratauth.server.handlers.readers.ReadRequestException
 import ru.ratauth.utils.StringUtils
 
 /**

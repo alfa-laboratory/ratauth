@@ -1,0 +1,21 @@
+@startuml
+left to right direction
+skinparam packageStyle rect
+
+:Relying party: as RP
+:Client: as client
+:Resource Server: as RS
+
+rectangle AuthServer {
+    RP --> (Authorize)
+    client --> (Authorize)
+    RP --> (GetToken)
+    RS --> (CheckToken)
+
+    (Implicit) .> (Authorize): extends
+    (AuthCode) .> (Authorize): extends
+    (RefreshToken) .> (GetToken): extends
+    (CrossAuthorize) .> (GetToken): extends
+    (AuthCode) .> (GetToken): include
+}
+@enduml

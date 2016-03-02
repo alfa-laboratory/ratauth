@@ -25,7 +25,6 @@ public class CheckTokenDTO {
 
   public CheckTokenDTO(CheckTokenResponse response) {
     this.jti = response.getIdToken();
-    this.aud = response.getResourceServers();
     this.exp = response.getExpiresIn();
     this.clientId = response.getClientId();
     this.scopes = response.getScopes();

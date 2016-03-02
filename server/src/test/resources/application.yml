@@ -1,4 +1,5 @@
 auth:
+ master_secret: "HdC4t2Wpjn/obYj9JHLVwmGzSqQ5SlatYqMF6zuAL0s="
  secret:
   code: "HdC4t2Wpjn/obYj9JHLVwmGzSqQ5SlatYqMF6zuAL0s="
   ttl: 2678400

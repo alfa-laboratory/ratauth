@@ -57,6 +57,7 @@ allprojects {
         entry 'spring-cloud-config-client'
         entry 'spring-cloud-starter-eureka'
       }
+      dependency 'org.apache.commons:commons-lang3:3.4'
     }
   }
 }
@@ -66,7 +67,8 @@ subprojects {
   apply plugin: 'groovy'
   apply plugin: 'maven-publish'
   apply plugin: 'com.jfrog.artifactory'
-  version = "0.0.3"
+  version = "0.1.0"
+  group = 'ru.ratauth'
 
   sourceCompatibility = 1.8
   targetCompatibility = 1.8
@@ -75,10 +77,18 @@ subprojects {
     archiveName = project.name + ".jar"
   }
 
+  task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+  }
+
   publishing {
     publications {
       mavenJava(MavenPublication) {
         from components.java
+
+        artifact sourceJar {
+          classifier "sources"
+        }
       }
     }
   }

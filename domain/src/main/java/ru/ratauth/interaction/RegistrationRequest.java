@@ -23,5 +23,5 @@ public class RegistrationRequest {
   private AuthzResponseType responseType;
   private GrantType grantType;
   private Map<String,String> data;
-  private Set<String> auds;
+  private Set<String> scopes;
 }

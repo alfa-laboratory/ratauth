@@ -1,6 +1,9 @@
 package ru.ratauth.providers.registrations.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
@@ -18,7 +21,6 @@ public class RegResult {
 
   public enum Status {
     SUCCESS,
-    FAILED,
     NEED_APPROVAL
   }
 }

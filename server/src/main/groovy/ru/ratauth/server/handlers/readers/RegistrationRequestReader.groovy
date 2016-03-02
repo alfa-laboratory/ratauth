@@ -4,7 +4,8 @@ import ratpack.form.Form
 import ratpack.http.Headers
 import ru.ratauth.interaction.GrantType
 import ru.ratauth.interaction.RegistrationRequest
-import static ru.ratauth.server.utils.RequestUtil.*
+
+import static ru.ratauth.server.handlers.readers.RequestUtil.*
 
 /**
  * @author mgorelikov

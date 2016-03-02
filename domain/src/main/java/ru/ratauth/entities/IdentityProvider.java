@@ -14,7 +14,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class IdentityProvider {
+  /**
+   * unique primary key
+   */
   private String id;
+  /**
+   * unique name
+   */
   private String name;
-  private String type;
 }

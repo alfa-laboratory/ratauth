@@ -1,10 +1,12 @@
 package ru.ratauth.server.handlers.readers;
 
+import ru.ratauth.exception.BaseAuthServerException;
+
 /**
  * @author djassan
  * @since 06/11/15
  */
-public class ReadRequestException extends RuntimeException {
+public class ReadRequestException extends BaseAuthServerException {
 
   private static final String BASE_TEXT ="Required field not found: ";
   public ReadRequestException() {
