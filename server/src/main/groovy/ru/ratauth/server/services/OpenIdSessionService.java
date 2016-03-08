@@ -15,9 +15,7 @@ import rx.Observable;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author djassan
@@ -75,15 +73,15 @@ public class OpenIdSessionService implements AuthSessionService {
         .relyingParty(relyingParty.getName())
         .authType(AuthType.COMMON)
         .redirectUrl(redirectUrl)
-        .token(token)
         .build();
+    authEntry.addToken(token);
     final Session session = Session.builder()
         .identityProvider(relyingParty.getIdentityProvider())
         .status(Status.ACTIVE)
         .created(DateUtils.fromLocal(now))
         .expiresIn(DateUtils.fromLocal(sessionExpires))
         .userInfo(jwtInfo)
-        .entry(authEntry)
+        .entries(new HashSet<>(Arrays.asList(authEntry)))
         .build();
     return sessionService.create(session);
   }
@@ -97,7 +95,8 @@ public class OpenIdSessionService implements AuthSessionService {
         .expiresIn(DateUtils.fromLocal(tokenExpires))
         .created(DateUtils.fromLocal(now))
         .build();
-    return sessionService.addToken(session.getId(), relyingParty.getName(), token);
+    return sessionService.addToken(session.getId(), relyingParty.getName(), token)
+        .doOnNext(subs -> session.getEntry(relyingParty.getName()).ifPresent(entry -> entry.addToken(token)));
   }
 
   @Override

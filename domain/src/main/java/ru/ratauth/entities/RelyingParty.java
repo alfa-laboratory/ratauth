@@ -27,6 +27,5 @@ public class RelyingParty extends AuthClient {
   /**
    * Set of unique grants (means only internal grants, it's not resource server scope)
    */
-  @Singular
   private Set<String> grants;
 }

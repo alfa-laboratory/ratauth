@@ -35,7 +35,7 @@ class AuthorizationAPISpec extends Specification {
 
   def 'request authorization code'() {
     given:
-    def query = 'response_type=code&client_id='+PersistenceServiceStubConfiguration.CLIENT_NAME+'&scope=rs.read&login=login&password=password'
+    def query = 'response_type=code&client_id='+PersistenceServiceStubConfiguration.CLIENT_NAME+'&scope=rs.read&username=login&password=password'
     HttpHeaders requestHeaders = new HttpHeaders();
     requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
     HttpEntity<String> requestEntity =
@@ -52,7 +52,7 @@ class AuthorizationAPISpec extends Specification {
 
   def 'bad request authorization code'() {
     given:
-    def query = 'login=login&password=password'
+    def query = 'login=username&password=password'
     HttpHeaders requestHeaders = new HttpHeaders();
     requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
     HttpEntity<String> requestEntity =
@@ -70,7 +70,7 @@ class AuthorizationAPISpec extends Specification {
 
   def 'bad requisites for authorization code'() {
     given:
-    def query = 'response_type=code&client_id='+PersistenceServiceStubConfiguration.CLIENT_NAME+'&scope=rs.read&login=login&password=bad'
+    def query = 'response_type=code&client_id='+PersistenceServiceStubConfiguration.CLIENT_NAME+'&scope=rs.read&username=login&password=bad'
     HttpHeaders requestHeaders = new HttpHeaders();
     requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
     HttpEntity<String> requestEntity =
@@ -124,7 +124,7 @@ class AuthorizationAPISpec extends Specification {
 
   def 'implicit request token'() {
     given:
-    def query = 'response_type=token&scope=read&login=login&password=password'
+    def query = 'response_type=token&scope=read&username=login&password=password'
     HttpHeaders requestHeaders = new HttpHeaders();
     requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
     HttpEntity<String> requestEntity =

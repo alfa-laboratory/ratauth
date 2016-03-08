@@ -22,18 +22,18 @@ public class AuthEntry {
   private Date created;
   private String refreshToken;
   private Date refreshTokenExpiresIn;
-  @Singular
   private Set<String> scopes;
   /**
    * unique name
    */
   private String relyingParty;
-  @Singular
   private Set<Token> tokens;
   private AuthType authType;
   private String redirectUrl;
 
   public void addToken(Token token) {
+    if(token == null)
+      return;
     if (this.tokens == null || this.tokens.isEmpty())
       this.tokens = new HashSet<>();
     this.tokens.add(token);
