@@ -11,6 +11,10 @@ public class ExceptionUtils {
   }
 
   private static <T extends Throwable> T searchThrowable(Throwable throwable, Class<T> clazz, int maxDepth, int count) {
+    if(throwable == null)
+      return null;
+    if(clazz.isAssignableFrom(throwable.getClass()))
+      return clazz.cast(throwable);
     Throwable cause = throwable.getCause();
     if (cause != null && clazz.isAssignableFrom(cause.getClass()))
       return clazz.cast(cause);
@@ -20,7 +24,6 @@ public class ExceptionUtils {
       else
         return searchThrowable(cause, clazz, maxDepth, count + 1);
     }
-
   }
 
 }

@@ -2,6 +2,7 @@ package ru.ratauth.server.handlers
 
 import groovy.util.logging.Slf4j
 import io.netty.handler.codec.http.HttpResponseStatus
+import org.springframework.stereotype.Component
 import ratpack.error.ServerErrorHandler
 import ratpack.handling.Context
 import ru.ratauth.exception.AuthorizationException
@@ -15,6 +16,7 @@ import ru.ratauth.server.utils.ExceptionUtils
  * @since 19/11/15
  */
 @Slf4j
+@Component
 class AuthErrorHandler implements ServerErrorHandler {
   public static final int AUTHENTICATION_TIMEOUT = 419
   public static final int MAX_EXCEPTION_DEPTH = 10
@@ -30,7 +32,7 @@ class AuthErrorHandler implements ServerErrorHandler {
     else if (exception in AuthorizationException.class)
       sendError(context, HttpResponseStatus.FORBIDDEN.code(), exception.getMessage())
     else
-      context.error(exception)
+      context.error(throwable)
 
     log.error("Auth error: " + throwable.getMessage())
     log.debug("Error stacktrace:", throwable)
