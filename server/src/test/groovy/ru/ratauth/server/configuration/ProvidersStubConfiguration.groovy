@@ -42,7 +42,7 @@ class ProvidersStubConfiguration {
     return new AbstractAuthProvider() {
       @Override
       Observable<AuthResult> authenticate(AuthInput input) {
-        if (input.data.get(BaseAuthFields.LOGIN.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
+        if (input.data.get(BaseAuthFields.USERNAME.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
           return Observable.just(AuthResult.builder().data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map).status(AuthResult.Status.SUCCESS).build())
         else
           return Observable.error(new AuthorizationException("Authorization failed"));
@@ -55,7 +55,7 @@ class ProvidersStubConfiguration {
 
       @Override
       Observable<RegResult> register(RegInput input) {
-        if (input.data.get(BaseAuthFields.LOGIN.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
+        if (input.data.get(BaseAuthFields.USERNAME.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
           return Observable.just(RegResult.builder().data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map).status(RegResult.Status.SUCCESS).build())
         else
           return Observable.error(new RegistrationException("Registration failed"));

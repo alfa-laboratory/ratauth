@@ -37,7 +37,6 @@ public class Session {
    * for optional process that checks user status in background
    */
   private Date lastCheck;
-  @Singular
   private Set<AuthEntry> entries;
 
   public Optional<AuthEntry> getEntry(String relyingPartyId) {

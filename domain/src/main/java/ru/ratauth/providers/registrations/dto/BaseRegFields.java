@@ -5,7 +5,7 @@ package ru.ratauth.providers.registrations.dto;
  * @since 28/01/16
  */
 public enum BaseRegFields {
-  LOGIN,
+  USERNAME,
   CODE;
 
   public String val() {

@@ -9,6 +9,7 @@ import ru.ratauth.providers.auth.dto.BaseAuthFields;
  */
 public enum Fields {
   PHONE("phone"),
+  USERNAME(BaseAuthFields.USERNAME.val()),
   USER_ID(BaseAuthFields.USER_ID.val());
   private String value;
 

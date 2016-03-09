@@ -6,6 +6,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.ratauth.entities.*;
+import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.interaction.AuthzRequest;
 import ru.ratauth.interaction.AuthzResponse;
 import ru.ratauth.interaction.AuthzResponseType;
@@ -52,10 +53,13 @@ public class OpenIdAuthorizeService implements AuthorizeService {
   @Override
   public Observable<AuthzResponse> crossAuthenticate(AuthzRequest request) {
     return Observable.zip(
-          clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), true),
-          clientService.loadRelyingParty(request.getExternalClientId()),
-          sessionService.getByValidRefreshToken(request.getRefreshToken(), new Date()),
-          (oldRP, newRP, session) -> new ImmutablePair<>(newRP, session))
+        clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), true)
+            .switchIfEmpty(Observable.error(new AuthorizationException("Credentials are wrong"))),
+        clientService.loadRelyingParty(request.getExternalClientId())
+            .switchIfEmpty(Observable.error(new AuthorizationException("Client not found"))),
+        sessionService.getByValidRefreshToken(request.getRefreshToken(), new Date())
+            .switchIfEmpty(Observable.error(new AuthorizationException("Token not found"))),
+        (oldRP, newRP, session) -> new ImmutablePair<>(newRP, session))
         .flatMap(rpSession -> sessionService.addEntry(rpSession.getRight(), rpSession.getLeft(), request.getScopes(), request.getRedirectURI()))
         .map(session -> buildResponse(request.getRedirectURI(), request.getExternalClientId(), session, null));
   }

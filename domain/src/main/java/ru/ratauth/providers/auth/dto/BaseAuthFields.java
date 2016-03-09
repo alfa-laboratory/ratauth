@@ -6,7 +6,7 @@ package ru.ratauth.providers.auth.dto;
  * Just basic fields
  */
 public enum BaseAuthFields {
-  LOGIN,
+  USERNAME,
   USER_ID,//constants for standard user info
   PASSWORD,
   CODE;

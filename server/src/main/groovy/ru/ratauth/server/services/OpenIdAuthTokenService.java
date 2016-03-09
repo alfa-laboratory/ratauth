@@ -6,9 +6,11 @@ import lombok.SneakyThrows;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import ru.ratauth.entities.*;
 import ru.ratauth.exception.AuthorizationException;
+import ru.ratauth.exception.ExpiredException;
 import ru.ratauth.interaction.*;
 import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.AuthProvider;
@@ -37,7 +39,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     final Observable<RelyingParty> relyingPartyObservable = clientService.loadAndAuthRelyingParty(oauthRequest.getClientId(), oauthRequest.getClientSecret(), true);
     return relyingPartyObservable
         .flatMap(rp -> loadSession(oauthRequest, rp).map(ses -> new ImmutablePair<>(rp, ses)))
-        .doOnNext(rpSess -> authSessionService.addToken(rpSess.getRight(), rpSess.getLeft()))
+        .flatMap(rpSess -> authSessionService.addToken(rpSess.getRight(), rpSess.getLeft()).map(res -> rpSess))
         .flatMap(rpSess -> createIdTokenAndResponse(rpSess.getRight(), rpSess.getLeft()));
   }
 
@@ -90,14 +92,16 @@ public class OpenIdAuthTokenService implements AuthTokenService {
   private Observable<Session> loadSession(TokenRequest oauthRequest, RelyingParty relyingParty) {
     Observable<Session> authObs;
     AuthProvider provider = authProviders.get(relyingParty.getIdentityProvider());
-    if (provider.isAuthCodeSupported()) {
+    if (provider.isAuthCodeSupported() && oauthRequest.getGrantType() == GrantType.AUTHORIZATION_CODE) {
       authObs = provider.authenticate(AuthInput.builder().relyingParty(relyingParty.getName()).data(oauthRequest.getAuthData()).build())
           .flatMap(res -> authSessionService.createSession(relyingParty, res.getData(), oauthRequest.getScopes(), null));
     } else if (oauthRequest.getGrantType() == GrantType.AUTHORIZATION_CODE)
-      authObs = authSessionService.getByValidCode(oauthRequest.getAuthzCode(), new Date());
+      authObs = authSessionService.getByValidCode(oauthRequest.getAuthzCode(), new Date())
+          //check that session belongs to target relying party and contains no tokens
+          .filter(sess -> sess.getEntry(relyingParty.getName()).map(entry -> CollectionUtils.isEmpty(entry.getTokens())).orElse(false));
     else if (oauthRequest.getGrantType() == GrantType.REFRESH_TOKEN || oauthRequest.getGrantType() == GrantType.AUTHENTICATION_TOKEN)
       authObs = authSessionService.getByValidRefreshToken(oauthRequest.getRefreshToken(), new Date());
-    else throw new AuthorizationException("Invalid grant type");
+    else return Observable.error(new AuthorizationException("Invalid grant type"));
     return authObs.switchIfEmpty(Observable.error(new AuthorizationException("Session not found")));
   }
 

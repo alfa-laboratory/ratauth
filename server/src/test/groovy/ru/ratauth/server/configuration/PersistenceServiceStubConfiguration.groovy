@@ -122,10 +122,7 @@ class PersistenceServiceStubConfiguration {
                       new AuthEntry(authCode: 'code',
                           relyingParty: CLIENT_NAME,
                           scopes: ['rs.read'] as Set,
-                          refreshToken: REFRESH_TOKEN,
-                          tokens: [new Token(token: TOKEN,
-                              expiresIn: DateUtils.fromLocal(TOMORROW),
-                              created: new Date())] as Set
+                          refreshToken: REFRESH_TOKEN
                       )] as Set)
           )
         else
@@ -185,17 +182,17 @@ class PersistenceServiceStubConfiguration {
 
       @Override
       Observable<Boolean> addToken(String sessionId, String relyingParty, Token token) {
-        return null
+        return Observable.just(true)
       }
 
       @Override
       Observable<Boolean> invalidateSession(String sessionId) {
-        return null
+        return Observable.just(true)
       }
 
       @Override
       Observable<Boolean> invalidateForClient(String clientId) {
-        return null
+        return Observable.just(true)
       }
     }
   }
