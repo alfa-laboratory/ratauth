@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.ratauth.utils.StringUtils;
 
+import java.util.Map;
 import java.util.StringJoiner;
 
 /**
@@ -18,6 +19,8 @@ import java.util.StringJoiner;
 @NoArgsConstructor
 public class AuthzResponse {
   private String code;
+  //intermediate step data for two step authentication
+  private Map<String,Object> data;
   private Long expiresIn;
   private String location;
   private String token;
@@ -43,6 +46,9 @@ public class AuthzResponse {
     }
     if(!StringUtils.isBlank(idToken)) {
       joiner.add("id_token="+idToken.toString());
+    }
+    if(data != null && !data.isEmpty()) {
+      data.entrySet().forEach(entry -> joiner.add(entry.getKey() + "=" + entry.getValue().toString()));
     }
     return location + "?" + joiner.toString();
   }

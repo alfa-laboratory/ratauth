@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.ratauth.entities.*;
+import ru.ratauth.providers.Fields;
 import ru.ratauth.server.secutiry.OAuthIssuerImpl;
 import ru.ratauth.server.secutiry.TokenProcessor;
 import ru.ratauth.server.secutiry.UUIDValueGenerator;
@@ -61,7 +62,7 @@ public class OpenIdSessionService implements AuthSessionService {
 
     final String jwtInfo = tokenProcessor.createToken(masterSecret, null,
         DateUtils.fromLocal(now), DateUtils.fromLocal(sessionExpires),
-        tokenCacheService.extractAudience(scopes), scopes, tokenCacheService.extractSubject(userInfo), userInfo);
+        tokenCacheService.extractAudience(scopes), scopes, userInfo.get(Fields.USER_ID.val()).toString(), userInfo);
 
     final AuthEntry authEntry = AuthEntry.builder()
         .created(DateUtils.fromLocal(now))

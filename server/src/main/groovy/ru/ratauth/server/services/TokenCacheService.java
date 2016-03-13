@@ -26,15 +26,6 @@ public interface TokenCacheService {
   Observable<TokenCache> getToken(Session session, AuthClient authClient, AuthEntry authEntry);
 
   /**
-   * Just extracts from userInfo map field with fixed name(at least now)
-   * @param userInfo
-   * @return
-   */
-  default String extractSubject(Map<String,Object> userInfo) {
-    return userInfo.get(Fields.USER_ID.val()).toString();
-  }
-
-  /**
    * Just extract from scopes like 'some_resource_server.read,some_resource_server.write' audience 'some_resource_server'
    * @param scopes
    * @return audience

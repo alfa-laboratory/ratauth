@@ -9,6 +9,7 @@ import ru.ratauth.server.secutiry.TokenProcessor;
 import rx.Observable;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * @author mgorelikov
@@ -25,6 +26,7 @@ public class JWTTokenCacheService implements TokenCacheService {
   @Override
   public Observable<TokenCache> getToken(Session session, AuthClient authClient, AuthEntry authEntry) {
     final Token token = authEntry.getLatestToken().get();
+    Map<String,Object> tokenInfo = tokenProcessor.extractInfo(session.getUserInfo(), masterSecret);
     return Observable.just(TokenCache.builder()
         .created(new Date())
         .session(session.getId())
@@ -33,7 +35,7 @@ public class JWTTokenCacheService implements TokenCacheService {
         .idToken(tokenProcessor.createToken(
             authClient.getSecret(), token.getToken(), token.getCreated(), token.getExpiresIn(),
             extractAudience(authEntry.getScopes()), authEntry.getScopes(),
-            authClient.getName(), tokenProcessor.extractUserInfo(session.getUserInfo(), masterSecret)
+          tokenInfo.get(TokenProcessor.JWT_SUB).toString(), tokenProcessor.filterUserInfo(tokenInfo)
             )).build());
   }
 }
