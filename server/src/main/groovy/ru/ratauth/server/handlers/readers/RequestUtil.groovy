@@ -1,13 +1,18 @@
 package ru.ratauth.server.handlers.readers
 
+import groovy.transform.CompileStatic
+import ratpack.form.Form
 import ratpack.http.Headers
 import ratpack.util.MultiValueMap
+import ratpack.util.internal.ImmutableDelegatingMultiValueMap
+import ru.ratauth.interaction.GrantType
 import ru.ratauth.utils.StringUtils
 
 /**
  * @author mgorelikov
  * @since 11/11/15
  */
+@CompileStatic
 class RequestUtil {
   private static final String AUTHORIZATION = "Authorization"
 
@@ -23,6 +28,21 @@ class RequestUtil {
     if(StringUtils.isBlank(value) && required)
       throw new ReadRequestException(name)
     value
+  }
+
+  /**
+   * Extracts field according to it's name and return enum corresponding for it's value
+   * @param params input map
+   * @param name name of parameter that must be exctracted
+   * @param required if true and parameter with name was not found throws ReadRequestException
+   * @return extracted param value
+   */
+  public static <T extends Enum>  T extractEnumField(MultiValueMap<String, String> params, String name, boolean required, Class<T> enumType) {
+    String value = extractField(params, name, required)
+    if(!StringUtils.isBlank(value))
+      Enum.valueOf(enumType, value.toUpperCase())
+    else
+      null
   }
 
   /**
