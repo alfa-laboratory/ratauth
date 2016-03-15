@@ -9,7 +9,7 @@ import ru.ratauth.exception.AuthorizationException
 import ru.ratauth.exception.BaseAuthServerException
 import ru.ratauth.exception.ExpiredException
 import ru.ratauth.server.handlers.readers.ReadRequestException
-import ru.ratauth.server.utils.ExceptionUtils
+import ru.ratauth.utils.ExceptionUtils
 
 /**
  * @author mgorelikov
@@ -32,7 +32,7 @@ class AuthErrorHandler implements ServerErrorHandler {
     else if (exception in AuthorizationException.class)
       sendError(context, HttpResponseStatus.FORBIDDEN.code(), exception.getMessage())
     else
-      context.error(throwable)
+      sendError(context, HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), exception.getMessage())
 
     log.error("Auth error: " + throwable.getMessage())
     log.debug("Error stacktrace:", throwable)

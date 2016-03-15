@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.ratauth.exception.RegistrationException;
 import ru.ratauth.interaction.GrantType;
 import ru.ratauth.interaction.RegistrationRequest;
 import ru.ratauth.interaction.TokenResponse;
@@ -30,8 +31,7 @@ public class OpenIdRegistrationService implements RegistrationService {
   public Observable<RegResult> register(RegistrationRequest request) {
     return authClientService.loadRelyingParty(request.getClientId())
         .flatMap(rp -> registerProviders.get(rp.getIdentityProvider())
-                .register(RegInput.builder().relyingParty(rp.getName()).data(request.getData()).build())
-        );
+                .register(RegInput.builder().relyingParty(rp.getName()).data(request.getData()).build()));
   }
 
   @Override
@@ -39,11 +39,9 @@ public class OpenIdRegistrationService implements RegistrationService {
     return authClientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), GrantType.AUTHORIZATION_CODE != request.getGrantType())
         .flatMap(rp -> registerProviders.get(rp.getName())
                 .register(RegInput.builder().relyingParty(rp.getName()).data(request.getData()).build())
-                .map(regResult -> new ImmutablePair<>(rp, regResult))
-        )
+                .map(regResult -> new ImmutablePair<>(rp, regResult)))
         .flatMap(rpRegResult -> authSessionService.createSession(rpRegResult.getLeft(), rpRegResult.getRight().getData(), request.getScopes(), null)
-                .map(session -> new ImmutablePair<>(rpRegResult.getLeft(), session))
-        )
+                .map(session -> new ImmutablePair<>(rpRegResult.getLeft(), session)))
         .flatMap(rpSession -> tokenService.createIdTokenAndResponse(rpSession.getRight(), rpSession.getLeft()));
   }
 }
