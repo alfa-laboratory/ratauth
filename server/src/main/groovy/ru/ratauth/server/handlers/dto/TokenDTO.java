@@ -1,5 +1,6 @@
 package ru.ratauth.server.handlers.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,6 +16,7 @@ import ru.ratauth.interaction.TokenResponse;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TokenDTO {
   @JsonProperty("access_token")
   private String accessToken;
