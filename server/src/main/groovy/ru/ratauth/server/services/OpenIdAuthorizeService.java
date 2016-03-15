@@ -3,8 +3,10 @@ package ru.ratauth.server.services;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import ru.ratauth.entities.*;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.interaction.AuthzRequest;
@@ -42,12 +44,13 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .map(authRes -> new ImmutablePair<>(rp, authRes)))
         .flatMap(rpAuth ->
             createSession(request, rpAuth.getRight(), rpAuth.getLeft())
-                .map(ses -> new ImmutablePair<>(rpAuth.getLeft(), ses)))
-        .flatMap(rpSession ->
-                createIdToken(rpSession.getLeft(), rpSession.getRight())
-                    .map(idToken -> new ImmutablePair<>(rpSession.getRight(), idToken))
+                .map(ses -> new ImmutableTriple<>(rpAuth.getLeft(), rpAuth.getRight(), ses)))
+        .flatMap(rpAuthSession ->
+            createIdToken(rpAuthSession.getLeft(), rpAuthSession.getRight())
+                .map(idToken -> new ImmutableTriple<>(rpAuthSession.getRight(), rpAuthSession.getMiddle(), idToken))
         )
-        .map(sessionToken -> buildResponse(request.getRedirectURI(), request.getClientId(), sessionToken.getLeft(), sessionToken.right));
+        .map(sessionAuthToken -> buildResponse(request.getRedirectURI(), request.getClientId(),
+            sessionAuthToken.getLeft(), sessionAuthToken.getMiddle(), sessionAuthToken.right));
   }
 
   @Override
@@ -61,13 +64,14 @@ public class OpenIdAuthorizeService implements AuthorizeService {
             .switchIfEmpty(Observable.error(new AuthorizationException("Token not found"))),
         (oldRP, newRP, session) -> new ImmutablePair<>(newRP, session))
         .flatMap(rpSession -> sessionService.addEntry(rpSession.getRight(), rpSession.getLeft(), request.getScopes(), request.getRedirectURI()))
-        .map(session -> buildResponse(request.getRedirectURI(), request.getExternalClientId(), session, null));
+        .map(session -> buildResponse(request.getRedirectURI(), request.getExternalClientId(),
+          session, AuthResult.builder().status(AuthResult.Status.NEED_APPROVAL).build(), null));
   }
 
   private Observable<TokenCache> createIdToken(RelyingParty relyingParty, Session session) {
     Optional<AuthEntry> entry = session.getEntry(relyingParty.getName());
     Optional<Token> token = entry.flatMap(el -> el.getLatestToken());
-    if (session != null && token.isPresent())
+    if (token.isPresent())
       return tokenCacheService.getToken(session, relyingParty, entry.get());
     else
       return Observable.just((TokenCache) null);
@@ -80,7 +84,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
       else//auth code auth
         return sessionService.initSession(relyingParty, authResult.getData(), oauthRequest.getScopes(), oauthRequest.getRedirectURI());
     else
-      return Observable.just((Session) null);//authCode provided by external Auth provider
+      return Observable.just(new Session());//authCode provided by external Auth provider
   }
 
   private Observable<AuthResult> authenticateUser(Map<String, String> authData, String identityProvider, String relyingPartyName) {
@@ -90,16 +94,20 @@ public class OpenIdAuthorizeService implements AuthorizeService {
             .relyingParty(relyingPartyName).build());
   }
 
-  private static AuthzResponse buildResponse(String redirectURL, String clientId, Session session, TokenCache tokenCache) {
+  private static AuthzResponse buildResponse(String redirectURL, String clientId, Session session,AuthResult authResult, TokenCache tokenCache) {
     //in case of autCode sent by authProvider
-    if (session == null) {
+    if (session == null || CollectionUtils.isEmpty(session.getEntries())) {
       return AuthzResponse.builder()
-          .location(redirectURL).build();
+          .location(redirectURL)
+          .data(authResult.getData())
+          .build();
     }
 
     AuthEntry entry = session.getEntry(clientId).get();
     AuthzResponse resp = AuthzResponse.builder()
-        .location(entry.getRedirectUrl()).build();
+        .location(entry.getRedirectUrl())
+        .data(authResult.getData())
+        .build();
     final Optional<Token> tokenOptional = entry.getLatestToken();
     //implicit auth
     if (tokenOptional.isPresent()) {

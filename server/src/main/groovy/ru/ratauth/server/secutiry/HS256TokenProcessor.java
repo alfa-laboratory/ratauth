@@ -61,13 +61,18 @@ public class HS256TokenProcessor implements TokenProcessor {
 
   @Override
   @SneakyThrows
-  public Map<String, Object> extractUserInfo(String jwt, String secret) {
+  public Map<String, Object> extractInfo(String jwt, String secret) {
     SignedJWT signedJWT = SignedJWT.parse(jwt);
     final JWSVerifier verifier = new MACVerifier(Base64Coder.decodeLines(secret));
     if(!signedJWT.verify(verifier))
       throw new JWTVerificationException("User info extraction error");
+    return signedJWT.getJWTClaimsSet().getClaims();
+  }
+
+  @Override
+  public Map<String, Object> filterUserInfo(Map<String, Object> info) {
     Map<String,Object> result = new HashMap<>();
-    signedJWT.getJWTClaimsSet().getClaims().forEach((key,value) -> {
+    info.forEach((key,value) -> {
       if(!JWTClaimsSet.getRegisteredNames().contains(key))
         result.put(key, value);
     });

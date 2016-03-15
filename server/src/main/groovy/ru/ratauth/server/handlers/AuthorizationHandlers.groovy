@@ -94,9 +94,9 @@ class AuthorizationHandlers {
           observe(formPromise).flatMap { params ->
             def request = readRegistrationRequest(params, ctx.request.headers)
             if (GrantType.AUTHORIZATION_CODE == request.getGrantType())
-              registerService.register(request)
-            else
               registerService.finishRegister(request)
+            else
+              registerService.register(request)
           } subscribe {
             res ->
               if (res instanceof RegResult)

@@ -1,9 +1,6 @@
 package ru.ratauth.interaction;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Map;
 import java.util.Set;
@@ -23,5 +20,6 @@ public class RegistrationRequest {
   private AuthzResponseType responseType;
   private GrantType grantType;
   private Map<String,String> data;
+  @Singular
   private Set<String> scopes;
 }

@@ -40,6 +40,8 @@ public class Session {
   private Set<AuthEntry> entries;
 
   public Optional<AuthEntry> getEntry(String relyingPartyId) {
+    if(entries == null)
+      return Optional.empty();
     return entries.stream().filter(it -> it.getRelyingParty().equals(relyingPartyId)).findFirst();
   }
   public Optional<Token> getToken(String relyingPartyId) {
