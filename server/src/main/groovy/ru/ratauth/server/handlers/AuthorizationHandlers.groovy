@@ -44,13 +44,11 @@ class AuthorizationHandlers {
         byMethod {
           get {
             def authorizeService = ctx.get(AuthorizeService.class)
-            authorizeService.authenticate(readAuthzRequest(request.queryParams, ctx.request.headers))
-            .doOnError {
-              throwable ->
-              ctx.get(ServerErrorHandler.class).error(ctx, throwable)
-            } subscribe {
+            authorizeService.authenticate readAuthzRequest(request.queryParams, ctx.request.headers) subscribe ({
               res -> ctx.redirect(HttpResponseStatus.FOUND.code(), res.buildURL())
-            }
+            }, /*on error*/{
+              throwable -> ctx.get(ServerErrorHandler.class).error(ctx, throwable)
+            })
           }
           post {
             def authorizeService = ctx.get(AuthorizeService.class)
@@ -61,11 +59,11 @@ class AuthorizationHandlers {
                 authorizeService.crossAuthenticate(authRequest)
               else
                 authorizeService.authenticate(authRequest)
-            } doOnError { throwable ->
-              ctx.get(ServerErrorHandler.class).error(ctx, throwable)
-            } subscribe {
+            }  subscribe({
               res -> ctx.redirect(HttpResponseStatus.FOUND.code(), res.buildURL())
-            }
+            }, /*on error*/{
+             throwable -> ctx.get(ServerErrorHandler.class).error(ctx, throwable)
+            })
           }
         }
       }
@@ -76,11 +74,11 @@ class AuthorizationHandlers {
           Promise<Form> formPromise = ctx.parse(Form.class);
           observe(formPromise).flatMap { params ->
             authTokenService.getToken readTokenRequest(params, ctx.request.headers)
-          } doOnError { throwable ->
-            ctx.get(ServerErrorHandler.class).error(ctx, throwable)
-          } subscribe {
+          } subscribe ({
             res -> ctx.render json(new TokenDTO(res))
-          }
+          }, /*on error*/{
+            throwable -> ctx.get(ServerErrorHandler.class).error(ctx, throwable)
+          })
         }
       }
 
@@ -90,11 +88,11 @@ class AuthorizationHandlers {
           Promise<Form> formPromise = ctx.parse(Form.class);
           observe(formPromise).flatMap { params ->
             authTokenService.checkToken readCheckTokenRequest(params, ctx.request.headers)
-          } doOnError { throwable ->
-            ctx.get(ServerErrorHandler.class).error(ctx, throwable)
-          } subscribe {
+          } subscribe ({
             res -> ctx.render json(new CheckTokenDTO(res))
-          }
+          }, /*on error*/{
+            throwable -> ctx.get(ServerErrorHandler.class).error(ctx, throwable)
+          })
         }
       }
 
@@ -108,15 +106,15 @@ class AuthorizationHandlers {
               registerService.finishRegister(request)
             else
               registerService.register(request)
-          } doOnError { throwable ->
-              ctx.get(ServerErrorHandler.class).error(ctx, throwable)
-          } subscribe {
+          } subscribe ({
             res ->
               if (res instanceof RegResult)
                 ctx.render json(new RegisterDTO(res))
               else
                 ctx.render json(new TokenDTO(res))
-          }
+          }, /*on error*/{
+            throwable -> ctx.get(ServerErrorHandler.class).error(ctx, throwable)
+          })
         }
       }
 

@@ -31,8 +31,10 @@ class AuthErrorHandler implements ServerErrorHandler {
       sendError(context, HttpResponseStatus.BAD_REQUEST.code(), exception.getMessage())
     else if (exception in AuthorizationException.class)
       sendError(context, HttpResponseStatus.FORBIDDEN.code(), exception.getMessage())
-    else
+    else if(exception)
       sendError(context, HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), exception.getMessage())
+    else
+      sendError(context, HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), throwable.getMessage())
 
     log.error("Auth error: " + throwable.getMessage())
     log.debug("Error stacktrace:", throwable)

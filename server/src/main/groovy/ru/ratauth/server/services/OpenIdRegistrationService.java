@@ -37,7 +37,7 @@ public class OpenIdRegistrationService implements RegistrationService {
   @Override
   public Observable<TokenResponse> finishRegister(RegistrationRequest request) {
     return authClientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), GrantType.AUTHORIZATION_CODE != request.getGrantType())
-        .flatMap(rp -> registerProviders.get(rp.getName())
+        .flatMap(rp -> registerProviders.get(rp.getIdentityProvider())
                 .register(RegInput.builder().relyingParty(rp.getName()).data(request.getData()).build())
                 .map(regResult -> new ImmutablePair<>(rp, regResult)))
         .flatMap(rpRegResult -> authSessionService.createSession(rpRegResult.getLeft(), rpRegResult.getRight().getData(), request.getScopes(), null)
