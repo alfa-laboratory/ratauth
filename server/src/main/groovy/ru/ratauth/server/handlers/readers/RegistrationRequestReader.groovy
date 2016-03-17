@@ -35,6 +35,7 @@ class RegistrationRequestReader {
     } else {
       builder.clientId(extractField(form, CLIENT_ID, true))
     }
+    builder.data(extractRest(form, BASE_FIELDS))
     return builder.build()
   }
 }

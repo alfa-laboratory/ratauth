@@ -1,5 +1,6 @@
 package ru.ratauth.server.handlers.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import ru.ratauth.interaction.CheckTokenResponse;
@@ -14,6 +15,7 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CheckTokenDTO {
   private String jti;
   private @Singular("auds") Set<String> aud;
