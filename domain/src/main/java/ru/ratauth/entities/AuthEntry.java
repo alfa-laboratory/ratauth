@@ -44,7 +44,7 @@ public class AuthEntry {
       return Optional.empty();
     return tokens.stream()
         .filter(el -> el != null)
-        .sorted((el1, el2) -> el1.getCreated().compareTo(el2.getCreated()))
+        .sorted((el1, el2) -> el2.getExpiresIn().compareTo(el1.getExpiresIn()))
         .findFirst();
   }
 }
