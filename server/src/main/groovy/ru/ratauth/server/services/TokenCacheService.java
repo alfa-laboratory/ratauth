@@ -26,6 +26,12 @@ public interface TokenCacheService {
   Observable<TokenCache> getToken(Session session, AuthClient authClient, AuthEntry authEntry);
 
   /**
+   * Extract user info from jwtToken signed by master_secret
+   * @param jwtToken input jwt token
+   * @return extracted user info
+   */
+  Map<String,Object> extractUserInfo(String jwtToken);
+  /**
    * Just extract from scopes like 'some_resource_server.read,some_resource_server.write' audience 'some_resource_server'
    * @param scopes
    * @return audience
@@ -33,4 +39,5 @@ public interface TokenCacheService {
   default Set<String> extractAudience(Set<String> scopes) {
     return scopes.stream().map(scope -> scope.split("\\.")[0]).collect(Collectors.toSet());
   }
+
 }

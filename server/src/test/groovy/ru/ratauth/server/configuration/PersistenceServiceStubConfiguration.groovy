@@ -157,6 +157,7 @@ class PersistenceServiceStubConfiguration {
                   identityProvider: 'STUB',
                   userInfo: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vcmF0YXV0aC5ydSIsImlhdCI6MTQ1Nzg1NzAzOCwiZXhwIjoxNDg5MzkyODcxLCJhdWQiOiJzb21lLWFwcCIsInN1YiI6InVzZXJfaWQiLCJqdGkiOiJiZDYzNjkyOC03MTk2LTM5YTctODlmNi03OGY5NDY3NjU0ZWIiLCJycF9iYXNlX2FkZHJlc3MiOlsiaHR0cDovL3JhdGF1dGgucnUiLCJodHRwOi8vcmF0YXV0aC5ydSJdLCJ1c2VyX2lkIjoidXNlcl9pZCJ9.rqxqXV9X0kdjmyWxuVJkYU8sNC5sW9dC9NUqT-CodEM',
                   status: Status.ACTIVE,
+                  expiresIn: DateUtils.fromLocal(LocalDateTime.now().plusDays(1)),
                   entries: [
                       new AuthEntry(authCode: 'code',
                           relyingParty: CLIENT_NAME,
@@ -185,13 +186,18 @@ class PersistenceServiceStubConfiguration {
       }
 
       @Override
-      Observable<Boolean> invalidateSession(String sessionId) {
-        return Observable.just(true)
+      Observable<Boolean> invalidateSession(String sessionId, Date blocked) {
+        return null
       }
 
       @Override
-      Observable<Boolean> invalidateForClient(String clientId) {
-        return Observable.just(true)
+      Observable<Boolean> invalidateForClient(String relyingParty, Date blocked) {
+        return null
+      }
+
+      @Override
+      Observable<Boolean> updateCheckDate(String sessionId, Date lastCheck) {
+        return null
       }
     }
   }

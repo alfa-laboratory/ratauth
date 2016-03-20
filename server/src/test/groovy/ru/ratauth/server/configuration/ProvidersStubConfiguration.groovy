@@ -54,6 +54,11 @@ class ProvidersStubConfiguration {
       }
 
       @Override
+      Observable<Boolean> checkUserStatus(AuthInput input) {
+        return Observable.just(true)
+      }
+
+      @Override
       Observable<RegResult> register(RegInput input) {
         if (input.data.get(BaseAuthFields.USERNAME.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
           return Observable.just(RegResult.builder().data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map).status(RegResult.Status.SUCCESS).build())

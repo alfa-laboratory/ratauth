@@ -10,3 +10,6 @@ auth:
   ttl: 36000
  code:
   ttl: 86400
+ session:
+  check_threads: 10
+  check_interval: 300

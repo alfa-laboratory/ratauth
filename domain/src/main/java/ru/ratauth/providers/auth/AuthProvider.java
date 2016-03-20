@@ -23,4 +23,11 @@ public interface AuthProvider {
    * Otherwise RatAuth provides authorization code flow by itself
    */
   boolean isAuthCodeSupported();
+
+  /**
+   * Checks user status
+   * @param input fields container
+   * @return true if user account is active, otherwise - false
+   */
+  Observable<Boolean> checkUserStatus(AuthInput input);
 }
