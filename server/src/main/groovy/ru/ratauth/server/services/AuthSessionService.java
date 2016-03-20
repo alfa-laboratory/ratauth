@@ -13,15 +13,37 @@ import java.util.Set;
  * @since 16/02/16
  */
 public interface AuthSessionService {
+  /**
+   * Creates and saves empty session with authEntry for input relyingParty
+   * @param relyingParty
+   * @param userInfo info got from provider
+   * @param scopes
+   * @param redirectUrl
+   * @return session entity
+   */
   Observable<Session> initSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, String redirectUrl);
 
+  /**
+   * Creates and saves session with authEntry and token granted for input relyingParty
+   * @param relyingParty
+   * @param userInfo info got from provider
+   * @param scopes
+   * @param redirectUrl
+   * @return session entity
+   */
   Observable<Session> createSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, String redirectUrl);
 
+  /**
+   * Adds token to session. Could be used in refresh token flow
+   * @param session
+   * @param relyingParty
+   * @return
+   */
   Observable<Boolean> addToken(Session session, RelyingParty relyingParty);
 
   /**
    * Creates new entry for relyingParty within existing session.
-   * Must be used in cross-authorization flow
+   * Could be used in cross-authorization flow
    * @param session
    * @param relyingParty
    * @param scopes

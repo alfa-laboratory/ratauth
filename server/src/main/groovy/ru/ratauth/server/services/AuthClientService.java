@@ -6,6 +6,7 @@ import ru.ratauth.exception.AuthorizationException;
 import rx.Observable;
 
 /**
+ * Class for loading information about authServer clients(relying party or resource server)
  * @author mgorelikov
  * @since 16/02/16
  */
@@ -53,6 +54,13 @@ public interface AuthClientService {
     return addAuth(authClientObservable, password, authRequired);
   }
 
+  /**
+   * Adds credentials check filter to the input observable
+   * @param clientObservable input observable
+   * @param password  client password
+   * @param authRequired  credential check flag
+   * @return modified observable
+   */
   default <T extends AuthClient> Observable<T> addAuth(Observable<T> clientObservable, String password, boolean authRequired) {
     return clientObservable.filter(rp -> !authRequired || rp.getPassword().equals(password))
         .switchIfEmpty(Observable.error(new AuthorizationException("Client not found")));
