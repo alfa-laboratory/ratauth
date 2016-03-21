@@ -11,7 +11,6 @@ import org.springframework.util.StringUtils;
 import ru.ratauth.entities.*;
 import ru.ratauth.entities.Status;
 import ru.ratauth.exception.AuthorizationException;
-import ru.ratauth.exception.ExpiredException;
 import ru.ratauth.interaction.*;
 import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.AuthProvider;
@@ -57,7 +56,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
   @Override
   public Observable<CheckTokenResponse> checkToken(CheckTokenRequest oauthRequest) {
     return authSessionService.getByValidToken(oauthRequest.getToken(), new Date())
-        .doOnNext(session -> sessionStatusChecker.checkAndUpdateSession(session, oauthRequest.getClientId()))
+        .doOnNext(session -> sessionStatusChecker.checkAndUpdateSession(session))
         .doOnNext(session -> checkSession(session))
         .zipWith(loadRelyingParty(oauthRequest),
             (session, client) -> new ImmutablePair<>(session, client))

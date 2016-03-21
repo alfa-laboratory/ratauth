@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.ratauth.entities.Session;
+import ru.ratauth.entities.Status;
 import ru.ratauth.providers.auth.AuthProvider;
 import ru.ratauth.providers.auth.dto.AuthInput;
 import ru.ratauth.server.utils.DateUtils;
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BackgroundSessionStatusChecker implements SessionStatusChecker {
-  private final BlockingQueue<Pair<String, Session>> queue = new LinkedBlockingQueue<>();
+  private final BlockingQueue<Session> queue = new LinkedBlockingQueue<>();
   private ExecutorService executorService;
   private final SessionService sessionService;
   private final Map<String, AuthProvider> authProviders;
@@ -57,41 +58,43 @@ public class BackgroundSessionStatusChecker implements SessionStatusChecker {
   }
 
   @Override
-  public void checkAndUpdateSession(Session session, String relyingParty) {
-    queue.offer(new ImmutablePair<>(relyingParty, session));
+  public void checkAndUpdateSession(Session session) {
+    queue.offer(session);
   }
 
-  private void process(String relyingParty, Session session) {
+  private void process(Session session) {
     //if not yet time
     if(session.getLastCheck() != null
-        && DateUtils.toLocal(session.getLastCheck()).plusSeconds(checkInterval).isAfter(LocalDateTime.now())) {
+        && DateUtils.toLocal(session.getLastCheck()).plusSeconds(checkInterval).isAfter(LocalDateTime.now())
+        || Status.BLOCKED == session.getStatus()) {
       return;
     }
     Map<String, String> userInfo =
         tokenCacheService.extractUserInfo(session.getUserInfo()).entrySet().stream()
-        .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue().toString()));
+            .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue().toString()));
     authProviders.get(session.getIdentityProvider())
-        .checkUserStatus(AuthInput.builder().relyingParty(relyingParty).data(userInfo).build())
-        .doOnNext(userNotBlocked -> {
+        .checkUserStatus(AuthInput.builder().relyingParty(session.getAuthClient()).data(userInfo).build())
+        .flatMap(userNotBlocked -> {
           if (!userNotBlocked)
-            sessionService.invalidateSession(session.getId(), new Date());
+            return sessionService.invalidateSession(session.getId(), new Date());
           else
-            sessionService.updateCheckDate(session.getId(), new Date());})
+            return sessionService.updateCheckDate(session.getId(), new Date());
+        })
         .toBlocking().single();
   }
 
   @RequiredArgsConstructor
   private class Consumer implements Runnable {
-    private final BlockingQueue<Pair<String, Session>> queue;
+    private final BlockingQueue<Session> queue;
 
     @Override
     public void run() {
-      Pair<String, Session> checkTask;
+      Session checkTask;
       while (true && !Thread.currentThread().isInterrupted()) {
         try {
           checkTask = queue.poll();
           if(checkTask != null)
-            process(checkTask.getLeft(), checkTask.getRight());
+            process(checkTask);
           else
             Thread.sleep(100);
         } catch (Exception e) {

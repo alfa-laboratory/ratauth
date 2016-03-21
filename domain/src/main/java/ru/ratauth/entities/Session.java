@@ -24,6 +24,10 @@ public class Session {
    * unique name
    */
   private String identityProvider;
+  /**
+   * unique name of primary relying party for this session
+   */
+  private String authClient;
 
   /**
    * JWT signed by server secret
@@ -46,5 +50,12 @@ public class Session {
   }
   public Optional<Token> getToken(String relyingPartyId) {
     return this.getEntry(relyingPartyId).flatMap(el -> el.getLatestToken());
+  }
+
+  public AuthEntry getPrimaryEntry() {
+    if(entries == null)
+      throw new InternalError("Session doesn't have primary entry");
+    return entries.stream().filter(it -> AuthType.COMMON == it.getAuthType()).findFirst()
+      .orElseThrow(() -> new InternalError("Session doesn't have primary entry"));
   }
 }

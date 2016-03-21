@@ -11,7 +11,6 @@ public interface SessionStatusChecker {
   /**
    * Check user status in authProvider attached to session
    * @param session session for invalidation
-   * @param relyingParty relyingParty unique name
    */
-  void checkAndUpdateSession(Session session, String relyingParty);
+  void checkAndUpdateSession(Session session);
 }
