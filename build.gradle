@@ -44,7 +44,7 @@ allprojects {
       dependency 'io.reactivex:rxjava:1.0.15'
       dependency 'io.ratpack:ratpack-rx:1.1.1'
       dependency 'io.ratpack:ratpack-spring-boot:1.1.1'
-      dependency 'io.ratpack:ratpack-groovy:1.2.0-SNAPSHOT'
+      dependency 'io.ratpack:ratpack-groovy:1.2.0'
       dependency 'io.ratpack:ratpack-test:1.1.1'
       dependency 'org.apache.commons:commons-lang3:3.4'
     }
