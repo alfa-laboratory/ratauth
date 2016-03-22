@@ -26,7 +26,7 @@ public class JWTTokenCacheService implements TokenCacheService {
   @Override
   public Observable<TokenCache> getToken(Session session, AuthClient authClient, AuthEntry authEntry) {
     final Token token = authEntry.getLatestToken().get();
-    Map<String,Object> tokenInfo = tokenProcessor.extractInfo(session.getUserInfo(), masterSecret);
+    Map<String,Object> tokenInfo = extractUserInfo(session.getUserInfo());
     return Observable.just(TokenCache.builder()
         .created(new Date())
         .session(session.getId())
@@ -37,5 +37,10 @@ public class JWTTokenCacheService implements TokenCacheService {
             extractAudience(authEntry.getScopes()), authEntry.getScopes(),
           tokenInfo.get(TokenProcessor.JWT_SUB).toString(), tokenProcessor.filterUserInfo(tokenInfo)
             )).build());
+  }
+
+  @Override
+  public Map<String, Object> extractUserInfo(String jwtToken) {
+    return tokenProcessor.extractInfo(jwtToken, masterSecret);
   }
 }

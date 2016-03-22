@@ -62,10 +62,23 @@ public interface SessionService {
   Observable<Boolean> addToken(String sessionId, String relyingParty, Token token);
 
   /**
-   * Must invalidate session and all token database cache(if supported)
+   * Invalidates session and all token database cache(if supported)
    * @param sessionId session identifier
+   * @param blocked date of blocking
    */
-  Observable<Boolean> invalidateSession(String sessionId);
+  Observable<Boolean> invalidateSession(String sessionId, Date blocked);
 
-  Observable<Boolean> invalidateForClient(String clientId);
+  /**
+   * Invalidates session and all token database cache(if supported)
+   * @param relyingParty client unique name
+   * @param blocked date of blocking
+   */
+  Observable<Boolean> invalidateForClient(String relyingParty, Date blocked);
+
+  /**
+   * Updates session lastCheck date
+   * @param sessionId session identifier
+   * @param lastCheck date of lastCheck
+   */
+  Observable<Boolean> updateCheckDate(String sessionId, Date lastCheck);
 }

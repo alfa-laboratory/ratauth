@@ -16,3 +16,6 @@ auth:
    externalSystemCode: ALSE
    externalUserCode: SENSE
    branchNumber: "0000"
+ session:
+  check_threads: 10
+  check_interval: 300

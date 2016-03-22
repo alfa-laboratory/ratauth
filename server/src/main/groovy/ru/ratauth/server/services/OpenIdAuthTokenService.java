@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import ru.ratauth.entities.*;
+import ru.ratauth.entities.Status;
 import ru.ratauth.exception.AuthorizationException;
-import ru.ratauth.exception.ExpiredException;
 import ru.ratauth.interaction.*;
 import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.AuthProvider;
@@ -32,6 +32,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
   private final AuthSessionService authSessionService;
   private final TokenCacheService tokenCacheService;
   private final AuthClientService clientService;
+  private final SessionStatusChecker sessionStatusChecker;
 
   @Override
   @SneakyThrows
@@ -55,6 +56,8 @@ public class OpenIdAuthTokenService implements AuthTokenService {
   @Override
   public Observable<CheckTokenResponse> checkToken(CheckTokenRequest oauthRequest) {
     return authSessionService.getByValidToken(oauthRequest.getToken(), new Date())
+        .doOnNext(session -> sessionStatusChecker.checkAndUpdateSession(session))
+        .doOnNext(session -> checkSession(session))
         .zipWith(loadRelyingParty(oauthRequest),
             (session, client) -> new ImmutablePair<>(session, client))
         .flatMap(sessionClient -> {
@@ -64,19 +67,23 @@ public class OpenIdAuthTokenService implements AuthTokenService {
               .map(token -> new ImmutablePair<>(entry, token));
         })
         .map(entryToken -> {
-              AuthEntry entry = entryToken.getLeft();
-              Token token = entry.getTokens().iterator().next();
-              return CheckTokenResponse.builder()
-                  .idToken(entryToken.getRight().getIdToken())
-                  .clientId(entryToken.getRight().getClient())
-                  .expiresIn(token.getExpiresIn().getTime())
-                  .scopes(entry.getScopes())
-                  .build();
-            }
-        )
+          AuthEntry entry = entryToken.getLeft();
+          Token token = entry.getTokens().iterator().next();
+          return CheckTokenResponse.builder()
+              .idToken(entryToken.getRight().getIdToken())
+              .clientId(entryToken.getRight().getClient())
+              .expiresIn(token.getExpiresIn().getTime())
+              .scopes(entry.getScopes())
+              .build();})
         .switchIfEmpty(Observable.error(new AuthorizationException("Token not found")));
   }
 
+  private void checkSession(Session session) {
+    if(Status.BLOCKED == session.getStatus())
+      throw new AuthorizationException("Session blocked");
+    if(session.getExpiresIn().before(new Date()))
+      throw new AuthorizationException("Session expired");
+  }
 
   private TokenResponse convertToResponse(AuthEntry authEntry, String idToken) {
     final Token token = authEntry.getLatestToken().get();
