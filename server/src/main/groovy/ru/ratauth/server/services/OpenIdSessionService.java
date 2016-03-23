@@ -33,6 +33,8 @@ public class OpenIdSessionService implements AuthSessionService {
   @Value("${auth.master_secret}")
   private String masterSecret;//final
 
+  public static final String RATAUTH = "ratauth";
+
   @Override
   public Observable<Session> initSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes,
                                          String redirectUrl) {
@@ -60,7 +62,7 @@ public class OpenIdSessionService implements AuthSessionService {
     final LocalDateTime authCodeExpires = now.plus(relyingParty.getCodeTTL(), ChronoUnit.SECONDS);
 
 
-    final String jwtInfo = tokenProcessor.createToken(masterSecret, null,
+    final String jwtInfo = tokenProcessor.createToken(RATAUTH, masterSecret, null,
         DateUtils.fromLocal(now), DateUtils.fromLocal(sessionExpires),
         tokenCacheService.extractAudience(scopes), scopes, userInfo.get(Fields.USER_ID.val()).toString(), userInfo);
 

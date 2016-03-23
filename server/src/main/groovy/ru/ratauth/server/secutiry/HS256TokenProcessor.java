@@ -27,24 +27,30 @@ import java.util.*;
 public class HS256TokenProcessor implements TokenProcessor {
   private final ObjectMapper jacksonObjectMapper;
   private static final String SCOPE = "scope";
+  private static final String CLIENT_ID = "client_id";
+
+  private static final List<String> LOCAL_REGISTERED_CLAIMS = Arrays.asList(SCOPE, CLIENT_ID);
 
   @Value("${auth.token.issuer}")
   private String issuer;//final
 
   @Override
   @SneakyThrows
-  public String createToken(String secret, String identifier,
+  public String createToken(String clientId, String secret, String identifier,
                             Date created, Date expiresIn,
                             Set<String> audience, Set<String> scopes,
                             String userId, Map<String, Object> userInfo) {
     final JWSSigner signer = new MACSigner(Base64Coder.decodeLines(secret));
+    final List<String> aud = new ArrayList<>(audience);
+    aud.add(clientId);
 // Prepare JWT with claims set
     JWTClaimsSet.Builder jwtBuilder = new JWTClaimsSet.Builder()
         .issuer(issuer)
         .subject(userId)
         .expirationTime(expiresIn)
-        .audience(new ArrayList<>(audience))
+        .audience(aud)
         .claim(SCOPE, scopes)
+        .claim(CLIENT_ID, clientId)
         .jwtID(identifier)
         .issueTime(created);
     userInfo.forEach((key, value) -> jwtBuilder.claim(key, value));
@@ -73,7 +79,7 @@ public class HS256TokenProcessor implements TokenProcessor {
   public Map<String, Object> filterUserInfo(Map<String, Object> info) {
     Map<String,Object> result = new HashMap<>();
     info.forEach((key,value) -> {
-      if(!JWTClaimsSet.getRegisteredNames().contains(key))
+      if(!JWTClaimsSet.getRegisteredNames().contains(key) && !LOCAL_REGISTERED_CLAIMS.contains(key))
         result.put(key, value);
     });
     return result;

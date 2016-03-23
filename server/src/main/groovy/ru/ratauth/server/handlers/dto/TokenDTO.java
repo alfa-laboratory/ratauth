@@ -28,6 +28,8 @@ public class TokenDTO {
   private String idToken;
   @JsonProperty("expires_in")
   private Long expiresIn;
+  @JsonProperty("client_id")
+  private String clientId;
 
   public TokenDTO(TokenResponse response) {
     this.accessToken = response.getAccessToken();
@@ -35,6 +37,7 @@ public class TokenDTO {
     this.tokenType = response.getTokenType();
     this.idToken = response.getIdToken();
     this.expiresIn = response.getExpiresIn();
+    this.clientId = response.getClientId();
   }
 
 }
