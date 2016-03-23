@@ -93,6 +93,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
         .tokenType(TokenType.BEARER.toString())
         .idToken(idToken)
         .refreshToken(authEntry.getRefreshToken())
+        .clientId(authEntry.getRelyingParty())
         .build();
   }
 

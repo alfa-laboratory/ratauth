@@ -19,4 +19,5 @@ public class TokenResponse {
   private String tokenType;
   private String idToken;
   private Long expiresIn;
+  private String clientId;
 }
