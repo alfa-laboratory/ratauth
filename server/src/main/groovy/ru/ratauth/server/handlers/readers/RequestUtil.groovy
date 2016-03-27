@@ -26,7 +26,7 @@ class RequestUtil {
   public static String extractField(MultiValueMap<String, String> params, String name, boolean required) {
     String value = params.get(name)
     if(StringUtils.isBlank(value) && required)
-      throw new ReadRequestException(name)
+      throw new ReadRequestException(ReadRequestException.ID.FIELD_MISSED, name)
     value
   }
 
@@ -61,14 +61,14 @@ class RequestUtil {
   public static String [] extractAuth(Headers headers) {
     def authHeader = headers?.get(AUTHORIZATION)
     if(!authHeader)
-      throw new ReadRequestException(AUTHORIZATION)
+      throw new ReadRequestException(ReadRequestException.ID.FIELD_MISSED, AUTHORIZATION)
     def encodedValue = authHeader.split(" ")[1]
     def decodedValue = new String(encodedValue.decodeBase64())?.split(":")
     // do some sort of validation here
     if (decodedValue[0] && decodedValue[1]) {
       decodedValue
     } else {
-      throw new ReadRequestException(AUTHORIZATION)
+      throw new ReadRequestException(ReadRequestException.ID.FIELD_MISSED, AUTHORIZATION)
     }
   }
 }

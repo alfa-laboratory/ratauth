@@ -1,6 +1,7 @@
 package ru.ratauth.server.handlers.readers
 
 import groovy.transform.CompileStatic
+import org.slf4j.MDC
 import ratpack.form.Form
 import ratpack.http.Headers
 import ru.ratauth.exception.AuthorizationException
@@ -8,6 +9,9 @@ import ru.ratauth.interaction.AuthzResponseType
 import ru.ratauth.interaction.CheckTokenRequest
 import ru.ratauth.interaction.GrantType
 import ru.ratauth.interaction.TokenRequest
+import ru.ratauth.server.services.log.ActionLogger
+import ru.ratauth.server.services.log.AuthAction
+import ru.ratauth.server.services.log.LogFields
 
 import static ru.ratauth.server.handlers.readers.RequestUtil.*
 
@@ -29,6 +33,7 @@ class TokenRequestReader {
   static TokenRequest readTokenRequest(Form form, Headers headers) {
     def auth = extractAuth(headers)
     GrantType grantType = extractEnumField(form, GRANT_TYPE, true, GrantType.class)
+    AuthAction authAction
     def builder = TokenRequest.builder()
         .responseType(extractEnumField(form, RESPONSE_TYPE, true, AuthzResponseType.class))
         .grantType(grantType)
@@ -38,16 +43,20 @@ class TokenRequestReader {
       case GrantType.AUTHORIZATION_CODE:
         builder.authzCode(extractField(form, CODE, true))
         def scope = extractField(form, SCOPE, false)?.split(" ")?.toList()
+        authAction = AuthAction.TOKEN
         if(scope)
           builder.scopes(scope)
         break
       case GrantType.AUTHENTICATION_TOKEN: builder.scopes(extractField(form, SCOPE, true).split(" ").toList()) //WATCH IT! There is no break here.
       case GrantType.REFRESH_TOKEN: builder.refreshToken(extractField(form, REFRESH_TOKEN, true))
+        authAction = AuthAction.REFRESH_TOKEN
         break;
       default: throw new AuthorizationException("Grant type is not supported");
     }
     builder.authData(extractRest(form, BASE_FIELDS))
-    builder.build()
+    def request = builder.build()
+    ActionLogger.addBaseRequestInfo(request.clientId, authAction)
+    request
   }
 
   static CheckTokenRequest readCheckTokenRequest(Form form, Headers headers) {
@@ -55,6 +64,10 @@ class TokenRequestReader {
     def auth = extractAuth(headers)
     builder.clientId(auth[0]).clientSecret(auth[1]);
     builder.externalClientId(extractField(form, CLIENT_ID, false))
-    builder.build()
+    def request = builder.build()
+    ActionLogger.addBaseRequestInfo(request.clientId, AuthAction.CHECK_TOKEN)
+    request
   }
+
+
 }

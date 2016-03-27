@@ -63,7 +63,7 @@ public interface AuthClientService {
    */
   default <T extends AuthClient> Observable<T> addAuth(Observable<T> clientObservable, String password, boolean authRequired) {
     return clientObservable.filter(rp -> !authRequired || rp.getPassword().equals(password))
-        .switchIfEmpty(Observable.error(new AuthorizationException("Client not found")));
+        .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)));
   }
 
 }

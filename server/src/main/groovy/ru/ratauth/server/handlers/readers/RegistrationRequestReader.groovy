@@ -1,10 +1,15 @@
 package ru.ratauth.server.handlers.readers
 
+import groovy.transform.CompileStatic
+import org.slf4j.MDC
 import ratpack.form.Form
 import ratpack.http.Headers
 import ru.ratauth.interaction.AuthzResponseType
 import ru.ratauth.interaction.GrantType
 import ru.ratauth.interaction.RegistrationRequest
+import ru.ratauth.server.services.log.ActionLogger
+import ru.ratauth.server.services.log.AuthAction
+import ru.ratauth.server.services.log.LogFields
 
 import static ru.ratauth.server.handlers.readers.RequestUtil.*
 
@@ -12,6 +17,7 @@ import static ru.ratauth.server.handlers.readers.RequestUtil.*
  * @author mgorelikov
  * @since 29/01/16
  */
+@CompileStatic
 class RegistrationRequestReader {
   private static final String CLIENT_ID = "client_id"
   private static final String CODE = "code"
@@ -36,6 +42,8 @@ class RegistrationRequestReader {
       builder.clientId(extractField(form, CLIENT_ID, true))
     }
     builder.data(extractRest(form, BASE_FIELDS))
-    return builder.build()
+    def request = builder.build()
+    ActionLogger.addBaseRequestInfo(request.clientId, AuthAction.REGISTRATION)
+    request
   }
 }

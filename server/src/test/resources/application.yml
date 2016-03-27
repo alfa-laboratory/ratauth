@@ -1,3 +1,7 @@
+spring:
+ application:
+  name: ${APPLICATION_NAME:auth-server}
+
 auth:
  master_secret: "cnlqV2hVQml3aWdrc1RqWXBSaFpma3l5enhNVU1TS1A="
  secret:

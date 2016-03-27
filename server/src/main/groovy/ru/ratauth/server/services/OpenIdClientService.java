@@ -21,12 +21,12 @@ public class OpenIdClientService implements AuthClientService {
   @Override
   public Observable<RelyingParty> loadRelyingParty(String name) {
     return clientService.getRelyingParty(name)
-        .switchIfEmpty(Observable.error(new AuthorizationException("Client not found")));
+        .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)));
   }
 
   @Override
   public Observable<AuthClient> loadClient(String name) {
     return clientService.getClient(name)
-        .switchIfEmpty(Observable.error(new AuthorizationException("Client not found")));
+        .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)));
   }
 }

@@ -2,6 +2,7 @@ package ru.ratauth.server.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import java.util.Optional;
  * @author mgorelikov
  * @since 02/11/15
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OpenIdAuthorizeService implements AuthorizeService {
@@ -50,22 +52,24 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .map(idToken -> new ImmutableTriple<>(rpAuthSession.getRight(), rpAuthSession.getMiddle(), idToken))
         )
         .map(sessionAuthToken -> buildResponse(request.getRedirectURI(), request.getClientId(),
-            sessionAuthToken.getLeft(), sessionAuthToken.getMiddle(), sessionAuthToken.right));
+            sessionAuthToken.getLeft(), sessionAuthToken.getMiddle(), sessionAuthToken.right))
+        .doOnCompleted(() -> log.info("Authorization succeed"));
   }
 
   @Override
   public Observable<AuthzResponse> crossAuthenticate(AuthzRequest request) {
     return Observable.zip(
         clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), true)
-            .switchIfEmpty(Observable.error(new AuthorizationException("Credentials are wrong"))),
+            .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CREDENTIALS_WRONG))),
         clientService.loadRelyingParty(request.getExternalClientId())
-            .switchIfEmpty(Observable.error(new AuthorizationException("Client not found"))),
+            .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND))),
         sessionService.getByValidRefreshToken(request.getRefreshToken(), new Date())
-            .switchIfEmpty(Observable.error(new AuthorizationException("Token not found"))),
+            .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.TOKEN_NOT_FOUND))),
         (oldRP, newRP, session) -> new ImmutablePair<>(newRP, session))
         .flatMap(rpSession -> sessionService.addEntry(rpSession.getRight(), rpSession.getLeft(), request.getScopes(), request.getRedirectURI()))
         .map(session -> buildResponse(request.getRedirectURI(), request.getExternalClientId(),
-          session, AuthResult.builder().status(AuthResult.Status.NEED_APPROVAL).build(), null));
+          session, AuthResult.builder().status(AuthResult.Status.NEED_APPROVAL).build(), null))
+        .doOnCompleted(() -> log.info("Cross-authorization succeed"));
   }
 
   private Observable<TokenCache> createIdToken(RelyingParty relyingParty, Session session) {

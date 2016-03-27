@@ -1,10 +1,21 @@
 package ru.ratauth.exception;
 
 /**
+ * BASE
+
+/**
  * @author mgorelikov
  * @since 23/02/16
  */
-public class BaseAuthServerException extends RuntimeException {
+public class BaseAuthServerException extends RuntimeException implements BaseIdentifiedException {
+
+  private static final String MODULE_UUID = "16080bf6-dbe4-428e-b648-06739b59e920";
+
+  @Override
+  public String getBaseId() {
+    return MODULE_UUID;
+  }
+
   public BaseAuthServerException() {
   }
 
@@ -18,5 +29,12 @@ public class BaseAuthServerException extends RuntimeException {
 
   public BaseAuthServerException(Throwable cause) {
     super(cause);
+  }
+
+  public enum Type {
+    AUTHORIZATION,
+    REGISTRATION,
+    PROVIDER,
+    EXPIRED
   }
 }
