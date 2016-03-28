@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.ratauth.entities.*;
 import ru.ratauth.providers.Fields;
+import ru.ratauth.providers.auth.dto.BaseAuthFields;
 import ru.ratauth.server.secutiry.OAuthIssuerImpl;
 import ru.ratauth.server.secutiry.TokenProcessor;
 import ru.ratauth.server.secutiry.UUIDValueGenerator;
+import ru.ratauth.server.services.log.ActionLogger;
 import ru.ratauth.server.utils.DateUtils;
 import ru.ratauth.services.SessionService;
 import rx.Observable;
@@ -29,6 +31,7 @@ public class OpenIdSessionService implements AuthSessionService {
   private final TokenProcessor tokenProcessor;
   private final TokenCacheService tokenCacheService;
   private final OAuthIssuerImpl codeGenerator = new OAuthIssuerImpl(new UUIDValueGenerator());
+  private final ActionLogger actionLogger;
 
   @Value("${auth.master_secret}")
   private String masterSecret;//final
@@ -84,10 +87,12 @@ public class OpenIdSessionService implements AuthSessionService {
         .status(Status.ACTIVE)
         .created(DateUtils.fromLocal(now))
         .expiresIn(DateUtils.fromLocal(sessionExpires))
+        .userId((String) userInfo.get(BaseAuthFields.USER_ID.val()))
         .userInfo(jwtInfo)
         .entries(new HashSet<>(Arrays.asList(authEntry)))
         .build();
-    return sessionService.create(session);
+    return sessionService.create(session)
+        .doOnNext(actionLogger::addSessionInfo);
   }
 
   @Override
@@ -119,23 +124,26 @@ public class OpenIdSessionService implements AuthSessionService {
         .authType(AuthType.CROSS)
         .redirectUrl(redirectUrl)
         .build();
-    session.getEntries().add(authEntry);
     return sessionService.addEntry(session.getId(), authEntry)
+        .doOnNext(res -> session.getEntries().add(authEntry))
         .map(res -> session);
   }
 
   @Override
   public Observable<Session> getByValidCode(String code, Date now) {
-    return sessionService.getByValidCode(code, now);
+    return sessionService.getByValidCode(code, now)
+        .doOnNext(actionLogger::addSessionInfo);
   }
 
   @Override
   public Observable<Session> getByValidRefreshToken(String token, Date now) {
-    return sessionService.getByValidRefreshToken(token, now);
+    return sessionService.getByValidRefreshToken(token, now)
+        .doOnNext(actionLogger::addSessionInfo);
   }
 
   @Override
   public Observable<Session> getByValidToken(String token, Date now) {
-    return sessionService.getByValidToken(token, now);
+    return sessionService.getByValidToken(token, now)
+        .doOnNext(actionLogger::addSessionInfo);
   }
 }

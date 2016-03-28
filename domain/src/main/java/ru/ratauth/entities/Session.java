@@ -30,7 +30,12 @@ public class Session {
   private String authClient;
 
   /**
-   * JWT signed by server secret
+   * Abstract user identifier got from provider
+   */
+  private String userId;
+
+  /**
+   * JWT with user info signed by server secret
    */
   private String userInfo;
   private Status status;

@@ -3,6 +3,7 @@ package ru.ratauth.server.services;
 import com.nimbusds.jose.JOSEException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import org.springframework.util.StringUtils;
 import ru.ratauth.entities.*;
 import ru.ratauth.entities.Status;
 import ru.ratauth.exception.AuthorizationException;
+import ru.ratauth.exception.ExpiredException;
 import ru.ratauth.interaction.*;
 import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.AuthProvider;
@@ -25,6 +27,7 @@ import java.util.Map;
  * @author mgorelikov
  * @since 03/11/15
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OpenIdAuthTokenService implements AuthTokenService {
@@ -41,7 +44,8 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     return relyingPartyObservable
         .flatMap(rp -> loadSession(oauthRequest, rp).map(ses -> new ImmutablePair<>(rp, ses)))
         .flatMap(rpSess -> authSessionService.addToken(rpSess.getRight(), rpSess.getLeft()).map(res -> rpSess))
-        .flatMap(rpSess -> createIdTokenAndResponse(rpSess.getRight(), rpSess.getLeft()));
+        .flatMap(rpSess -> createIdTokenAndResponse(rpSess.getRight(), rpSess.getLeft()))
+        .doOnCompleted(() -> log.info("Get-token succeed"));
   }
 
   @Override
@@ -50,7 +54,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     return tokenCacheService.getToken(session, relyingParty, entry)
         .map(idToken -> new ImmutablePair<>(entry, idToken))
         .map(entryToken -> convertToResponse(entryToken.getLeft(), entryToken.getRight().getIdToken()))
-        .switchIfEmpty(Observable.error(new AuthorizationException()));
+        .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.TOKEN_NOT_FOUND)));
   }
 
   @Override
@@ -75,14 +79,15 @@ public class OpenIdAuthTokenService implements AuthTokenService {
               .expiresIn(token.getExpiresIn().getTime())
               .scopes(entry.getScopes())
               .build();})
-        .switchIfEmpty(Observable.error(new AuthorizationException("Token not found")));
+        .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.TOKEN_NOT_FOUND)))
+        .doOnCompleted(() -> log.info("Check token succeed"));
   }
 
   private void checkSession(Session session) {
     if(Status.BLOCKED == session.getStatus())
-      throw new AuthorizationException("Session blocked");
+      throw new AuthorizationException(AuthorizationException.ID.SESSION_BLOCKED);
     if(session.getExpiresIn().before(new Date()))
-      throw new AuthorizationException("Session expired");
+      throw new ExpiredException(ExpiredException.ID.SESSION_EXPIRED);
   }
 
   private TokenResponse convertToResponse(AuthEntry authEntry, String idToken) {
@@ -109,8 +114,8 @@ public class OpenIdAuthTokenService implements AuthTokenService {
           .filter(sess -> sess.getEntry(relyingParty.getName()).map(entry -> CollectionUtils.isEmpty(entry.getTokens())).orElse(false));
     else if (oauthRequest.getGrantType() == GrantType.REFRESH_TOKEN || oauthRequest.getGrantType() == GrantType.AUTHENTICATION_TOKEN)
       authObs = authSessionService.getByValidRefreshToken(oauthRequest.getRefreshToken(), new Date());
-    else return Observable.error(new AuthorizationException("Invalid grant type"));
-    return authObs.switchIfEmpty(Observable.error(new AuthorizationException("Session not found")));
+    else return Observable.error(new AuthorizationException(AuthorizationException.ID.INVALID_GRANT_TYPE));
+    return authObs.switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.SESSION_NOT_FOUND)));
   }
 
   /**
