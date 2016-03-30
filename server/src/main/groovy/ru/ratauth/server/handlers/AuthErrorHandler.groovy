@@ -33,26 +33,24 @@ class AuthErrorHandler implements ServerErrorHandler {
     def exception = ExceptionUtils.getThrowable(throwable, BaseAuthServerException.class, MAX_EXCEPTION_DEPTH)
 
     if (exception in ExpiredException.class)
-      sendError(context, AUTHENTICATION_TIMEOUT, exception)
+      sendIdentifiedError(context, AUTHENTICATION_TIMEOUT, exception)
     else if (exception in ReadRequestException.class)
-      sendError(context, HttpResponseStatus.BAD_REQUEST.code(), exception)
+      sendIdentifiedError(context, HttpResponseStatus.BAD_REQUEST.code(), exception)
     else if (exception in AuthorizationException.class)
-      sendError(context, HttpResponseStatus.FORBIDDEN.code(), exception)
+      sendIdentifiedError(context, HttpResponseStatus.FORBIDDEN.code(), exception)
     else if(exception)
       sendError(context, HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), exception)
     else
-      sendError(context, HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), throwable.getMessage())
-
-    log.debug("Error stacktrace:", throwable)
+      sendError(context, HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), throwable)
   }
 
-  private static void sendError(Context context, int code, String body) {
+  private static void sendError(Context context, int code, Throwable throwable) {
     context.response.status(code)
-    context.response.send(body)
-    log.error("Auth error: " + body)
+    context.response.send(throwable.getMessage())
+    log.error("Auth error: ", throwable)
   }
 
-  private void sendError(Context context, int code, IdentifiedException exception) {
+  private void sendIdentifiedError(Context context, int code, IdentifiedException exception) {
     context.response.status(code)
     def dto = jacksonObjectMapper.writeValueAsString(new ExceptionDTO(exception))
     log.error(dto, exception)
