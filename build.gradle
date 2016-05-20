@@ -67,7 +67,7 @@ subprojects {
   apply plugin: 'groovy'
   apply plugin: 'maven-publish'
   apply plugin: 'com.jfrog.artifactory'
-  version = '0.3.0'
+  version = '0.3.1'
   group = 'ru.ratauth'
 
   sourceCompatibility = 1.8

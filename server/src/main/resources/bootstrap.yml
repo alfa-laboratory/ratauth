@@ -10,6 +10,7 @@ spring:
   config:
    enabled: true
    failFast: true
+   label: ${CONFIG_BRANCH:master}
    discovery:
     enabled: true
     serviceId: ${CONFIG_SERV:config-server}
