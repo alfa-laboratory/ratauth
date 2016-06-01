@@ -49,7 +49,7 @@ allprojects {
       dependency 'io.ratpack:ratpack-test:1.1.1'
       dependency 'ru.ratauth.providers:auth-mongo:+'
       dependency 'ru.ratauth.providers:auth-identity-mongo:+'
-      dependency 'ru.alfabank.providers:provider-dca:+'
+      dependency 'ru.alfabank.providers:provider-dca:0.+'
 
       dependency 'net.logstash.logback:logstash-logback-encoder:4.5.1'
 
@@ -67,7 +67,7 @@ subprojects {
   apply plugin: 'groovy'
   apply plugin: 'maven-publish'
   apply plugin: 'com.jfrog.artifactory'
-  version = '0.3.1'
+  version = '0.3.2'
   group = 'ru.ratauth'
 
   sourceCompatibility = 1.8
@@ -134,7 +134,7 @@ subprojects {
 }
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '2.10'
+  gradleVersion = '2.13'
 }
 
 idea {
