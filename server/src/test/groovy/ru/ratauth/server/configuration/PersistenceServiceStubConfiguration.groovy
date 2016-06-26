@@ -3,13 +3,7 @@ package ru.ratauth.server.configuration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
-import ru.ratauth.entities.AuthClient
-import ru.ratauth.entities.AuthEntry
-import ru.ratauth.entities.RelyingParty
-import ru.ratauth.entities.Session
-import ru.ratauth.entities.Status
-import ru.ratauth.entities.Token
-import ru.ratauth.entities.TokenCache
+import ru.ratauth.entities.*
 import ru.ratauth.exception.ExpiredException
 import ru.ratauth.server.utils.DateUtils
 import ru.ratauth.services.ClientService

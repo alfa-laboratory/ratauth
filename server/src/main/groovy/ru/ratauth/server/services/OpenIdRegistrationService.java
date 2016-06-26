@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.ratauth.exception.RegistrationException;
 import ru.ratauth.interaction.GrantType;
 import ru.ratauth.interaction.RegistrationRequest;
 import ru.ratauth.interaction.TokenResponse;

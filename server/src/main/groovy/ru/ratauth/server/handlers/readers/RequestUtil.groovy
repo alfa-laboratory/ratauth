@@ -1,11 +1,8 @@
 package ru.ratauth.server.handlers.readers
 
 import groovy.transform.CompileStatic
-import ratpack.form.Form
 import ratpack.http.Headers
 import ratpack.util.MultiValueMap
-import ratpack.util.internal.ImmutableDelegatingMultiValueMap
-import ru.ratauth.interaction.GrantType
 import ru.ratauth.utils.StringUtils
 
 /**

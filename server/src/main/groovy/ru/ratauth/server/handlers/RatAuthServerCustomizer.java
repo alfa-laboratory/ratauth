@@ -8,9 +8,7 @@ import ratpack.func.Action;
 import ratpack.groovy.template.MarkupTemplateModule;
 import ratpack.groovy.template.TextTemplateModule;
 import ratpack.guice.BindingsSpec;
-import ratpack.guice.ConfigurableModule;
 import ratpack.handling.Chain;
-import ratpack.logging.MDCInterceptor;
 import ratpack.server.ServerConfigBuilder;
 import ratpack.spring.config.RatpackServerCustomizer;
 

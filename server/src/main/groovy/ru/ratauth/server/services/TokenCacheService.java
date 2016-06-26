@@ -4,7 +4,6 @@ import ru.ratauth.entities.AuthClient;
 import ru.ratauth.entities.AuthEntry;
 import ru.ratauth.entities.Session;
 import ru.ratauth.entities.TokenCache;
-import ru.ratauth.providers.Fields;
 import rx.Observable;
 
 import java.util.Map;

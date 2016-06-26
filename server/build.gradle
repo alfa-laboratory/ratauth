@@ -15,16 +15,20 @@ bootRepackage {
 }
 
 dependencies {
+  //commons
+  compile project(':domain')
+  compile 'org.apache.commons:commons-lang3:'
+
+  //web/reactive
   compile 'org.springframework.boot:spring-boot-starter-actuator'
   compile 'org.springframework.boot:spring-boot-starter-web'
   compile 'io.ratpack:ratpack-rx'
   compile 'io.ratpack:ratpack-spring-boot'
   compile 'io.ratpack:ratpack-groovy'
-  compile 'org.apache.commons:commons-lang3:'
-
-  compile 'com.nimbusds:nimbus-jose-jwt'
-  compile project(':domain')
   provided 'javax.servlet:javax.servlet-api'
+
+  //crypto
+  compile 'com.nimbusds:nimbus-jose-jwt'
 }
 
 task dockerBuild << {

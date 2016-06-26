@@ -1,9 +1,6 @@
 package ru.ratauth.server.services.log;
 
 import org.springframework.stereotype.Service;
-import ru.ratauth.entities.Session;
-
-import java.util.Date;
 
 /**
  * @author mgorelikov

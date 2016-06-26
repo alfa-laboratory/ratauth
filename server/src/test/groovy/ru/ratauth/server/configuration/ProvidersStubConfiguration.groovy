@@ -6,9 +6,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import ratpack.spring.config.EnableRatpack
-import ru.ratauth.entities.*
 import ru.ratauth.exception.AuthorizationException
-import ru.ratauth.exception.ExpiredException
 import ru.ratauth.exception.RegistrationException
 import ru.ratauth.providers.auth.AuthProvider
 import ru.ratauth.providers.auth.dto.AuthInput
@@ -17,13 +15,7 @@ import ru.ratauth.providers.auth.dto.BaseAuthFields
 import ru.ratauth.providers.registrations.RegistrationProvider
 import ru.ratauth.providers.registrations.dto.RegInput
 import ru.ratauth.providers.registrations.dto.RegResult
-import ru.ratauth.server.utils.DateUtils
-import ru.ratauth.services.ClientService
-import ru.ratauth.services.SessionService
-import ru.ratauth.services.TokenCacheService
 import rx.Observable
-
-import java.time.LocalDateTime
 
 /**
  * @author mgorelikov
