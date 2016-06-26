@@ -1,0 +1,16 @@
+|===
+|Parameter|Description
+
+|`response_type`
+|Response type that must be provided CODE or TOKEN
+
+|`scope`
+|Scope for authorization that will be provided through JWT to all resource servers in flow
+
+|`username`
+|part of user's credentials
+
+|`password`
+|part of user's credentials
+
+|===

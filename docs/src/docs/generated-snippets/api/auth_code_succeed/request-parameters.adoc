@@ -1,0 +1,19 @@
+|===
+|Parameter|Description
+
+|`response_type`
+|Response type that must be provided CODE or TOKEN
+
+|`client_id`
+|relying party identifier
+
+|`scope`
+|Scope for authorization that will be provided through JWT to all resource servers in flow
+
+|`username`
+|part of user's credentials
+
+|`password`
+|part of user's credentials
+
+|===

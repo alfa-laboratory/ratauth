@@ -1,0 +1,16 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 200 OK
+content-type: application/json
+connection: keep-alive
+content-encoding: gzip
+transfer-encoding: chunked
+Content-Length: 472
+
+{
+  "jti" : "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyX2lkIiwiYXVkIjpbInJzIiwibWluZSJdLCJ1c2VyX2lkIjoidXNlcl9pZCIsInNjb3BlIjpbInJzLnJlYWQiXSwiaXNzIjoiaHR0cDpcL1wvcmF0YXV0aC5ydSIsImV4cCI6MTQ2NzA2MTI1OCwiaWF0IjoxNDY2OTc0ODYyLCJycF9iYXNlX2FkZHJlc3MiOlsiaHR0cDpcL1wvcmF0YXV0aC5ydSIsImh0dHA6XC9cL3JhdGF1dGgucnUiXSwiY2xpZW50X2lkIjoibWluZSIsImp0aSI6IjEyMzQifQ.eLdMzJNHfCtDFX6B2adSZc-A91sDRzSv2H4fsjiy2BM",
+  "exp" : 1467061258052,
+  "client_id" : "mine3",
+  "scope" : [ "rs.read" ]
+}
+----

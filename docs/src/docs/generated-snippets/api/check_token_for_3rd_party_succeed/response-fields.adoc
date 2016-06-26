@@ -1,0 +1,20 @@
+|===
+|Path|Type|Description
+
+|`jti`
+|`String`
+|JWT token
+
+|`exp`
+|`String`
+|expiration date of checkeed token
+
+|`client_id`
+|`String`
+|relying party identifier
+
+|`scope`
+|`Array`
+|scopes of access token
+
+|===

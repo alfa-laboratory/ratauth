@@ -25,6 +25,7 @@ class PersistenceServiceStubConfiguration {
   public static final String TOKEN = '1234'
   public static final String REFRESH_TOKEN = '12345'
   public static final String CODE = '123'
+  public static final String CODE_EXPIRED = '1111'
 
   private static final LocalDateTime NOW = LocalDateTime.now()
   private static final LocalDateTime TOMORROW = NOW.plusDays(1)
@@ -119,7 +120,7 @@ class PersistenceServiceStubConfiguration {
                       )] as Set)
           )
         else
-          return Observable.error(new ExpiredException('Auth code expired'))
+          return Observable.error(new ExpiredException(ExpiredException.ID.AUTH_CODE_EXPIRED))
       }
 
 

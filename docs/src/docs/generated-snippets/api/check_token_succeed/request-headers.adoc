@@ -1,0 +1,7 @@
+|===
+|Name|Description
+
+|`Authorization`
+|Authorization header for relying party basic authorization
+
+|===

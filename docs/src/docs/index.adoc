@@ -1,0 +1,16 @@
+= RatAuth
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 4
+:sectlinks:
+
+[description]
+== Description
+Authorization server based on Ratpack, Spring boot and RxJava. +
+Authorization flow based on http://openid.net/connect/[OpenId Connect specification].
+
+[api]
+== Api description
+include::api.adoc[]

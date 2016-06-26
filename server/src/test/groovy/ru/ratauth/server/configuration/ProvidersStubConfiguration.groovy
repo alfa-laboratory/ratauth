@@ -37,7 +37,7 @@ class ProvidersStubConfiguration {
         if (input.data.get(BaseAuthFields.USERNAME.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
           return Observable.just(AuthResult.builder().data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map).status(AuthResult.Status.SUCCESS).build())
         else
-          return Observable.error(new AuthorizationException("Authorization failed"));
+          return Observable.error(new AuthorizationException(AuthorizationException.ID.CREDENTIALS_WRONG));
       }
 
       @Override

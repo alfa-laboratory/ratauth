@@ -1,0 +1,19 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 403 Forbidden
+content-type: application/json
+connection: keep-alive
+content-encoding: gzip
+transfer-encoding: chunked
+Content-Length: 238
+
+{
+  "id" : "CREDENTIALS_WRONG",
+  "message" : {
+    "en" : "Credentials are wrong"
+  },
+  "base_id" : "16080bf6-dbe4-428e-b648-06739b59e920",
+  "type_id" : "AUTHORIZATION",
+  "class" : "class ru.ratauth.exception.AuthorizationException"
+}
+----

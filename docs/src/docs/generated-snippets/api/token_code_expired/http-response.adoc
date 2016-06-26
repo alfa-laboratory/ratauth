@@ -1,0 +1,19 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 419 Insufficient Space On Resource
+content-type: application/json
+connection: keep-alive
+content-encoding: gzip
+transfer-encoding: chunked
+Content-Length: 226
+
+{
+  "id" : "AUTH_CODE_EXPIRED",
+  "message" : {
+    "en" : "Auth code has expired"
+  },
+  "base_id" : "16080bf6-dbe4-428e-b648-06739b59e920",
+  "type_id" : "EXPIRED",
+  "class" : "class ru.ratauth.exception.ExpiredException"
+}
+----

@@ -1,0 +1,24 @@
+|===
+|Path|Type|Description
+
+|`id`
+|`String`
+|Error identifier
+
+|`message`
+|`Object`
+|Different localizations of message
+
+|`base_id`
+|`String`
+|Base identifier for auth module exceptions
+
+|`type_id`
+|`String`
+|String identifier of exception type
+
+|`class`
+|`String`
+|Exception class
+
+|===

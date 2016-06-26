@@ -47,6 +47,10 @@ public class ReadRequestException extends BaseAuthServerException implements Ide
     return this.id;
   }
 
+  public String getField() {
+    return this.field;
+  }
+
   public enum ID {
     FIELD_MISSED("Required field not found: "),
     WRONG_REQUEST("Wrong request: ");

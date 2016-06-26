@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import ratpack.error.ServerErrorHandler
 import ratpack.handling.Context
+import ratpack.http.MediaType
 import ru.ratauth.exception.AuthorizationException
 import ru.ratauth.exception.BaseAuthServerException
 import ru.ratauth.exception.ExpiredException
@@ -52,6 +53,7 @@ class AuthErrorHandler implements ServerErrorHandler {
 
   private void sendIdentifiedError(Context context, int code, IdentifiedException exception) {
     context.response.status(code)
+    context.response.contentType(MediaType.APPLICATION_JSON)
     def dto = jacksonObjectMapper.writeValueAsString(new ExceptionDTO(exception))
     log.error(dto, exception)
     context.response.send(dto)

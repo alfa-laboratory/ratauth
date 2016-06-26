@@ -1,0 +1,4 @@
+[source,bash]
+----
+$ http --form --auth 'mine:password' POST 'http://localhost:8080/token' 'Accept:application/x-www-form-urlencoded' 'Content-Type:application/x-www-form-urlencoded; charset=ISO-8859-1' 'response_type=TOKEN' 'grant_type=REFRESH_TOKEN' 'refresh_token=12345'
+----

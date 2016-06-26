@@ -1,0 +1,7 @@
+|===
+|Name|Description
+
+|`Location`
+|Header that contains token, refresh token and expiration date of access token
+
+|===

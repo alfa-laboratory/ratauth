@@ -1,0 +1,10 @@
+|===
+|Parameter|Description
+
+|`token`
+|access token that must be checked
+
+|`client_id`
+|resource provider identifier
+
+|===

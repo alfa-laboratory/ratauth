@@ -1,0 +1,9 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 302 Found
+location: http://localhost:8080/null?code=f0b34c82-70c6-39b7-8e64-34930556d928&expires_in=1467010861252&user_id=user_id
+connection: keep-alive
+content-encoding: gzip
+transfer-encoding: chunked
+
+----

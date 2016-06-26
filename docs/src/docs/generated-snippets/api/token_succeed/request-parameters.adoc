@@ -1,0 +1,13 @@
+|===
+|Parameter|Description
+
+|`response_type`
+|Response type that must be provided
+
+|`grant_type`
+|grant type for token request
+
+|`code`
+|authorization code
+
+|===

@@ -56,7 +56,8 @@ public class BackgroundSessionStatusChecker implements SessionStatusChecker {
 
   @PreDestroy
   public void destroy() {
-    executorService.shutdownNow();
+    if(backgroundCheckEnabled)
+      executorService.shutdownNow();
   }
 
   @Override

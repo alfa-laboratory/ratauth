@@ -1,0 +1,33 @@
+apply plugin: 'org.asciidoctor.convert'
+
+ext {
+  snippetsDir = file('src/docs/generated-snippets')
+  docsDir = file('src/ratauth/public/docs')
+}
+
+/*_______________asciidoc task__________________*/
+task cleanTempDirs(type: Delete) {
+  delete fileTree(dir: docsDir)
+}
+
+
+asciidoctor {
+  mustRunAfter test
+  inputs.dir snippetsDir
+  sourceDir = file('src/docs')
+  separateOutputDirs = false
+  outputDir docsDir
+  attributes 'snippets': snippetsDir,
+      'source-highlighter': 'prettify',
+      'imagesdir': 'images',
+      'toc': 'left',
+      'icons': 'font',
+      'setanchors': 'true',
+      'idprefix': '',
+      'idseparator': '-',
+      'docinfo1': 'true'
+
+  dependsOn cleanTempDirs
+}
+
+build.dependsOn asciidoctor

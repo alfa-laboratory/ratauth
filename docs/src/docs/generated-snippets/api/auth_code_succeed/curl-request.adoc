@@ -1,0 +1,4 @@
+[source,bash]
+----
+$ curl 'http://localhost:8080/authorize' -i -X POST -H 'Accept: application/x-www-form-urlencoded' -H 'Content-Type: application/x-www-form-urlencoded; charset=ISO-8859-1' -d 'response_type=CODE&client_id=mine&scope=rs.read&username=login&password=password'
+----

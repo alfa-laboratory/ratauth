@@ -1,0 +1,13 @@
+|===
+|Parameter|Description
+
+|`response_type`
+|Response type, this case it must be TOKEN
+
+|`grant_type`
+|grant type for operation
+
+|`refresh_token`
+|refresh token
+
+|===
