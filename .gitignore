@@ -95,3 +95,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+# html dirs
+docs/src/docs/public
+

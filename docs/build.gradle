@@ -2,7 +2,7 @@ apply plugin: 'org.asciidoctor.convert'
 
 ext {
   snippetsDir = file('../server/build/docs/generated-snippets')
-  docsDir = file('src/ratauth/public/docs')
+  docsDir = file('src/docs/public')
 }
 
 /*_______________asciidoc task__________________*/
