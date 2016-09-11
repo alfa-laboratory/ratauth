@@ -26,6 +26,9 @@ import rx.Observable
 @SpringBootApplication
 @CompileStatic
 class ProvidersStubConfiguration {
+  public static final String REG_CREDENTIAL = 'credential'
+  public static final String REG_CODE = '123'
+
   abstract class AbstractAuthProvider implements AuthProvider, RegistrationProvider {}
 
   @Bean(name = 'STUB')
@@ -52,15 +55,29 @@ class ProvidersStubConfiguration {
 
       @Override
       Observable<RegResult> register(RegInput input) {
-        if (input.data.get(BaseAuthFields.USERNAME.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
-          return Observable.just(RegResult.builder().data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map).status(RegResult.Status.SUCCESS).build())
-        else
-          return Observable.error(new RegistrationException("Registration failed"));
+        if (!input.data.containsKey(BaseAuthFields.CODE.val())) { //first step of registration
+          //one step registration
+          if (input.data.get(BaseAuthFields.USERNAME.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
+            return Observable.just(RegResult.builder().data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
+              .status(RegResult.Status.SUCCESS).build())
+          else if (input.data.get(REG_CREDENTIAL) == 'credential') //two step registration
+            return Observable.just(RegResult.builder().data([(BaseAuthFields.USERNAME.val()): 'login'] as Map)
+              .status(RegResult.Status.NEED_APPROVAL).build())
+          else
+            return Observable.error(new RegistrationException("Registration failed"));
+        } else {//second step of registration
+          if (input.data.get(BaseAuthFields.CODE.val()) == REG_CODE && input.data.get(BaseAuthFields.USERNAME.val()) == 'login')
+            return Observable.just(RegResult.builder().redirectUrl('http://relying.party/gateway')
+              .data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
+              .status(RegResult.Status.SUCCESS).build())
+          else
+            return Observable.error(new RegistrationException("Registration failed"));
+        }
       }
 
       @Override
       boolean isRegCodeSupported() {
-        return false
+        return true
       }
     }
   }

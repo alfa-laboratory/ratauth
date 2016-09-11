@@ -5,6 +5,44 @@
 :toclevels: 4
 :sectlinks:
 
+[registration]
+=== Registration
+
+[initreg]
+==== Registration code request (first step)
+
+===== Request example
+Method must be POST
+include::../../../server/build/docs/generated-snippets/api/reg_code_provider_channel_succeed/http-request.adoc[]
+Parameters
+include::../../../server/build/docs/generated-snippets/api/reg_code_provider_channel_succeed/request-parameters.adoc[]
+
+===== Response examples
+
+====== Succeed
+include::../../../server/build/docs/generated-snippets/api/reg_code_provider_channel_succeed/http-response.adoc[]
+Headers
+include::../../../server/build/docs/generated-snippets/api/reg_code_provider_channel_succeed/response-fields.adoc[]
+
+[regbycode]
+==== Finish registration by code request (second step)
+
+===== Request example
+Method must be POST
+include::../../../server/build/docs/generated-snippets/api/reg_code_finish_provider_channel_succeed/http-request.adoc[]
+Headers
+include::../../../server/build/docs/generated-snippets/api/reg_code_finish_provider_channel_succeed/request-headers.adoc[]
+Parameters
+include::../../../server/build/docs/generated-snippets/api/reg_code_finish_provider_channel_succeed/request-parameters.adoc[]
+
+===== Response examples
+
+====== Succeed
+include::../../../server/build/docs/generated-snippets/api/reg_code_finish_provider_channel_succeed/http-response.adoc[]
+Headers
+include::../../../server/build/docs/generated-snippets/api/reg_code_finish_provider_channel_succeed/response-fields.adoc[]
+
+
 [authorization]
 === Authorization
 

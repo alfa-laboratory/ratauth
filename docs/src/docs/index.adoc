@@ -11,6 +11,31 @@
 Authorization server based on Ratpack, Spring boot and RxJava. +
 Authorization flow based on http://openid.net/connect/[OpenId Connect specification].
 
+[processes_scheme]
+== Processes' schemes
+=== Registration
+Two steps authorization scheme that uses code sent by registration provider.
+
+[plantuml, "registration-by-code-scheme","png"]
+----------
+include::../uml/RegistrationByCode.puml[]
+----------
+
+=== Authorization
+Two steps authorization scheme.
+
+[plantuml, "auth-by-code-authentication","png"]
+----------
+include::../uml/AuthCodeAuthentication.puml[]
+----------
+=== Cross-authorization
+The way for relying party B to obtain tokens using authentication from relying party A
+
+[plantuml, "cross-authorization-scheme","png"]
+----------
+include::../uml/CrossAuthorization.puml[]
+----------
+
 [api]
 == Api description
 include::api.adoc[]

@@ -1,9 +1,18 @@
 apply plugin: 'org.asciidoctor.convert'
+apply plugin: 'com.github.jruby-gradle.base'
 
 ext {
   snippetsDir = file('../server/build/docs/generated-snippets')
   docsDir = file('src/docs/public')
 }
+
+dependencies {
+  gems 'rubygems:asciidoctor-diagram:1.3.1'
+}
+
+//asciidoctorj {
+//  version '1.5.4'
+//}
 
 /*_______________asciidoc task__________________*/
 task cleanTempDirs(type: Delete) {
@@ -17,6 +26,10 @@ asciidoctor {
   sourceDir = file('src/docs')
   separateOutputDirs = false
   outputDir docsDir
+  gemPath = jrubyPrepare.outputDir
+  requires = ['asciidoctor-diagram']
+
+
   attributes 'snippets': snippetsDir,
       'source-highlighter': 'prettify',
       'imagesdir': 'images',
@@ -28,7 +41,8 @@ asciidoctor {
       'docinfo1': 'true'
 
   dependsOn cleanTempDirs
-  dependsOn(":server:test")
+  dependsOn jrubyPrepare
+  dependsOn project(':server').test
 }
 
 build.dependsOn asciidoctor
