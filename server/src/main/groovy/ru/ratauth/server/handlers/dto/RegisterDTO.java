@@ -1,6 +1,7 @@
 package ru.ratauth.server.handlers.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,9 +23,12 @@ public class RegisterDTO {
   private String status;
   private Map<String, Object> data;
   private String code;
+  @JsonProperty("redirect_url")
+  private String redirectUrl;
 
   public RegisterDTO(RegResult regResult) {
     this.status = regResult.getStatus().toString();
     this.data = regResult.getData();
+    this.redirectUrl = regResult.getRedirectUrl();
   }
 }

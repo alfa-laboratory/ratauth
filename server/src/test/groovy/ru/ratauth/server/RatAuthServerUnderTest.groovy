@@ -1,5 +1,8 @@
 package ru.ratauth.server
 
+import org.springframework.boot.test.IntegrationTest
+import org.springframework.boot.test.SpringApplicationConfiguration
+import org.springframework.test.context.TestPropertySource
 import ratpack.test.MainClassApplicationUnderTest
 
 /**

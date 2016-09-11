@@ -6,9 +6,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import ratpack.spring.config.EnableRatpack
-import ru.ratauth.entities.*
 import ru.ratauth.exception.AuthorizationException
-import ru.ratauth.exception.ExpiredException
 import ru.ratauth.exception.RegistrationException
 import ru.ratauth.providers.auth.AuthProvider
 import ru.ratauth.providers.auth.dto.AuthInput
@@ -17,13 +15,7 @@ import ru.ratauth.providers.auth.dto.BaseAuthFields
 import ru.ratauth.providers.registrations.RegistrationProvider
 import ru.ratauth.providers.registrations.dto.RegInput
 import ru.ratauth.providers.registrations.dto.RegResult
-import ru.ratauth.server.utils.DateUtils
-import ru.ratauth.services.ClientService
-import ru.ratauth.services.SessionService
-import ru.ratauth.services.TokenCacheService
 import rx.Observable
-
-import java.time.LocalDateTime
 
 /**
  * @author mgorelikov
@@ -34,6 +26,9 @@ import java.time.LocalDateTime
 @SpringBootApplication
 @CompileStatic
 class ProvidersStubConfiguration {
+  public static final String REG_CREDENTIAL = 'credential'
+  public static final String REG_CODE = '123'
+
   abstract class AbstractAuthProvider implements AuthProvider, RegistrationProvider {}
 
   @Bean(name = 'STUB')
@@ -45,7 +40,7 @@ class ProvidersStubConfiguration {
         if (input.data.get(BaseAuthFields.USERNAME.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
           return Observable.just(AuthResult.builder().data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map).status(AuthResult.Status.SUCCESS).build())
         else
-          return Observable.error(new AuthorizationException("Authorization failed"));
+          return Observable.error(new AuthorizationException(AuthorizationException.ID.CREDENTIALS_WRONG));
       }
 
       @Override
@@ -60,15 +55,29 @@ class ProvidersStubConfiguration {
 
       @Override
       Observable<RegResult> register(RegInput input) {
-        if (input.data.get(BaseAuthFields.USERNAME.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
-          return Observable.just(RegResult.builder().data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map).status(RegResult.Status.SUCCESS).build())
-        else
-          return Observable.error(new RegistrationException("Registration failed"));
+        if (!input.data.containsKey(BaseAuthFields.CODE.val())) { //first step of registration
+          //one step registration
+          if (input.data.get(BaseAuthFields.USERNAME.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
+            return Observable.just(RegResult.builder().data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
+              .status(RegResult.Status.SUCCESS).build())
+          else if (input.data.get(REG_CREDENTIAL) == 'credential') //two step registration
+            return Observable.just(RegResult.builder().data([(BaseAuthFields.USERNAME.val()): 'login'] as Map)
+              .status(RegResult.Status.NEED_APPROVAL).build())
+          else
+            return Observable.error(new RegistrationException("Registration failed"));
+        } else {//second step of registration
+          if (input.data.get(BaseAuthFields.CODE.val()) == REG_CODE && input.data.get(BaseAuthFields.USERNAME.val()) == 'login')
+            return Observable.just(RegResult.builder().redirectUrl('http://relying.party/gateway')
+              .data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
+              .status(RegResult.Status.SUCCESS).build())
+          else
+            return Observable.error(new RegistrationException("Registration failed"));
+        }
       }
 
       @Override
       boolean isRegCodeSupported() {
-        return false
+        return true
       }
     }
   }

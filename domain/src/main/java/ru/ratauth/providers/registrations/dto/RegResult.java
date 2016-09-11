@@ -17,6 +17,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class RegResult {
   private Status status;
+  private String redirectUrl;
   private Map<String, Object> data;//login
 
   public enum Status {

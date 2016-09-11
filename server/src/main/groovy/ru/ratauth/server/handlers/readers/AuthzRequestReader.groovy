@@ -1,7 +1,6 @@
 package ru.ratauth.server.handlers.readers
 
 import groovy.transform.CompileStatic
-import org.slf4j.MDC
 import ratpack.http.Headers
 import ratpack.util.MultiValueMap
 import ru.ratauth.interaction.AuthzRequest
@@ -9,7 +8,6 @@ import ru.ratauth.interaction.AuthzResponseType
 import ru.ratauth.interaction.GrantType
 import ru.ratauth.server.services.log.ActionLogger
 import ru.ratauth.server.services.log.AuthAction
-import ru.ratauth.server.services.log.LogFields
 
 import static ru.ratauth.server.handlers.readers.RequestUtil.*
 

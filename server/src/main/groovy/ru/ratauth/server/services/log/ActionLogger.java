@@ -3,8 +3,6 @@ package ru.ratauth.server.services.log;
 import org.slf4j.MDC;
 import ru.ratauth.entities.Session;
 
-import java.util.Date;
-
 /**
  * @author mgorelikov
  * @since 24/03/16

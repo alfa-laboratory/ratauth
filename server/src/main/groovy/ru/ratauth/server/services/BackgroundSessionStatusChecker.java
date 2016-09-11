@@ -2,8 +2,6 @@ package ru.ratauth.server.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,10 +17,10 @@ import javax.annotation.PreDestroy;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 
 /**
@@ -33,12 +31,14 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BackgroundSessionStatusChecker implements SessionStatusChecker {
-  private final BlockingQueue<Session> queue = new LinkedBlockingQueue<>();
+  private final Queue<Session> queue = new ConcurrentLinkedQueue<>();
   private ExecutorService executorService;
   private final SessionService sessionService;
   private final Map<String, AuthProvider> authProviders;
   private final TokenCacheService tokenCacheService;
 
+  @Value("${auth.session.background_check_enabled:false}")
+  private Boolean backgroundCheckEnabled;
   @Value("${auth.session.check_threads}")
   private Integer threads;
   @Value("${auth.session.check_interval}")
@@ -46,20 +46,24 @@ public class BackgroundSessionStatusChecker implements SessionStatusChecker {
 
   @PostConstruct
   public void init() {
-    executorService = Executors.newFixedThreadPool(threads);
-    for(int i = 0; i < threads; i++)
-      executorService.submit(new Consumer(queue));
-    executorService.shutdown();
+    if(backgroundCheckEnabled) {
+      executorService = Executors.newFixedThreadPool(threads);
+      for (int i = 0; i < threads; i++)
+        executorService.submit(new Consumer(queue));
+      executorService.shutdown();
+    }
   }
 
   @PreDestroy
   public void destroy() {
-    executorService.shutdownNow();
+    if(backgroundCheckEnabled)
+      executorService.shutdownNow();
   }
 
   @Override
   public void checkAndUpdateSession(Session session) {
-    queue.offer(session);
+    if(backgroundCheckEnabled)
+      queue.offer(session);
   }
 
   private void process(Session session) {
@@ -85,7 +89,7 @@ public class BackgroundSessionStatusChecker implements SessionStatusChecker {
 
   @RequiredArgsConstructor
   private class Consumer implements Runnable {
-    private final BlockingQueue<Session> queue;
+    private final Queue<Session> queue;
 
     @Override
     public void run() {
