@@ -1,7 +1,0 @@
-|===
-|Parameter|Description
-
-|`token`
-|access token that must be checked
-
-|===

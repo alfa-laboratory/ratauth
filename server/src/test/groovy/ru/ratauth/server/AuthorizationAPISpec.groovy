@@ -66,15 +66,11 @@ import static com.jayway.restassured.RestAssured.given
  */
 
 class AuthorizationAPISpec extends BaseDocumentationSpec {
-//  @Delegate
-//  RestTemplate client = new RestTemplate()
   @Value('${server.port}')
   String port
   @Autowired
   ObjectMapper objectMapper
 
-  @Delegate
-  TestHttpClient client = aut.httpClient
 
   def 'should get authorization code'() {
     given:

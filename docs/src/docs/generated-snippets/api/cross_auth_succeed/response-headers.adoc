@@ -1,8 +1,0 @@
-|===
-|Name|Description
-
-|`Location`
-|Header that contains authorization code for the next step of authorization code flow,
-its expiration date and optional user identifier
-
-|===

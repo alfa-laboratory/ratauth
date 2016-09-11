@@ -1,9 +1,0 @@
-[source,http,options="nowrap"]
-----
-HTTP/1.1 302 Found
-location: http://localhost:8080/null?expires_in=1467010862419&token=4002c5ad-d48b-3583-89e2-d03c5aee2086&token_type=BEARER&refresh_token=730bb039-c933-3997-a620-9cc85a027d6b&id_token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyX2lkIiwiYXVkIjpbInJlYWQiLCJtaW5lIl0sInVzZXJfaWQiOiJ1c2VyX2lkIiwic2NvcGUiOlsicmVhZCJdLCJpc3MiOiJodHRwOlwvXC9yYXRhdXRoLnJ1IiwiZXhwIjoxNDY3MDEwODYyLCJpYXQiOjE0NjY5NzQ4NjIsImNsaWVudF9pZCI6Im1pbmUiLCJqdGkiOiI0MDAyYzVhZC1kNDhiLTM1ODMtODllMi1kMDNjNWFlZTIwODYifQ.2L61SS9kj5Ce36WshdKtPl8YCa3f8sRReMD05Du8vIc&user_id=user_id
-connection: keep-alive
-content-encoding: gzip
-transfer-encoding: chunked
-
-----

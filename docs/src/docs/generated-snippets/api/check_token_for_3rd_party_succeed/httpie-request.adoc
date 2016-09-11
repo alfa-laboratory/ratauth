@@ -1,4 +1,0 @@
-[source,bash]
-----
-$ http --form --auth 'mine:password' POST 'http://localhost:8080/check_token' 'Accept:application/x-www-form-urlencoded' 'Content-Type:application/x-www-form-urlencoded; charset=ISO-8859-1' 'token=1234' 'client_id=mine3'
-----

@@ -1,7 +1,7 @@
 apply plugin: 'org.asciidoctor.convert'
 
 ext {
-  snippetsDir = file('src/docs/generated-snippets')
+  snippetsDir = file('../server/build/docs/generated-snippets')
   docsDir = file('src/ratauth/public/docs')
 }
 
@@ -28,6 +28,7 @@ asciidoctor {
       'docinfo1': 'true'
 
   dependsOn cleanTempDirs
+  dependsOn(":server:test")
 }
 
 build.dependsOn asciidoctor

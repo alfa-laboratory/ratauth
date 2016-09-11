@@ -26,7 +26,7 @@ class BaseDocumentationSpec extends Specification {
   ApplicationUnderTest aut = new RatAuthServerUnderTest()
 
   @Rule
-  JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation('../docs/src/docs/generated-snippets/api')
+  JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation('../server/build/docs/generated-snippets/api')
 
   protected RequestSpecification documentationSpec
 

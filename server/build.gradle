@@ -8,7 +8,7 @@ buildscript {
 }
 
 ext {
-  snippetsDir = file("../docs/src/docs/generated-snippets")
+  snippetsDir = file("/build/docs/generated-snippets")
 }
 
 apply plugin: 'spring-boot'

@@ -1,4 +1,0 @@
-[source,bash]
-----
-$ http --form POST 'http://localhost:8080/authorize' 'Accept:application/x-www-form-urlencoded' 'Content-Type:application/x-www-form-urlencoded; charset=ISO-8859-1' 'client_id=mine' 'scope=rs.read' 'username=login' 'password=password'
-----

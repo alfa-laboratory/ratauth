@@ -13,100 +13,100 @@
 
 ===== Request example
 Method could be POST or GET
-include::generated-snippets/api/auth_code_succeed/http-request.adoc[]
+include::../../../server/build/docs/generated-snippets/api/auth_code_succeed/http-request.adoc[]
 Parameters
-include::generated-snippets/api/auth_code_succeed/request-parameters.adoc[]
+include::../../../server/build/docs/generated-snippets/api/auth_code_succeed/request-parameters.adoc[]
 
 ===== Response examples
 
 ====== Succeed
-include::generated-snippets/api/auth_code_succeed/http-response.adoc[]
+include::../../../server/build/docs/generated-snippets/api/auth_code_succeed/http-response.adoc[]
 Headers
-include::generated-snippets/api/auth_code_succeed/response-headers.adoc[]
+include::../../../server/build/docs/generated-snippets/api/auth_code_succeed/response-headers.adoc[]
 
 ====== Failed
-include::generated-snippets/api/auth_code_bad_request/response-fields.adoc[]
+include::../../../server/build/docs/generated-snippets/api/auth_code_bad_request/response-fields.adoc[]
 ====== Bad request
-include::generated-snippets/api/auth_code_bad_request/http-response.adoc[]
+include::../../../server/build/docs/generated-snippets/api/auth_code_bad_request/http-response.adoc[]
 ====== Bad credentials
-include::generated-snippets/api/auth_code_forbidden/http-response.adoc[]
+include::../../../server/build/docs/generated-snippets/api/auth_code_forbidden/http-response.adoc[]
 
 ==== Request access token by authorization code
 ===== Request example
-include::generated-snippets/api/token_succeed/http-request.adoc[]
+include::../../../server/build/docs/generated-snippets/api/token_succeed/http-request.adoc[]
 Headers
-include::generated-snippets/api/token_succeed/request-headers.adoc[]
+include::../../../server/build/docs/generated-snippets/api/token_succeed/request-headers.adoc[]
 Parameters
-include::generated-snippets/api/token_succeed/request-parameters.adoc[]
+include::../../../server/build/docs/generated-snippets/api/token_succeed/request-parameters.adoc[]
 
 ====== Succeed
-include::generated-snippets/api/token_succeed/http-response.adoc[]
+include::../../../server/build/docs/generated-snippets/api/token_succeed/http-response.adoc[]
 
 ====== Auth code expired
-include::generated-snippets/api/token_code_expired/http-response.adoc[]
-include::generated-snippets/api/token_code_expired/response-fields.adoc[]
+include::../../../server/build/docs/generated-snippets/api/token_code_expired/http-response.adoc[]
+include::../../../server/build/docs/generated-snippets/api/token_code_expired/response-fields.adoc[]
 
 ==== Request access token by implicit flow
 ===== Request example
-include::generated-snippets/api/token_implicit_succeed/http-request.adoc[]
+include::../../../server/build/docs/generated-snippets/api/token_implicit_succeed/http-request.adoc[]
 Headers
-include::generated-snippets/api/token_implicit_succeed/request-headers.adoc[]
+include::../../../server/build/docs/generated-snippets/api/token_implicit_succeed/request-headers.adoc[]
 Parameters
-include::generated-snippets/api/token_implicit_succeed/request-parameters.adoc[]
+include::../../../server/build/docs/generated-snippets/api/token_implicit_succeed/request-parameters.adoc[]
 
 ====== Succeed
-include::generated-snippets/api/token_implicit_succeed/http-response.adoc[]
+include::../../../server/build/docs/generated-snippets/api/token_implicit_succeed/http-response.adoc[]
 Headers
-include::generated-snippets/api/token_implicit_succeed/response-headers.adoc[]
+include::../../../server/build/docs/generated-snippets/api/token_implicit_succeed/response-headers.adoc[]
 
 ==== Refresh token
 ===== Request example
-include::generated-snippets/api/token_refresh_succeed/http-request.adoc[]
+include::../../../server/build/docs/generated-snippets/api/token_refresh_succeed/http-request.adoc[]
 Headers
-include::generated-snippets/api/token_refresh_succeed/request-headers.adoc[]
+include::../../../server/build/docs/generated-snippets/api/token_refresh_succeed/request-headers.adoc[]
 Parameters
-include::generated-snippets/api/token_refresh_succeed/request-parameters.adoc[]
+include::../../../server/build/docs/generated-snippets/api/token_refresh_succeed/request-parameters.adoc[]
 
 ====== Succeed
-include::generated-snippets/api/token_refresh_succeed/http-response.adoc[]
+include::../../../server/build/docs/generated-snippets/api/token_refresh_succeed/http-response.adoc[]
 Fields
-include::generated-snippets/api/token_refresh_succeed/response-fields.adoc[]
+include::../../../server/build/docs/generated-snippets/api/token_refresh_succeed/response-fields.adoc[]
 
 ==== Cross-authorization
 ===== Request example
-include::generated-snippets/api/cross_auth_succeed/http-request.adoc[]
+include::../../../server/build/docs/generated-snippets/api/cross_auth_succeed/http-request.adoc[]
 Headers
-include::generated-snippets/api/cross_auth_succeed/request-headers.adoc[]
+include::../../../server/build/docs/generated-snippets/api/cross_auth_succeed/request-headers.adoc[]
 Parameters
-include::generated-snippets/api/cross_auth_succeed/request-parameters.adoc[]
+include::../../../server/build/docs/generated-snippets/api/cross_auth_succeed/request-parameters.adoc[]
 
 ====== Succeed
-include::generated-snippets/api/cross_auth_succeed/http-response.adoc[]
+include::../../../server/build/docs/generated-snippets/api/cross_auth_succeed/http-response.adoc[]
 Fields
-include::generated-snippets/api/cross_auth_succeed/response-headers.adoc[]
+include::../../../server/build/docs/generated-snippets/api/cross_auth_succeed/response-headers.adoc[]
 
 ==== Check token
 ===== Request example
-include::generated-snippets/api/check_token_succeed/http-request.adoc[]
+include::../../../server/build/docs/generated-snippets/api/check_token_succeed/http-request.adoc[]
 Headers
-include::generated-snippets/api/check_token_succeed/request-headers.adoc[]
+include::../../../server/build/docs/generated-snippets/api/check_token_succeed/request-headers.adoc[]
 Parameters
-include::generated-snippets/api/check_token_succeed/request-parameters.adoc[]
+include::../../../server/build/docs/generated-snippets/api/check_token_succeed/request-parameters.adoc[]
 
 ====== Succeed
-include::generated-snippets/api/check_token_succeed/http-response.adoc[]
+include::../../../server/build/docs/generated-snippets/api/check_token_succeed/http-response.adoc[]
 Fields
-include::generated-snippets/api/check_token_succeed/response-fields.adoc[]
+include::../../../server/build/docs/generated-snippets/api/check_token_succeed/response-fields.adoc[]
 
 ==== Check token and sign JWT for external resource server
 ===== Request example
-include::generated-snippets/api/check_token_for_3rd_party_succeed/http-request.adoc[]
+include::../../../server/build/docs/generated-snippets/api/check_token_for_3rd_party_succeed/http-request.adoc[]
 Headers
-include::generated-snippets/api/check_token_for_3rd_party_succeed/request-headers.adoc[]
+include::../../../server/build/docs/generated-snippets/api/check_token_for_3rd_party_succeed/request-headers.adoc[]
 Parameters
-include::generated-snippets/api/check_token_for_3rd_party_succeed/request-parameters.adoc[]
+include::../../../server/build/docs/generated-snippets/api/check_token_for_3rd_party_succeed/request-parameters.adoc[]
 
 ====== Succeed
-include::generated-snippets/api/check_token_for_3rd_party_succeed/http-response.adoc[]
+include::../../../server/build/docs/generated-snippets/api/check_token_for_3rd_party_succeed/http-response.adoc[]
 Fields
-include::generated-snippets/api/check_token_for_3rd_party_succeed/response-fields.adoc[]
+include::../../../server/build/docs/generated-snippets/api/check_token_for_3rd_party_succeed/response-fields.adoc[]
