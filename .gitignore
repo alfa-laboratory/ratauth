@@ -107,3 +107,6 @@ gradle-app.setting
 !gradle-wrapper.jar
 ### Java template
 *.class
+
+# html dirs
+docs/src/docs/public

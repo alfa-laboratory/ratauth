@@ -1,7 +1,6 @@
 package ru.ratauth.server.services;
 
 import ru.ratauth.entities.Session;
-import ru.ratauth.providers.auth.dto.AuthInput;
 
 /**
  * @author mgorelikov

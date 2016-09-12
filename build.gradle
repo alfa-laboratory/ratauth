@@ -1,6 +1,7 @@
 buildscript {
   ext {
-    springBootVersion = '1.3.0.RELEASE'
+    springBootVersion = '1.3.5.RELEASE'
+    ratpackVersion = '1.3.3'
   }
   repositories {
     jcenter()
@@ -11,6 +12,12 @@ buildscript {
     classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+'
     classpath "org.jfrog.buildinfo:build-info-extractor-gradle:3.1.1"
   }
+}
+
+plugins {
+  id "idea"
+  id 'org.asciidoctor.convert' version '1.5.3'
+  id 'com.github.jruby-gradle.base' version '1.2.0'
 }
 
 group = "ru.ratauth"
@@ -32,32 +39,43 @@ allprojects {
 
   dependencyManagement {
     imports {
-      mavenBom 'io.spring.platform:platform-bom:2.0.0.RELEASE'
+      mavenBom 'io.spring.platform:platform-bom:2.0.5.RELEASE'
     }
 
     dependencies {
-      dependency 'com.google.guava:guava:18.0'
-      dependency 'org.codehaus.groovy:groovy-all:2.4.5'
-      dependency 'org.spockframework:spock-core:1.0-groovy-2.4'
-      dependency 'org.spockframework:spock-spring:1.0-groovy-2.4'
+      //common
       dependency 'org.projectlombok:lombok:1.16.2'
-      dependency 'com.nimbusds:nimbus-jose-jwt:4.3.1'
-      dependency 'io.reactivex:rxjava:1.0.15'
-      dependency 'io.ratpack:ratpack-rx:1.1.1'
-      dependency 'io.ratpack:ratpack-spring-boot:1.1.1'
-      dependency 'io.ratpack:ratpack-groovy:1.2.0'
-      dependency 'io.ratpack:ratpack-test:1.1.1'
-      dependency 'ru.ratauth.providers:auth-mongo:+'
-      dependency 'ru.ratauth.providers:auth-identity-mongo:+'
-      dependency 'ru.alfabank.providers:provider-dca:0.+'
-
+      dependency 'org.apache.commons:commons-lang3:3.4'
+      dependency 'com.google.guava:guava:19.0'
+      dependency 'org.codehaus.groovy:groovy-all:2.4.7'//for ratpack server config
       dependency 'net.logstash.logback:logstash-logback-encoder:4.5.1'
 
+      //spring
       dependencySet(group:'org.springframework.cloud', version:'1.0.2.RELEASE') {
         entry 'spring-cloud-config-client'
         entry 'spring-cloud-starter-eureka'
       }
-      dependency 'org.apache.commons:commons-lang3:3.4'
+
+      //reactive
+      dependency 'io.reactivex:rxjava:1.1.6'
+      dependency "io.ratpack:ratpack-rx:${ratpackVersion}"
+      dependency "io.ratpack:ratpack-spring-boot:${ratpackVersion}"
+      dependency "io.ratpack:ratpack-groovy:${ratpackVersion}"
+
+      //crypto
+      dependency 'com.nimbusds:nimbus-jose-jwt:4.20'
+
+      //providers
+      dependency 'ru.ratauth.providers:auth-mongo:+'
+      dependency 'ru.ratauth.providers:auth-identity-mongo:+'
+      dependency 'ru.alfabank.providers:provider-dca:0.+'
+
+      //test
+      dependency 'org.spockframework:spock-core:1.0-groovy-2.4'
+      dependency 'org.spockframework:spock-spring:1.0-groovy-2.4'
+      dependency "io.ratpack:ratpack-test:${ratpackVersion}"
+      dependency 'org.springframework.restdocs:spring-restdocs-restassured:1.1.0.RELEASE'
+      dependency  'org.springframework.restdocs:spring-restdocs-core:1.1.0.RELEASE'
     }
   }
 }
@@ -67,11 +85,20 @@ subprojects {
   apply plugin: 'groovy'
   apply plugin: 'maven-publish'
   apply plugin: 'com.jfrog.artifactory'
+  apply plugin: 'jacoco'
   version = '0.3.2'
   group = 'ru.ratauth'
 
   sourceCompatibility = 1.8
   targetCompatibility = 1.8
+
+  jacocoTestReport {
+    reports {
+      xml.enabled true
+      csv.enabled true
+      html.destination "${buildDir}/jacocoHtml"
+    }
+  }
 
   jar {
     archiveName = project.name + ".jar"
@@ -101,7 +128,7 @@ subprojects {
         repoKey = repo
         username = "${artifactory_user}"
         password = "${artifactory_password}"
-        maven = true
+//        maven = true
       }
       defaults {
         publications('mavenJava')
@@ -122,6 +149,7 @@ subprojects {
     compile 'org.projectlombok:lombok'
     compile 'io.reactivex:rxjava'
 
+    //test
     testCompile 'org.springframework.boot:spring-boot-starter-test'
     testCompile 'org.spockframework:spock-core', {
       exclude module: "groovy-all"
@@ -134,19 +162,13 @@ subprojects {
 }
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '2.13'
+  gradleVersion = '2.14'
 }
 
 idea {
   project {
     jdkName "1.8"
     languageLevel "1.8"
-    ipr {
-      withXml { provider ->
-        def node = provider.asNode()
-        //configure git support for the project in idea
-        node.component.find { it.'@name' == 'VcsDirectoryMappings' }?.mapping[0].'@vcs' = 'Git'
-      }
-    }
+    vcs 'Git'
   }
 }

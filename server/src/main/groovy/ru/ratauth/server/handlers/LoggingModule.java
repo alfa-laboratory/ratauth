@@ -2,12 +2,9 @@ package ru.ratauth.server.handlers;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
-import lombok.Data;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import ratpack.func.Action;
-import ratpack.guice.ConfigurableModule;
 import ratpack.handling.HandlerDecorator;
 import ratpack.handling.RequestId;
 import ratpack.logging.MDCInterceptor;

@@ -7,6 +7,10 @@ buildscript {
   }
 }
 
+ext {
+  snippetsDir = file("/build/docs/generated-snippets")
+}
+
 apply plugin: 'spring-boot'
 apply plugin: 'io.spring.dependency-management'
 
@@ -15,6 +19,13 @@ bootRepackage {
 }
 
 dependencies {
+  //commons
+  compile project(':domain')
+  compile 'org.apache.commons:commons-lang3:'
+  provided 'javax.servlet:javax.servlet-api'
+  compile 'net.logstash.logback:logstash-logback-encoder'
+
+  //web/reactive
   compile 'org.springframework.boot:spring-boot-starter-actuator'
   compile 'org.springframework.boot:spring-boot-starter-web'
   compile 'org.springframework.cloud:spring-cloud-starter-eureka'
@@ -24,19 +35,30 @@ dependencies {
   compile 'io.ratpack:ratpack-rx'
   compile 'io.ratpack:ratpack-spring-boot'
   compile 'io.ratpack:ratpack-groovy'
-  compile 'org.apache.commons:commons-lang3:'
 
+  //local
+  compile project(':domain')
   compile 'ru.ratauth.providers:auth-mongo'
   compile 'ru.ratauth.providers:auth-identity-mongo'
   compile 'ru.alfabank.providers:provider-dca'
-  
+
+  //crypto
   compile 'com.nimbusds:nimbus-jose-jwt'
 
-  compile 'net.logstash.logback:logstash-logback-encoder'
-  compile project(':domain')
-  provided 'javax.servlet:javax.servlet-api'
+  //docs/test
+  testCompile 'org.springframework.restdocs:spring-restdocs-restassured:1.1.0.RELEASE'
 }
 
+task cleanTempDirs(type: Delete) {
+  delete fileTree(dir: snippetsDir)
+}
+
+test {
+  outputs.dir snippetsDir
+  dependsOn cleanTempDirs
+}
+
+/*_______________docker task__________________*/
 task dockerBuild << {
   exec {
     commandLine 'docker', 'build', '--force-rm=true', "--tag='${project.name}'", '.'

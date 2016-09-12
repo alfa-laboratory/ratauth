@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.ratauth.exception.RegistrationException;
 import ru.ratauth.interaction.GrantType;
 import ru.ratauth.interaction.RegistrationRequest;
 import ru.ratauth.interaction.TokenResponse;
@@ -33,7 +32,9 @@ public class OpenIdRegistrationService implements RegistrationService {
   public Observable<RegResult> register(RegistrationRequest request) {
     return authClientService.loadRelyingParty(request.getClientId())
         .flatMap(rp -> registerProviders.get(rp.getIdentityProvider())
-                .register(RegInput.builder().relyingParty(rp.getName()).data(request.getData()).build()))
+                .register(RegInput.builder().relyingParty(rp.getName()).data(request.getData()).build())
+                .map(result  -> { result.setRedirectUrl(rp.getRedirectURL()); return result; })
+        )
         .doOnCompleted(() -> log.info("First step of registration succeed"));
   }
 
