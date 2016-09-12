@@ -17,9 +17,6 @@ import ru.ratauth.server.configuration.RatAuthProperties
 @EnableRatpack
 @ComponentScan(["ru.ratauth"])
 @EnableHystrix
-@EnableEurekaClient
-@EnableRetry
-@EnableDiscoveryClient
 @EnableConfigurationProperties(RatAuthProperties.class)
 public class RatAuthApplication {
   public static final int DEFAULT_PADDING = 50

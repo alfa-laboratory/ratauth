@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.IntegrationTest
 import org.springframework.boot.test.SpringApplicationConfiguration
 import org.springframework.restdocs.JUnitRestDocumentation
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 import ratpack.test.ApplicationUnderTest
 import spock.lang.Shared
@@ -21,6 +22,7 @@ import static org.springframework.restdocs.restassured.RestAssuredRestDocumentat
 @SpringApplicationConfiguration(classes = RatAuthApplication.class)
 @IntegrationTest(['server.port=8080', 'management.port=0'])
 @TestPropertySource(locations = "classpath:application.yml")
+@ActiveProfiles("test")
 class BaseDocumentationSpec extends Specification {
   @Shared
   ApplicationUnderTest aut = new RatAuthServerUnderTest()

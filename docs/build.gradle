@@ -1,5 +1,7 @@
 apply plugin: 'org.asciidoctor.convert'
 apply plugin: 'com.github.jruby-gradle.base'
+apply plugin: 'distribution'
+apply plugin: 'maven-publish'
 
 ext {
   snippetsDir = file('../server/build/docs/generated-snippets')
@@ -43,6 +45,22 @@ asciidoctor {
   dependsOn cleanTempDirs
   dependsOn jrubyPrepare
   dependsOn project(':server').test
+}
+
+//distributions {
+//  main {
+//    baseName = 'ratauth-doc-full'
+//    contents {
+//      from { "$docsDir" }
+//    }
+//  }
+//}
+
+jar {
+  dependsOn asciidoctor
+  from ("${docsDir}") {
+    into 'static/docs'
+  }
 }
 
 build.dependsOn asciidoctor

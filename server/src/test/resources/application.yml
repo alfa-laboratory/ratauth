@@ -1,9 +1,16 @@
 spring:
  application:
   name: ${APPLICATION_NAME:auth-server}
+ data:
+   mongodb:
+    dbname: auth
+    dbhosts: localhost:27017
 
 auth:
  master_secret: "cnlqV2hVQml3aWdrc1RqWXBSaFpma3l5enhNVU1TS1A="
+ identity:
+  local:
+   salt: "se33ani3nacvhpmrd1et"
  secret:
   code: "HdC4t2Wpjn/obYj9JHLVwmGzSqQ5SlatYqMF6zuAL0s="
   ttl: 2678400
@@ -18,6 +25,7 @@ auth:
   check_threads: 10
   check_interval: 300
  dca:
+  litePackets: "104,105,106"
   ws:
    channel: channel
    timeout: 10000
@@ -25,8 +33,8 @@ auth:
    externalSystemCode: syscode
    externalUserCode: usercode
    branchNumber: "0000"
-spring:
- data:
-  mongodb:
-   dbname: auth
-   dbhosts: localhost:27017
+   authTempPasswordLength: 6
+   regTempPasswordLength: 6
+   tmpPasswordScheme: true
+   xm: xm
+   name: test-app
