@@ -21,8 +21,8 @@ plugins {
 }
 
 allprojects {
-  apply plugin: 'io.spring.dependency-management'
-  apply plugin: 'provided-base'
+  apply plugin:'io.spring.dependency-management'
+  apply plugin:'provided-base'
 
   repositories {
     mavenCentral()
@@ -31,7 +31,7 @@ allprojects {
     maven { url "https://repo.spring.io/milestone" }
   }
   configurations {
-    compile.exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+    compile.exclude group:'org.springframework.boot', module:'spring-boot-starter-tomcat'
   }
 
   dependencyManagement {
@@ -42,6 +42,7 @@ allprojects {
     dependencies {
       //common
       dependency 'org.projectlombok:lombok:1.16.2'
+      dependency 'com.google.code.findbugs:annotations:3.0.1'
       dependency 'org.apache.commons:commons-lang3:3.4'
       dependency 'com.google.guava:guava:19.0'
       dependency 'com.google.inject:guice:4.1.0'
@@ -67,17 +68,41 @@ allprojects {
 }
 
 subprojects {
-  apply plugin: 'java'
-  apply plugin: 'groovy'
-  apply plugin: 'jacoco'
-  apply plugin: 'com.github.kt3k.coveralls'
-  apply plugin: 'codenarc'
+  apply plugin:'java'
+  apply plugin:'groovy'
+  apply plugin:'jacoco'
+  apply plugin:'pmd'
+  apply plugin:'findbugs'
+  apply plugin:'com.github.kt3k.coveralls'
+  apply plugin:'codenarc'
 
   version = '0.3.0'
   group = 'ru.ratauth'
 
   sourceCompatibility = 1.8
   targetCompatibility = 1.8
+
+  codenarcMain {
+    configFile = file("${getRootDir()}/gradle/codenarc.groovy")
+    exclude 'ru/**/*Stub*'
+    exclude 'ru/**/RatAuthApplication*'
+    exclude 'ru/**/AuthorizationHandlers*' //TODO uncomment and fix it!
+  }
+
+  codenarcTest.onlyIf { false }
+
+  pmd {
+    ignoreFailures = false
+    ruleSets = [] // This overwrites the rules that are being added
+    ruleSetFiles = files("${project.rootDir}/gradle/pmd-ruleset.xml")
+  }
+
+  tasks.withType(FindBugs) {
+    reports {
+      xml.enabled false
+      html.enabled true
+    }
+  }
 
   jacocoTestReport {
     reports {
@@ -94,22 +119,30 @@ subprojects {
     jacocoTestReport.executionData += files("$buildDir/jacoco/${task.name}.exec")
   }
 
+  findbugs {
+    sourceSets = [sourceSets.main]
+    effort = "max"
+    reportLevel = "high"
+    excludeFilter = file("$rootDir/gradle/findbugs-exclude.xml")
+  }
+
   jar {
     archiveName = project.name + ".jar"
   }
 
   dependencies {
+    provided 'org.projectlombok:lombok'
+    provided 'com.google.code.findbugs:annotations'
     compile 'org.codehaus.groovy:groovy-all'
-    compile 'org.projectlombok:lombok'
     compile 'io.reactivex:rxjava'
 
     //test
     testCompile 'org.springframework.boot:spring-boot-starter-test'
     testCompile 'org.spockframework:spock-core', {
-      exclude module: "groovy-all"
+      exclude module:"groovy-all"
     }
     testCompile 'org.spockframework:spock-spring', {
-      exclude module: "groovy-all"
+      exclude module:"groovy-all"
     }
     testCompile 'io.ratpack:ratpack-test'
   }

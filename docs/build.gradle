@@ -44,5 +44,3 @@ asciidoctor {
   dependsOn jrubyPrepare
   dependsOn project(':server').test
 }
-
-build.dependsOn asciidoctor
