@@ -14,6 +14,7 @@ import ru.ratauth.interaction.AuthzResponseType
 import ru.ratauth.interaction.GrantType
 import ru.ratauth.server.local.PersistenceServiceStubConfiguration
 
+import static com.jayway.restassured.RestAssured.given
 import static org.hamcrest.Matchers.*
 import static org.springframework.restdocs.headers.HeaderDocumentation.*
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse

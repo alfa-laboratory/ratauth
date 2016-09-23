@@ -1,7 +1,7 @@
 package ru.ratauth.server.utils;
 
 
-import com.fasterxml.jackson.dataformat.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
+import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;

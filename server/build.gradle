@@ -36,6 +36,7 @@ dependencies {
 
   //docs/test
   testCompile 'org.springframework.restdocs:spring-restdocs-restassured:1.1.0.RELEASE'
+  testCompile 'org.springframework.boot:spring-boot-starter-test'
 }
 
 task cleanTempDirs(type: Delete) {

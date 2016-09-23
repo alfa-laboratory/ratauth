@@ -110,7 +110,7 @@ class TokenAPISpec extends BaseDocumentationSpec {
           .type(JsonFieldType.STRING),
         fieldWithPath('exp')
           .description('expiration date of checkeed token')
-          .type(JsonFieldType.STRING),
+          .type(JsonFieldType.NUMBER),
         fieldWithPath('client_id')
           .description('relying party identifier')
           .type(JsonFieldType.STRING),
