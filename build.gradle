@@ -103,10 +103,6 @@ subprojects {
   }
 }
 
-task wrapper(type: Wrapper) {
-  gradleVersion = '2.14'
-}
-
 idea {
   project {
     jdkName "1.8"
