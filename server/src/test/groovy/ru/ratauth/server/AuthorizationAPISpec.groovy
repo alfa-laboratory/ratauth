@@ -5,19 +5,17 @@ import com.jayway.restassured.http.ContentType
 import org.hamcrest.core.StringContains
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.*
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.restdocs.payload.JsonFieldType
 import ru.ratauth.exception.BaseAuthServerException
 import ru.ratauth.exception.ExpiredException
 import ru.ratauth.interaction.AuthzResponseType
 import ru.ratauth.interaction.GrantType
-import ru.ratauth.server.configuration.PersistenceServiceStubConfiguration
-import static org.hamcrest.Matchers.containsString
-import static org.hamcrest.Matchers.equalToIgnoringCase
-import static org.hamcrest.Matchers.notNullValue
-import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName
-import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders
-import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders
+import ru.ratauth.server.local.PersistenceServiceStubConfiguration
+
+import static org.hamcrest.Matchers.*
+import static org.springframework.restdocs.headers.HeaderDocumentation.*
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
@@ -25,7 +23,6 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document
-import static com.jayway.restassured.RestAssured.given
 
 /**
  * @author mgorelikov

@@ -1,3 +1,0 @@
-spring:
- application:
-  name: ${APPLICATION_NAME:auth-server}

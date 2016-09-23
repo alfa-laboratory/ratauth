@@ -1,4 +1,5 @@
 package ru.ratauth.server
+
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.jayway.restassured.http.ContentType
 import org.hamcrest.core.StringContains
@@ -9,7 +10,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.restdocs.payload.JsonFieldType
 import ru.ratauth.interaction.AuthzResponseType
 import ru.ratauth.interaction.GrantType
-import ru.ratauth.server.configuration.PersistenceServiceStubConfiguration
+import ru.ratauth.server.local.PersistenceServiceStubConfiguration
 
 import static com.jayway.restassured.RestAssured.given
 import static org.hamcrest.Matchers.equalToIgnoringCase
