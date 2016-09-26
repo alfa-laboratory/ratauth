@@ -8,22 +8,24 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
     classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+'
     classpath 'com.bmuschko:gradle-docker-plugin:3.0.3'
+    classpath 'com.netflix.nebula:nebula-release-plugin:4.1.0'
+    classpath 'com.netflix.nebula:gradle-info-plugin:3.2.1'
+    classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.3'
+    classpath 'com.github.jruby-gradle:jruby-gradle-plugin:1.3.3'
+    classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.6.3'
+    classpath 'com.netflix.nebula:nebula-publishing-plugin:4.9.1'
   }
 }
 
-plugins {
-  id "idea"
-  id 'org.asciidoctor.convert' version '1.5.3'
-  id 'com.github.jruby-gradle.base' version '1.2.0'
-  id 'com.github.kt3k.coveralls' version '2.6.3'
-}
-
 allprojects {
-  apply plugin:'io.spring.dependency-management'
-  apply plugin:'provided-base'
+  apply plugin: 'io.spring.dependency-management'
+  apply plugin: 'com.github.kt3k.coveralls'
+  apply plugin: 'idea'
+  apply plugin: 'nebula.release'
+  apply plugin: 'nebula.info'
 
   repositories {
     mavenCentral()
@@ -37,7 +39,7 @@ allprojects {
 
   dependencyManagement {
     imports {
-      mavenBom 'io.spring.platform:platform-bom:2.0.5.RELEASE'
+      mavenBom 'io.spring.platform:platform-bom:2.0.8.RELEASE'
     }
 
     dependencies {
@@ -62,8 +64,7 @@ allprojects {
       dependency "io.ratpack:ratpack-test:${ratpackVersion}"
       dependency 'org.spockframework:spock-core:1.1-groovy-2.4-rc-2'
       dependency 'org.spockframework:spock-spring:1.1-groovy-2.4-rc-2'
-      dependency 'org.springframework.restdocs:spring-restdocs-restassured:1.1.0.RELEASE'
-//      dependency 'org.springframework.restdocs:spring-restdocs-core:1.1.0.RELEASE'
+      dependency 'org.springframework.restdocs:spring-restdocs-restassured:1.1.2.RELEASE'
     }
   }
 }
@@ -116,34 +117,34 @@ subprojects {
   tasks.withType(Test) { task ->
     minHeapSize = '32m'
     maxHeapSize = '256m'
-    jvmArgs "-XX:MaxPermSize=512m"
+    jvmArgs '-XX:MaxPermSize=512m'
     jacocoTestReport.executionData += files("$buildDir/jacoco/${task.name}.exec")
   }
 
   findbugs {
     sourceSets = [sourceSets.main]
-    effort = "max"
-    reportLevel = "high"
+    effort = 'max'
+    reportLevel = 'high'
     excludeFilter = file("$rootDir/gradle/findbugs-exclude.xml")
   }
 
   jar {
-    archiveName = project.name + ".jar"
+    archiveName = project.name + '.jar'
   }
 
   dependencies {
-    provided 'org.projectlombok:lombok'
-    provided 'com.google.code.findbugs:annotations'
+    compileOnly 'org.projectlombok:lombok'
+    compileOnly 'com.google.code.findbugs:annotations'
     compile 'org.codehaus.groovy:groovy-all'
     compile 'io.reactivex:rxjava'
 
     //test
     testCompile 'org.springframework.boot:spring-boot-starter-test'
     testCompile 'org.spockframework:spock-core', {
-      exclude module:"groovy-all"
+      exclude module:'groovy-all'
     }
     testCompile 'org.spockframework:spock-spring', {
-      exclude module:"groovy-all"
+      exclude module:'groovy-all'
     }
     testCompile 'io.ratpack:ratpack-test'
   }
@@ -151,8 +152,8 @@ subprojects {
 
 idea {
   project {
-    jdkName "1.8"
-    languageLevel "1.8"
+    jdkName '1.8'
+    languageLevel '1.8'
     vcs 'Git'
   }
 }
