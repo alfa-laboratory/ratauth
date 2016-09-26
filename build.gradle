@@ -10,6 +10,7 @@ buildscript {
   dependencies {
     classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
     classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+'
+    classpath 'com.bmuschko:gradle-docker-plugin:3.0.3'
   }
 }
 
