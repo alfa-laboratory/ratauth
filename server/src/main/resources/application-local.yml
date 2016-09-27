@@ -1,0 +1,19 @@
+spring:
+ application:
+  name: ${APPLICATION_NAME:auth-server}
+
+auth:
+ master_secret: "cnlqV2hVQml3aWdrc1RqWXBSaFpma3l5enhNVU1TS1A="
+ secret:
+  code: "HdC4t2Wpjn/obYj9JHLVwmGzSqQ5SlatYqMF6zuAL0s="
+  ttl: 2678400
+ token:
+  ttl: 86400
+  issuer: "http://ratauth.ru"
+ refresh_token:
+  ttl: 36000
+ code:
+  ttl: 86400
+ session:
+  check_threads: 10
+  check_interval: 300

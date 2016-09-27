@@ -1,0 +1,10 @@
+<FindBugsFilter>
+    <Match>
+        <Class name="ru.ratauth.server.secutiry.MD5Generator" />
+        <Bug pattern="DM_DEFAULT_ENCODING" />
+    </Match>
+    <Match>
+        <Class name="ru.ratauth.server.secutiry.UUIDValueGenerator" />
+        <Bug pattern="DM_DEFAULT_ENCODING" />
+    </Match>
+</FindBugsFilter>

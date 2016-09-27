@@ -1,7 +1,5 @@
 package ru.ratauth.server.secutiry;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
@@ -10,11 +8,10 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import java.util.*;
 
@@ -23,9 +20,7 @@ import java.util.*;
  * @since 03/11/15
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HS256TokenProcessor implements TokenProcessor {
-  private final ObjectMapper jacksonObjectMapper;
   private static final String SCOPE = "scope";
   private static final String CLIENT_ID = "client_id";
 
@@ -53,7 +48,7 @@ public class HS256TokenProcessor implements TokenProcessor {
         .claim(CLIENT_ID, clientId)
         .jwtID(identifier)
         .issueTime(created);
-    userInfo.forEach((key, value) -> jwtBuilder.claim(key, value));
+    userInfo.forEach(jwtBuilder::claim);
 
     SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), jwtBuilder.build());
 
