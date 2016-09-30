@@ -1,4 +1,5 @@
 # OpenID Connect authorization server
+[![Build Status](https://travis-ci.org/alfa-laboratory/ratauth.svg?branch=master)](https://travis-ci.org/alfa-laboratory/ratauth)
 [![Coverage Status](https://coveralls.io/repos/github/alfa-laboratory/ratauth/badge.svg)](https://coveralls.io/github/alfa-laboratory/ratauth)
 ## Local run
 
