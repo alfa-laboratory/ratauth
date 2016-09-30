@@ -5,6 +5,8 @@
 
 `SERVER_PORT=8080 SPRING_PROFILES_ACTIVE=local ./gradlew bootRun`
 
+or use `docker-compose` util. See details below
+
 And then, see docs and try to use register API
 
 ## Build
