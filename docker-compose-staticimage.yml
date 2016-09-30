@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+  run_ratauth:
+    image: ratauth
+    ports:
+      - 5050:5050
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+

@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+  build_ratauth:
+    image: lavcraft/jdkgit
+    command: bash -c "cd /tmp/buildDir && ./gradlew build buildImage -PimageTagLatest=true"
+    volumes:
+      - .:/tmp/buildDir
+      - ~/.gradle:/root/.gradle
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      GRADLE_OPTS: "-Dorg.gradle.native=false"

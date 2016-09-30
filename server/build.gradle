@@ -1,5 +1,7 @@
 ext {
   snippetsDir = file("/build/docs/generated-snippets")
+  imagePrefix = (project.findProperty('imagePrefix') ? project.findProperty('imagePrefix') + '/' : '')
+  imageTagLatest = project.hasProperty('imageTagLatest')
 }
 
 apply plugin: 'spring-boot'
@@ -71,5 +73,7 @@ task copyJars(type: Copy){
 task buildImage(type: DockerBuildImage) {
     dependsOn build, copyJars, createDockerfile
     inputDir = createDockerfile.destFile.parentFile
-    tag 'moscow.alfaintra.net/ratauth'
+    tag "${imagePrefix}ratauth:${imageTagLatest ? 'latest' : project.version.toString().replace('+','.')}"
 }
+
+
