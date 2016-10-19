@@ -22,10 +22,15 @@ class RegistrationRequestReader {
   private static final String GRANT_TYPE = "grant_type"
   private static final String RESPONSE_TYPE = "response_type"
   private static final String SCOPE = "scope"
-  private static final Set BASE_FIELDS = [CLIENT_ID,GRANT_TYPE,RESPONSE_TYPE,SCOPE] as Set
+  private static final Set BASE_FIELDS = [
+      CLIENT_ID,
+      GRANT_TYPE,
+      RESPONSE_TYPE,
+      SCOPE
+  ] as Set
 
   static RegistrationRequest readRegistrationRequest(Form form, Headers headers) {
-    GrantType grantType = extractEnumField(form, GRANT_TYPE, false, GrantType.class)
+    GrantType grantType = extractEnumField(form, GRANT_TYPE, false, GrantType)
     def builder = RegistrationRequest.builder()
         .grantType(grantType)
         .responseType(extractEnumField(form, RESPONSE_TYPE, false, AuthzResponseType))

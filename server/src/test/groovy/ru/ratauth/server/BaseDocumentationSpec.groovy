@@ -3,30 +3,25 @@ package ru.ratauth.server
 import com.jayway.restassured.builder.RequestSpecBuilder
 import com.jayway.restassured.specification.RequestSpecification
 import org.junit.Rule
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.test.IntegrationTest
-import org.springframework.boot.test.SpringApplicationConfiguration
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.restdocs.JUnitRestDocumentation
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
-import ratpack.test.ApplicationUnderTest
-import spock.lang.Shared
+import ru.ratauth.server.configuration.TestBaseConfiguration
 import spock.lang.Specification
 
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.documentationConfiguration
 
 /**
  * @author mgorelikov
  * @since 26/06/16
  */
-@SpringApplicationConfiguration(classes = RatAuthApplication.class)
-@IntegrationTest(['server.port=8080', 'management.port=0'])
-@TestPropertySource(locations = "classpath:application.yml")
-@ActiveProfiles("test")
+@SpringBootTest(
+    webEnvironment = NONE,
+    classes = [TestBaseConfiguration],
+    properties = "ratpack.port=8080"
+)
 class BaseDocumentationSpec extends Specification {
-  @Shared
-  ApplicationUnderTest aut = new RatAuthServerUnderTest()
-
   @Rule
   JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation('../server/build/docs/generated-snippets/api')
 

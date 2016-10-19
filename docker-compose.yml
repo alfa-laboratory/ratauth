@@ -1,8 +1,12 @@
-#registrator:
-#  image: gliderlabs/registrator
-#  container_name: registrator
-#  net: "host"
-#  volumes:
-#    - "/var/run/docker.sock:/tmp/docker.sock"
-#  command: "-ip 192.168.99.100 consul://192.168.99.100:8500"
-#  restart: always
+version: '2'
+
+services:
+  run_ratauth:
+    image: java:8-alpine
+    ports:
+      - 5050:5050
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+    volumes:
+        - ./server/build/libs:/tmp/app
+    command: java -Djava.security.egd=file:/dev/./urandom -jar /tmp/app/server.jar

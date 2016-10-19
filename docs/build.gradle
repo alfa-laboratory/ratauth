@@ -1,7 +1,5 @@
 apply plugin: 'org.asciidoctor.convert'
 apply plugin: 'com.github.jruby-gradle.base'
-apply plugin: 'distribution'
-apply plugin: 'maven-publish'
 
 ext {
   snippetsDir = file('../server/build/docs/generated-snippets')
@@ -12,9 +10,9 @@ dependencies {
   gems 'rubygems:asciidoctor-diagram:1.3.1'
 }
 
-//asciidoctorj {
-//  version '1.5.4'
-//}
+asciidoctorj {
+  version '1.5.4'
+}
 
 /*_______________asciidoc task__________________*/
 task cleanTempDirs(type: Delete) {
@@ -46,21 +44,3 @@ asciidoctor {
   dependsOn jrubyPrepare
   dependsOn project(':server').test
 }
-
-//distributions {
-//  main {
-//    baseName = 'ratauth-doc-full'
-//    contents {
-//      from { "$docsDir" }
-//    }
-//  }
-//}
-
-jar {
-  dependsOn asciidoctor
-  from ("${docsDir}") {
-    into 'static/docs'
-  }
-}
-
-build.dependsOn asciidoctor

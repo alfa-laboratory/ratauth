@@ -17,18 +17,25 @@ import static ru.ratauth.server.handlers.readers.RequestUtil.*
  */
 @CompileStatic
 class AuthzRequestReader {
+  public static final String SPACE = " "
   private static final String RESPONSE_TYPE = "response_type"
   private static final String GRANT_TYPE = "grant_type"
   private static final String CLIENT_ID = "client_id"
   private static final String SCOPE = "scope"
   private static final String REDIRECT_URI = "redirect_uri"
   private static final String REFRESH_TOKEN = "refresh_token"
-  private static
-  final Set<String> BASE_FIELDS = new HashSet<String>(Arrays.asList(RESPONSE_TYPE, CLIENT_ID, SCOPE, REDIRECT_URI, REFRESH_TOKEN, GRANT_TYPE));
+  private static final Set<String> BASE_FIELDS = [
+          RESPONSE_TYPE,
+          CLIENT_ID,
+          SCOPE,
+          REDIRECT_URI,
+          REFRESH_TOKEN,
+          GRANT_TYPE
+  ] as Set
 
   static AuthzRequest readAuthzRequest(MultiValueMap<String, String> params, Headers headers) {
-    AuthzResponseType responseType = extractEnumField(params, RESPONSE_TYPE, true, AuthzResponseType.class)
-    GrantType grantType = extractEnumField(params, GRANT_TYPE, false, GrantType.class)
+    AuthzResponseType responseType = extractEnumField(params, RESPONSE_TYPE, true, AuthzResponseType)
+    GrantType grantType = extractEnumField(params, GRANT_TYPE, false, GrantType)
     AuthAction authAction
     def builder = AuthzRequest.builder()
         .responseType(responseType)
@@ -45,21 +52,23 @@ class AuthzRequestReader {
       builder.refreshToken(extractField(params, REFRESH_TOKEN, true))
       builder.externalClientId(extractField(params, CLIENT_ID, true))
       builder.grantType(grantType)
-      builder.scopes(extractField(params, SCOPE, true).split(" ").toList())
+      builder.scopes(extractField(params, SCOPE, true).split(SPACE).toList())
     } else if (responseType == AuthzResponseType.TOKEN) {
       authAction = AuthAction.AUTHORIZATION
       def auth = extractAuth(headers)
       builder.clientId(auth[0])
           .clientSecret(auth[1])
-      def scope = extractField(params, SCOPE, false)?.split(" ")?.toList()
-      if(scope)
+      def scope = extractField(params, SCOPE, false)?.split(SPACE)?.toList()
+      if (scope) {
         builder.scopes(scope)
+      }
     } else {
       authAction = AuthAction.AUTHORIZATION
       builder.clientId(extractField(params, CLIENT_ID, true))
-      def scope = extractField(params, SCOPE, false)?.split(" ")?.toList()
-      if(scope)
+      def scope = extractField(params, SCOPE, false)?.split(SPACE)?.toList()
+      if (scope) {
         builder.scopes(scope)
+      }
     }
     builder.authData(extractRest(params, BASE_FIELDS))
     def request = builder.build()

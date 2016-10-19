@@ -1,18 +1,13 @@
-buildscript {
-  repositories {
-    jcenter()
-  }
-  dependencies {
-    classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-  }
-}
-
 ext {
   snippetsDir = file("/build/docs/generated-snippets")
+  imagePrefix = (project.findProperty('imagePrefix') ? project.findProperty('imagePrefix') + '/' : '')
+  imageTagLatest = project.hasProperty('imageTagLatest')
 }
 
 apply plugin: 'spring-boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'com.bmuschko.docker-remote-api'
+apply plugin: 'nebula.maven-publish'
 
 bootRepackage {
   mainClass = 'ru.ratauth.server.RatAuthApplication'
@@ -35,6 +30,8 @@ dependencies {
   compile 'io.ratpack:ratpack-rx'
   compile 'io.ratpack:ratpack-spring-boot'
   compile 'io.ratpack:ratpack-groovy'
+  provided 'javax.servlet:javax.servlet-api'
+  compile 'com.google.inject:guice'
 
   //local
   compile project(':domain')
@@ -47,6 +44,10 @@ dependencies {
 
   //docs/test
   testCompile 'org.springframework.restdocs:spring-restdocs-restassured:1.1.0.RELEASE'
+  testCompile 'org.springframework.boot:spring-boot-starter-test'
+
+  dockerJava 'com.github.docker-java:docker-java:3.0.6'
+  dockerJava 'cglib:cglib:3.2.0'
 }
 
 task cleanTempDirs(type: Delete) {
@@ -58,12 +59,34 @@ test {
   dependsOn cleanTempDirs
 }
 
-/*_______________docker task__________________*/
-task dockerBuild << {
-  exec {
-    commandLine 'docker', 'build', '--force-rm=true', "--tag='${project.name}'", '.'
-  }
+import com.bmuschko.gradle.docker.tasks.image.Dockerfile
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
+docker {
+  url = "unix:///var/run/docker.sock"
 }
 
-dockerBuild.dependsOn build
+task createDockerfile(type: Dockerfile) {
+    destFile = project.file('build/docker/Dockerfile')
+    from 'java:8-alpine'
+    maintainer 'Tolkachev Kirill "tolk.kv@gmail.com"'
+    volume '/tmp'
+    jar.outputs.files.filter { it.name.endsWith '.jar' } each {
+      addFile it.name, "/$it.name"
+    }
+    exposePort 5050
+    entryPoint 'java', '-Djava.security.egd=file:/dev/./urandom', '-jar', '/server.jar', '--spring.profiles.active=local'
+}
+
+task copyJars(type: Copy){
+  from(jar.outputs.files)
+  into('build/docker/')
+}
+
+task buildImage(type: DockerBuildImage) {
+    dependsOn build, copyJars, createDockerfile
+    inputDir = createDockerfile.destFile.parentFile
+    tag "${imagePrefix}ratauth:${imageTagLatest ? 'latest' : project.version.toString().replace('+','.')}"
+}
+
 

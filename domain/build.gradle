@@ -1,15 +1,4 @@
-group 'ru.ratauth'
-version '0.1.0'
-
 apply plugin: 'java'
 apply plugin: 'maven-publish'
-
-sourceCompatibility = 1.8
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-}
+apply plugin: 'nebula.source-jar'
+apply plugin: 'nebula.maven-publish'

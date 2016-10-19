@@ -21,11 +21,13 @@ import ru.ratauth.server.configuration.RatAuthProperties
 public class RatAuthApplication {
   public static final int DEFAULT_PADDING = 50
 
-  public static void main(String[] args) {
+  static void main(String[] args) {
     log.debug 'Starting'.center(DEFAULT_PADDING, '=')
-    new SpringApplicationBuilder(RatAuthApplication.class)
+
+    new SpringApplicationBuilder(RatAuthApplication)
         .web(false)
-        .run(args);
+        .run(args)
+
     log.debug 'Started'.center(DEFAULT_PADDING, '=')
   }
 

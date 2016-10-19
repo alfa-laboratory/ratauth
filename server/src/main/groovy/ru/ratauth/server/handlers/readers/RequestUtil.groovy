@@ -5,6 +5,8 @@ import ratpack.http.Headers
 import ratpack.util.MultiValueMap
 import ru.ratauth.utils.StringUtils
 
+import java.nio.charset.Charset
+
 /**
  * @author mgorelikov
  * @since 11/11/15
@@ -20,10 +22,11 @@ class RequestUtil {
    * @param required if true and parameter with name was not found throws ReadRequestException
    * @return extracted param value
    */
-  public static String extractField(MultiValueMap<String, String> params, String name, boolean required) {
+  static String extractField(MultiValueMap<String, String> params, String name, boolean required) {
     String value = params.get(name)
-    if(StringUtils.isBlank(value) && required)
+    if (StringUtils.isBlank(value) && required) {
       throw new ReadRequestException(ReadRequestException.ID.FIELD_MISSED, name)
+    }
     value
   }
 
@@ -34,12 +37,12 @@ class RequestUtil {
    * @param required if true and parameter with name was not found throws ReadRequestException
    * @return extracted param value
    */
-  public static <T extends Enum>  T extractEnumField(MultiValueMap<String, String> params, String name, boolean required, Class<T> enumType) {
+  static <T extends Enum> T extractEnumField(MultiValueMap<String, String> params, String name, boolean required, Class<T> enumType) {
     String value = extractField(params, name, required)
-    if(!StringUtils.isBlank(value))
-      Enum.valueOf(enumType, value.toUpperCase())
-    else
-      null
+    if (!StringUtils.isBlank(value)) {
+      return Enum.valueOf(enumType, value.toUpperCase())
+    }
+    null
   }
 
   /**
@@ -48,19 +51,20 @@ class RequestUtil {
    * @param excludedNames names that must be excluded from result
    * @return resulted map of params
    */
-  public static Map<String,String> extractRest(MultiValueMap<String, String> params, Set<String> excludedNames) {
+  static Map<String, String> extractRest(MultiValueMap<String, String> params, Set<String> excludedNames) {
     //since duplicate must be removed we won't use clone method
-    Map<String,String> result = new HashMap<>()
-    params.entrySet().stream().filter{ !excludedNames.contains(it.key) } forEach{ result.put(it.key, it.value) }
+    Map<String, String> result = [:]
+    params.entrySet().stream().filter { !excludedNames.contains(it.key) } forEach { result.put(it.key, it.value) }
     return result
   }
 
-  public static String [] extractAuth(Headers headers) {
+  static String[] extractAuth(Headers headers) {
     def authHeader = headers?.get(AUTHORIZATION)
-    if(!authHeader)
+    if (!authHeader) {
       throw new ReadRequestException(ReadRequestException.ID.FIELD_MISSED, AUTHORIZATION)
+    }
     def encodedValue = authHeader.split(" ")[1]
-    def decodedValue = new String(encodedValue.decodeBase64())?.split(":")
+    def decodedValue = new String(encodedValue.decodeBase64(), Charset.forName("UTF-8"))?.split(":")
     // do some sort of validation here
     if (decodedValue[0] && decodedValue[1]) {
       decodedValue

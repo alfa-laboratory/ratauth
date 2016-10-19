@@ -1,7 +1,6 @@
-package ru.ratauth.server.configuration
+package ru.ratauth.server.local
 
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import ru.ratauth.entities.*
 import ru.ratauth.exception.ExpiredException
@@ -12,12 +11,10 @@ import ru.ratauth.services.TokenCacheService
 import rx.Observable
 
 import java.time.LocalDateTime
-
 /**
  * @author mgorelikov
  * @since 25/02/16
  */
-@Configuration
 class PersistenceServiceStubConfiguration {
   public static final String CLIENT_SECRET = 'HdC4t2Wpjn/obYj9JHLVwmGzSqQ5SlatYqMF6zuAL0s='
   public static final String CLIENT_NAME = 'mine'
@@ -32,7 +29,7 @@ class PersistenceServiceStubConfiguration {
 
   @Bean
   @Primary
-  public ClientService relyingPartyService() {
+  ClientService relyingPartyService() {
     return new ClientService() {
       @Override
       Observable<RelyingParty> getRelyingParty(String name) {
@@ -86,7 +83,7 @@ class PersistenceServiceStubConfiguration {
 
   @Bean
   @Primary
-  public TokenCacheService tokenCacheService() {
+  TokenCacheService tokenCacheService() {
     return new TokenCacheService() {
       @Override
       Observable<TokenCache> create(TokenCache cache) {
@@ -102,7 +99,7 @@ class PersistenceServiceStubConfiguration {
 
   @Bean
   @Primary
-  public SessionService authCodeService() {
+  SessionService authCodeService() {
     return new SessionService() {
       @Override
       Observable<Session> getByValidCode(String code, Date now) {

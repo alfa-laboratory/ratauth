@@ -1,0 +1,12 @@
+language: java
+sudo: false
+jdk:
+- oraclejdk8
+install: true
+script: "./gradlew build asciidoctor"
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+after_success:
+- ./gradlew jacocoTestReport coveralls

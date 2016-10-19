@@ -13,6 +13,7 @@ import ru.ratauth.exception.AuthorizationException
 import ru.ratauth.exception.BaseAuthServerException
 import ru.ratauth.exception.ExpiredException
 import ru.ratauth.exception.IdentifiedException
+import ru.ratauth.exception.RegistrationException
 import ru.ratauth.server.handlers.readers.ReadRequestException
 import ru.ratauth.utils.ExceptionUtils
 
@@ -31,23 +32,26 @@ class AuthErrorHandler implements ServerErrorHandler {
 
   @Override
   void error(Context context, Throwable throwable) throws Exception {
-    def exception = ExceptionUtils.getThrowable(throwable, BaseAuthServerException.class, MAX_EXCEPTION_DEPTH)
+    def exception = ExceptionUtils.getThrowable(throwable, BaseAuthServerException, MAX_EXCEPTION_DEPTH)
 
-    if (exception in ExpiredException.class)
+    if (exception in ExpiredException) {
       sendIdentifiedError(context, AUTHENTICATION_TIMEOUT, exception)
-    else if (exception in ReadRequestException.class)
-      sendIdentifiedError(context, HttpResponseStatus.BAD_REQUEST.code(), exception)
-    else if (exception in AuthorizationException.class)
-      sendIdentifiedError(context, HttpResponseStatus.FORBIDDEN.code(), exception)
-    else if(exception)
-      sendError(context, HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), exception)
-    else
-      sendError(context, HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), throwable)
+    } else if (exception in ReadRequestException) {
+      sendIdentifiedError context, HttpResponseStatus.BAD_REQUEST.code(), exception
+    } else if (exception in AuthorizationException || exception in RegistrationException) {
+      sendIdentifiedError context, HttpResponseStatus.FORBIDDEN.code(), exception
+    } else if (exception in IdentifiedException) {
+      sendIdentifiedError(context, HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), exception)  
+    } else if (exception) {
+      sendError context, HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), exception
+    } else {
+      sendError context, HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), throwable
+    }
   }
 
   private static void sendError(Context context, int code, Throwable throwable) {
     context.response.status(code)
-    context.response.send(throwable.getMessage())
+    context.response.send(throwable.message)
     log.error("Auth error: ", throwable)
   }
 
@@ -65,9 +69,9 @@ class AuthErrorHandler implements ServerErrorHandler {
     @JsonProperty("type_id")
     final String typeId
     final String id
-    final Map<String,String> message;
+    final Map<String, String> message
     @JsonProperty("class")
-    final String clazz;
+    final String clazz
 
     private static final String DEFAULT_LANG = "en"
 
@@ -76,7 +80,9 @@ class AuthErrorHandler implements ServerErrorHandler {
       this.typeId = exception.typeId
       this.id = exception.id
       clazz = exception.getClass().toString()
-      message = [(DEFAULT_LANG): exception.getMessage()] as Map
+      message = [
+          (DEFAULT_LANG):exception.message
+      ] as Map
     }
   }
 }

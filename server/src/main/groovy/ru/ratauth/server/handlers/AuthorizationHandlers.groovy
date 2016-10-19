@@ -27,8 +27,6 @@ import static ru.ratauth.server.handlers.readers.AuthzRequestReader.readAuthzReq
 import static ru.ratauth.server.handlers.readers.RegistrationRequestReader.readRegistrationRequest
 import static ru.ratauth.server.handlers.readers.TokenRequestReader.readCheckTokenRequest
 import static ru.ratauth.server.handlers.readers.TokenRequestReader.readTokenRequest
-
-
 /**
  * @author mgorelikov
  * @since 30/10/15
@@ -43,93 +41,95 @@ class AuthorizationHandlers {
       path('authorize') { Context ctx ->
         byMethod {
           get {
-            def authorizeService = ctx.get(AuthorizeService.class)
-            authorizeService.authenticate readAuthzRequest(request.queryParams, ctx.request.headers) subscribe ({
-              res -> ctx.redirect(HttpResponseStatus.FOUND.code(), res.buildURL())
-            }, /*on error*/{
-              throwable -> ctx.get(ServerErrorHandler.class).error(ctx, throwable)
-            })
+            def authorizeService = ctx.get(AuthorizeService)
+            authorizeService.authenticate readAuthzRequest(
+                request.queryParams,
+                ctx.request.headers
+            ) subscribe(
+                { res -> ctx.redirect(HttpResponseStatus.FOUND.code(), res.buildURL()) },
+                { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) }  /*on error*/
+            )
           }
           post {
-            def authorizeService = ctx.get(AuthorizeService.class)
-            Promise<Form> formPromise = parse(Form.class);
+            def authorizeService = ctx.get(AuthorizeService)
+            Promise<Form> formPromise = parse(Form)
             observe(formPromise).flatMap { params ->
               def authRequest = readAuthzRequest(params, ctx.request.headers)
-              if(GrantType.AUTHENTICATION_TOKEN == authRequest.grantType)
+              if (GrantType.AUTHENTICATION_TOKEN == authRequest.grantType) {
                 authorizeService.crossAuthenticate(authRequest)
-              else
+              } else {
                 authorizeService.authenticate(authRequest)
-            }  subscribe({
-              res -> ctx.redirect(HttpResponseStatus.FOUND.code(), res.buildURL())
-            }, /*on error*/{
-             throwable -> ctx.get(ServerErrorHandler.class).error(ctx, throwable)
-            })
+              }
+            } subscribe(
+                { res -> ctx.redirect(HttpResponseStatus.FOUND.code(), res.buildURL()) },
+                { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) } /*on error*/
+            )
           }
         }
       }
 
       prefix('token') {
         post { Context ctx ->
-          def authTokenService = ctx.get(AuthTokenService.class)
-          Promise<Form> formPromise = ctx.parse(Form.class);
+          def authTokenService = ctx.get(AuthTokenService)
+          Promise<Form> formPromise = ctx.parse(Form)
           observe(formPromise).flatMap { params ->
             authTokenService.getToken readTokenRequest(params, ctx.request.headers)
-          } subscribe ({
-            res -> ctx.render json(new TokenDTO(res))
-          }, /*on error*/{
-            throwable -> ctx.get(ServerErrorHandler.class).error(ctx, throwable)
-          })
+          } subscribe(
+              { res -> ctx.render json(new TokenDTO(res)) },
+              { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) } /*on error*/
+          )
         }
       }
 
       prefix('check_token') {
         post { Context ctx ->
-          def authTokenService = ctx.get(AuthTokenService.class)
-          Promise<Form> formPromise = ctx.parse(Form.class);
+          def authTokenService = ctx.get(AuthTokenService)
+          Promise<Form> formPromise = ctx.parse(Form)
           observe(formPromise).flatMap { params ->
             authTokenService.checkToken readCheckTokenRequest(params, ctx.request.headers)
-          } subscribe ({
-            res -> ctx.render json(new CheckTokenDTO(res))
-          }, /*on error*/{
-            throwable -> ctx.get(ServerErrorHandler.class).error(ctx, throwable)
-          })
+          } subscribe(
+              { res -> ctx.render json(new CheckTokenDTO(res)) },
+              { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) } /*on error*/
+          )
         }
       }
 
       prefix('register') {
         post { Context ctx ->
-          def registerService = ctx.get(RegistrationService.class)
-          Promise<Form> formPromise = ctx.parse(Form.class);
+          def registerService = ctx.get(RegistrationService)
+          Promise<Form> formPromise = ctx.parse(Form)
           observe(formPromise).flatMap { params ->
             def request = readRegistrationRequest(params, ctx.request.headers)
-            if (GrantType.AUTHORIZATION_CODE == request.getGrantType())
+            if (GrantType.AUTHORIZATION_CODE == request.grantType) {
               registerService.finishRegister(request)
-            else
+            } else {
               registerService.register(request)
-          } subscribe ({
-            res ->
-              if (res instanceof RegResult)
-                ctx.render json(new RegisterDTO(res))
-              else
-                ctx.render json(new TokenDTO(res))
-          }, /*on error*/{
-            throwable -> ctx.get(ServerErrorHandler.class).error(ctx, throwable)
-          })
+            }
+          } subscribe(
+              { res ->
+                if (res instanceof RegResult) {
+                  ctx.render json(new RegisterDTO(res))
+                } else {
+                  ctx.render json(new TokenDTO(res))
+                }
+              },
+              { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) } /*on error*/
+          )
         }
       }
 
       prefix('login') {
         get { Context ctx ->
           render groovyMarkupTemplate('login.gtpl',
-              title: 'Authorization',
-              error: null,
-              method: 'post',
-              action: '/authorize',
-              audValue: request.queryParams.get('aud'),
-              scope: request.queryParams.get('scope'),
-              clientId: request.queryParams.get('client_id'),
-              responseType: 'code',
-              redirectUri: request.queryParams.get('redirect_uri')
+              title:'Authorization',
+              error:null,
+              method:'post',
+              action:'/authorize',
+              audValue:request.queryParams.get('aud'),
+              scope:request.queryParams.get('scope'),
+              clientId:request.queryParams.get('client_id'),
+              responseType:'code',
+              redirectUri:request.queryParams.get('redirect_uri')
           )
         }
       }
