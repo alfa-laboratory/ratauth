@@ -37,8 +37,10 @@ class AuthErrorHandler implements ServerErrorHandler {
       sendIdentifiedError(context, AUTHENTICATION_TIMEOUT, exception)
     } else if (exception in ReadRequestException) {
       sendIdentifiedError context, HttpResponseStatus.BAD_REQUEST.code(), exception
-    } else if (exception in AuthorizationException) {
+    } else if (exception in AuthorizationException || exception in RegistrationException) {
       sendIdentifiedError context, HttpResponseStatus.FORBIDDEN.code(), exception
+    } else if(exception in IdentifiedException) {
+      sendIdentifiedError(context, HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), exception)  
     } else if (exception) {
       sendError context, HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), exception
     } else {
