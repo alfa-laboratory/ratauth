@@ -18,7 +18,7 @@ elif [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_TAG" != "" ]; then
     ./gradlew -Prelease.travisci=true -Prelease.useLastTag=true candidate $SWITCHES
     ;;
   *)
-    ./gradlew -Prelease.travisci=true -Prelease.useLastTag=true final pushImage -PimagePrefix=$DOCKER_REPOSITORY $SWITCHES
+    ./gradlew -Prelease.travisci=true -Prelease.useLastTag=true final pushImage $SWITCHES
     ;;
   esac
 else
