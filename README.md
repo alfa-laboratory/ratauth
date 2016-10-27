@@ -37,3 +37,25 @@ Run built docker image. Image with statically added ratauth jar. Work only you a
 Run with jar file. Build jar before
 
     docker-compose up
+
+## Advanced Configuration
+
+If you need to change username for publish docker image to registry or change
+registry name, follow next instruction:
+
+1. make gradle.properties file (it not index by git, see `.gitignore`) in
+project dir or your home directory
+1. add next properties to gradle.properties:
+```
+systemProp.org.ajoberstar.grgit.auth.force=hardcoded # needed for nebula release plugin
+DOCKER_USERNAME=USERNAME                             # docker registry username
+DOCKER_REPOSITORY=DOCKER_REGISTRY_NAME               # docker registry name for correct image creation. Like <you_username>/ratauth:tag
+DOCKER_PASSWORD=API_KEY                              # api key or password for authenticate in docker registry
+```
+
+And now, you can push image to registry by gradle command `./gradlew pushImage`
+
+If you need gradle.properties in Travis CI, you will be able to encrypt gradle.properties by travis ci command `travis`
+For example: `travis encrypt-file gradle.properties`
+
+See TravisCI [Official Instruction](https://docs.travis-ci.com/user/encryption-keys/)
