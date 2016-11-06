@@ -5,6 +5,7 @@ import com.jayway.restassured.specification.RequestSpecification
 import org.junit.Rule
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.restdocs.JUnitRestDocumentation
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 import ru.ratauth.server.configuration.TestBaseConfiguration
 import spock.lang.Specification
@@ -21,6 +22,8 @@ import static org.springframework.restdocs.restassured.RestAssuredRestDocumentat
     classes = [TestBaseConfiguration],
     properties = "ratpack.port=8080"
 )
+@TestPropertySource(locations = "classpath:application.yml")
+@ActiveProfiles("test")
 class BaseDocumentationSpec extends Specification {
   @Rule
   JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation('../server/build/docs/generated-snippets/api')

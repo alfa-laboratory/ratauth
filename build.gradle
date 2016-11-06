@@ -4,6 +4,7 @@ buildscript {
     ratpackVersion = '1.4.2'
   }
   repositories {
+    maven { url 'http://mvn/artifactory/public' }
     jcenter()
     mavenCentral()
   }
@@ -32,10 +33,10 @@ allprojects {
   apply plugin: 'nebula.info'
 
   repositories {
+    maven { url 'http://mvn/artifactory/public' }
     mavenCentral()
     jcenter()
     mavenLocal()
-    maven { url "https://repo.spring.io/milestone" }
   }
   configurations {
     compile.exclude group:'org.springframework.boot', module:'spring-boot-starter-tomcat'
@@ -56,8 +57,8 @@ allprojects {
       dependency 'org.codehaus.groovy:groovy-all:2.4.7'//for ratpack server config
       dependency 'net.logstash.logback:logstash-logback-encoder:4.5.1'
 
-      //spring
-      dependencySet(group:'org.springframework.cloud', version:'1.0.2.RELEASE') {
+//      spring
+      dependencySet(group:'org.springframework.cloud', version:'1.2.1.RELEASE') {
         entry 'spring-cloud-config-client'
         entry 'spring-cloud-starter-eureka'
       }
@@ -74,13 +75,13 @@ allprojects {
       //providers
       dependency 'ru.ratauth.providers:auth-mongo:+'
       dependency 'ru.ratauth.providers:auth-identity-mongo:+'
-      dependency 'ru.alfabank.providers:provider-dca:0.+'
+      dependency 'ru.alfabank.providers:provider-dca:0.3.8'
 
       //test
       dependency "io.ratpack:ratpack-test:${ratpackVersion}"
       dependency 'org.spockframework:spock-core:1.1-groovy-2.4-rc-2'
       dependency 'org.spockframework:spock-spring:1.1-groovy-2.4-rc-2'
-      dependency 'org.springframework.restdocs:spring-restdocs-restassured:1.1.2.RELEASE'
+//      dependency 'org.springframework.restdocs:spring-restdocs-restassured:1.1.2.RELEASE'
     }
   }
 }
@@ -148,45 +149,45 @@ subprojects {
     archiveName = project.name + '.jar'
   }
 
-  task sourceJar(type: Jar) {
-    from sourceSets.main.allJava
-  }
+//  task sourceJar(type: Jar) {
+//    from sourceSets.main.allJava
+//  }
 
-  publishing {
-    publications {
-      mavenJava(MavenPublication) {
-        from components.java
+//  publishing {
+//    publications {
+//      mavenJava(MavenPublication) {
+//        from components.java
+//
+//        artifact sourceJar {
+//          classifier "sources"
+//        }
+//      }
+//    }
+//  }
 
-        artifact sourceJar {
-          classifier "sources"
-        }
-      }
-    }
-  }
-
-  String repo = version.endsWith('SNAPSHOT') ? 'snapshots' : 'releases'
-  artifactory {
-    contextUrl = "${artifactory_contextUrl}"
-    publish {
-      repository {
-        repoKey = repo
-        username = "${artifactory_user}"
-        password = "${artifactory_password}"
+//  String repo = version.endsWith('SNAPSHOT') ? 'snapshots' : 'releases'
+//  artifactory {
+//    contextUrl = "${artifactory_contextUrl}"
+//    publish {
+//      repository {
+//        repoKey = repo
+//        username = "${artifactory_user}"
+//        password = "${artifactory_password}"
+////        maven = true
+//      }
+//      defaults {
+//        publications('mavenJava')
+//      }
+//    }
+//    resolve {
+//      repository {
+//        repoKey = 'public'
+//        username = "${artifactory_user}"
+//        password = "${artifactory_password}"
 //        maven = true
-      }
-      defaults {
-        publications('mavenJava')
-      }
-    }
-    resolve {
-      repository {
-        repoKey = 'public'
-        username = "${artifactory_user}"
-        password = "${artifactory_password}"
-        maven = true
-      }
-    }
-  }
+//      }
+//    }
+//  }
 
   dependencies {
     compileOnly 'org.projectlombok:lombok'

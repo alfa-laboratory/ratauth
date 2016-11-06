@@ -9,6 +9,10 @@ or use `docker-compose` util. See details below
 
 And then, see docs and try to use register API
 
+## What is it?
+
+This is a branch for bank build. It contains some additional dependencies like spring cloud and local bank providers
+
 ## Build
 
 Build docker image with prefix:
