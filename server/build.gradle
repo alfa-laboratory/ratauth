@@ -1,7 +1,7 @@
 ext {
   snippetsDir = file("/build/docs/generated-snippets")
   imageTagLatest = project.hasProperty('imageTagLatest')
-  imageTag = "${imageTagLatest ? 'latest' : project.version.toString().replace('+','.')}"
+  imageTag = "${imageTagLatest ? 'latest' : project.version.toString().replace('+', '.')}"
   imageFullName = "ratauth:$imageTag"
   dockerRegistryName = (project.hasProperty('DOCKER_REPOSITORY') ? project.findProperty('DOCKER_REPOSITORY') : System.getenv()['DOCKER_REPOSITORY'])
   dockerRegistryUsername = (project.hasProperty('DOCKER_USERNAME') ? project.findProperty('DOCKER_USERNAME') : System.getenv()['DOCKER_USERNAME'])
@@ -11,10 +11,10 @@ ext {
   imageName = "${dockerRegistryName ? dockerRegistryName + '/' : ''}ratauth"
 }
 
-apply plugin: 'spring-boot'
-apply plugin: 'io.spring.dependency-management'
-apply plugin: 'com.bmuschko.docker-remote-api'
-apply plugin: 'nebula.maven-publish'
+apply plugin:'spring-boot'
+apply plugin:'io.spring.dependency-management'
+apply plugin:'com.bmuschko.docker-remote-api'
+apply plugin:'nebula.maven-publish'
 
 bootRepackage {
   mainClass = 'ru.ratauth.server.RatAuthApplication'
@@ -36,6 +36,8 @@ dependencies {
   //crypto
   compile 'com.nimbusds:nimbus-jose-jwt'
 
+  compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
+
   //docs/test
   testCompile 'org.springframework.restdocs:spring-restdocs-restassured:1.1.0.RELEASE'
   testCompile 'org.springframework.boot:spring-boot-starter-test'
@@ -44,8 +46,8 @@ dependencies {
   dockerJava 'cglib:cglib:3.2.0'
 }
 
-task cleanTempDirs(type: Delete) {
-  delete fileTree(dir: snippetsDir)
+task cleanTempDirs(type:Delete) {
+  delete fileTree(dir:snippetsDir)
 }
 
 test {
@@ -61,13 +63,13 @@ import com.bmuschko.gradle.docker.tasks.image.DockerTagImage
 docker {
   url = "unix:///var/run/docker.sock"
   registryCredentials {
-      url = dockerRegistryUrl ? dockerRegistryUrl : dockerRegistryUrlDefault
-      username = dockerRegistryUsername
-      password = dockerRegistryPassword
+    url = dockerRegistryUrl ? dockerRegistryUrl : dockerRegistryUrlDefault
+    username = dockerRegistryUsername
+    password = dockerRegistryPassword
   }
 }
 
-task createDockerfile(type: Dockerfile) {
+task createDockerfile(type:Dockerfile) {
   destFile = project.file('build/docker/Dockerfile')
   from 'java:8-alpine'
   maintainer 'Tolkachev Kirill "tolk.kv@gmail.com"'
@@ -79,18 +81,18 @@ task createDockerfile(type: Dockerfile) {
   entryPoint 'java', '-Djava.security.egd=file:/dev/./urandom', '-jar', '/server.jar', '--spring.profiles.active=local'
 }
 
-task copyJars(type: Copy){
+task copyJars(type:Copy) {
   from(jar.outputs.files)
   into('build/docker/')
 }
 
-task buildImage(type: DockerBuildImage) {
+task buildImage(type:DockerBuildImage) {
   dependsOn build, copyJars, createDockerfile
   inputDir = createDockerfile.destFile.parentFile
   tag = imageFullName
 }
 
-task tagDocker(type: DockerTagImage) {
+task tagDocker(type:DockerTagImage) {
   dependsOn buildImage
   force = true
   repository = imageName
@@ -98,7 +100,7 @@ task tagDocker(type: DockerTagImage) {
   conventionMapping.tag = { imageTag as String }
 }
 
-task pushImage(type: DockerPushImage) {
+task pushImage(type:DockerPushImage) {
   dependsOn tagDocker
   conventionMapping.imageName = { tagDocker.getRepository() }
   conventionMapping.tag = { tagDocker.getTag() }

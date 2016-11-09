@@ -1,7 +1,3 @@
-spring:
- application:
-  name: ${APPLICATION_NAME:auth-server}
-
 auth:
  master_secret: "cnlqV2hVQml3aWdrc1RqWXBSaFpma3l5enhNVU1TS1A="
  secret:
@@ -17,3 +13,14 @@ auth:
  session:
   check_threads: 10
   check_interval: 300
+
+openid.properties.discovery:
+  issuer: Issuer
+  authorization-endpoint: https://server.example.com/connect/authorize
+  token_endpoint: https://server.example.com/connect/token
+  token-endpoint-auth-signing-alg-values-supported:
+    - RSA256
+  registration-endpoint: https://server.example.com/connect/register
+  user-info-endpoint: https://server.example.com/connect/userinfo
+  check-session-iframe: https://server.example.com/connect/check_session
+  end-session-endpoint: https://server.example.com/connect/end_session

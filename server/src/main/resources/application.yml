@@ -1,3 +1,10 @@
+spring:
+ application:
+  name: ${APPLICATION_NAME:auth-server}
+ jackson:
+   serialization:
+     WRITE_NULL_MAP_VALUES: false
+
 auth:
  secret:
   ttl: 2678400
