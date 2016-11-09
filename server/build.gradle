@@ -46,6 +46,8 @@ dependencies {
   dockerJava 'cglib:cglib:3.2.0'
 }
 
+compileJava.dependsOn(processResources)
+
 task cleanTempDirs(type:Delete) {
   delete fileTree(dir:snippetsDir)
 }

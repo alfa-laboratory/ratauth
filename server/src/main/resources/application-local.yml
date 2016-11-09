@@ -24,3 +24,22 @@ openid.properties.discovery:
   user-info-endpoint: https://server.example.com/connect/userinfo
   check-session-iframe: https://server.example.com/connect/check_session
   end-session-endpoint: https://server.example.com/connect/end_session
+  subject-types-supported:
+    - public
+    - pairwise
+  responseTypesSupported:
+    - code
+    - id_token
+    - code id_token
+    - token id_token
+  claims_supported:
+    - aud
+    - exp
+    - iat
+    - iss
+    - name
+    - sub
+  scopes_supported:
+    - openid
+    - profile
+  jwks_uri: http://example.com/oauth2/certs

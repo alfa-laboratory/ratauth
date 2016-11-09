@@ -32,6 +32,11 @@ class WellKnownHandler implements Action<Chain> {
               userinfo_endpoint                               :connectDiscoveryProperties.userInfoEndpoint,
               check_session_iframe                            :connectDiscoveryProperties.checkSessionIframe,
               end_session_endpoint                            :connectDiscoveryProperties.endSessionEndpoint,
+              subject_types_supported                         :connectDiscoveryProperties.subjectTypesSupported,
+              response_types_supported                        :connectDiscoveryProperties.responseTypesSupported,
+              jwks_uri                                        :connectDiscoveryProperties.jwksUri,
+              scopes_supported                                :connectDiscoveryProperties.scopesSupported,
+              claims_supported                                :connectDiscoveryProperties.claimsSupported,
           ]
       ))
     }

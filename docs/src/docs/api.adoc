@@ -168,3 +168,14 @@ include::../../../server/build/docs/generated-snippets/api/check_token_for_3rd_p
 include::../../../server/build/docs/generated-snippets/api/check_token_for_3rd_party_succeed/http-response.adoc[]
 .Fields
 include::../../../server/build/docs/generated-snippets/api/check_token_for_3rd_party_succeed/response-fields.adoc[]
+
+==== OpenID Connect Discovery Configuration
+===== Request example
+include::../../../server/build/docs/generated-snippets/api/should_return_openid_discovery_fields/http-request.adoc[]
+include::../../../server/build/docs/generated-snippets/api/should_return_openid_discovery_fields/httpie-request.adoc[]
+include::../../../server/build/docs/generated-snippets/api/should_return_openid_discovery_fields/curl-request.adoc[]
+
+====== Succeed
+include::../../../server/build/docs/generated-snippets/api/should_return_openid_discovery_fields/http-response.adoc[]
+.Fields
+include::../../../server/build/docs/generated-snippets/api/should_return_openid_discovery_fields/response-fields.adoc[]
