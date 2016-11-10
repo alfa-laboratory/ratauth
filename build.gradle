@@ -1,7 +1,7 @@
 buildscript {
   ext {
-    springBootVersion = '1.4.1.RELEASE'
-    ratpackVersion = '1.4.3'
+    springBootVersion = '1.4.2.RELEASE'
+    ratpackVersion = '1.4.4'
   }
   repositories {
     maven { url 'http://mvn/artifactory/public' }

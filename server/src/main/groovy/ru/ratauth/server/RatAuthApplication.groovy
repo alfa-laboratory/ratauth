@@ -10,6 +10,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.retry.annotation.EnableRetry
 import ratpack.spring.config.EnableRatpack
+import ru.ratauth.server.configuration.OpenIdConnectDiscoveryProperties
 import ru.ratauth.server.configuration.RatAuthProperties
 
 @Slf4j
@@ -17,8 +18,8 @@ import ru.ratauth.server.configuration.RatAuthProperties
 @EnableRatpack
 @ComponentScan(["ru.ratauth"])
 @EnableHystrix
-@EnableConfigurationProperties(RatAuthProperties.class)
-public class RatAuthApplication {
+@EnableConfigurationProperties([RatAuthProperties, OpenIdConnectDiscoveryProperties])
+class RatAuthApplication {
   public static final int DEFAULT_PADDING = 50
 
   static void main(String[] args) {
@@ -30,7 +31,5 @@ public class RatAuthApplication {
 
     log.debug 'Started'.center(DEFAULT_PADDING, '=')
   }
-
-
 
 }

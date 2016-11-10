@@ -1,7 +1,7 @@
 # OpenID Connect authorization server
 [![Build Status](https://travis-ci.org/alfa-laboratory/ratauth.svg?branch=master)](https://travis-ci.org/alfa-laboratory/ratauth)
 [![Coverage Status](https://coveralls.io/repos/github/alfa-laboratory/ratauth/badge.svg)](https://coveralls.io/github/alfa-laboratory/ratauth)
-[![Download](https://api.bintray.com/packages/alfa-laboratory/docker/ratauth/images/download.svg)](https://bintray.com/alfa-laboratory/docker/ratauth/_latestVersion)
+[![Download](https://api.bintray.com/packages/alfa-laboratory/passport/ratauth/images/download.svg)](https://bintray.com/alfa-laboratory/passport/ratauth/_latestVersion)
 ## Local run
 
 `SERVER_PORT=8080 SPRING_PROFILES_ACTIVE=local ./gradlew bootRun`
