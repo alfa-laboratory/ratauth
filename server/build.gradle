@@ -12,9 +12,7 @@ ext {
 }
 
 apply plugin:'spring-boot'
-apply plugin:'io.spring.dependency-management'
 apply plugin:'com.bmuschko.docker-remote-api'
-apply plugin:'nebula.maven-publish'
 
 bootRepackage {
   mainClass = 'ru.ratauth.server.RatAuthApplication'
