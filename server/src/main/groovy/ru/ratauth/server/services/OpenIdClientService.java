@@ -9,6 +9,8 @@ import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.services.ClientService;
 import rx.Observable;
 
+import static ru.ratauth.utils.URIUtils.appendQuery;
+
 /**
  * @author mgorelikov
  * @since 16/02/16
@@ -28,5 +30,17 @@ public class OpenIdClientService implements AuthClientService {
   public Observable<AuthClient> loadClient(String name) {
     return clientService.getClient(name)
         .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)));
+  }
+
+  @Override
+  public Observable<String> getAuthorizationPageURI(String name, String query) {
+    return loadRelyingParty(name)
+        .map(rp -> appendQuery(rp.getAuthorizationPageURI(), query));
+  }
+
+  @Override
+  public Observable<String> getRegistrationPageURI(String name, String query) {
+    return loadRelyingParty(name)
+        .map(rp -> appendQuery(rp.getRegistrationPageURI(), query));
   }
 }

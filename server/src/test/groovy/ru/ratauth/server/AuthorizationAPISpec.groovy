@@ -296,4 +296,85 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
         .statusCode(HttpStatus.FOUND.value())
         .header(HttpHeaders.LOCATION, StringContains.containsString("token="))
   }
+
+  def 'should not allow non-correct redirect url' () {
+    given:
+    def setup = given(this.documentationSpec)
+        .accept(ContentType.URLENC)
+        .filter(document('auth_code_succeed',
+        requestParameters(
+            parameterWithName('response_type')
+                .description('Response type that must be provided CODE or TOKEN'),
+            parameterWithName('client_id')
+                .description('relying party identifier'),
+            parameterWithName('scope')
+                .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+            parameterWithName('username')
+                .description('part of user\'s credentials'),
+            parameterWithName('password')
+                .description('part of user\'s credentials')
+                .optional(),
+            parameterWithName('redirect_uri')
+                .description('end-user will be redirected on that URI with authorization code')
+                .optional()
+        )))
+        .given()
+        .formParam('response_type', AuthzResponseType.CODE.name())
+        .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
+        .formParam('scope', 'rs.read')
+        .formParam('username', 'login')
+        .formParam('password', 'password')
+        .formParam('redirect_uri', 'http://blabla.com')
+    when:
+    def result = setup
+        .when()
+        .post("authorize")
+    then:
+    result
+        .then()
+        .statusCode(HttpStatus.FORBIDDEN.value())
+  }
+
+  def 'should redirectToWeb'() {
+    given:
+    def setup = given(this.documentationSpec)
+        .accept(ContentType.HTML)
+        .filter(document('auth_code_succeed',
+        requestParameters(
+            parameterWithName('response_type')
+                .description('Response type that must be provided CODE or TOKEN'),
+            parameterWithName('client_id')
+                .description('relying party identifier'),
+            parameterWithName('scope')
+                .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+            parameterWithName('username')
+                .description('part of user\'s credentials'),
+            parameterWithName('password')
+                .description('part of user\'s credentials')
+                .optional()
+        ),
+        responseHeaders(
+            headerWithName(HttpHeaders.LOCATION)
+                .description('Header that contains authorization code for the next step of authorization code flow,' +
+                '\nits expiration date and optional user identifier')
+        )))
+        .given()
+        .formParam('response_type', AuthzResponseType.CODE.name())
+        .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
+        .formParam('scope', 'rs.read')
+        .formParam('username', 'login')
+        .formParam('password', 'password')
+    when:
+    def result = setup
+        .when()
+        .get("authorize")
+    then:
+    result
+        .then()
+        .statusCode(HttpStatus.MOVED_PERMANENTLY.value())
+        .header(HttpHeaders.LOCATION, StringContains.containsString('scope=rs.read'))
+        .header(HttpHeaders.LOCATION, StringContains.containsString('username=login'))
+        .header(HttpHeaders.LOCATION, StringContains.containsString('client_id=' + PersistenceServiceStubConfiguration.CLIENT_NAME))
+        .header(HttpHeaders.LOCATION, StringContains.containsString('is_webview='))// according to test stub
+  }
 }

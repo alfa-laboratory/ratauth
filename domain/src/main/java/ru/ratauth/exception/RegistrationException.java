@@ -43,6 +43,7 @@ public class RegistrationException extends BaseAuthServerException implements Id
 
   public enum ID {
     CLIENT_NOT_FOUND("Client not found"),
+    REDIRECT_NOT_CORRECT("Redirect url is not correct"),
     CREDENTIALS_WRONG("Credentials are wrong");
 
     private final String baseText;

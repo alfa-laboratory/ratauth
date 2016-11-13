@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import ru.ratauth.entities.*;
 import ru.ratauth.exception.AuthorizationException;
+import ru.ratauth.exception.RegistrationException;
 import ru.ratauth.interaction.AuthzRequest;
 import ru.ratauth.interaction.AuthzResponse;
 import ru.ratauth.interaction.AuthzResponseType;
@@ -17,6 +18,8 @@ import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.AuthProvider;
 import ru.ratauth.providers.auth.dto.AuthInput;
 import ru.ratauth.providers.auth.dto.AuthResult;
+import ru.ratauth.utils.StringUtils;
+import ru.ratauth.utils.URIUtils;
 import rx.Observable;
 
 import java.util.Date;
@@ -49,10 +52,9 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .map(ses -> new ImmutableTriple<>(rpAuth.getLeft(), rpAuth.getRight(), ses)))
         .flatMap(rpAuthSession ->
             createIdToken(rpAuthSession.getLeft(), rpAuthSession.getRight())
-                .map(idToken -> new ImmutableTriple<>(rpAuthSession.getRight(), rpAuthSession.getMiddle(), idToken))
+                .map(idToken -> buildResponse(rpAuthSession.getLeft(), rpAuthSession.getRight(),
+                    rpAuthSession.getMiddle(), idToken, request.getRedirectURI()))
         )
-        .map(sessionAuthToken -> buildResponse(request.getRedirectURI(), request.getClientId(),
-            sessionAuthToken.getLeft(), sessionAuthToken.getMiddle(), sessionAuthToken.right))
         .doOnCompleted(() -> log.info("Authorization succeed"));
   }
 
@@ -65,11 +67,12 @@ public class OpenIdAuthorizeService implements AuthorizeService {
             .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND))),
         sessionService.getByValidRefreshToken(request.getRefreshToken(), new Date())
             .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.TOKEN_NOT_FOUND))),
-        (oldRP, newRP, session) -> new ImmutablePair<>(newRP, session))
-        .flatMap(rpSession -> sessionService.addEntry(rpSession.getRight(), rpSession.getLeft(), request.getScopes(), request.getRedirectURI()))
-        .map(session -> buildResponse(request.getRedirectURI(), request.getExternalClientId(),
-          session, AuthResult.builder().status(AuthResult.Status.NEED_APPROVAL).build(), null))
-        .doOnCompleted(() -> log.info("Cross-authorization succeed"));
+        (oldRP, newRP, session) -> new ImmutablePair<>(newRP, session)
+    ).flatMap(rpSession ->
+        sessionService.addEntry(rpSession.getRight(), rpSession.getLeft(), request.getScopes(), request.getRedirectURI())
+            .map(session -> buildResponse(rpSession.getLeft(), session,
+                AuthResult.builder().status(AuthResult.Status.NEED_APPROVAL).build(), null, request.getRedirectURI()))
+    ).doOnCompleted(() -> log.info("Cross-authorization succeed"));
   }
 
   private Observable<TokenCache> createIdToken(RelyingParty relyingParty, Session session) {
@@ -98,16 +101,17 @@ public class OpenIdAuthorizeService implements AuthorizeService {
             .relyingParty(relyingPartyName).build());
   }
 
-  private static AuthzResponse buildResponse(String redirectURL, String clientId, Session session,AuthResult authResult, TokenCache tokenCache) {
+  private static AuthzResponse buildResponse(RelyingParty relyingParty, Session session,AuthResult authResult, TokenCache tokenCache, String redirectUri) {
+    final String targetRedirectURI = createRedirectURI(relyingParty, redirectUri);
     //in case of autCode sent by authProvider
     if (session == null || CollectionUtils.isEmpty(session.getEntries())) {
       return AuthzResponse.builder()
-          .location(redirectURL)
+          .location(targetRedirectURI)
           .data(authResult.getData())
           .build();
     }
 
-    AuthEntry entry = session.getEntry(clientId).get();
+    AuthEntry entry = session.getEntry(relyingParty.getName()).get();
     AuthzResponse resp = AuthzResponse.builder()
         .location(entry.getRedirectUrl())
         .data(authResult.getData())
@@ -126,5 +130,16 @@ public class OpenIdAuthorizeService implements AuthorizeService {
       resp.setExpiresIn(entry.getCodeExpiresIn().getTime());
     }
     return resp;
+  }
+
+  private static String createRedirectURI(RelyingParty relyingParty, String redirectUri) {
+    if(StringUtils.isBlank(redirectUri)) {
+      return relyingParty.getRegistrationRedirectURI();
+    } else {
+      if(!URIUtils.compareHosts(redirectUri, relyingParty.getRedirectURIs()))
+        throw new AuthorizationException(AuthorizationException.ID.REDIRECT_NOT_CORRECT);
+      else
+        return redirectUri;
+    }
   }
 }

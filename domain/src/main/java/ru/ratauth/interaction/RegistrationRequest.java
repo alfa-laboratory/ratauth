@@ -22,4 +22,5 @@ public class RegistrationRequest {
   private Map<String,String> data;
   @Singular
   private Set<String> scopes;
+  private String redirectURI;
 }
