@@ -1,6 +1,7 @@
 package ru.ratauth.server
 
 import com.jayway.restassured.builder.RequestSpecBuilder
+import com.jayway.restassured.config.RestAssuredConfig
 import com.jayway.restassured.specification.RequestSpecification
 import org.junit.Rule
 import org.springframework.boot.test.context.SpringBootTest
@@ -30,6 +31,7 @@ class BaseDocumentationSpec extends Specification {
   void setup() {
     this.documentationSpec = new RequestSpecBuilder()
         .addFilter(documentationConfiguration(restDocumentation))
+        .setConfig(RestAssuredConfig.config().redirect(RestAssuredConfig.config().getRedirectConfig().followRedirects(false)))
         .build()
   }
 }

@@ -75,4 +75,8 @@ class AuthzRequestReader {
     ActionLogger.addBaseRequestInfo(request.clientId, authAction)
     request
   }
+
+  static String readClientId(MultiValueMap<String, String> params) {
+    extractField(params, CLIENT_ID, true)
+  }
 }

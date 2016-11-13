@@ -43,7 +43,13 @@ class PersistenceServiceStubConfiguration {
               codeTTL: 36000l,
               refreshTokenTTL: 36000l,
               sessionTTL: 36000l,
-              tokenTTL: 36000l
+              tokenTTL: 36000l,
+              redirectURIs: ['domain.mine', 'mine.domain'],
+              registrationRedirectURI: 'http://domain.mine/oidc/register',
+              authorizationRedirectURI: 'http://domain.mine/oidc/authorize',
+              authorizationPageURI: 'http://domain.mine/oidc/web/authorize?is_webview=true',
+              registrationPageURI: 'http://domain.mine/oidc//web/register?is_webview=true',
+              incAuthLevelPageURI: 'http://domain.mine/oidc//web/inc_auth_level?is_webview=true',
           )
           )
         else

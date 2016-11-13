@@ -24,7 +24,4 @@ class RatAuthApplication {
 
     log.debug 'Started'.center(DEFAULT_PADDING, '=')
   }
-
-
-
 }

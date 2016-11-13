@@ -47,6 +47,7 @@ public class AuthorizationException extends BaseAuthServerException implements I
     TOKEN_NOT_FOUND("Token not found"),
     SESSION_NOT_FOUND("Session not found"),
     SESSION_BLOCKED("Session is blocked"),
+    REDIRECT_NOT_CORRECT("Redirect url is not correct"),
     INVALID_GRANT_TYPE("Invalid grant type");
 
     private final String baseText;

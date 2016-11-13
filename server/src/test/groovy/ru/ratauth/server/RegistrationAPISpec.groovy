@@ -2,6 +2,7 @@ package ru.ratauth.server
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.jayway.restassured.http.ContentType
+import org.hamcrest.core.StringContains
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
@@ -18,6 +19,7 @@ import static org.hamcrest.Matchers.isEmptyOrNullString
 import static org.hamcrest.core.IsNot.not
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders
+import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName
@@ -47,13 +49,10 @@ class RegistrationAPISpec extends BaseDocumentationSpec {
           .description('Some credential fields...')
           .optional()
       ),
-      responseFields(
-        fieldWithPath('status')
-          .description('registration status(SUCCESS,NEED_APPROVAL)')
-          .type(JsonFieldType.STRING),
-        fieldWithPath('data')
-          .description('some object data that contains user specific data, e.g.: username')
-          .type(JsonFieldType.OBJECT)
+      responseHeaders(
+          headerWithName(HttpHeaders.LOCATION)
+              .description('Header that contains authorization code for the next step of authorization code flow,' +
+              '\nits expiration date and optional user identifier')
       )))
       .given()
       .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
@@ -66,8 +65,8 @@ class RegistrationAPISpec extends BaseDocumentationSpec {
     then:
     result
       .then()
-      .statusCode(HttpStatus.OK.value())
-      .body("data.username", containsString("login"))
+      .statusCode(HttpStatus.FOUND.value())
+      .header(HttpHeaders.LOCATION, StringContains.containsString("code="))
   }
 
   def 'should successfully finish registration over provider channel'() {
@@ -123,7 +122,7 @@ class RegistrationAPISpec extends BaseDocumentationSpec {
     when:
     def result = setup
       .when()
-      .post("register")
+      .post("register/token")
     then:
     result
       .then()
@@ -132,6 +131,42 @@ class RegistrationAPISpec extends BaseDocumentationSpec {
       .body("refresh_token", not(isEmptyOrNullString()))
       .body("id_token", not(isEmptyOrNullString()))
       .body("expires_in", not(isEmptyOrNullString()))
+  }
+
+  def 'should be redirected to webPage'() {
+    given:
+    def setup = given(this.documentationSpec)
+        .accept(ContentType.HTML)
+        .filter(document('reg_code_provider_channel_succeed',
+        requestParameters(
+            parameterWithName('client_id')
+                .description('relying party identifier'),
+            parameterWithName('scope')
+                .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+            parameterWithName(ProvidersStubConfiguration.REG_CREDENTIAL)
+                .description('Some credential fields...')
+                .optional()
+        ),
+        responseHeaders(
+            headerWithName(HttpHeaders.LOCATION)
+                .description('Header that contains authorization code for the next step of authorization code flow,' +
+                '\nits expiration date and optional user identifier')
+        )))
+        .given()
+        .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
+        .formParam('scope', 'rs.read')
+        .formParam(ProvidersStubConfiguration.REG_CREDENTIAL, 'credential')
+    when:
+    def result = setup
+        .when()
+        .get("register")
+    then:
+    result
+        .then()
+        .statusCode(HttpStatus.MOVED_PERMANENTLY.value())
+        .header(HttpHeaders.LOCATION, StringContains.containsString('scope=rs.read'))
+        .header(HttpHeaders.LOCATION, StringContains.containsString('client_id=' + PersistenceServiceStubConfiguration.CLIENT_NAME))
+        .header(HttpHeaders.LOCATION, StringContains.containsString('is_webview='))// according to test stub
   }
 
 }
