@@ -335,7 +335,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
         .statusCode(HttpStatus.FORBIDDEN.value())
   }
 
-  def 'should redirectToWeb'() {
+  def 'should be redirected ToWeb'() {
     given:
     def setup = given(this.documentationSpec)
         .accept(ContentType.HTML)

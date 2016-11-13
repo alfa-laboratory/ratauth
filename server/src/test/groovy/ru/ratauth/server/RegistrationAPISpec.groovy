@@ -133,4 +133,40 @@ class RegistrationAPISpec extends BaseDocumentationSpec {
       .body("expires_in", not(isEmptyOrNullString()))
   }
 
+  def 'should be redirected to webPage'() {
+    given:
+    def setup = given(this.documentationSpec)
+        .accept(ContentType.HTML)
+        .filter(document('reg_code_provider_channel_succeed',
+        requestParameters(
+            parameterWithName('client_id')
+                .description('relying party identifier'),
+            parameterWithName('scope')
+                .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+            parameterWithName(ProvidersStubConfiguration.REG_CREDENTIAL)
+                .description('Some credential fields...')
+                .optional()
+        ),
+        responseHeaders(
+            headerWithName(HttpHeaders.LOCATION)
+                .description('Header that contains authorization code for the next step of authorization code flow,' +
+                '\nits expiration date and optional user identifier')
+        )))
+        .given()
+        .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
+        .formParam('scope', 'rs.read')
+        .formParam(ProvidersStubConfiguration.REG_CREDENTIAL, 'credential')
+    when:
+    def result = setup
+        .when()
+        .get("register")
+    then:
+    result
+        .then()
+        .statusCode(HttpStatus.MOVED_PERMANENTLY.value())
+        .header(HttpHeaders.LOCATION, StringContains.containsString('scope=rs.read'))
+        .header(HttpHeaders.LOCATION, StringContains.containsString('client_id=' + PersistenceServiceStubConfiguration.CLIENT_NAME))
+        .header(HttpHeaders.LOCATION, StringContains.containsString('is_webview='))// according to test stub
+  }
+
 }
