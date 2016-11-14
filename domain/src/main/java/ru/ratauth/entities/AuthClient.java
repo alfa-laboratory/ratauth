@@ -26,6 +26,7 @@ public class AuthClient {
   private String name;
   private String description;
   private String password;
+  private String salt;
   private Date created;
   /**
    * 256-bit sequence encoded in base64

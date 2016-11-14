@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Primary
 import ru.ratauth.entities.*
 import ru.ratauth.exception.ExpiredException
 import ru.ratauth.server.utils.DateUtils
+import ru.ratauth.server.utils.SecurityUtils
 import ru.ratauth.services.ClientService
 import ru.ratauth.services.SessionService
 import ru.ratauth.services.TokenCacheService
@@ -19,6 +20,7 @@ class PersistenceServiceStubConfiguration {
   public static final String CLIENT_SECRET = 'HdC4t2Wpjn/obYj9JHLVwmGzSqQ5SlatYqMF6zuAL0s='
   public static final String CLIENT_NAME = 'mine'
   public static final String PASSWORD = 'password'
+  public static final String SALT = 'JBn7SnEzMy0MXdNsh5GVvktSGuRs0+BNVZ47kmm3TDM='
   public static final String TOKEN = '1234'
   public static final String REFRESH_TOKEN = '12345'
   public static final String CODE = '123'
@@ -39,7 +41,8 @@ class PersistenceServiceStubConfiguration {
               name: CLIENT_NAME,
               identityProvider: 'STUB',
               secret: CLIENT_SECRET,
-              password: PASSWORD,
+              password: SecurityUtils.hashPassword(PASSWORD, SALT),
+              salt: SALT,
               codeTTL: 36000l,
               refreshTokenTTL: 36000l,
               sessionTTL: 36000l,
@@ -74,7 +77,8 @@ class PersistenceServiceStubConfiguration {
               id: 'id',
               name: CLIENT_NAME,
               secret: CLIENT_SECRET,
-              password: PASSWORD
+              salt: SALT,
+              password: SecurityUtils.hashPassword(PASSWORD, SALT),
           ))
         else
           return Observable.just(new AuthClient(
