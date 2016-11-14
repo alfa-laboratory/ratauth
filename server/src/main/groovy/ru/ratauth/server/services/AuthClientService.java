@@ -3,6 +3,7 @@ package ru.ratauth.server.services;
 import ru.ratauth.entities.AuthClient;
 import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.exception.AuthorizationException;
+import ru.ratauth.server.utils.SecurityUtils;
 import rx.Observable;
 
 /**
@@ -23,10 +24,26 @@ public interface AuthClientService {
   /**
    * Just loads client by name
    *
-   * @param name unique name
+   * @param name unique client name
    * @return observable of loaded AuthClient
    */
   Observable<AuthClient> loadClient(String name);
+
+  /**
+   * Loads relying party authPageURI from database and appends query to it
+   * @param name unique client name
+   * @param query input query string
+   * @return authorizationPageURI
+   */
+  Observable<String> getAuthorizationPageURI(String name, String query);
+
+  /**
+   * Loads relying party reisterPageURI from database and appends query to it
+   * @param name unique client name
+   * @param query input query string
+   * @return registrationPageURI
+   */
+  Observable<String> getRegistrationPageURI(String name, String query);
 
   /**
    * Loads Relying party by name and checks it password in case of auth required
@@ -62,8 +79,8 @@ public interface AuthClientService {
    * @return modified observable
    */
   default <T extends AuthClient> Observable<T> addAuth(Observable<T> clientObservable, String password, boolean authRequired) {
-    return clientObservable.filter(rp -> !authRequired || rp.getPassword().equals(password))
-        .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)));
+    return clientObservable.filter(rp -> !authRequired ||
+        SecurityUtils.hashPassword(password, rp.getSalt()).equalsIgnoreCase(rp.getPassword())
+    ).switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)));
   }
-
 }

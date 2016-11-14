@@ -201,7 +201,7 @@ ruleset {
   // rulesets/groovyism.xml
   AssignCollectionSort
   AssignCollectionUnique
-  ClosureAsLastMethodParameter
+//  ClosureAsLastMethodParameter  // damned CodeNarc! In case of two closure parameters in method definition scheme doesn't work properly
   CollectAllIsDeprecated
   ConfusingMultipleReturns
   ExplicitArrayListInstantiation

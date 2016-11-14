@@ -49,10 +49,10 @@ class AuthzRequestReader {
       def auth = extractAuth(headers)
       builder.clientId(auth[0])
           .clientSecret(auth[1])
-      builder.refreshToken(extractField(params, REFRESH_TOKEN, true))
-      builder.externalClientId(extractField(params, CLIENT_ID, true))
-      builder.grantType(grantType)
-      builder.scopes(extractField(params, SCOPE, true).split(SPACE).toList())
+          .refreshToken(extractField(params, REFRESH_TOKEN, true))
+          .externalClientId(extractField(params, CLIENT_ID, true))
+          .grantType(grantType)
+          .scopes(extractField(params, SCOPE, true).split(SPACE).toList())
     } else if (responseType == AuthzResponseType.TOKEN) {
       authAction = AuthAction.AUTHORIZATION
       def auth = extractAuth(headers)
@@ -74,5 +74,9 @@ class AuthzRequestReader {
     def request = builder.build()
     ActionLogger.addBaseRequestInfo(request.clientId, authAction)
     request
+  }
+
+  static String readClientId(MultiValueMap<String, String> params) {
+    extractField(params, CLIENT_ID, true)
   }
 }

@@ -11,7 +11,6 @@ import com.nimbusds.jwt.SignedJWT;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import java.util.*;
 
@@ -35,7 +34,7 @@ public class HS256TokenProcessor implements TokenProcessor {
                             Date created, Date expiresIn,
                             Set<String> audience, Set<String> scopes,
                             String userId, Map<String, Object> userInfo) {
-    final JWSSigner signer = new MACSigner(Base64Coder.decodeLines(secret));
+    final JWSSigner signer = new MACSigner(Base64.getDecoder().decode(secret));
     final List<String> aud = new ArrayList<>(audience);
     aud.add(clientId);
 // Prepare JWT with claims set
@@ -64,7 +63,7 @@ public class HS256TokenProcessor implements TokenProcessor {
   @SneakyThrows
   public Map<String, Object> extractInfo(String jwt, String secret) {
     SignedJWT signedJWT = SignedJWT.parse(jwt);
-    final JWSVerifier verifier = new MACVerifier(Base64Coder.decodeLines(secret));
+    final JWSVerifier verifier = new MACVerifier(Base64.getDecoder().decode(secret));
     if(!signedJWT.verify(verifier))
       throw new JWTVerificationException("User info extraction error");
     return signedJWT.getJWTClaimsSet().getClaims();

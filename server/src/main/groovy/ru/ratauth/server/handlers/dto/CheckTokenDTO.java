@@ -6,6 +6,7 @@ import lombok.*;
 import ru.ratauth.interaction.CheckTokenResponse;
 
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * @author mgorelikov
@@ -17,6 +18,8 @@ import java.util.Set;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CheckTokenDTO {
+  @JsonProperty("id_token")
+  private String idToken;
   private String jti;
   private @Singular("auds") Set<String> aud;
   private Long exp;
@@ -26,9 +29,10 @@ public class CheckTokenDTO {
   private @Singular Set<String> scopes;
 
   public CheckTokenDTO(CheckTokenResponse response) {
-    this.jti = response.getIdToken();
+    this.idToken = response.getIdToken();
     this.exp = response.getExpiresIn();
     this.clientId = response.getClientId();
     this.scopes = response.getScopes();
+    this.jti = UUID.randomUUID().toString();
   }
 }

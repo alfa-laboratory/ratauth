@@ -54,7 +54,9 @@ class ProvidersStubConfiguration {
             return Observable.just(RegResult.builder().data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
               .status(RegResult.Status.SUCCESS).build())
           else if (input.data.get(REG_CREDENTIAL) == 'credential') //two step registration
-            return Observable.just(RegResult.builder().data([(BaseAuthFields.USERNAME.val()): 'login'] as Map)
+            return Observable.just(RegResult.builder().data([
+                (BaseAuthFields.USERNAME.val()): 'login',
+                (BaseAuthFields.CODE.val()): 'code'] as Map)
               .status(RegResult.Status.NEED_APPROVAL).build())
           else
             return Observable.error(new RegistrationException("Registration failed"))
