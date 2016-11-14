@@ -75,7 +75,7 @@ allprojects {
       dependency 'com.nimbusds:nimbus-jose-jwt:4.20'
 
       //providers
-      dependency 'ru.ratauth.providers:auth-mongo:+'
+      dependency 'ru.ratauth.providers:auth-mongo:0.1.+'
       dependency 'ru.ratauth.providers:auth-identity-mongo:+'
       dependency 'ru.alfabank.providers:provider-dca:0.3.8'
 
