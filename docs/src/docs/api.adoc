@@ -13,7 +13,7 @@
 
 ===== Request example
 
-IMPORTANT: Method must be POST
+IMPORTANT: Method must be GET
 
 include::../../../server/build/docs/generated-snippets/api/reg_code_provider_channel_succeed/http-request.adoc[]
 include::../../../server/build/docs/generated-snippets/api/reg_code_provider_channel_succeed/httpie-request.adoc[]
@@ -26,7 +26,7 @@ include::../../../server/build/docs/generated-snippets/api/reg_code_provider_cha
 ====== Succeed
 include::../../../server/build/docs/generated-snippets/api/reg_code_provider_channel_succeed/http-response.adoc[]
 .Headers
-include::../../../server/build/docs/generated-snippets/api/reg_code_provider_channel_succeed/response-fields.adoc[]
+include::../../../server/build/docs/generated-snippets/api/reg_code_provider_channel_succeed/response-headers.adoc[]
 
 [regbycode]
 ==== Finish registration by code request (second step)

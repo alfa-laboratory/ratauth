@@ -47,3 +47,7 @@ classes
 # html dirs
 docs/src/docs/public
 
+# docs files
+*.cache
+*.png
+

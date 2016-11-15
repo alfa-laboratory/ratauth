@@ -1,8 +1,8 @@
 package ru.ratauth.server.handlers.readers
 
 import groovy.transform.CompileStatic
-import ratpack.form.Form
 import ratpack.http.Headers
+import ratpack.util.MultiValueMap
 import ru.ratauth.interaction.AuthzResponseType
 import ru.ratauth.interaction.GrantType
 import ru.ratauth.interaction.RegistrationRequest
@@ -29,7 +29,7 @@ class RegistrationRequestReader {
       SCOPE
   ] as Set
 
-  static RegistrationRequest readRegistrationRequest(Form form, Headers headers) {
+  static RegistrationRequest readRegistrationRequest(MultiValueMap<String, String> form, Headers headers) {
     GrantType grantType = extractEnumField(form, GRANT_TYPE, false, GrantType)
     def builder = RegistrationRequest.builder()
         .grantType(grantType)
