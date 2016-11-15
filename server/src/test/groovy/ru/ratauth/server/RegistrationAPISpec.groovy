@@ -61,7 +61,7 @@ class RegistrationAPISpec extends BaseDocumentationSpec {
     when:
     def result = setup
       .when()
-      .post("register")
+      .get("register")
     then:
     result
       .then()
@@ -122,7 +122,7 @@ class RegistrationAPISpec extends BaseDocumentationSpec {
     when:
     def result = setup
       .when()
-      .post("register/token")
+      .post("register")
     then:
     result
       .then()
@@ -137,7 +137,7 @@ class RegistrationAPISpec extends BaseDocumentationSpec {
     given:
     def setup = given(this.documentationSpec)
         .accept(ContentType.HTML)
-        .filter(document('reg_code_provider_channel_succeed',
+        .filter(document('register_redirect_to_web',
         requestParameters(
             parameterWithName('client_id')
                 .description('relying party identifier'),

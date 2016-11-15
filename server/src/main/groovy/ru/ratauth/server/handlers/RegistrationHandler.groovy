@@ -15,6 +15,7 @@ import ru.ratauth.server.services.RegistrationService
 import rx.Subscription
 
 import static ratpack.jackson.Jackson.json
+import static ratpack.rx.RxRatpack.bindExec
 import static ratpack.rx.RxRatpack.observe
 import static ru.ratauth.server.handlers.readers.AuthzRequestReader.readClientId
 import static ru.ratauth.server.handlers.readers.RegistrationRequestReader.readRegistrationRequest
@@ -39,28 +40,25 @@ class RegistrationHandler implements Action<Chain> {
           ctx.byContent { spec ->
             spec.html {
               redirectToWeb(ctx)
+            }.noMatch {
+              initRegistration(ctx)
             }
           }
         } post {
-          initRegistration(ctx)
+          finishRegistration(ctx)
         }
       }
-    }.post('register/token') { Context ctx ->
-      finishRegistration(ctx)
     }
   }
 
+  // BY GET
   private Subscription initRegistration(Context ctx) {
-    Promise<Form> formPromise = ctx.parse(Form)
-    observe(formPromise).flatMap { params ->
-      def request = readRegistrationRequest(params, ctx.request.headers)
-      registrationService.register(request)
-    } subscribe ({
-        res -> ctx.redirect(HttpResponseStatus.FOUND.code(), res.buildURL())
-      }, {  /*on error*/
-        throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable)
-      }
-    )
+    def parsedRequest = readRegistrationRequest(ctx.request.queryParams, ctx.request.headers)
+    registrationService.register(parsedRequest).bindExec() subscribe({
+      res -> ctx.redirect(HttpResponseStatus.FOUND.code(), res.buildURL())
+    }, { /*on error*/
+    throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable)
+    })
   }
 
   private Subscription finishRegistration(Context ctx) {
