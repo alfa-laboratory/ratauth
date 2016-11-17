@@ -1,0 +1,12 @@
+spring:
+ cloud:
+  config:
+   enabled: false
+   failFast: false
+   discovery:
+    enabled: false
+
+eureka:
+ client:
+  healthcheck:
+   enabled: false

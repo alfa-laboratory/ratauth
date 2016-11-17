@@ -1,0 +1,75 @@
+spring:
+ application:
+  name: ${APPLICATION_NAME:auth-server}
+ data:
+   mongodb:
+    dbname: auth
+    dbhosts: localhost:27017
+ jackson:
+   serialization:
+     WRITE_NULL_MAP_VALUES: false
+
+auth:
+ master_secret: "cnlqV2hVQml3aWdrc1RqWXBSaFpma3l5enhNVU1TS1A="
+ identity:
+  local:
+   salt: "se33ani3nacvhpmrd1et"
+ secret:
+  code: "HdC4t2Wpjn/obYj9JHLVwmGzSqQ5SlatYqMF6zuAL0s="
+  ttl: 2678400
+ token:
+  ttl: 86400
+  issuer: "http://ratauth.ru"
+ refresh_token:
+  ttl: 36000
+ code:
+  ttl: 86400
+ session:
+  check_threads: 10
+  check_interval: 300
+ dca:
+  litePackets: "104,105,106"
+  wsservice:
+   configs:
+    -
+      channel: channel
+      timeout: 10000
+      userId: user_id
+      externalSystemCode: syscode
+      externalUserCode: usercode
+      branchNumber: "0000"
+      authTempPasswordLength: 6
+      regTempPasswordLength: 6
+      tmpPasswordScheme: true
+      xm: xm
+      name: test-app
+
+openid.properties.discovery:
+  issuer: Issuer
+  authorization-endpoint: https://server.example.com/connect/authorize
+  token_endpoint: https://server.example.com/connect/token
+  token-endpoint-auth-signing-alg-values-supported:
+    - RSA256
+  registration-endpoint: https://server.example.com/connect/register
+  user-info-endpoint: https://server.example.com/connect/userinfo
+  check-session-iframe: https://server.example.com/connect/check_session
+  end-session-endpoint: https://server.example.com/connect/end_session
+  subject-types-supported:
+    - public
+    - pairwise
+  responseTypesSupported:
+    - code
+    - id_token
+    - code id_token
+    - token id_token
+  claims_supported:
+    - aud
+    - exp
+    - iat
+    - iss
+    - name
+    - sub
+  scopes_supported:
+    - openid
+    - profile
+  jwks_uri: http://example.com/oauth2/certs
