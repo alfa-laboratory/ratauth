@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import ru.ratauth.entities.*;
 import ru.ratauth.exception.AuthorizationException;
-import ru.ratauth.exception.RegistrationException;
 import ru.ratauth.interaction.AuthzRequest;
 import ru.ratauth.interaction.AuthzResponse;
 import ru.ratauth.interaction.AuthzResponseType;
@@ -134,7 +133,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
 
   private static String createRedirectURI(RelyingParty relyingParty, String redirectUri) {
     if(StringUtils.isBlank(redirectUri)) {
-      return relyingParty.getRegistrationRedirectURI();
+      return relyingParty.getAuthorizationRedirectURI();
     } else {
       if(!URIUtils.compareHosts(redirectUri, relyingParty.getRedirectURIs()))
         throw new AuthorizationException(AuthorizationException.ID.REDIRECT_NOT_CORRECT);
