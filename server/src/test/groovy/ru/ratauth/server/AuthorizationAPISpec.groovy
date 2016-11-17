@@ -301,7 +301,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
     given:
     def setup = given(this.documentationSpec)
         .accept(ContentType.URLENC)
-        .filter(document('auth_code_succeed',
+        .filter(document('authorize_not_allowed_redirect',
         requestParameters(
             parameterWithName('response_type')
                 .description('Response type that must be provided CODE or TOKEN'),
