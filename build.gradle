@@ -47,6 +47,7 @@ allprojects {
   dependencyManagement {
     imports {
       mavenBom 'io.spring.platform:platform-bom:2.0.8.RELEASE'
+      mavenBom 'org.springframework.cloud:spring-cloud-dependencies:Brixton.SR6'
     }
 
     dependencies {
@@ -58,12 +59,13 @@ allprojects {
       dependency 'com.google.inject:guice:4.1.0'
       dependency 'org.codehaus.groovy:groovy-all:2.4.7'//for ratpack server config
       dependency 'net.logstash.logback:logstash-logback-encoder:4.5.1'
+      dependency 'javax.servlet:javax.servlet-api:3.1.0'
 
 //      spring
-      dependencySet(group:'org.springframework.cloud', version:'1.2.1.RELEASE') {
-        entry 'spring-cloud-config-client'
-        entry 'spring-cloud-starter-eureka'
-      }
+//      dependencySet(group:'org.springframework.cloud', version:'1.2.1.RELEASE') {
+//        entry 'spring-cloud-config-client'
+//        entry 'spring-cloud-starter-eureka'
+//      }
 
       //reactive
       dependency 'io.reactivex:rxjava:1.1.6'
@@ -77,7 +79,7 @@ allprojects {
       //providers
       dependency 'ru.ratauth.providers:auth-mongo:0.1.+'
       dependency 'ru.ratauth.providers:auth-identity-mongo:+'
-      dependency 'ru.alfabank.providers:provider-dca:0.3.13'
+      dependency 'ru.alfabank.providers:provider-dca:0.3.15'
 
       //test
       dependency "io.ratpack:ratpack-test:${ratpackVersion}"

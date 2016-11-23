@@ -28,7 +28,7 @@ auth:
   check_threads: 10
   check_interval: 300
  dca:
-  litePackets: "104,105,106"
+  paidPackets: "104,105,106"
   wsservice:
    configs:
     -

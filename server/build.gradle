@@ -22,7 +22,7 @@ dependencies {
   //commons
   compile project(':domain')
   compile 'org.apache.commons:commons-lang3:'
-//  provided 'javax.servlet:javax.servlet-api'
+  compile 'javax.servlet:javax.servlet-api'
   compile 'net.logstash.logback:logstash-logback-encoder'
 
   //web/reactive
