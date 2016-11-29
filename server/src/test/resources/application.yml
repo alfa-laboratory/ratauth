@@ -3,7 +3,7 @@ spring:
   name: ${APPLICATION_NAME:auth-server}
  data:
    mongodb:
-    dbname: auth
+    dbname: oidc_auth
     dbhosts: localhost:27017
  jackson:
    serialization:
