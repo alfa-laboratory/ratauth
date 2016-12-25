@@ -61,11 +61,8 @@ allprojects {
       dependency 'net.logstash.logback:logstash-logback-encoder:4.5.1'
       dependency 'javax.servlet:javax.servlet-api:3.1.0'
 
-//      spring
-//      dependencySet(group:'org.springframework.cloud', version:'1.2.1.RELEASE') {
-//        entry 'spring-cloud-config-client'
-//        entry 'spring-cloud-starter-eureka'
-//      }
+      //downgrade
+      dependency 'com.netflix.eureka:eureka-client:1.3.7'
 
       //reactive
       dependency 'io.reactivex:rxjava:1.1.6'
