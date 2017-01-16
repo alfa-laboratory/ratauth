@@ -1,10 +1,10 @@
 spring:
  application:
   name: ${APPLICATION_NAME:auth-server}
- data:
-   mongodb:
-    dbname: oidc_auth
-    dbhosts: localhost:27017
+# data:
+#   mongodb:
+#    dbname: oidc_auth
+#    dbhosts: localhost:27017
  jackson:
    serialization:
      WRITE_NULL_MAP_VALUES: false

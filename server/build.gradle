@@ -40,9 +40,9 @@ dependencies {
 
   //local
   compile project(':domain')
-  compile 'ru.ratauth.providers:auth-mongo'
-  compile 'ru.ratauth.providers:auth-identity-mongo'
-  compile 'ru.alfabank.providers:provider-dca'
+  compileOnly 'ru.ratauth.providers:auth-mongo'
+  compileOnly 'ru.ratauth.providers:auth-identity-mongo'
+  compileOnly 'ru.alfabank.providers:provider-dca'
 
   //crypto
   compile 'com.nimbusds:nimbus-jose-jwt'

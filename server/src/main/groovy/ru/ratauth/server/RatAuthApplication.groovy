@@ -4,10 +4,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.context.annotation.Import
 import ratpack.spring.config.EnableRatpack
-import ru.ratauth.configuration.BaseConfiguration
-import ru.ratauth.configuration.DCAConfiguration
 import ru.ratauth.server.configuration.OpenIdConnectDiscoveryProperties
 import ru.ratauth.server.configuration.RatAuthProperties
 
@@ -15,7 +12,6 @@ import ru.ratauth.server.configuration.RatAuthProperties
 @SpringBootApplication
 @EnableRatpack
 @EnableConfigurationProperties([RatAuthProperties, OpenIdConnectDiscoveryProperties])
-@Import([DCAConfiguration, BaseConfiguration])
 class RatAuthApplication {
   public static final int DEFAULT_PADDING = 50
 
