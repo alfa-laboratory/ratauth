@@ -17,9 +17,12 @@ public class RegistrationRequest {
   private String clientId;
   private String clientSecret;
   private String authCode;
-  private AuthzResponseType responseType;
+  @Singular
+  private Set<AuthzResponseType> responseTypes;
   private GrantType grantType;
   private Map<String,String> data;
+  @Singular
+  private Set<String> acrValues;
   @Singular
   private Set<String> scopes;
   private String redirectURI;

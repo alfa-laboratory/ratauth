@@ -19,7 +19,7 @@ import java.util.StringJoiner;
 @NoArgsConstructor
 public class AuthzResponse {
   private String code;
-  //intermediate step data for two step authentication
+  //intermediate step userInfo for two step authentication
   private Map<String,Object> data;
   private Long expiresIn;
   private String location;

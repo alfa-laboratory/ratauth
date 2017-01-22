@@ -13,7 +13,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegInput {
-  @Singular("data")
+  @Singular("userInfo")
   private Map<String, String> data;
   private String relyingParty;
 }

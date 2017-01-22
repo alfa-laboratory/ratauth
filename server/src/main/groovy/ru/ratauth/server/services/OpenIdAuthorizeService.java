@@ -86,9 +86,9 @@ public class OpenIdAuthorizeService implements AuthorizeService {
   private Observable<Session> createSession(AuthzRequest oauthRequest, AuthResult authResult, RelyingParty relyingParty) {
     if (AuthResult.Status.SUCCESS == authResult.getStatus())
       if (AuthzResponseType.TOKEN == oauthRequest.getResponseType())//implicit auth
-        return sessionService.createSession(relyingParty, authResult.getData(), oauthRequest.getScopes(), oauthRequest.getRedirectURI());
+        return sessionService.createSession(relyingParty, authResult.getUserInfo(), oauthRequest.getScopes(), oauthRequest.getRedirectURI());
       else//auth code auth
-        return sessionService.initSession(relyingParty, authResult.getData(), oauthRequest.getScopes(), oauthRequest.getRedirectURI());
+        return sessionService.initSession(relyingParty, authResult.getUserInfo(), oauthRequest.getScopes(), oauthRequest.getRedirectURI());
     else
       return Observable.just(new Session());//authCode provided by external Auth provider
   }
@@ -106,14 +106,14 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     if (session == null || CollectionUtils.isEmpty(session.getEntries())) {
       return AuthzResponse.builder()
           .location(targetRedirectURI)
-          .data(authResult.getData())
+          .data(authResult.getUserInfo())
           .build();
     }
 
     AuthEntry entry = session.getEntry(relyingParty.getName()).get();
     AuthzResponse resp = AuthzResponse.builder()
         .location(entry.getRedirectUrl())
-        .data(authResult.getData())
+        .data(authResult.getUserInfo())
         .build();
     final Optional<Token> tokenOptional = entry.getLatestToken();
     //implicit auth

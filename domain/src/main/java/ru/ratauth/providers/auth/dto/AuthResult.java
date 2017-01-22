@@ -14,9 +14,11 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthResult {
-  //some abstract data map that could contain any registration data(login, personal code etc.)
+  private String userId;
+
+  //some abstract userInfo map that could contain any registration userInfo(login, personal code etc.)
   @Singular("field")
-  private Map<String, Object> data;
+  private Map<String, Object> userInfo;
 
   private Status status;
 

@@ -1,7 +1,7 @@
 @startuml
-Client -> AuthServer: register (registration data, client_id)
+Client -> AuthServer: register (registration userInfo, client_id)
 AuthServer -> AuthServer: defineAuthProvider
-AuthServer -> AuthProvider: register (register data)
+AuthServer -> AuthProvider: register (register userInfo)
 Client <- AuthProvider: regAuthCode
 AuthServer <-- AuthProvider: userIdentifier
 Client <-- AuthServer: userIdentifier

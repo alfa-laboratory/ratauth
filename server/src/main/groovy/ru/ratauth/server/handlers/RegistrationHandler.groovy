@@ -61,18 +61,18 @@ class RegistrationHandler implements Action<Chain> {
     })
   }
 
-  private Subscription finishRegistration(Context ctx) {
-    Promise<Form> formPromise = ctx.parse(Form)
-    observe(formPromise).flatMap { params ->
-      def request = readRegistrationRequest(params, ctx.request.headers)
-      registrationService.finishRegister(request)
-    } subscribe({
-          res -> ctx.render json(new TokenDTO(res))
-        }, {  /*on error*/
-          throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable)
-        }
-    )
-  }
+//  private Subscription finishRegistration(Context ctx) {
+//    Promise<Form> formPromise = ctx.parse(Form)
+//    observe(formPromise).flatMap { params ->
+//      def request = readRegistrationRequest(params, ctx.request.headers)
+//      registrationService.finishRegister(request)
+//    } subscribe({
+//          res -> ctx.render json(new TokenDTO(res))
+//        }, {  /*on error*/
+//          throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable)
+//        }
+//    )
+//  }
 
   private void redirectToWeb(Context ctx) {
     def clientId = readClientId(ctx.request.queryParams)

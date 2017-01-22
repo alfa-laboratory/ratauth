@@ -31,7 +31,7 @@ class ProvidersStubConfiguration {
       @Override
       Observable<AuthResult> authenticate(AuthInput input) {
         if (input.data.get(BaseAuthFields.USERNAME.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
-          return Observable.just(AuthResult.builder().data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map).status(AuthResult.Status.SUCCESS).build())
+          return Observable.just(AuthResult.builder().userInfo([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map).status(AuthResult.Status.SUCCESS).build())
         else
           return Observable.error(new AuthorizationException(AuthorizationException.ID.CREDENTIALS_WRONG))
       }
@@ -47,14 +47,19 @@ class ProvidersStubConfiguration {
       }
 
       @Override
+      int getProvidedAssuranceLevel() {
+        return 1
+      }
+
+      @Override
       Observable<RegResult> register(RegInput input) {
         if (!input.data.containsKey(BaseAuthFields.CODE.val())) { //first step of registration
           //one step registration
           if (input.data.get(BaseAuthFields.USERNAME.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
-            return Observable.just(RegResult.builder().data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
+            return Observable.just(RegResult.builder().userInfo([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
               .status(RegResult.Status.SUCCESS).build())
           else if (input.data.get(REG_CREDENTIAL) == 'credential') //two step registration
-            return Observable.just(RegResult.builder().data([
+            return Observable.just(RegResult.builder().userInfo([
                 (BaseAuthFields.USERNAME.val()): 'login',
                 (BaseAuthFields.CODE.val()): 'code'] as Map)
               .status(RegResult.Status.NEED_APPROVAL).build())
@@ -63,7 +68,7 @@ class ProvidersStubConfiguration {
         } else {//second step of registration
           if (input.data.get(BaseAuthFields.CODE.val()) == REG_CODE && input.data.get(BaseAuthFields.USERNAME.val()) == 'login')
             return Observable.just(RegResult.builder().redirectUrl('http://relying.party/gateway')
-              .data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
+              .getUserInfo([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
               .status(RegResult.Status.SUCCESS).build())
           else
             return Observable.error(new RegistrationException("Registration failed"))

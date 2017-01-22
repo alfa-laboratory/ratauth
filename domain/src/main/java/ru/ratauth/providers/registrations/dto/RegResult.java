@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.ratauth.providers.assurance.dto.AssuranceStatus;
 
 import java.util.Map;
 
@@ -17,8 +18,8 @@ import java.util.Map;
 @NoArgsConstructor
 public class RegResult {
   private Status status;
-  private String redirectUrl;
-  private Map<String, Object> data;//login
+  private String userId;
+  private Map<String, Object> userInfo;
 
   public enum Status {
     SUCCESS,

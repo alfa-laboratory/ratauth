@@ -107,7 +107,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     AuthProvider provider = authProviders.get(relyingParty.getIdentityProvider());
     if (provider.isAuthCodeSupported() && oauthRequest.getGrantType() == GrantType.AUTHORIZATION_CODE) {
       authObs = provider.authenticate(AuthInput.builder().relyingParty(relyingParty.getName()).data(oauthRequest.getAuthData()).build())
-          .flatMap(res -> authSessionService.createSession(relyingParty, res.getData(), oauthRequest.getScopes(), null));
+          .flatMap(res -> authSessionService.createSession(relyingParty, res.getUserInfo(), oauthRequest.getScopes(), null));
     } else if (oauthRequest.getGrantType() == GrantType.AUTHORIZATION_CODE)
       authObs = authSessionService.getByValidCode(oauthRequest.getAuthzCode(), new Date())
           //check that session belongs to target relying party and contains no tokens

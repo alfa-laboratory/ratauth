@@ -1,12 +1,9 @@
 package ru.ratauth.interaction;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.ratauth.utils.StringUtils;
 
-import java.util.Map;
+import java.net.URLEncoder;
 import java.util.StringJoiner;
 
 import static ru.ratauth.utils.URIUtils.appendQuery;
@@ -22,16 +19,21 @@ import static ru.ratauth.utils.URIUtils.appendQuery;
 @NoArgsConstructor
 public class RegistrationResponse {
   private String redirectUrl;
-  private Map<String, Object> data;
+  private String idToken;
   private String code;
+  private String enrollmentId;
 
+  @SneakyThrows
   public String buildURL() {
     StringJoiner joiner = new StringJoiner("&");
-    if(!StringUtils.isBlank(code)) {
-      joiner.add("code="+code);
+    if (!StringUtils.isBlank(code)) {
+      joiner.add("code=" + URLEncoder.encode(code, "UTF-8"));
     }
-    if(data != null && !data.isEmpty()) {
-      data.entrySet().forEach(entry -> joiner.add(entry.getKey() + "=" + entry.getValue().toString()));
+    if (!StringUtils.isBlank(idToken)) {
+      joiner.add("id_token=" + URLEncoder.encode(idToken, "UTF-8"));
+    }
+    if (!StringUtils.isBlank(enrollmentId)) {
+      joiner.add("enrollmentId=" + URLEncoder.encode(enrollmentId, "UTF-8"));
     }
     return appendQuery(redirectUrl, joiner.toString());
   }
