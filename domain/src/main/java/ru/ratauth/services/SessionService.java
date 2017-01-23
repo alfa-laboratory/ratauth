@@ -70,6 +70,13 @@ public interface SessionService {
 
   /**
    * Invalidates session and all token database cache(if supported)
+   * @param userId userIdentifier
+   * @param blocked date of blocking
+   */
+  Observable<Boolean> invalidateForUser(String userId, Date blocked);
+
+  /**
+   * Invalidates session and all token database cache(if supported)
    * @param relyingParty client unique name
    * @param blocked date of blocking
    */
