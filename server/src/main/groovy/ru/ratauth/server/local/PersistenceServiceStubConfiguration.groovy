@@ -152,6 +152,11 @@ class PersistenceServiceStubConfiguration {
       }
 
       @Override
+      Observable<Boolean> invalidateForUser(String userId, Date blocked) {
+        return null
+      }
+
+      @Override
       Observable<Session> getByValidToken(String token, Date now) {
         if (token == TOKEN)
           return Observable.just(
