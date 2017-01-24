@@ -80,7 +80,7 @@ public class BackgroundSessionStatusChecker implements SessionStatusChecker {
         .checkUserStatus(AuthInput.builder().relyingParty(session.getAuthClient()).data(userInfo).build())
         .flatMap(userNotBlocked -> {
           if (!userNotBlocked)
-            return sessionService.invalidateSession(session.getId(), new Date());
+            return sessionService.invalidateForUser(session.getUserId(), new Date());
           else
             return sessionService.updateCheckDate(session.getId(), new Date());
         })
