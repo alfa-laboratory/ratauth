@@ -2,6 +2,7 @@ package ru.ratauth.server.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.logging.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import ru.ratauth.entities.Session;
 import ru.ratauth.entities.Status;
 import ru.ratauth.providers.auth.AuthProvider;
 import ru.ratauth.providers.auth.dto.AuthInput;
+import ru.ratauth.server.services.log.LogFields;
 import ru.ratauth.server.utils.DateUtils;
 import ru.ratauth.services.SessionService;
 
@@ -36,6 +38,9 @@ public class BackgroundSessionStatusChecker implements SessionStatusChecker {
   private final SessionService sessionService;
   private final Map<String, AuthProvider> authProviders;
   private final TokenCacheService tokenCacheService;
+
+  public static final String CHECK_SESSION = "CHECK_SESSION";
+  public static final String INVALIDATE_SESSION = "INVALIDATE_SESSION";
 
   @Value("${auth.session.background_check_enabled:false}")
   private Boolean backgroundCheckEnabled;
@@ -79,10 +84,14 @@ public class BackgroundSessionStatusChecker implements SessionStatusChecker {
     authProviders.get(session.getIdentityProvider())
         .checkUserStatus(AuthInput.builder().relyingParty(session.getAuthClient()).data(userInfo).build())
         .flatMap(userNotBlocked -> {
-          if (!userNotBlocked)
+          if (!userNotBlocked) {
+            logEvent(CHECK_SESSION, session.getUserId(), session.getId());
             return sessionService.invalidateForUser(session.getUserId(), new Date());
-          else
+          }
+          else {
+            logEvent(INVALIDATE_SESSION, session.getUserId(), session.getId());
             return sessionService.updateCheckDate(session.getId(), new Date());
+          }
         })
         .toBlocking().single();
   }
@@ -106,5 +115,13 @@ public class BackgroundSessionStatusChecker implements SessionStatusChecker {
         }
       }
     }
+  }
+
+  private void logEvent(String action, String userId, String sessionId) {
+    MDC.put(LogFields.ACTION.val(), action);
+    MDC.put(LogFields.USER_ID.val(), userId);
+    MDC.put(LogFields.SESSION_ID.val(), sessionId);
+    log.info("Background session checked");
+    MDC.clear();
   }
 }
