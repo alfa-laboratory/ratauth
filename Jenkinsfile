@@ -48,7 +48,8 @@ node('mesos-asdev') {
         }
 
         stage('Aggregate test results') {
-            junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
+            junit allowEmptyResults: true, testResults: 'server/build/test-results/test/*.xml'
+            junit 'server/build/test-results/test/*.xml'
             echo 'Test results ... DONE'
         }
 
