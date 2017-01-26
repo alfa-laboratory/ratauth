@@ -36,8 +36,8 @@ node('mesos-asdev') {
             withCredentials([usernamePassword(credentialsId: 'cecda320-9ccb-4827-931c-1e372124b75b', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                 withEnv(['GRADLE_OPTS=-Dorg.ajoberstar.grgit.auth.username=$GIT_USERNAME -Dorg.ajoberstar.grgit.auth.password=$GIT_PASSWORD']) {
                     def gradleTasks = ''
-                    if(gitTag) {
-                        gradleTasks = 'final'
+                    if(gitTag && env.GIT_BRANCH =~ 'release') {
+                        gradleTasks = 'final -Prelease.useLastTag=true'
                     } else {
                         gradleTasks = 'snapshot'
                     }
@@ -47,8 +47,9 @@ node('mesos-asdev') {
             archiveArtifacts artifacts: '**/build/reports/**', allowEmptyArchive: true 
         }
 
-        stage('publish build information') {
-            echo 'Publishing... DONE'
+        stage('Aggregate test results') {
+            junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
+            echo 'Test results ... DONE'
         }
 
         stage('deploy') {
