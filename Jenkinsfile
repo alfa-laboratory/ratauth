@@ -2,7 +2,15 @@ node('mesos-asdev') {
     ws('ws-'+env.BUILD_NUMBER) {
         def server = Artifactory.server 'alfa-laboratory'
         def rtGradle = Artifactory.newGradleBuild()
-
+        echo "BRANCH_NAME: ${env.BRANCH_NAME}"
+        echo "CHANGE_ID: ${env.CHANGE_ID}"
+        echo "CHANGE_URL: ${env.CHANGE_URL}"
+        echo "CHANGE_TITLE: ${env.CHANGE_TITLE}"
+        echo "CHANGE_AUTHOR: ${env.CHANGE_AUTHOR}"
+        echo "CHANGE_AUTHOR_DISPLAY_NAME: ${env.CHANGE_AUTHOR_DISPLAY_NAME}"
+        echo "CHANGE_AUTHOR_EMAIL: ${env.CHANGE_AUTHOR_EMAIL}"
+        echo "CHANGE_TARGET: ${env.CHANGE_TARGET}"
+      
         stage('fetch'){
             git branch: 'bank_build', credentialsId: 'cecda320-9ccb-4827-931c-1e372124b75b', url: 'http://u_m0ln1@git/scm/auts/ratauth.git'
             sh 'ls -la'
