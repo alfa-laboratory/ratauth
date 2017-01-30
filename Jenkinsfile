@@ -14,12 +14,26 @@ node('mesos-asdev') {
             sh 'ls -la'
         }
 
+        //black magic with Gradle init script. Need to add --init-script=./.gradle/init.gradle to gradle switches
+        stage('gradle configure') {
+            sh 'mkdir .gradle/'
+            writeFile file:'./.gradle/init.gradle', text: '''rootProject {
+              afterEvaluate {
+                  def file = file("$buildDir/project-version")
+                  if(!it.buildDir.exists()){
+                    it.buildDir.mkdir()
+                  }
+                  file << "$version"
+              }
+            }'''.stripIndent().stripMargin()
+        }
+
         //predefined
         def appGroup       = 'ru/ratauth/server'
 
         //build
         def hasTag= hasTag()
-        def currentVersion = resolveLatestVersion(hasTag)
+        def currentVersion
         def buildInfo      = Artifactory.newBuildInfo()
         def server
         def rtGradle
@@ -49,17 +63,17 @@ node('mesos-asdev') {
             rtGradle.deployer.deployMavenDescriptors = true
             rtGradle.resolver repo:'public', server: server
             rtGradle.useWrapper = true
-            rtGradle.usesPlugin = true
         }
 
         stage('build') {
             withCredentials([usernamePassword(credentialsId: 'cecda320-9ccb-4827-931c-1e372124b75b', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                 withEnv(['GRADLE_OPTS=-Dorg.ajoberstar.grgit.auth.username=$GIT_USERNAME -Dorg.ajoberstar.grgit.auth.password=$GIT_PASSWORD']) {
-                    rtGradle.run usesPlugin: true, switches: '--gradle-user-home=/home/javagit/.gradle --stacktrace --info', tasks: gradleTasks, buildInfo: buildInfo
+                    rtGradle.run switches: '--gradle-user-home=/home/javagit/.gradle --init-script=./.gradle/init.gradle --stacktrace --info', tasks: gradleTasks, buildInfo: buildInfo
                     server.publishBuildInfo buildInfo
                 }
             }
             archiveArtifacts artifacts: '**/build/reports/**', allowEmptyArchive: true 
+            currentVersion = resolveLatestVersion(hasTag) //read from it. Version will be able resolve now
         }
 
         stage('Aggregate test results') {
@@ -104,6 +118,8 @@ def hasTag() {
  */
 def resolveLatestVersion(isRelease) {
   try {
+    versionFromFile= readFile('build/project-version')
+    if(versionFromFile) return versionFromFile
     version = sh(returnStdout: true, script: 'git describe --tags --abbrev=0').trim()
     if(!isRelease){
       version = version+'-SNAPSHOT'
