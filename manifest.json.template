@@ -1,0 +1,50 @@
+{
+  "id": "/oidc/auth-api",
+  "container": {
+    "docker": {
+      "image": "docker.moscow.alfaintra.net/java:alpine-server-jre112-standard",
+      "network": "HOST",
+      "parameters": [ 
+        { "key": "log-driver", "value": "syslog" },
+        { "key": "memory", "value": "${manifest.oidc_auth_api.mem}M" },
+        { "key": "memory-swap", "value": "0" }
+      ]
+    }
+  },
+  "healthChecks": [{
+    "protocol": "HTTP",
+    "path": "/health",
+    "portIndex": 0,
+    "gracePeriodSeconds": 300,
+    "intervalSeconds": 20,
+    "timeoutSeconds": 20,
+    "maxConsecutiveFailures": 6
+  }],
+  "backoffFactor": 2,
+  "backoffSeconds": 1,
+  "maxLaunchDelaySeconds": 100,
+  "upgradeStrategy": {
+    "minimumHealthCapacity": 0.5,
+    "maximumOverCapacity": 0.2
+  },
+  "cmd": "java -Xmx${manifest.oidc_auth_api.xmx}M -Djava.awt.headless=true -Duser.timezone=Europe/Moscow -server -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark -DCONFIG_SERV=sense-config-server -cp \$MESOS_SANDBOX/server-${manifest.oidc_auth_api.version}.jar -jar \$MESOS_SANDBOX/server-${manifest.oidc_auth_api.version}.jar --spring.profiles.active=${manifest.oidc_auth_api.spring_profiles} --logging.config=\$MESOS_SANDBOX/logback.groovy --server.port=\$PORT0 -server.port=\$PORT0 --logging.level.com.netflix.discovery=OFF",
+  "cpus": ${manifest.oidc_auth_api.cpu},
+  "mem": ${manifest.oidc_auth_api.mem},
+  "uris": [
+    "http://mvn/artifactory/${manifest.oidc_auth_api.version_type}/ru/ratauth/server/${manifest.oidc_auth_api.version}/server-${manifest.oidc_auth_api.version}.jar",
+    "http://mvn/artifactory/releases/ru/sense/resources/logback_config/${manifest.logger.version}/logback_config-${manifest.logger.version}.tar.gz"
+  ],
+  "env": {
+    "APPLICATION_NAME": "oidc-auth-api",
+    "LOGGING_PROFILE": "${manifest.oidc_auth_api.logging_profile}",
+    "APP": "oidc-auth",
+    "LOGSTASH_PORT_5959_TCP_ADDR": "${manifest.logger.host}",
+    "LOGSTASH_PORT_5959_TCP_PORT": "${manifest.logger.port}",
+    "LOGSTASH_SYSLOG_TAGS": "${manifest.logger.tags}",
+    "CONTAINER_NAME": "oidc-auth",
+    "EUREKA_SERV": "eureka_servers",
+    "CONFIG_BRANCH": "${manifest.oidc_auth_api.config_branch}"
+  },
+  "instances": ${manifest.oidc_auth_api.instances},
+  "constraints": [["rack_id", "GROUP_BY"], ["type", "LIKE", "(.*,*|^)app(,.*|\$)"]]
+}
