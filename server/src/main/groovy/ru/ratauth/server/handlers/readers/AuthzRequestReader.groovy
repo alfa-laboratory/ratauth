@@ -17,13 +17,13 @@ import static ru.ratauth.server.handlers.readers.RequestUtil.*
  */
 @CompileStatic
 class AuthzRequestReader {
-  public static final String SPACE = " "
-  private static final String RESPONSE_TYPE = "response_type"
-  private static final String GRANT_TYPE = "grant_type"
-  private static final String CLIENT_ID = "client_id"
-  private static final String SCOPE = "scope"
-  private static final String REDIRECT_URI = "redirect_uri"
-  private static final String REFRESH_TOKEN = "refresh_token"
+  public static final String FIELD_SPLITTER = ' '
+  private static final String RESPONSE_TYPE = 'response_type'
+  private static final String GRANT_TYPE = 'grant_type'
+  private static final String CLIENT_ID = 'client_id'
+  private static final String SCOPE = 'scope'
+  private static final String REDIRECT_URI = 'redirect_uri'
+  private static final String REFRESH_TOKEN = 'refresh_token'
   private static final Set<String> BASE_FIELDS = [
           RESPONSE_TYPE,
           CLIENT_ID,
@@ -43,7 +43,7 @@ class AuthzRequestReader {
 
     if (GrantType.AUTHENTICATION_TOKEN == grantType) {
       if (responseType == AuthzResponseType.TOKEN) {
-        throw new ReadRequestException(ReadRequestException.ID.WRONG_REQUEST, "Response for that grant_type could not be Token")
+        throw new ReadRequestException(ReadRequestException.ID.WRONG_REQUEST, 'Response for that grant_type could not be Token')
       }
       authAction = AuthAction.CROSS_AUTHORIZATION
       def auth = extractAuth(headers)
@@ -52,20 +52,20 @@ class AuthzRequestReader {
           .refreshToken(extractField(params, REFRESH_TOKEN, true))
           .externalClientId(extractField(params, CLIENT_ID, true))
           .grantType(grantType)
-          .scopes(extractField(params, SCOPE, true).split(SPACE).toList())
+          .scopes(extractField(params, SCOPE, true).split(FIELD_SPLITTER).toList())
     } else if (responseType == AuthzResponseType.TOKEN) {
       authAction = AuthAction.AUTHORIZATION
       def auth = extractAuth(headers)
       builder.clientId(auth[0])
           .clientSecret(auth[1])
-      def scope = extractField(params, SCOPE, false)?.split(SPACE)?.toList()
+      def scope = extractField(params, SCOPE, false)?.split(FIELD_SPLITTER)?.toList()
       if (scope) {
         builder.scopes(scope)
       }
     } else {
       authAction = AuthAction.AUTHORIZATION
       builder.clientId(extractField(params, CLIENT_ID, true))
-      def scope = extractField(params, SCOPE, false)?.split(SPACE)?.toList()
+      def scope = extractField(params, SCOPE, false)?.split(FIELD_SPLITTER)?.toList()
       if (scope) {
         builder.scopes(scope)
       }

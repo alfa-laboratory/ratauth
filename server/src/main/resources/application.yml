@@ -6,15 +6,9 @@ spring:
      WRITE_NULL_MAP_VALUES: false
 
 auth:
- secret:
-  ttl: 2678400
- token:
-  ttl: 86400
-  issuer: "http://ratauth.ru"
- refresh_token:
-  ttl: 36000
- code:
-  ttl: 86400
- session:
-  check_threads: 10
-  check_interval: 300
+  signature:
+    issuer: "http://ratauth.ru"
+    masterSecret: "cnlqV2hVQml3aWdrc1RqWXBSaFpma3l5enhNVU1TS1A="
+  session:
+    check_interval: 300
+    check_threads: 10

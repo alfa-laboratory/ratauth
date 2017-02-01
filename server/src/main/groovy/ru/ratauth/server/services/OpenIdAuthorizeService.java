@@ -52,7 +52,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         .flatMap(rpAuthSession ->
             createIdToken(rpAuthSession.getLeft(), rpAuthSession.getRight())
                 .map(idToken -> buildResponse(rpAuthSession.getLeft(), rpAuthSession.getRight(),
-                    rpAuthSession.getMiddle(), idToken, request.getRedirectURI()))
+                    rpAuthSession.getMiddle(), idToken))
         )
         .doOnCompleted(() -> log.info("Authorization succeed"));
   }
@@ -68,9 +68,8 @@ public class OpenIdAuthorizeService implements AuthorizeService {
             .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.TOKEN_NOT_FOUND))),
         (oldRP, newRP, session) -> new ImmutablePair<>(newRP, session)
     ).flatMap(rpSession ->
-        sessionService.addEntry(rpSession.getRight(), rpSession.getLeft(), request.getScopes(), request.getRedirectURI())
-            .map(session -> buildResponse(rpSession.getLeft(), session,
-                AuthResult.builder().status(AuthResult.Status.NEED_APPROVAL).build(), null, request.getRedirectURI()))
+        sessionService.addEntry(rpSession.getRight(), rpSession.getLeft(), request.getScopes(), createRedirectURI(rpSession.left, request.getRedirectURI()))
+            .map(session -> buildResponse(rpSession.getLeft(), session, new AuthResult(), null))
     ).doOnCompleted(() -> log.info("Cross-authorization succeed"));
   }
 
@@ -84,13 +83,11 @@ public class OpenIdAuthorizeService implements AuthorizeService {
   }
 
   private Observable<Session> createSession(AuthzRequest oauthRequest, AuthResult authResult, RelyingParty relyingParty) {
-    if (AuthResult.Status.SUCCESS == authResult.getStatus())
-      if (AuthzResponseType.TOKEN == oauthRequest.getResponseType())//implicit auth
-        return sessionService.createSession(relyingParty, authResult.getUserInfo(), oauthRequest.getScopes(), oauthRequest.getRedirectURI());
-      else//auth code auth
-        return sessionService.initSession(relyingParty, authResult.getUserInfo(), oauthRequest.getScopes(), oauthRequest.getRedirectURI());
-    else
-      return Observable.just(new Session());//authCode provided by external Auth provider
+    final String redirectURI = createRedirectURI(relyingParty, oauthRequest.getRedirectURI());
+    if (AuthzResponseType.TOKEN == oauthRequest.getResponseType())//implicit auth
+      return sessionService.createSession(relyingParty, authResult.getUserId(), authResult.getUserInfo(), oauthRequest.getScopes(), redirectURI, authResult.getAcr());
+    else//auth code auth
+      return sessionService.initSession(relyingParty, authResult.getUserId(), authResult.getUserInfo(), oauthRequest.getScopes(), redirectURI, authResult.getAcr());
   }
 
   private Observable<AuthResult> authenticateUser(Map<String, String> authData, String identityProvider, String relyingPartyName) {
@@ -100,15 +97,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
             .relyingParty(relyingPartyName).build());
   }
 
-  private static AuthzResponse buildResponse(RelyingParty relyingParty, Session session,AuthResult authResult, TokenCache tokenCache, String redirectUri) {
-    final String targetRedirectURI = createRedirectURI(relyingParty, redirectUri);
-    //in case of autCode sent by authProvider
-    if (session == null || CollectionUtils.isEmpty(session.getEntries())) {
-      return AuthzResponse.builder()
-          .location(targetRedirectURI)
-          .data(authResult.getUserInfo())
-          .build();
-    }
+  private static AuthzResponse buildResponse(RelyingParty relyingParty, Session session, AuthResult authResult, TokenCache tokenCache) {
 
     AuthEntry entry = session.getEntry(relyingParty.getName()).get();
     AuthzResponse resp = AuthzResponse.builder()
@@ -132,10 +121,10 @@ public class OpenIdAuthorizeService implements AuthorizeService {
   }
 
   private static String createRedirectURI(RelyingParty relyingParty, String redirectUri) {
-    if(StringUtils.isBlank(redirectUri)) {
+    if (StringUtils.isBlank(redirectUri)) {
       return relyingParty.getAuthorizationRedirectURI();
     } else {
-      if(!URIUtils.compareHosts(redirectUri, relyingParty.getRedirectURIs()))
+      if (!URIUtils.compareHosts(redirectUri, relyingParty.getRedirectURIs()))
         throw new AuthorizationException(AuthorizationException.ID.REDIRECT_NOT_CORRECT);
       else
         return redirectUri;

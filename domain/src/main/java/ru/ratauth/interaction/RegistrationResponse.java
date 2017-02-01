@@ -1,6 +1,7 @@
 package ru.ratauth.interaction;
 
 import lombok.*;
+import lombok.experimental.Wither;
 import ru.ratauth.utils.StringUtils;
 
 import java.net.URLEncoder;
@@ -19,7 +20,6 @@ import static ru.ratauth.utils.URIUtils.appendQuery;
 @NoArgsConstructor
 public class RegistrationResponse {
   private String redirectUrl;
-  private String idToken;
   private String code;
   private String enrollmentId;
 
@@ -28,9 +28,6 @@ public class RegistrationResponse {
     StringJoiner joiner = new StringJoiner("&");
     if (!StringUtils.isBlank(code)) {
       joiner.add("code=" + URLEncoder.encode(code, "UTF-8"));
-    }
-    if (!StringUtils.isBlank(idToken)) {
-      joiner.add("id_token=" + URLEncoder.encode(idToken, "UTF-8"));
     }
     if (!StringUtils.isBlank(enrollmentId)) {
       joiner.add("enrollmentId=" + URLEncoder.encode(enrollmentId, "UTF-8"));

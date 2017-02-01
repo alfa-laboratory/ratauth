@@ -16,22 +16,26 @@ public interface AuthSessionService {
   /**
    * Creates and saves empty session with authEntry for input relyingParty
    * @param relyingParty
+   * @param userId user identifier from provider
    * @param userInfo info got from provider
    * @param scopes
    * @param redirectUrl
    * @return session entity
    */
-  Observable<Session> initSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, String redirectUrl);
+  Observable<Session> initSession(RelyingParty relyingParty, String userId, Map<String, Object> userInfo, Set<String> scopes,
+                                  String redirectUrl, String acr);
 
   /**
    * Creates and saves session with authEntry and token granted for input relyingParty
    * @param relyingParty
+   * @param userId user identifier from provider
    * @param userInfo info got from provider
    * @param scopes
    * @param redirectUrl
    * @return session entity
    */
-  Observable<Session> createSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, String redirectUrl);
+  Observable<Session> createSession(RelyingParty relyingParty, String userId, Map<String, Object> userInfo, Set<String> scopes,
+                                    String redirectUrl, String acr);
 
   /**
    * Adds token to session. Could be used in refresh token flow

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ru.ratauth.entities.*;
 import ru.ratauth.providers.Fields;
 import ru.ratauth.providers.auth.dto.BaseAuthFields;
+import ru.ratauth.server.configuration.SignatureConfig;
 import ru.ratauth.server.secutiry.OAuthIssuerImpl;
 import ru.ratauth.server.secutiry.TokenProcessor;
 import ru.ratauth.server.secutiry.UUIDValueGenerator;
@@ -32,22 +33,20 @@ public class OpenIdSessionService implements AuthSessionService {
   private final TokenCacheService tokenCacheService;
   private final OAuthIssuerImpl codeGenerator = new OAuthIssuerImpl(new UUIDValueGenerator());
   private final ActionLogger actionLogger;
-
-  @Value("${auth.master_secret}")
-  private String masterSecret;//final
+  private final SignatureConfig signatureConfig;
 
   public static final String RATAUTH = "ratauth";
 
   @Override
-  public Observable<Session> initSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes,
-                                         String redirectUrl) {
+  public Observable<Session> initSession(RelyingParty relyingParty, String userId, Map<String, Object> userInfo, Set<String> scopes,
+                                         String redirectUrl, String acr) {
     final LocalDateTime now = LocalDateTime.now();
-    return createSession(relyingParty, userInfo, scopes, redirectUrl, now, null);
+    return createSession(relyingParty, userId, userInfo, scopes, redirectUrl, now, null, acr);
   }
 
   @Override
-  public Observable<Session> createSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes,
-                                           String redirectUrl) {
+  public Observable<Session> createSession(RelyingParty relyingParty, String userId, Map<String, Object> userInfo, Set<String> scopes,
+                                           String redirectUrl, String acr) {
     final LocalDateTime now = LocalDateTime.now();
     final LocalDateTime tokenExpires = now.plus(relyingParty.getTokenTTL(), ChronoUnit.SECONDS);
     final Token token = Token.builder()
@@ -55,19 +54,20 @@ public class OpenIdSessionService implements AuthSessionService {
         .expiresIn(DateUtils.fromLocal(tokenExpires))
         .created(DateUtils.fromLocal(now))
         .build();
-    return createSession(relyingParty, userInfo, scopes, redirectUrl, now, token);
+    return createSession(relyingParty, userId, userInfo, scopes, redirectUrl, now, token, acr);
   }
 
-  private Observable<Session> createSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes,
-                                            String redirectUrl, LocalDateTime now, Token token) {
+  private Observable<Session> createSession(RelyingParty relyingParty, String userId, Map<String, Object> userInfo, Set<String> scopes,
+                                            String redirectUrl, LocalDateTime now, Token token, String acr) {
+
     final LocalDateTime sessionExpires = now.plus(relyingParty.getSessionTTL(), ChronoUnit.SECONDS);
     final LocalDateTime refreshExpires = now.plus(relyingParty.getRefreshTokenTTL(), ChronoUnit.SECONDS);
     final LocalDateTime authCodeExpires = now.plus(relyingParty.getCodeTTL(), ChronoUnit.SECONDS);
 
 
-    final String jwtInfo = tokenProcessor.createToken(RATAUTH, masterSecret, null,
+    final String jwtInfo = tokenProcessor.createToken(RATAUTH, signatureConfig.getMasterSecret(), null,
         DateUtils.fromLocal(now), DateUtils.fromLocal(sessionExpires),
-        tokenCacheService.extractAudience(scopes), scopes, userInfo.get(Fields.USER_ID.val()).toString(), userInfo);
+        tokenCacheService.extractAudience(scopes), scopes, userId, userInfo);
 
     final AuthEntry authEntry = AuthEntry.builder()
         .created(DateUtils.fromLocal(now))
@@ -87,9 +87,10 @@ public class OpenIdSessionService implements AuthSessionService {
         .status(Status.ACTIVE)
         .created(DateUtils.fromLocal(now))
         .expiresIn(DateUtils.fromLocal(sessionExpires))
-        .userId((String) userInfo.get(BaseAuthFields.USER_ID.val()))
+        .userId(userId)
         .userInfo(jwtInfo)
         .entries(new HashSet<>(Arrays.asList(authEntry)))
+        .initialACR(acr)
         .build();
     return sessionService.create(session)
         .doOnNext(actionLogger::addSessionInfo);

@@ -21,7 +21,6 @@ public class RegistrationRequest {
   private Set<AuthzResponseType> responseTypes;
   private GrantType grantType;
   private Map<String,String> data;
-  @Singular
   private Set<String> acrValues;
   @Singular
   private Set<String> scopes;

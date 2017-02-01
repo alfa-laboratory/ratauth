@@ -12,7 +12,7 @@ import java.util.Date;
  * @since 02/11/15
  *
  * Persistence layer
- * Async token service
+ * Async session service
  */
 public interface SessionService {
   /**

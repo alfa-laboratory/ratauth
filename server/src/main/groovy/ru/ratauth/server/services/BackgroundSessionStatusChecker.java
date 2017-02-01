@@ -37,6 +37,7 @@ public class BackgroundSessionStatusChecker implements SessionStatusChecker {
   private final Map<String, AuthProvider> authProviders;
   private final TokenCacheService tokenCacheService;
 
+  //TODO must be in separate config bean
   @Value("${auth.session.background_check_enabled:false}")
   private Boolean backgroundCheckEnabled;
   @Value("${auth.session.check_threads}")

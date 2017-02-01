@@ -17,11 +17,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class AuthClient {
   /**
-   * unique primary key
-   */
-  private String id;
-  /**
-   * should be human-readable unique sequence
+   * unique sequence
    */
   private String name;
   private String description;

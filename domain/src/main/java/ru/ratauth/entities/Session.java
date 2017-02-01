@@ -51,6 +51,10 @@ public class Session {
   private Date lastCheck;
   private Set<AuthEntry> entries;
 
+  private String initialACR;
+
+  private String deviceId;
+
   public Optional<AuthEntry> getEntry(String relyingPartyId) {
     if(entries == null)
       return Optional.empty();

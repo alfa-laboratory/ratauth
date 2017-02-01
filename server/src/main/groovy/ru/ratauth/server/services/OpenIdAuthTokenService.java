@@ -105,16 +105,14 @@ public class OpenIdAuthTokenService implements AuthTokenService {
   private Observable<Session> loadSession(TokenRequest oauthRequest, RelyingParty relyingParty) {
     Observable<Session> authObs;
     AuthProvider provider = authProviders.get(relyingParty.getIdentityProvider());
-    if (provider.isAuthCodeSupported() && oauthRequest.getGrantType() == GrantType.AUTHORIZATION_CODE) {
-      authObs = provider.authenticate(AuthInput.builder().relyingParty(relyingParty.getName()).data(oauthRequest.getAuthData()).build())
-          .flatMap(res -> authSessionService.createSession(relyingParty, res.getUserInfo(), oauthRequest.getScopes(), null));
-    } else if (oauthRequest.getGrantType() == GrantType.AUTHORIZATION_CODE)
+    if (oauthRequest.getGrantType() == GrantType.AUTHORIZATION_CODE)
       authObs = authSessionService.getByValidCode(oauthRequest.getAuthzCode(), new Date())
           //check that session belongs to target relying party and contains no tokens
           .filter(sess -> sess.getEntry(relyingParty.getName()).map(entry -> CollectionUtils.isEmpty(entry.getTokens())).orElse(false));
     else if (oauthRequest.getGrantType() == GrantType.REFRESH_TOKEN || oauthRequest.getGrantType() == GrantType.AUTHENTICATION_TOKEN)
       authObs = authSessionService.getByValidRefreshToken(oauthRequest.getRefreshToken(), new Date());
     else return Observable.error(new AuthorizationException(AuthorizationException.ID.INVALID_GRANT_TYPE));
+
     return authObs.switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.SESSION_NOT_FOUND)));
   }
 

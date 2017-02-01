@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.ratauth.entities.*;
+import ru.ratauth.server.configuration.SignatureConfig;
 import ru.ratauth.server.secutiry.TokenProcessor;
 import rx.Observable;
 
@@ -20,8 +21,7 @@ import java.util.Map;
 public class JWTTokenCacheService implements TokenCacheService {
   private final TokenProcessor tokenProcessor;
 
-  @Value("${auth.master_secret}")
-  private String masterSecret;//final
+  private final SignatureConfig signatureConfig;
 
   @Override
   public Observable<TokenCache> getToken(Session session, AuthClient authClient, AuthEntry authEntry) {
@@ -41,6 +41,6 @@ public class JWTTokenCacheService implements TokenCacheService {
 
   @Override
   public Map<String, Object> extractUserInfo(String jwtToken) {
-    return tokenProcessor.extractInfo(jwtToken, masterSecret);
+    return tokenProcessor.extractInfo(jwtToken, signatureConfig.getMasterSecret());
   }
 }

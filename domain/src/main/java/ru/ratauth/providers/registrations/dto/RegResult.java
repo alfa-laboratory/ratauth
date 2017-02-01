@@ -20,6 +20,7 @@ public class RegResult {
   private Status status;
   private String userId;
   private Map<String, Object> userInfo;
+  private String assuranceLevel;
 
   public enum Status {
     SUCCESS,

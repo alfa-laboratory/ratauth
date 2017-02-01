@@ -6,6 +6,7 @@ import ru.ratauth.entities.*
 import ru.ratauth.exception.ExpiredException
 import ru.ratauth.server.utils.DateUtils
 import ru.ratauth.server.utils.SecurityUtils
+import ru.ratauth.services.AssuranceService
 import ru.ratauth.services.ClientService
 import ru.ratauth.services.SessionService
 import ru.ratauth.services.TokenCacheService
@@ -22,6 +23,7 @@ class PersistenceServiceStubConfiguration {
   public static final String PASSWORD = 'password'
   public static final String SALT = 'JBn7SnEzMy0MXdNsh5GVvktSGuRs0+BNVZ47kmm3TDM='
   public static final String TOKEN = '1234'
+  public static final String ASSURANCE_ID = 'ASSURANCE_ID'
   public static final String REFRESH_TOKEN = '12345'
   public static final String CODE = '123'
   public static final String CODE_EXPIRED = '1111'
@@ -37,7 +39,6 @@ class PersistenceServiceStubConfiguration {
       Observable<RelyingParty> getRelyingParty(String name) {
         if (name == CLIENT_NAME)
           return Observable.just(new RelyingParty(
-              id: 'id',
               name: CLIENT_NAME,
               identityProvider: 'STUB',
               secret: CLIENT_SECRET,
@@ -57,7 +58,6 @@ class PersistenceServiceStubConfiguration {
           )
         else
           return Observable.just(new RelyingParty(
-              id: 'id2',
               name: CLIENT_NAME + '2',
               identityProvider: 'STUB2',
               secret: CLIENT_SECRET,
@@ -74,7 +74,6 @@ class PersistenceServiceStubConfiguration {
       Observable<AuthClient> getClient(String name) {
         if (name == CLIENT_NAME)
           return Observable.just(new AuthClient(
-              id: 'id',
               name: CLIENT_NAME,
               secret: CLIENT_SECRET,
               salt: SALT,
@@ -82,7 +81,6 @@ class PersistenceServiceStubConfiguration {
           ))
         else
           return Observable.just(new AuthClient(
-              id: 'id',
               name: CLIENT_NAME + '3',
               secret: CLIENT_SECRET,
               password: PASSWORD
@@ -109,7 +107,19 @@ class PersistenceServiceStubConfiguration {
 
   @Bean
   @Primary
-  SessionService authCodeService() {
+  AssuranceService assuranceServiceBean() {
+    return new AssuranceService() {
+      @Override
+      Observable<Assurance> create(Assurance assurance) {
+        assurance.setId(ASSURANCE_ID)
+        return Observable.just(assurance)
+      }
+    }
+  }
+
+  @Bean
+  @Primary
+  SessionService sessionServiceBean() {
     return new SessionService() {
       @Override
       Observable<Session> getByValidCode(String code, Date now) {

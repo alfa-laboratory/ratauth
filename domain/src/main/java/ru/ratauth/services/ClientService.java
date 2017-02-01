@@ -9,7 +9,7 @@ import rx.Observable;
  * @since 02/11/15
  * 
  * Persistence layer
- * Async token service
+ * Async auth clients service
  */
 public interface ClientService {
   /**

@@ -52,10 +52,15 @@ class RequestUtil {
    * @param required if true and parameter with name was not found throws ReadRequestException
    * @return extracted param value
    */
-  static <T extends Enum> List<T> extractEnumFields(MultiValueMap<String, String> params, String name, String splitter,  boolean required, Class<T> enumType) {
-    extractField(params, name, required).split(splitter)
+  static <T extends Enum> List<T> extractEnumFields(MultiValueMap<String, String> params, String name, String splitter,
+                                                    boolean required, Class<T> enumType) {
+    List<T> result = extractField(params, name, required).split(splitter)
         .findAll { !StringUtils.isBlank(it) }
         .collect { Enum.valueOf(enumType, it.toUpperCase()) }
+    if (required && result.isEmpty()) {
+      throw new ReadRequestException(ReadRequestException.ID.FIELD_MISSED, name)
+    }
+    result
   }
 
   /**

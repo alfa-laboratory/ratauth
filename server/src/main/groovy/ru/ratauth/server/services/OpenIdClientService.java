@@ -6,7 +6,10 @@ import org.springframework.stereotype.Service;
 import ru.ratauth.entities.AuthClient;
 import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.exception.AuthorizationException;
+import ru.ratauth.exception.RegistrationException;
 import ru.ratauth.services.ClientService;
+import ru.ratauth.utils.StringUtils;
+import ru.ratauth.utils.URIUtils;
 import rx.Observable;
 
 import static ru.ratauth.utils.URIUtils.appendQuery;

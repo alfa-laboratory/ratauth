@@ -8,9 +8,10 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.ratauth.server.configuration.SignatureConfig;
 
 import java.util.*;
 
@@ -19,14 +20,13 @@ import java.util.*;
  * @since 03/11/15
  */
 @Service
+@RequiredArgsConstructor
 public class HS256TokenProcessor implements TokenProcessor {
   private static final String SCOPE = "scope";
   private static final String CLIENT_ID = "client_id";
 
   private static final List<String> LOCAL_REGISTERED_CLAIMS = Arrays.asList(SCOPE, CLIENT_ID);
-
-  @Value("${auth.token.issuer}")
-  private String issuer;//final
+  private final SignatureConfig signatureConfig;
 
   @Override
   @SneakyThrows
@@ -39,7 +39,7 @@ public class HS256TokenProcessor implements TokenProcessor {
     aud.add(clientId);
 // Prepare JWT with claims set
     JWTClaimsSet.Builder jwtBuilder = new JWTClaimsSet.Builder()
-        .issuer(issuer)
+        .issuer(signatureConfig.getIssuer())
         .subject(userId)
         .expirationTime(expiresIn)
         .audience(aud)

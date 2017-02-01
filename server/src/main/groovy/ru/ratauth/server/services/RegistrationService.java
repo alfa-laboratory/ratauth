@@ -18,10 +18,10 @@ public interface RegistrationService {
    */
   Observable<RegistrationResponse> register(RegistrationRequest request);
 
-  /**
-   * Second step of two-step registration process. It will be called in case of NEED_APPROVAL status on firs step.
-   * @param request registration approval request
-   * @return registration result. Contains status and addition data from provider
-   */
-  Observable<TokenResponse> finishRegister(RegistrationRequest request);
+//  /**
+//   * Second step of two-step registration process. It will be called in case of NEED_APPROVAL status on firs step.
+//   * @param request registration approval request
+//   * @return registration result. Contains status and addition data from provider
+//   */
+//  Observable<TokenResponse> finishRegister(RegistrationRequest request);
 }

@@ -20,10 +20,6 @@ public class AuthResult {
   @Singular("field")
   private Map<String, Object> userInfo;
 
-  private Status status;
+  private String acr;
 
-  public enum Status {
-    SUCCESS,
-    NEED_APPROVAL
-  }
 }
