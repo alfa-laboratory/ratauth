@@ -179,3 +179,59 @@ include::../../../server/build/docs/generated-snippets/api/should_return_openid_
 include::../../../server/build/docs/generated-snippets/api/should_return_openid_discovery_fields/http-response.adoc[]
 .Fields
 include::../../../server/build/docs/generated-snippets/api/should_return_openid_discovery_fields/response-fields.adoc[]
+
+=== Factor API
+
+==== Authorization Flow
+.MFA by enrollment api scheme
+[plantuml, "classic-mfa-authorization","png"]
+----------
+include::../uml/ClassicMFAAuthorization.puml[]
+----------
+==== Enrollment API
+===== Request example
+include::../../../server/build/docs/generated-snippets/api/enroll_factor_succeed/http-request.adoc[]
+include::../../../server/build/docs/generated-snippets/api/enroll_factor_succeed/httpie-request.adoc[]
+include::../../../server/build/docs/generated-snippets/api/enroll_factor_succeed/curl-request.adoc[]
+.Headers
+include::../../../server/build/docs/generated-snippets/api/enroll_factor_succeed/request-headers.adoc[]
+
+====== Succeed
+include::../../../server/build/docs/generated-snippets/api/enroll_factor_succeed/http-response.adoc[]
+.Fields
+include::../../../server/build/docs/generated-snippets/api/enroll_factor_succeed/response-fields.adoc[]
+
+==== Factors list API
+===== Request example
+include::../../../server/build/docs/generated-snippets/api/list_factor_succeed/http-request.adoc[]
+include::../../../server/build/docs/generated-snippets/api/list_factor_succeed/httpie-request.adoc[]
+include::../../../server/build/docs/generated-snippets/api/list_factor_succeed/curl-request.adoc[]
+
+====== Succeed
+include::../../../server/build/docs/generated-snippets/api/list_factor_succeed/http-response.adoc[]
+.Fields
+include::../../../server/build/docs/generated-snippets/api/list_factor_succeed/response-fields.adoc[]
+
+==== Factor Activation API
+===== Request example
+include::../../../server/build/docs/generated-snippets/api/activate_factor_succeed/http-request.adoc[]
+include::../../../server/build/docs/generated-snippets/api/activate_factor_succeed/httpie-request.adoc[]
+include::../../../server/build/docs/generated-snippets/api/activate_factor_succeed/curl-request.adoc[]
+
+====== Succeed
+include::../../../server/build/docs/generated-snippets/api/activate_factor_succeed/http-response.adoc[]
+.Fields
+include::../../../server/build/docs/generated-snippets/api/activate_factor_succeed/response-fields.adoc[]
+
+==== Factor Verification API
+===== Request example
+include::../../../server/build/docs/generated-snippets/api/verify_factor_succeed/http-request.adoc[]
+include::../../../server/build/docs/generated-snippets/api/verify_factor_succeed/httpie-request.adoc[]
+include::../../../server/build/docs/generated-snippets/api/verify_factor_succeed/curl-request.adoc[]
+.Fields
+include::../../../server/build/docs/generated-snippets/api/verify_factor_succeed/request-fields.adoc[]
+
+====== Succeed
+include::../../../server/build/docs/generated-snippets/api/verify_factor_succeed/http-response.adoc[]
+.Headers
+include::../../../server/build/docs/generated-snippets/api/verify_factor_succeed/response-headers.adoc[]

@@ -36,8 +36,6 @@ dependencies {
   //crypto
   compile 'com.nimbusds:nimbus-jose-jwt'
 
-  compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
-
   //docs/test
   testCompile 'org.springframework.restdocs:spring-restdocs-restassured:1.1.0.RELEASE'
   testCompile 'org.springframework.boot:spring-boot-starter-test'

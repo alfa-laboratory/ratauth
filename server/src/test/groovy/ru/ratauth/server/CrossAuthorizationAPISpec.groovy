@@ -26,7 +26,7 @@ import static org.springframework.restdocs.restassured.RestAssuredRestDocumentat
  * @author djassan
  * @since 11/09/16
  */
-class CrossAuthorizationAPISpec  extends BaseDocumentationSpec {
+class CrossAuthorizationAPISpec extends BaseDocumentationSpec {
   @Value('${server.port}')
   String port
   @Autowired

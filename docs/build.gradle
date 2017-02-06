@@ -25,22 +25,23 @@ asciidoctor {
   inputs.dir snippetsDir
   sourceDir = file('src/docs')
   separateOutputDirs = false
-  outputDir docsDir
   gemPath = jrubyPrepare.outputDir
   requires = ['asciidoctor-diagram']
 
-
-  attributes 'snippets': snippetsDir,
-      'source-highlighter': 'prettify',
+  attributes 'source-highlighter': 'prettify',
       'imagesdir': 'images',
       'toc': 'left',
       'icons': 'font',
       'setanchors': 'true',
       'idprefix': '',
       'idseparator': '-',
-      'docinfo1': 'true'
+      'docinfo1': 'true',
+      'toclevels': 5,
+      'snippets': snippetsDir
 
   dependsOn cleanTempDirs
   dependsOn jrubyPrepare
   dependsOn project(':server').test
 }
+
+build.dependsOn 'asciidoctor'
