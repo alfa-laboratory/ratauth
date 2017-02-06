@@ -1,20 +1,20 @@
-package ru.ratauth.providers.assurance.dto;
+package ru.ratauth.entities.assurance;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Map;
-
 /**
  * @author mgorelikov
- * @since 20/01/17
+ * @since 06/02/17
  */
-@Data
 @Builder
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EnrollmentInput {
-  private String userId;
+public class FactorField {
+  private String name;
+  private FieldType type;
+  private Integer length;
 }

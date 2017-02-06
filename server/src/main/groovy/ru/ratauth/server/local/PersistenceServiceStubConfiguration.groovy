@@ -3,6 +3,7 @@ package ru.ratauth.server.local
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import ru.ratauth.entities.*
+import ru.ratauth.entities.assurance.Assurance
 import ru.ratauth.exception.ExpiredException
 import ru.ratauth.server.utils.DateUtils
 import ru.ratauth.server.utils.SecurityUtils

@@ -1,8 +1,10 @@
 package ru.ratauth.server.services;
 
-import ru.ratauth.entities.Assurance;
+import ru.ratauth.entities.assurance.Assurance;
 import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.entities.Session;
+import ru.ratauth.entities.assurance.FactorProviderData;
+import ru.ratauth.interaction.EnrollmentRequest;
 import ru.ratauth.providers.assurance.dto.AssuranceStatus;
 import rx.Observable;
 
@@ -15,7 +17,9 @@ import java.util.Set;
  */
 public interface AuthAssuranceService {
 
-  Observable<Assurance> enroll(Session session, RelyingParty relyingParty);
+  Observable<Assurance> enroll(EnrollmentRequest request);
+
+  Observable<Assurance> enroll(Session session, RelyingParty relyingParty, Set<String> acrValues);
 
   Observable<Assurance> activate(String assuranceId);
 
@@ -23,5 +27,5 @@ public interface AuthAssuranceService {
 
   Observable<Assurance> create(String sessionId, String relyingPartyName, String identityProvider,
                                AssuranceStatus status, Set<String> acrValues, String acr,
-                               Map<String, Object> userInfo, Map<String, Object> enrollmentInfo);
+                               Map<String, Object> userInfo, Map<String, FactorProviderData> providerData);
 }

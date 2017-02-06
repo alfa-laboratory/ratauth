@@ -17,5 +17,5 @@ public class EnrollmentRequest {
   private String accessToken;
   private Set<String> acrValues;
   private String clientId;
-  private String password;
+  private String clientPassword;
 }

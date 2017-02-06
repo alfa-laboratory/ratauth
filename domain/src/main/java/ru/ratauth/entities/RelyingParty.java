@@ -23,6 +23,7 @@ public class RelyingParty extends AuthClient {
    * unique name
    */
   private String identityProvider;
+  private Set<String> factorProviders;
   private Long codeTTL;
   private Long tokenTTL;
   private Long refreshTokenTTL;

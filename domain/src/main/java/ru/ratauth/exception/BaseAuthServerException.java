@@ -33,6 +33,7 @@ public class BaseAuthServerException extends RuntimeException implements BaseIde
 
   public enum Type {
     AUTHORIZATION,
+    FACTOR,
     REGISTRATION,
     PROVIDER,
     EXPIRED

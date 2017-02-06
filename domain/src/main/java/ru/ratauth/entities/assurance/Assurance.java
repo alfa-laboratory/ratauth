@@ -1,4 +1,4 @@
-package ru.ratauth.entities;
+package ru.ratauth.entities.assurance;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,15 +29,21 @@ public class Assurance {
   private String relyingParty;
   private String redirectURL;
 
-  private String identityProvider;
+  private String activatedFactorProvider;
 
   private Set<String> acrValues;
   private String acr;
   private AssuranceStatus status;
 
+  /**
+   * Additional user info provided by factor provider
+   */
   private Map<String,Object> additionalUserInfo;
 
-  private Map<String,Object> enrollmentInfo;
+  /**
+   * Key-value container for factor provider data available for that assurance
+   */
+  private Map<String,FactorProviderData> providerData;
 
   private Date lastUpdate;
 }

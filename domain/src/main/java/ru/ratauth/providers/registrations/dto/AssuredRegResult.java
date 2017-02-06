@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import ru.ratauth.entities.assurance.FactorProviderData;
 import ru.ratauth.providers.assurance.dto.AssuranceStatus;
 
 import java.util.Map;
@@ -17,14 +18,14 @@ import java.util.Map;
 @EqualsAndHashCode(callSuper = true)
 public class AssuredRegResult extends RegResult {
 
-  private Map<String,Object> assuranceData;
+  private Map<String,FactorProviderData> providerData;
   private AssuranceStatus assuranceStatus;
 
   @Builder
   public AssuredRegResult(Status status, String userId, Map<String, Object> userInfo,
-                          Map<String,Object> assuranceData, AssuranceStatus assuranceStatus, String assuranceLevel) {
+                          Map<String,FactorProviderData> providerData, AssuranceStatus assuranceStatus, String assuranceLevel) {
     super(status, userId, userInfo, assuranceLevel);
-    this.assuranceData = assuranceData;
+    this.providerData = providerData;
     this.assuranceStatus = assuranceStatus;
   }
 

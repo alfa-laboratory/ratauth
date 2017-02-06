@@ -9,12 +9,12 @@ import rx.Observable;
  * @author mgorelikov
  * @since 19/01/17
  */
-public interface AssuranceLevelProvider {
+public interface FactorProvider {
   /**
-   * Method that returns Assurance Level
+   * Method that returns Assurance Level (acr value)
    * that provided by this provider
    */
-  int getProvidedAssuranceLevel();
+  String getProvidedAssuranceLevel();
 
   /**
    * Method that initiate assurance level increase

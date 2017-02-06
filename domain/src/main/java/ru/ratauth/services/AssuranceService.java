@@ -1,6 +1,6 @@
 package ru.ratauth.services;
 
-import ru.ratauth.entities.Assurance;
+import ru.ratauth.entities.assurance.Assurance;
 import rx.Observable;
 
 /**

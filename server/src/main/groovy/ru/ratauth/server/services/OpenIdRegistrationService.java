@@ -5,14 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.ratauth.entities.Assurance;
+import ru.ratauth.entities.assurance.Assurance;
 import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.entities.Session;
 import ru.ratauth.exception.RegistrationException;
-import ru.ratauth.interaction.AuthzResponseType;
 import ru.ratauth.interaction.RegistrationRequest;
 import ru.ratauth.interaction.RegistrationResponse;
-import ru.ratauth.interaction.TokenResponse;
 import ru.ratauth.providers.registrations.RegistrationProvider;
 import ru.ratauth.providers.registrations.dto.AssuredRegResult;
 import ru.ratauth.providers.registrations.dto.RegInput;
@@ -57,7 +55,7 @@ public class OpenIdRegistrationService implements RegistrationService {
     if(regResult.getStatus() == RegResult.Status.NEED_APPROVAL) {
       AssuredRegResult acrResult =  (AssuredRegResult)regResult;
       return assuranceService.create(session.getId(), relyingParty.getName(), relyingParty.getIdentityProvider(), acrResult.getAssuranceStatus(),
-          request.getAcrValues(), regResult.getAssuranceLevel(), acrResult.getUserInfo(), acrResult.getAssuranceData());
+          request.getAcrValues(), regResult.getAssuranceLevel(), acrResult.getUserInfo(), acrResult.getProviderData());
     } else {
       return Observable.just(null);
     }
