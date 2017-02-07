@@ -115,7 +115,6 @@ node('mesos-asdev') {
         echo 'without appid'
         deployTo(masters,  devManifest, '')
       }
-      deployTo(masters,  devManifest)
     }
 
     if(isRelease) {
