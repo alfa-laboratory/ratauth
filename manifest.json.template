@@ -42,7 +42,7 @@
     "LOGSTASH_PORT_5959_TCP_PORT": "${manifest.logger.port}",
     "LOGSTASH_SYSLOG_TAGS": "${manifest.logger.tags}",
     "CONTAINER_NAME": "oidc-auth",
-    "EUREKA_SERV": "eureka_servers",
+    "EUREKA_SERV": "${manifest.oidc_auth_api.eureka_servers}",
     "CONFIG_BRANCH": "${manifest.oidc_auth_api.config_branch}"
   },
   "instances": ${manifest.oidc_auth_api.instances},
