@@ -71,7 +71,7 @@ allprojects {
       //providers
       dependency 'ru.ratauth.providers:auth-mongo:0.1.7'
       dependency 'ru.ratauth.providers:auth-identity-mongo:+'
-      dependency 'ru.alfabank.providers:provider-dca:0.3.16'
+      dependency 'ru.alfabank.providers:provider-dca:0.3.17'
 
       //test
       dependency "io.ratpack:ratpack-test:${ratpackVersion}"
