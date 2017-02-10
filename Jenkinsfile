@@ -214,7 +214,7 @@ def extractHosts(String content) {
  */
 def hasTag() {
   try {
-    hasTag= sh(returnStdout: true, script: 'git describe --exact-match HEAD').trim()
+    hasTag= sh(returnStdout: true, script: 'git describe --exact-match HEAD --tags').trim()
     if(hasTag) {
       return true
     } else {
