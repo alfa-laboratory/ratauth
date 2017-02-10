@@ -52,7 +52,7 @@ node('mesos-asdev') {
       server      = Artifactory.server 'alfa-laboratory'
       rtGradle    = Artifactory.newGradleBuild()
       gradleTasks = ''
-      if(isRelease && env.GIT_BRANCH =~ 'release') {
+      if(isRelease && env.GIT_BRANCH =~ /release/) {
         gradleTasks = 'final -Prelease.useLastTag=true'
         deployRepo  = 'releases'
       } else {
@@ -214,7 +214,7 @@ def extractHosts(String content) {
  */
 def hasTag() {
   try {
-    hasTag= sh(returnStdout: true, script: 'git describe --exact-match HEAD').trim()
+    hasTag= sh(returnStdout: true, script: 'git describe --exact-match HEAD --tags').trim()
     if(hasTag) {
       return true
     } else {
