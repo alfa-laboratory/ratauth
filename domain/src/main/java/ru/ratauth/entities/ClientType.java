@@ -6,5 +6,6 @@ package ru.ratauth.entities;
  */
 public enum ClientType {
   RELYING_PARTY,
-  RESOURCE_SERVER
+  RESOURCE_SERVER,
+  SESSION_CLIENT
 }

@@ -143,6 +143,12 @@ public class OpenIdSessionService implements AuthSessionService {
   }
 
   @Override
+  public Observable<Session> getByValidSessionToken(String token, Date now) {
+    return sessionService.getByValidSessionToken(token, now)
+      .doOnNext(actionLogger::addSessionInfo);
+  }
+
+  @Override
   public Observable<Session> getByValidToken(String token, Date now) {
     return sessionService.getByValidToken(token, now)
         .doOnNext(actionLogger::addSessionInfo);

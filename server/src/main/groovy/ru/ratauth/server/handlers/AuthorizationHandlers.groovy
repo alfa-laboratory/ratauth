@@ -9,7 +9,6 @@ import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
 import ru.ratauth.interaction.AuthzRequest
-import ru.ratauth.interaction.GrantType
 import ru.ratauth.server.services.AuthClientService
 import ru.ratauth.server.services.AuthorizeService
 import rx.Observable
@@ -17,6 +16,7 @@ import rx.Observable
 import static ratpack.rx.RxRatpack.observe
 import static ru.ratauth.server.handlers.readers.AuthzRequestReader.readAuthzRequest
 import static ru.ratauth.server.handlers.readers.AuthzRequestReader.readClientId
+import static ru.ratauth.interaction.GrantType.*
 /**
  * @author mgorelikov
  * @since 30/10/15
@@ -63,7 +63,7 @@ class AuthorizationHandlers implements Action<Chain> {
 
   private void authorize(Context ctx, Observable<AuthzRequest> requestObs) {
     requestObs.flatMap { authRequest ->
-      if (GrantType.AUTHENTICATION_TOKEN == authRequest.grantType) {
+      if (AUTHENTICATION_TOKEN == authRequest.grantType || SESSION_TOKEN == authRequest.grantType) {
         authorizeService.crossAuthenticate(authRequest)
       } else {
         authorizeService.authenticate(authRequest)

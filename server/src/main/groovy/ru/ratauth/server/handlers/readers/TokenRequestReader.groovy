@@ -49,9 +49,13 @@ class TokenRequestReader {
         break
       case GrantType.AUTHENTICATION_TOKEN: builder.scopes(extractField(form, SCOPE, true)
           .split(FIELD_SPLITTER)
-          .toList()) //WATCH IT! There is no break here.
-      case GrantType.REFRESH_TOKEN: builder.refreshToken(extractField(form, REFRESH_TOKEN, true))
+          .toList())
+        authAction = AuthAction.CROSS_AUTHORIZATION
+        builder.refreshToken(extractField(form, REFRESH_TOKEN, true))
+        break
+      case GrantType.REFRESH_TOKEN:
         authAction = AuthAction.REFRESH_TOKEN
+        builder.refreshToken(extractField(form, REFRESH_TOKEN, true))
         break
       default: throw new AuthorizationException("Grant type is not supported")
     }

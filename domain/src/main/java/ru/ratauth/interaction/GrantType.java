@@ -15,5 +15,6 @@ public enum GrantType {
    */
   AUTHENTICATION_TOKEN,
   INTERNAL_AUTH_CODE,
+  SESSION_TOKEN,
   PASSWORD
 }
