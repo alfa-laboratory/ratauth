@@ -53,7 +53,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     AuthEntry entry = session.getEntry(relyingParty.getName()).get();
     return tokenCacheService.getToken(session, relyingParty, entry)
         .map(idToken -> new ImmutablePair<>(entry, idToken))
-        .map(entryToken -> convertToResponse(entryToken.getLeft(), entryToken.getRight().getIdToken()))
+        .map(entryToken -> convertToResponse(entryToken.getLeft(), entryToken.getRight().getIdToken(), session.getSessionToken()))
         .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.TOKEN_NOT_FOUND)));
   }
 
@@ -90,7 +90,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
       throw new ExpiredException(ExpiredException.ID.SESSION_EXPIRED);
   }
 
-  private TokenResponse convertToResponse(AuthEntry authEntry, String idToken) {
+  private TokenResponse convertToResponse(AuthEntry authEntry, String idToken, String sessionToken) {
     final Token token = authEntry.getLatestToken().get();
     return TokenResponse.builder()
         .accessToken(token.getToken())
@@ -99,6 +99,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
         .idToken(idToken)
         .refreshToken(authEntry.getRefreshToken())
         .clientId(authEntry.getRelyingParty())
+        .sessionToken(sessionToken)
         .build();
   }
 

@@ -22,6 +22,7 @@ class RegistrationRequestReader {
   private static final String GRANT_TYPE = "grant_type"
   private static final String RESPONSE_TYPE = "response_type"
   private static final String SCOPE = "scope"
+  private static final String FIELD_SPLITTER = ' '
   private static final Set BASE_FIELDS = [
       CLIENT_ID,
       GRANT_TYPE,
@@ -33,11 +34,11 @@ class RegistrationRequestReader {
     GrantType grantType = extractEnumField(form, GRANT_TYPE, false, GrantType)
     def builder = RegistrationRequest.builder()
         .grantType(grantType)
-        .responseType(extractEnumField(form, RESPONSE_TYPE, false, AuthzResponseType))
+        .responseTypes(extractEnumFields(form, RESPONSE_TYPE, FIELD_SPLITTER, true, AuthzResponseType))
         .data(extractRest(form, BASE_FIELDS))
     if (GrantType.AUTHORIZATION_CODE == grantType) {
       builder.authCode(extractField(form, CODE, true))
-      builder.scopes(extractField(form, SCOPE, true).split(" ").toList())
+      builder.scopes(extractField(form, SCOPE, true).split(FIELD_SPLITTER).toList())
       def auth = extractAuth(headers)
       builder.clientId(auth[0])
           .clientSecret(auth[1])

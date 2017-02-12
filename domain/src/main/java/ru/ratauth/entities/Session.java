@@ -32,6 +32,9 @@ public class Session {
    */
   private String authClient;
 
+
+  private String sessionToken;
+
   /**
    * Abstract user identifier got from provider
    */

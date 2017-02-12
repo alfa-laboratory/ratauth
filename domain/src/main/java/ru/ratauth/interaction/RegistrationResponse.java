@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import ru.ratauth.utils.StringUtils;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.StringJoiner;
 
 import static ru.ratauth.utils.URIUtils.appendQuery;

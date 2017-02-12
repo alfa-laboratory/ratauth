@@ -1,6 +1,7 @@
 package ru.ratauth.server.handlers
 
 import io.netty.handler.codec.http.HttpResponseStatus
+import org.apache.commons.lang3.tuple.ImmutablePair
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import ratpack.error.ServerErrorHandler
@@ -9,6 +10,8 @@ import ratpack.form.Form
 import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
+import ru.ratauth.interaction.RegistrationRequest
+import ru.ratauth.interaction.TokenResponse
 import ru.ratauth.server.handlers.dto.TokenDTO
 import ru.ratauth.server.services.AuthClientService
 import ru.ratauth.server.services.RegistrationService
@@ -63,11 +66,14 @@ class RegistrationHandler implements Action<Chain> {
 
   private Subscription finishRegistration(Context ctx) {
     Promise<Form> formPromise = ctx.parse(Form)
-    observe(formPromise).flatMap { params ->
-      def request = readRegistrationRequest(params, ctx.request.headers)
+    observe(formPromise) map { params ->
+      readRegistrationRequest(params, ctx.request.headers)
+    } flatMap ({ request ->
       registrationService.finishRegister(request)
-    } subscribe({
-          res -> ctx.render json(new TokenDTO(res))
+    }, { RegistrationRequest req, TokenResponse resp ->
+      ImmutablePair.of(req, resp)
+    }) subscribe({
+          reqRes -> ctx.render json(new TokenDTO(reqRes.right, reqRes.left.responseTypes))
         }, {  /*on error*/
           throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable)
         }

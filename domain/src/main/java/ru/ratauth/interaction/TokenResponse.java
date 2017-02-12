@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Wither;
 
 /**
  * @author mgorelikov
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Wither
 public class TokenResponse {
   private String accessToken;
   private String refreshToken;
@@ -20,4 +22,5 @@ public class TokenResponse {
   private String idToken;
   private Long expiresIn;
   private String clientId;
+  private String sessionToken;
 }

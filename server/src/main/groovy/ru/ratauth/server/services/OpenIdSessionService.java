@@ -82,6 +82,7 @@ public class OpenIdSessionService implements AuthSessionService {
         .build();
     authEntry.addToken(token);
     final Session session = Session.builder()
+        .sessionToken(codeGenerator.refreshToken())
         .identityProvider(relyingParty.getIdentityProvider())
         .authClient(relyingParty.getName())
         .status(Status.ACTIVE)

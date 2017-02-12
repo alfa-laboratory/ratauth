@@ -47,7 +47,9 @@ class RegistrationAPISpec extends BaseDocumentationSpec {
           .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
         parameterWithName(ProvidersStubConfiguration.REG_CREDENTIAL)
           .description('Some credential fields...')
-          .optional()
+          .optional(),
+        parameterWithName('response_type')
+            .description('response type values')
       ),
       responseHeaders(
           headerWithName(HttpHeaders.LOCATION)
@@ -57,6 +59,7 @@ class RegistrationAPISpec extends BaseDocumentationSpec {
       .given()
       .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
       .formParam('scope', 'rs.read')
+      .formParam('response_type', AuthzResponseType.CODE.name())
       .formParam(ProvidersStubConfiguration.REG_CREDENTIAL, 'credential')
     when:
     def result = setup
@@ -109,14 +112,17 @@ class RegistrationAPISpec extends BaseDocumentationSpec {
           .type(JsonFieldType.NUMBER),
         fieldWithPath('client_id')
           .description('identifier of relying party')
-          .type(JsonFieldType.STRING)
+          .type(JsonFieldType.STRING),
+          fieldWithPath('session_token')
+              .description('session token')
+              .type(JsonFieldType.STRING)
       )))
       .given()
       .formParam('code', ProvidersStubConfiguration.REG_CODE)
       .formParam('username', 'login')
       .formParam('scope', 'read')
       .formParam('grant_type', GrantType.AUTHORIZATION_CODE.name())
-      .formParam('response_type', AuthzResponseType.TOKEN.name())
+      .formParam('response_type', AuthzResponseType.TOKEN.name() + ' ' + AuthzResponseType.SESSION_TOKEN.name())
       .header(IntegrationSpecUtil.createAuthHeaders(PersistenceServiceStubConfiguration.CLIENT_NAME,
                                                     PersistenceServiceStubConfiguration.PASSWORD))
     when:
@@ -131,6 +137,7 @@ class RegistrationAPISpec extends BaseDocumentationSpec {
       .body("refresh_token", not(isEmptyOrNullString()))
       .body("id_token", not(isEmptyOrNullString()))
       .body("expires_in", not(isEmptyOrNullString()))
+      .body("session_token", not(isEmptyOrNullString()))
   }
 
   def 'should be redirected to webPage'() {

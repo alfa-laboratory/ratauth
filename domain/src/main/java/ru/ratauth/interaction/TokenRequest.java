@@ -19,7 +19,8 @@ public class TokenRequest {
   private String clientId;
   private String clientSecret;//means password, not secret key for signature or encryption
   private GrantType grantType;
-  private AuthzResponseType responseType;
+  @Singular
+  private Set<AuthzResponseType> responseTypes;
   private @Singular Set<String> scopes;
   private Map<String, String> authData;
 }

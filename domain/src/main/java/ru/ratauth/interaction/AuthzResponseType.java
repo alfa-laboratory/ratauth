@@ -6,5 +6,7 @@ package ru.ratauth.interaction;
  */
 public enum AuthzResponseType {
   CODE,
-  TOKEN
+  TOKEN,
+  ID_TOKEN,
+  SESSION_TOKEN
 }
