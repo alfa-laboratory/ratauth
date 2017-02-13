@@ -52,7 +52,7 @@ node('mesos-asdev') {
       server      = Artifactory.server 'alfa-laboratory'
       rtGradle    = Artifactory.newGradleBuild()
       gradleTasks = ''
-      if(isRelease && env.GIT_BRANCH =~ /release/) {
+      if(isRelease || env.GIT_BRANCH =~ /release/) {
         gradleTasks = 'final -Prelease.useLastTag=true'
         deployRepo  = 'releases'
       } else {
@@ -105,7 +105,8 @@ node('mesos-asdev') {
                 app id: $appId
         """.stripIndent().stripMargin()
 
-      String devManifest = generateManifest(template, currentVersion,eurekaServers, appId)
+      String versionType = isRelease ? 'releases' : 'snapshots'
+      String devManifest = generateManifest(template, currentVersion,eurekaServers, appId, versionType)
       echo "manifest: $devManifest"
       def appIsExist = appIsExistInCluster(appId, masters)
       if(appIsExist) {
@@ -245,7 +246,7 @@ def resolveLatestVersion(isRelease) {
 }
 
 @NonCPS
-def generateManifest(String template, String version, String eurekaServers, String appId) {
+def generateManifest(String template, String version, String eurekaServers, String appId, String versionType) {
   def engine = new groovy.text.SimpleTemplateEngine(false)
   return engine.createTemplate(template)
       .make([
@@ -257,14 +258,14 @@ def generateManifest(String template, String version, String eurekaServers, Stri
           version          : version,             // application version, need for resolve app url
           spring_profiles  : 'dev,debug,cloud',   // profiles for spring app
           cpu              : '1',                 // mesos cpu resource
-          version_type     : 'snapshots',         // artifact type
+          version_type     : versionType,         // artifact type
           config_branch    : 'test',              // config branch
           instances        : '1',                 // run instances
           logging_profile  : 'dev',               // logging profile
-          ha_group         : 'mobile',            // marathon lb ha group
-          ha_path          : '/nonfinancial/api', // marathon lb path for route to app
-          ha_vhost         : 'mobile',            // marathon lb vhost for route to app
-          deployment_group : 'nonfinancial',      // marathon lb deployment group
+          ha_group         : 'oidc2',             // marathon lb ha group
+          ha_path          : '/auth/api',         // marathon lb path for route to app
+          ha_vhost         : 'oidc2',             // marathon lb vhost for route to app
+          deployment_group : 'oidc2',             // marathon lb deployment group
           eureka_servers   : eurekaServers        // eureka servers for register
         ],
         logger : [
