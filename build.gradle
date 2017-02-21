@@ -28,7 +28,6 @@ ext {
   bintrayRepository = (project.hasProperty('BINTRAY_REPOSITORY') ? project.findProperty('BINTRAY_REPOSITORY') : System.getenv()['BINTRAY_REPOSITORY'])
 }
 
-apply plugin: 'nebula.maven-publish'
 apply plugin: 'com.jfrog.bintray'
 
 group = 'ru.ratauth'
@@ -39,7 +38,6 @@ allprojects {
   apply plugin: 'idea'
   apply plugin: 'nebula.release'
   apply plugin: 'nebula.info'
-  apply plugin: 'nebula.maven-publish'
 
   repositories {
     mavenCentral()
@@ -98,38 +96,17 @@ subprojects {
   sourceCompatibility = 1.8
   targetCompatibility = 1.8
 
-  apply plugin: 'maven-publish'
   apply plugin: 'com.jfrog.bintray'
 
-  task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-  }
-
-  task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-  }
-
-  artifacts {
-    archives sourcesJar, javadocJar
-  }
-
-  publishing {
-    publications {
-      mavenJava(MavenPublication) {
-        from components.java
-        artifact sourcesJar
-        artifact javadocJar
-      }
-    }
-  }
+  apply plugin: 'nebula.maven-publish'
+  apply plugin: 'nebula.source-jar'
+  apply plugin: 'nebula.javadoc-jar'
 
   bintray {
     user = bintrayUserName
     key = bintrayPassword
 
-    publications = ['mavenJava']
+    publications = ['nebula']
 
     dryRun = false
     publish = true
