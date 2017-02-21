@@ -202,5 +202,5 @@ idea {
 bintrayUpload.onlyIf { !project.version.toString().toUpperCase().endsWith("-SNAPSHOT") }
 
 releaseCheck.doFirst {
-  nebulaRelease.addReleaseBranchPattern('ratauth-bintray')
+  nebulaRelease.addReleaseBranchPattern('.*')
 }
