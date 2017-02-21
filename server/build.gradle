@@ -108,9 +108,3 @@ task pushImage(type: DockerPushImage) {
   conventionMapping.imageName = { tagDocker.getRepository() }
   conventionMapping.tag = { tagDocker.getTag() }
 }
-
-task releaseCheck {
-  doFirst {
-    nebulaRelease.addReleaseBranchPattern('ratauth-bintray')
-  }
-}
