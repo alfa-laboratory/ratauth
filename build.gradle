@@ -125,8 +125,6 @@ subprojects {
     }
   }
 
-  group = parent.group
-  version = project.version
   bintray {
     user = bintrayUserName
     key = bintrayPassword
