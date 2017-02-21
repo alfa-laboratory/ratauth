@@ -199,10 +199,8 @@ idea {
   }
 }
 
-bintrayUpload.onlyIf{!project.version.toString().toUpperCase().endsWith("-SNAPSHOT")}
+bintrayUpload.onlyIf { !project.version.toString().toUpperCase().endsWith("-SNAPSHOT") }
 
-task releaseCheck {
-  doFirst {
-    nebulaRelease.addReleaseBranchPattern('ratauth-bintray')
-  }
+releaseCheck.doFirst {
+  nebulaRelease.addReleaseBranchPattern('ratauth-bintray')
 }
