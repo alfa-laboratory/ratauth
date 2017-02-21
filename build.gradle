@@ -47,37 +47,9 @@ allprojects {
     mavenLocal()
     maven { url "https://repo.spring.io/milestone" }
   }
+
   configurations {
     compile.exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
-  }
-
-  bintray {
-    user = bintrayUserName
-    key = bintrayPassword
-
-    configurations = ['published', 'archives']
-
-    dryRun = false
-    publish = true
-    pkg {
-      repo = bintrayRepository
-      userOrg = 'alfa-laboratory'
-      name = 'ratauth'
-      desc = project.description
-      websiteUrl = 'https://github.com/alfa-laboratory/${project.name}'
-      issueTrackerUrl = 'https://github.com/alfa-laboratory/${project.name}/issues'
-      vcsUrl = 'https://github.com/alfa-laboratory/${project.name}.git'
-      licenses = ['MIT']
-      labels = ['gradle', 'ratauth']
-      publicDownloadNumbers = true
-      attributes = [:]
-      version {
-        name = project.version
-        vcsTag = project.version
-        attributes = [:]
-      }
-    }
-
   }
 
   dependencyManagement {
@@ -125,6 +97,63 @@ subprojects {
 
   sourceCompatibility = 1.8
   targetCompatibility = 1.8
+
+  apply plugin: 'maven-publish'
+  apply plugin: 'com.jfrog.bintray'
+
+  task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+  }
+
+  task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+  }
+
+  artifacts {
+    archives sourcesJar, javadocJar
+  }
+
+  publishing {
+    publications {
+      mavenJava(MavenPublication) {
+        from components.java
+        artifact sourcesJar
+        artifact javadocJar
+      }
+    }
+  }
+
+  group = parent.group
+  version = project.version
+  bintray {
+    user = bintrayUserName
+    key = bintrayPassword
+
+    publications = ['mavenJava']
+
+    dryRun = false
+    publish = true
+    pkg {
+      repo = bintrayRepository
+      userOrg = 'alfa-laboratory'
+      name = 'ratauth'
+      desc = project.description
+      websiteUrl = 'https://github.com/alfa-laboratory/${project.name}'
+      issueTrackerUrl = 'https://github.com/alfa-laboratory/${project.name}/issues'
+      vcsUrl = 'https://github.com/alfa-laboratory/${project.name}.git'
+      licenses = ['MIT']
+      labels = ['gradle', 'ratauth']
+      publicDownloadNumbers = true
+      attributes = [:]
+      version {
+        name = project.version
+        vcsTag = project.version
+        attributes = [:]
+      }
+    }
+  }
 
   codenarcMain {
     configFile = file("${getRootDir()}/gradle/codenarc.groovy")
@@ -190,6 +219,7 @@ subprojects {
     }
     testCompile 'io.ratpack:ratpack-test'
   }
+
 }
 
 idea {
