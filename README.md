@@ -48,9 +48,9 @@ project dir or your home directory
 1. add next properties to gradle.properties:
 ```
 systemProp.org.ajoberstar.grgit.auth.force=hardcoded # needed for nebula release plugin
-DOCKER_USERNAME=USERNAME                             # docker registry username
+BINTRAY_USERNAME=USERNAME                             # docker registry username
 DOCKER_REPOSITORY=DOCKER_REGISTRY_NAME               # docker registry name for correct image creation. Like <you_username>/ratauth:tag
-DOCKER_PASSWORD=API_KEY                              # api key or password for authenticate in docker registry
+BINTRAY_PASSWORD=API_KEY                              # api key or password for authenticate in docker registry
 ```
 
 And now, you can push image to registry by gradle command `./gradlew pushImage`
