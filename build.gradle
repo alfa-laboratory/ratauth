@@ -17,8 +17,19 @@ buildscript {
     classpath 'com.github.jruby-gradle:jruby-gradle-plugin:1.3.3'
     classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.6.3'
     classpath 'com.netflix.nebula:nebula-publishing-plugin:4.9.1'
+    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
   }
 }
+
+ext {
+  bintrayUserName = (project.hasProperty('BINTRAY_USERNAME') ? project.findProperty('BINTRAY_USERNAME') : System.getenv()['BINTRAY_USERNAME'])
+  bintrayPassword = (project.hasProperty('BINTRAY_PASSWORD') ? project.findProperty('BINTRAY_PASSWORD') : System.getenv()['BINTRAY_PASSWORD'])
+  bintrayRepository = (project.hasProperty('BINTRAY_REPOSITORY') ? project.findProperty('BINTRAY_REPOSITORY') : System.getenv()['BINTRAY_REPOSITORY'])
+}
+
+apply plugin: 'com.jfrog.bintray'
+
+group = 'ru.ratauth'
 
 allprojects {
   apply plugin: 'io.spring.dependency-management'
@@ -33,8 +44,9 @@ allprojects {
     mavenLocal()
     maven { url "https://repo.spring.io/milestone" }
   }
+
   configurations {
-    compile.exclude group:'org.springframework.boot', module:'spring-boot-starter-tomcat'
+    compile.exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
   }
 
   dependencyManagement {
@@ -73,18 +85,52 @@ allprojects {
 }
 
 subprojects {
-  apply plugin:'java'
-  apply plugin:'groovy'
-  apply plugin:'jacoco'
-  apply plugin:'pmd'
-  apply plugin:'findbugs'
-  apply plugin:'com.github.kt3k.coveralls'
-  apply plugin:'codenarc'
+  apply plugin: 'java'
+  apply plugin: 'groovy'
+  apply plugin: 'jacoco'
+  apply plugin: 'pmd'
+  apply plugin: 'findbugs'
+  apply plugin: 'com.github.kt3k.coveralls'
+  apply plugin: 'codenarc'
 
-  group = 'ru.ratauth'
+  group = rootProject.group
 
   sourceCompatibility = 1.8
   targetCompatibility = 1.8
+
+  apply plugin: 'com.jfrog.bintray'
+
+  apply plugin: 'nebula.maven-publish'
+  apply plugin: 'nebula.source-jar'
+  apply plugin: 'nebula.javadoc-jar'
+
+  bintray {
+    user = bintrayUserName
+    key = bintrayPassword
+
+    publications = ['nebula']
+
+    dryRun = false
+    publish = true
+    pkg {
+      repo = bintrayRepository
+      userOrg = 'alfa-laboratory'
+      name = 'ratauth'
+      desc = project.description
+      websiteUrl = 'https://github.com/alfa-laboratory/${project.name}'
+      issueTrackerUrl = 'https://github.com/alfa-laboratory/${project.name}/issues'
+      vcsUrl = 'https://github.com/alfa-laboratory/${project.name}.git'
+      licenses = ['MIT']
+      labels = ['gradle', 'ratauth']
+      publicDownloadNumbers = true
+      attributes = [:]
+      version {
+        name = project.version
+        vcsTag = project.version
+        attributes = [:]
+      }
+    }
+  }
 
   codenarcMain {
     configFile = file("${getRootDir()}/gradle/codenarc.groovy")
@@ -143,14 +189,15 @@ subprojects {
     //test
     testCompile 'org.springframework.boot:spring-boot-starter-test'
     testCompile 'org.spockframework:spock-core', {
-      exclude module:'groovy-all'
+      exclude module: 'groovy-all'
     }
     testCompile 'org.spockframework:spock-spring', {
-      exclude module:'groovy-all'
+      exclude module: 'groovy-all'
     }
     testCompile 'io.ratpack:ratpack-test'
     testCompile 'org.assertj:assertj-core'
   }
+
 }
 
 idea {
@@ -159,4 +206,10 @@ idea {
     languageLevel '1.8'
     vcs 'Git'
   }
+}
+
+bintrayUpload.onlyIf { !project.version.toString().toUpperCase().endsWith("-SNAPSHOT") }
+
+releaseCheck.doFirst {
+  nebulaRelease.addReleaseBranchPattern('.*')
 }
