@@ -61,10 +61,13 @@ allprojects {
       dependency 'com.nimbusds:nimbus-jose-jwt:4.20'
 
       //test
+      dependency "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
       dependency "io.ratpack:ratpack-test:${ratpackVersion}"
       dependency 'org.spockframework:spock-core:1.1-groovy-2.4-rc-2'
       dependency 'org.spockframework:spock-spring:1.1-groovy-2.4-rc-2'
       dependency 'org.springframework.restdocs:spring-restdocs-restassured:1.1.2.RELEASE'
+      dependency 'org.assertj:assertj-core:3.6.2'
+
     }
   }
 }
@@ -146,6 +149,7 @@ subprojects {
       exclude module:'groovy-all'
     }
     testCompile 'io.ratpack:ratpack-test'
+    testCompile 'org.assertj:assertj-core'
   }
 }
 

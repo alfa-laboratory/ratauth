@@ -1,0 +1,9 @@
+dependencies {
+  compile project(':server')
+  compile 'org.springframework.boot:spring-boot'
+  compile 'org.springframework.boot:spring-boot-starter'
+  compile 'org.springframework.boot:spring-boot-starter-test'
+  compile 'org.springframework.boot:spring-boot-starter-actuator'
+  compile 'org.springframework.boot:spring-boot-configuration-processor'
+}
+

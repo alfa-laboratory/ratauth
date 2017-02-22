@@ -3,4 +3,6 @@ rootProject.name = "ratauth"
 include 'server'
 include 'domain'
 include 'docs'
+include 'ratauth-spring-boot-starter'
+include 'ratauth-spring-boot-autoconfigure'
 

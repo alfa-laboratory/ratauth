@@ -1,0 +1,6 @@
+dependencies {
+  compile project(':ratauth-spring-boot-autoconfigure')
+  compile 'org.springframework.boot:spring-boot-starter'
+  compile 'org.springframework.boot:spring-boot-starter-test'
+  compile 'org.springframework.boot:spring-boot-configuration-processor'
+}
