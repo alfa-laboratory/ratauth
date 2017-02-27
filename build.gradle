@@ -113,7 +113,7 @@ subprojects {
     dryRun = false
     publish = true
     pkg {
-      repo = bintrayRepository
+      repo = 'maven-releases'
       userOrg = 'alfa-laboratory'
       name = 'ratauth'
       desc = project.description
