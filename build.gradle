@@ -132,6 +132,8 @@ subprojects {
     }
   }
 
+  bintrayUpload.onlyIf { !project.version.toString().toUpperCase().endsWith("-SNAPSHOT") }
+
   codenarcMain {
     configFile = file("${getRootDir()}/gradle/codenarc.groovy")
     exclude 'ru/**/*Stub*'
@@ -207,6 +209,3 @@ idea {
     vcs 'Git'
   }
 }
-
-bintrayUpload.onlyIf { !project.version.toString().toUpperCase().endsWith("-SNAPSHOT") }
-
