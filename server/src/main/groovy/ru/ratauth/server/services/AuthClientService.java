@@ -2,6 +2,7 @@ package ru.ratauth.server.services;
 
 import ru.ratauth.entities.AuthClient;
 import ru.ratauth.entities.RelyingParty;
+import ru.ratauth.entities.SessionClient;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.server.utils.SecurityUtils;
 import rx.Observable;
@@ -28,6 +29,14 @@ public interface AuthClientService {
    * @return observable of loaded AuthClient
    */
   Observable<AuthClient> loadClient(String name);
+
+  /**
+   * Just loads sessionClient by name
+   *
+   * @param name unique name
+   * @return observable of loaded sessionClient
+   */
+  Observable<SessionClient> loadSessionClient(String name);
 
   /**
    * Loads relying party authPageURI from database and appends query to it
@@ -69,6 +78,19 @@ public interface AuthClientService {
   default Observable<AuthClient> loadAndAuthClient(String name, String password, boolean authRequired) {
     Observable<AuthClient> authClientObservable = loadClient(name);
     return addAuth(authClientObservable, password, authRequired);
+  }
+
+  /**
+   * Loads Session client by name and checks it password in case of auth required
+   *
+   * @param name         unique name
+   * @param password     session client password
+   * @param authRequired flag that auth required
+   * @return observable of loaded sessionClient
+   */
+  default Observable<SessionClient> loadAndAuthSessionClient(String name, String password, boolean authRequired) {
+    Observable<SessionClient> sessionClientObservable = loadSessionClient(name);
+    return addAuth(sessionClientObservable, password, authRequired);
   }
 
   /**

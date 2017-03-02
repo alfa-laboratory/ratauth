@@ -46,6 +46,24 @@ class RequestUtil {
   }
 
   /**
+   * Extracts field according to it's name and return enum corresponding for it's value
+   * @param params input map
+   * @param name name of parameter that must be exctracted
+   * @param required if true and parameter with name was not found throws ReadRequestException
+   * @return extracted param value
+   */
+  static <T extends Enum> List<T> extractEnumFields(MultiValueMap<String, String> params, String name, String splitter,
+                                                    boolean required, Class<T> enumType) {
+    List<T> result = extractField(params, name, required).split(splitter)
+        .findAll { !StringUtils.isBlank(it) }
+        .collect { Enum.valueOf(enumType, it.toUpperCase()) }
+    if (required && result.isEmpty()) {
+      throw new ReadRequestException(ReadRequestException.ID.FIELD_MISSED, name)
+    }
+    result
+  }
+
+  /**
    * Extracts field with names that are not given in excludedNames
    * @param params input map
    * @param excludedNames names that must be excluded from result

@@ -82,6 +82,7 @@ public class OpenIdSessionService implements AuthSessionService {
         .build();
     authEntry.addToken(token);
     final Session session = Session.builder()
+        .sessionToken(codeGenerator.refreshToken())
         .identityProvider(relyingParty.getIdentityProvider())
         .authClient(relyingParty.getName())
         .status(Status.ACTIVE)
@@ -139,6 +140,12 @@ public class OpenIdSessionService implements AuthSessionService {
   public Observable<Session> getByValidRefreshToken(String token, Date now) {
     return sessionService.getByValidRefreshToken(token, now)
         .doOnNext(actionLogger::addSessionInfo);
+  }
+
+  @Override
+  public Observable<Session> getByValidSessionToken(String token, Date now) {
+    return sessionService.getByValidSessionToken(token, now)
+      .doOnNext(actionLogger::addSessionInfo);
   }
 
   @Override

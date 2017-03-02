@@ -24,12 +24,14 @@ class AuthzRequestReader {
   private static final String SCOPE = "scope"
   private static final String REDIRECT_URI = "redirect_uri"
   private static final String REFRESH_TOKEN = "refresh_token"
+  private static final String SESSION_TOKEN = "session_token"
   private static final Set<String> BASE_FIELDS = [
           RESPONSE_TYPE,
           CLIENT_ID,
           SCOPE,
           REDIRECT_URI,
           REFRESH_TOKEN,
+          SESSION_TOKEN,
           GRANT_TYPE
   ] as Set
 
@@ -41,7 +43,7 @@ class AuthzRequestReader {
         .responseType(responseType)
         .redirectURI(extractField(params, REDIRECT_URI, false))
 
-    if (GrantType.AUTHENTICATION_TOKEN == grantType) {
+    if (GrantType.AUTHENTICATION_TOKEN == grantType || GrantType.SESSION_TOKEN == grantType) {
       if (responseType == AuthzResponseType.TOKEN) {
         throw new ReadRequestException(ReadRequestException.ID.WRONG_REQUEST, "Response for that grant_type could not be Token")
       }
@@ -49,10 +51,14 @@ class AuthzRequestReader {
       def auth = extractAuth(headers)
       builder.clientId(auth[0])
           .clientSecret(auth[1])
-          .refreshToken(extractField(params, REFRESH_TOKEN, true))
           .externalClientId(extractField(params, CLIENT_ID, true))
           .grantType(grantType)
           .scopes(extractField(params, SCOPE, true).split(SPACE).toList())
+      if (GrantType.AUTHENTICATION_TOKEN == grantType) {
+        builder.refreshToken(extractField(params, REFRESH_TOKEN, true))
+      } else {
+        builder.sessionToken(extractField(params, SESSION_TOKEN, true))
+      }
     } else if (responseType == AuthzResponseType.TOKEN) {
       authAction = AuthAction.AUTHORIZATION
       def auth = extractAuth(headers)

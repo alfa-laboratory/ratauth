@@ -18,6 +18,7 @@ import java.time.LocalDateTime
  */
 class PersistenceServiceStubConfiguration {
   public static final String CLIENT_SECRET = 'HdC4t2Wpjn/obYj9JHLVwmGzSqQ5SlatYqMF6zuAL0s='
+  public static final String SESSION_TOKEN = 'session_token'
   public static final String CLIENT_NAME = 'mine'
   public static final String PASSWORD = 'password'
   public static final String SALT = 'JBn7SnEzMy0MXdNsh5GVvktSGuRs0+BNVZ47kmm3TDM='
@@ -25,6 +26,7 @@ class PersistenceServiceStubConfiguration {
   public static final String REFRESH_TOKEN = '12345'
   public static final String CODE = '123'
   public static final String CODE_EXPIRED = '1111'
+  public static final String ID_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vcmF0YXV0aC5ydSIsImlhdCI6MTQ1Nzg1NzAzOCwiZXhwIjoxNDg5MzkyODcxLCJhdWQiOiJzb21lLWFwcCIsInN1YiI6InVzZXJfaWQiLCJqdGkiOiJiZDYzNjkyOC03MTk2LTM5YTctODlmNi03OGY5NDY3NjU0ZWIiLCJycF9iYXNlX2FkZHJlc3MiOlsiaHR0cDovL3JhdGF1dGgucnUiLCJodHRwOi8vcmF0YXV0aC5ydSJdLCJ1c2VyX2lkIjoidXNlcl9pZCJ9.rqxqXV9X0kdjmyWxuVJkYU8sNC5sW9dC9NUqT-CodEM'
 
   private static final LocalDateTime NOW = LocalDateTime.now()
   private static final LocalDateTime TOMORROW = NOW.plusDays(1)
@@ -88,6 +90,25 @@ class PersistenceServiceStubConfiguration {
               password: PASSWORD
           ))
       }
+
+      @Override
+      Observable<SessionClient> getSessionClient(String name) {
+        if (name == CLIENT_NAME)
+          return Observable.just(new SessionClient(
+            id: 'id',
+            name: CLIENT_NAME,
+            secret: CLIENT_SECRET,
+            salt: SALT,
+            password: SecurityUtils.hashPassword(PASSWORD, SALT),
+          ))
+        else
+          return Observable.just(new SessionClient(
+            id: 'id',
+            name: CLIENT_NAME + '3',
+            secret: CLIENT_SECRET,
+            password: PASSWORD
+          ))
+      }
     }
   }
 
@@ -117,7 +138,8 @@ class PersistenceServiceStubConfiguration {
           return Observable.just(
               new Session(
                   identityProvider: 'STUB',
-                  userInfo: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vcmF0YXV0aC5ydSIsImlhdCI6MTQ1Nzg1NzAzOCwiZXhwIjoxNDg5MzkyODcxLCJhdWQiOiJzb21lLWFwcCIsInN1YiI6InVzZXJfaWQiLCJqdGkiOiJiZDYzNjkyOC03MTk2LTM5YTctODlmNi03OGY5NDY3NjU0ZWIiLCJycF9iYXNlX2FkZHJlc3MiOlsiaHR0cDovL3JhdGF1dGgucnUiLCJodHRwOi8vcmF0YXV0aC5ydSJdLCJ1c2VyX2lkIjoidXNlcl9pZCJ9.rqxqXV9X0kdjmyWxuVJkYU8sNC5sW9dC9NUqT-CodEM',
+                  sessionToken: SESSION_TOKEN,
+                  userInfo: ID_TOKEN,
                   status: Status.ACTIVE,
                   entries: [
                       new AuthEntry(authCode: 'code',
@@ -137,7 +159,8 @@ class PersistenceServiceStubConfiguration {
           return Observable.just(
               new Session(
                   identityProvider: 'STUB',
-                  userInfo: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vcmF0YXV0aC5ydSIsImlhdCI6MTQ1Nzg1NzAzOCwiZXhwIjoxNDg5MzkyODcxLCJhdWQiOiJzb21lLWFwcCIsInN1YiI6InVzZXJfaWQiLCJqdGkiOiJiZDYzNjkyOC03MTk2LTM5YTctODlmNi03OGY5NDY3NjU0ZWIiLCJycF9iYXNlX2FkZHJlc3MiOlsiaHR0cDovL3JhdGF1dGgucnUiLCJodHRwOi8vcmF0YXV0aC5ydSJdLCJ1c2VyX2lkIjoidXNlcl9pZCJ9.rqxqXV9X0kdjmyWxuVJkYU8sNC5sW9dC9NUqT-CodEM',
+                  sessionToken: SESSION_TOKEN,
+                  userInfo: ID_TOKEN,
                   status: Status.ACTIVE,
                   entries: [
                       new AuthEntry(authCode: 'code',
@@ -152,6 +175,26 @@ class PersistenceServiceStubConfiguration {
       }
 
       @Override
+      Observable<Session> getByValidSessionToken(String token, Date now) {
+        if (token == SESSION_TOKEN)
+          return Observable.just(
+            new Session(
+              identityProvider: 'STUB',
+              sessionToken: SESSION_TOKEN,
+              userInfo: ID_TOKEN,
+              status: Status.ACTIVE,
+              entries: [
+                new AuthEntry(authCode: 'code',
+                  relyingParty: CLIENT_NAME,
+                  scopes: ['rs.read'] as Set,
+                  refreshToken: REFRESH_TOKEN
+                )] as Set)
+          )
+        else
+          return Observable.error(new ExpiredException(ExpiredException.ID.AUTH_CODE_EXPIRED))
+      }
+
+      @Override
       Observable<Boolean> invalidateForUser(String userId, Date blocked) {
         return null
       }
@@ -162,7 +205,8 @@ class PersistenceServiceStubConfiguration {
           return Observable.just(
               new Session(
                   identityProvider: 'STUB',
-                  userInfo: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vcmF0YXV0aC5ydSIsImlhdCI6MTQ1Nzg1NzAzOCwiZXhwIjoxNDg5MzkyODcxLCJhdWQiOiJzb21lLWFwcCIsInN1YiI6InVzZXJfaWQiLCJqdGkiOiJiZDYzNjkyOC03MTk2LTM5YTctODlmNi03OGY5NDY3NjU0ZWIiLCJycF9iYXNlX2FkZHJlc3MiOlsiaHR0cDovL3JhdGF1dGgucnUiLCJodHRwOi8vcmF0YXV0aC5ydSJdLCJ1c2VyX2lkIjoidXNlcl9pZCJ9.rqxqXV9X0kdjmyWxuVJkYU8sNC5sW9dC9NUqT-CodEM',
+                  sessionToken: SESSION_TOKEN,
+                  userInfo: ID_TOKEN,
                   status: Status.ACTIVE,
                   expiresIn: DateUtils.fromLocal(LocalDateTime.now().plusDays(1)),
                   entries: [

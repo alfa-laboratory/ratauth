@@ -2,6 +2,7 @@ package ru.ratauth.services;
 
 import ru.ratauth.entities.AuthClient;
 import ru.ratauth.entities.RelyingParty;
+import ru.ratauth.entities.SessionClient;
 import rx.Observable;
 
 /**
@@ -25,4 +26,11 @@ public interface ClientService {
    * @return loaded authClient entity
    */
   Observable<RelyingParty> getRelyingParty(String name);
+
+  /**
+   * Loads only clients that belongs to sessionClients
+   * @param name unique client name
+   * @return loaded authClient entity
+   */
+  Observable<SessionClient> getSessionClient(String name);
 }

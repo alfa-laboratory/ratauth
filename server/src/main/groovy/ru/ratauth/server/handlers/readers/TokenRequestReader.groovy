@@ -26,32 +26,36 @@ class TokenRequestReader {
   private static final String TOKEN = "token"
   private static final String REFRESH_TOKEN = "refresh_token"
   private static final String CLIENT_ID = "client_id"
+  private static final String FIELD_SPLITTER = ' '
   private static final Set<String> BASE_FIELDS = [RESPONSE_TYPE, SCOPE, GRANT_TYPE, TOKEN, REFRESH_TOKEN] as Set
-  public static final String SPACE = " "
 
   static TokenRequest readTokenRequest(Form form, Headers headers) {
     def auth = extractAuth(headers)
     GrantType grantType = extractEnumField(form, GRANT_TYPE, true, GrantType)
     AuthAction authAction
     def builder = TokenRequest.builder()
-        .responseType(extractEnumField(form, RESPONSE_TYPE, true, AuthzResponseType))
+        .responseTypes(extractEnumFields(form, RESPONSE_TYPE, FIELD_SPLITTER, true, AuthzResponseType))
         .grantType(grantType)
         .clientId(auth[0])
         .clientSecret(auth[1])
     switch (grantType) {
       case GrantType.AUTHORIZATION_CODE:
         builder.authzCode(extractField(form, CODE, true))
-        def scope = extractField(form, SCOPE, false)?.split(SPACE)?.toList()
+        def scope = extractField(form, SCOPE, false)?.split(FIELD_SPLITTER)?.toList()
         authAction = AuthAction.TOKEN
         if (scope) {
           builder.scopes(scope)
         }
         break
       case GrantType.AUTHENTICATION_TOKEN: builder.scopes(extractField(form, SCOPE, true)
-          .split(SPACE)
-          .toList()) //WATCH IT! There is no break here.
-      case GrantType.REFRESH_TOKEN: builder.refreshToken(extractField(form, REFRESH_TOKEN, true))
+          .split(FIELD_SPLITTER)
+          .toList())
+        authAction = AuthAction.CROSS_AUTHORIZATION
+        builder.refreshToken(extractField(form, REFRESH_TOKEN, true))
+        break
+      case GrantType.REFRESH_TOKEN:
         authAction = AuthAction.REFRESH_TOKEN
+        builder.refreshToken(extractField(form, REFRESH_TOKEN, true))
         break
       default: throw new AuthorizationException("Grant type is not supported")
     }

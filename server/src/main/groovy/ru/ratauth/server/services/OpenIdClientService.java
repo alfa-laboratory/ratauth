@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.ratauth.entities.AuthClient;
 import ru.ratauth.entities.RelyingParty;
+import ru.ratauth.entities.SessionClient;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.services.ClientService;
 import rx.Observable;
@@ -30,6 +31,12 @@ public class OpenIdClientService implements AuthClientService {
   public Observable<AuthClient> loadClient(String name) {
     return clientService.getClient(name)
         .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)));
+  }
+
+  @Override
+  public Observable<SessionClient> loadSessionClient(String name) {
+    return clientService.getSessionClient(name)
+      .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)));
   }
 
   @Override

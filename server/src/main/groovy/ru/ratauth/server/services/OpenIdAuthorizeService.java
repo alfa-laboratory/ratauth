@@ -10,9 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import ru.ratauth.entities.*;
 import ru.ratauth.exception.AuthorizationException;
-import ru.ratauth.interaction.AuthzRequest;
-import ru.ratauth.interaction.AuthzResponse;
-import ru.ratauth.interaction.AuthzResponseType;
+import ru.ratauth.interaction.*;
 import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.AuthProvider;
 import ru.ratauth.providers.auth.dto.AuthInput;
@@ -57,14 +55,25 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         .doOnCompleted(() -> log.info("Authorization succeed"));
   }
 
+  //TODO check token relation
   @Override
   public Observable<AuthzResponse> crossAuthenticate(AuthzRequest request) {
+    Observable<Session> sessionObs;
+    Observable<? extends AuthClient> authClientObs;
+    if(GrantType.AUTHENTICATION_TOKEN == request.getGrantType()) {
+      sessionObs = sessionService.getByValidRefreshToken(request.getRefreshToken(), new Date());
+      authClientObs = clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), true);
+    } else {
+      sessionObs = sessionService.getByValidSessionToken(request.getSessionToken(), new Date());
+      authClientObs = clientService.loadAndAuthSessionClient(request.getClientId(), request.getClientSecret(), true);
+    }
+
     return Observable.zip(
-        clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), true)
+        authClientObs
             .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CREDENTIALS_WRONG))),
         clientService.loadRelyingParty(request.getExternalClientId())
             .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND))),
-        sessionService.getByValidRefreshToken(request.getRefreshToken(), new Date())
+        sessionObs
             .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.TOKEN_NOT_FOUND))),
         (oldRP, newRP, session) -> new ImmutablePair<>(newRP, session)
     ).flatMap(rpSession ->

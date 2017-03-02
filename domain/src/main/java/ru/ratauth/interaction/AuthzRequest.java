@@ -23,6 +23,7 @@ public class AuthzRequest {
   //fields for cross-authorization
   private GrantType grantType;
   private String refreshToken;
+  private String sessionToken;
   private String externalClientId;
 
 }

@@ -7,4 +7,12 @@
         <Class name="ru.ratauth.server.secutiry.UUIDValueGenerator" />
         <Bug pattern="DM_DEFAULT_ENCODING" />
     </Match>
+    <Match>
+        <Class name="ru.ratauth.interaction.TokenResponse" />
+        <Bug pattern="ES_COMPARING_PARAMETER_STRING_WITH_EQ" />
+    </Match>
+    <Match>
+        <Class name="ru.ratauth.interaction.TokenResponse" />
+        <Bug pattern="RC_REF_COMPARISON" />
+    </Match>
 </FindBugsFilter>

@@ -17,7 +17,8 @@ public class RegistrationRequest {
   private String clientId;
   private String clientSecret;
   private String authCode;
-  private AuthzResponseType responseType;
+  @Singular
+  private Set<AuthzResponseType> responseTypes;
   private GrantType grantType;
   private Map<String,String> data;
   @Singular

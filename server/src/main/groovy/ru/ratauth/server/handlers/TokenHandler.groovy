@@ -1,5 +1,6 @@
 package ru.ratauth.server.handlers
 
+import org.apache.commons.lang3.tuple.ImmutablePair
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import ratpack.error.ServerErrorHandler
@@ -8,6 +9,8 @@ import ratpack.form.Form
 import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
+import ru.ratauth.interaction.TokenRequest
+import ru.ratauth.interaction.TokenResponse
 import ru.ratauth.server.handlers.dto.CheckTokenDTO
 import ru.ratauth.server.handlers.dto.TokenDTO
 import ru.ratauth.server.services.AuthTokenService
@@ -49,10 +52,14 @@ class TokenHandler implements Action<Chain> {
 
   private void getToken(Context ctx) {
     Promise<Form> formPromise = ctx.parse(Form)
-    observe(formPromise).flatMap { params ->
-      authTokenService.getToken readTokenRequest(params, ctx.request.headers)
-    } subscribe ({
-        res -> ctx.render json(new TokenDTO(res))
+    observe(formPromise) map { params ->
+        readTokenRequest(params, ctx.request.headers)
+      } flatMap ({ request ->
+        authTokenService.getToken(request)
+      }, { TokenRequest req, TokenResponse resp ->
+        ImmutablePair.of(req, resp)
+      }) subscribe ({
+        reqResp -> ctx.render json(new TokenDTO(reqResp.right, reqResp.left.responseTypes))
       }, { /*on error*/
         throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable)
       }
