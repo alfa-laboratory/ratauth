@@ -1,11 +1,16 @@
 package ru.ratauth;
 
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import ru.ratauth.server.RatAuthApplication;
+import ratpack.spring.config.EnableRatpack;
+import ru.ratauth.server.configuration.OpenIdConnectDiscoveryProperties;
+import ru.ratauth.server.configuration.RatAuthProperties;
 
 @Configuration
-@Import(RatAuthApplication.class)
+@EnableRatpack
+@ComponentScan("ru.ratauth.server")
+@EnableConfigurationProperties({RatAuthProperties.class, OpenIdConnectDiscoveryProperties.class})
 public class RatAuthAutoConfiguration {
 
 }

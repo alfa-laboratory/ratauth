@@ -20,12 +20,6 @@ bootRepackage {
   mainClass = 'ru.ratauth.server.RatAuthApplication'
 }
 
-configurations.all {
-  resolutionStrategy {
-    preferProjectModules()
-  }
-}
-
 
 dependencies {
   //commons
