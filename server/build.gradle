@@ -18,6 +18,7 @@ apply plugin: 'nebula.maven-publish'
 
 bootRepackage {
   mainClass = 'ru.ratauth.server.RatAuthApplication'
+  enabled = false
 }
 
 configurations.all {
