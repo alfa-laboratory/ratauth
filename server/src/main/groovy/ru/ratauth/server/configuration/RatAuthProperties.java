@@ -24,7 +24,6 @@ import java.util.Objects;
  * @author mgorelikov
  * @since 23/11/15
  */
-@Component
 @Primary
 @ConfigurationProperties(prefix = "ratpack", ignoreUnknownFields = false)
 public class RatAuthProperties extends RatpackProperties {
