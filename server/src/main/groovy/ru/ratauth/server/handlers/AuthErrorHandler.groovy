@@ -2,6 +2,7 @@ package ru.ratauth.server.handlers
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import io.netty.handler.codec.http.HttpResponseStatus
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,7 +24,9 @@ import ru.ratauth.utils.ExceptionUtils
  */
 @Slf4j
 @Component
+@CompileStatic
 class AuthErrorHandler implements ServerErrorHandler {
+
   @Autowired
   ObjectMapper jacksonObjectMapper
 
@@ -34,14 +37,14 @@ class AuthErrorHandler implements ServerErrorHandler {
   void error(Context context, Throwable throwable) throws Exception {
     def exception = ExceptionUtils.getThrowable(throwable, BaseAuthServerException, MAX_EXCEPTION_DEPTH)
 
-    if (exception in ExpiredException) {
+    if (exception instanceof ExpiredException) {
       sendIdentifiedError(context, AUTHENTICATION_TIMEOUT, exception)
-    } else if (exception in ReadRequestException) {
+    } else if (exception instanceof ReadRequestException) {
       sendIdentifiedError context, HttpResponseStatus.BAD_REQUEST.code(), exception
-    } else if (exception in AuthorizationException || exception in RegistrationException) {
-      sendIdentifiedError context, HttpResponseStatus.FORBIDDEN.code(), exception
-    } else if (exception in IdentifiedException) {
-      sendIdentifiedError(context, HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), exception)  
+    } else if (exception instanceof AuthorizationException || exception instanceof RegistrationException) {
+      sendIdentifiedError context, HttpResponseStatus.FORBIDDEN.code(), (IdentifiedException)exception
+    } else if (exception instanceof IdentifiedException) {
+      sendIdentifiedError context, HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), exception
     } else if (exception) {
       sendError context, HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), exception
     } else {
@@ -51,7 +54,7 @@ class AuthErrorHandler implements ServerErrorHandler {
 
   private static void sendError(Context context, int code, Throwable throwable) {
     context.response.status(code)
-    context.response.send(throwable.message)
+    context.response.send(String.valueOf(throwable.message))
     log.error("Auth error: ", throwable)
   }
 
