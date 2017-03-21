@@ -1,0 +1,3 @@
+ratpack:
+  base-dir: file:server/src/main/resources
+  templates-path: templates

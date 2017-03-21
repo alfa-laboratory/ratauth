@@ -10,6 +10,7 @@ import ratpack.groovy.template.TextTemplateModule;
 import ratpack.guice.BindingsSpec;
 import ratpack.handling.Chain;
 import ratpack.server.ServerConfigBuilder;
+import ratpack.spring.config.RatpackProperties;
 import ratpack.spring.config.RatpackServerCustomizer;
 
 import java.util.Collections;
@@ -24,6 +25,7 @@ import java.util.List;
 public class RatAuthServerCustomizer implements RatpackServerCustomizer {
   private final LoggingModule loggingModule;
   private final AuthErrorHandler errorHandler;
+  private final RatpackProperties ratpackProperties;
 
   @Override
   public List<Action<Chain>> getHandlers() {
@@ -34,9 +36,14 @@ public class RatAuthServerCustomizer implements RatpackServerCustomizer {
   public Action<BindingsSpec> getBindings() {
     return spec -> {
       spec.bindInstance(ServerErrorHandler.class, errorHandler);
-      spec.module(MarkupTemplateModule.class);
+      spec.module(MarkupTemplateModule.class, config -> {
+        config.setTemplatesDirectory(ratpackProperties.getTemplatesPath());
+      });
       spec.module(loggingModule);
-      spec.module(TextTemplateModule.class, (TextTemplateModule.Config config) -> config.setStaticallyCompile(true));
+      spec.module(TextTemplateModule.class, (TextTemplateModule.Config config) -> {
+        config.setTemplatesPath(ratpackProperties.getTemplatesPath());
+        config.setStaticallyCompile(true);
+      });
     };
   }
 

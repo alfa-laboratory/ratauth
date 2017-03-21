@@ -6,13 +6,11 @@ import com.jayway.restassured.specification.RequestSpecification
 import org.junit.Rule
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.restdocs.JUnitRestDocumentation
-import org.springframework.test.context.TestPropertySource
 import ru.ratauth.server.configuration.TestBaseConfiguration
 import spock.lang.Specification
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.documentationConfiguration
-
 /**
  * @author mgorelikov
  * @since 26/06/16
@@ -20,7 +18,9 @@ import static org.springframework.restdocs.restassured.RestAssuredRestDocumentat
 @SpringBootTest(
     webEnvironment = NONE,
     classes = [TestBaseConfiguration],
-    properties = "ratpack.port=8080"
+    properties = [
+        "ratpack.port=8080"
+    ]
 )
 class BaseDocumentationSpec extends Specification {
   @Rule

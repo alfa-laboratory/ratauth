@@ -7,20 +7,23 @@ import org.springframework.context.ConfigurableApplicationContext;
 import ratpack.server.RatpackServer;
 
 import java.net.UnknownHostException;
+import java.util.HashMap;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static ru.ratauth.RatAuthAutoConfigurationTest.DEFAULT_PROPERTIES;
 
 public class RatAuthServerTest {
 
   private static final int DEFAULT_RATPACK_PORT = 5050;
   private ConfigurableApplicationContext context;
 
-  public void registerAndRefresh(Class<?> configClass, String... properties) {
+  private void registerAndRefresh(Class<?> configClass, String... properties) {
+    HashMap<String, Object> mergedPropsMap = mergePropertiesWithDefault(properties);
     context = new SpringApplicationBuilder(configClass)
-            .web(false)
-            .properties(properties)
-            .profiles("local")
-            .run();
+        .web(false)
+        .properties(mergedPropsMap)
+        .profiles("local")
+        .run();
   }
 
   @Test
@@ -54,6 +57,18 @@ public class RatAuthServerTest {
     if (context != null) {
       context.close();
     }
+  }
+
+  private HashMap<String, Object> mergePropertiesWithDefault(String[] properties) {
+    HashMap<String, Object> mergedPropsMap = new HashMap<>();
+
+    for (String property : properties) {
+      String[] split = property.split("=");
+      mergedPropsMap.put(split[0], split[1]);
+    }
+
+    mergedPropsMap.putAll(DEFAULT_PROPERTIES);
+    return mergedPropsMap;
   }
 
 }
