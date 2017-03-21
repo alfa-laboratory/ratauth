@@ -67,7 +67,8 @@ class PersistenceServiceStubConfiguration {
               codeTTL: 36000l,
               refreshTokenTTL: 36000l,
               sessionTTL: 36000l,
-              tokenTTL: 36000l
+              tokenTTL: 36000l,
+              authorizationRedirectURI: 'http://domain.mine/oidc/authorize',
           )
           )
       }

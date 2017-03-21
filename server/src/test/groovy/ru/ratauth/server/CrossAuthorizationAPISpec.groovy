@@ -124,6 +124,7 @@ class CrossAuthorizationAPISpec  extends BaseDocumentationSpec {
       .then()
       .statusCode(HttpStatus.FOUND.value())
       .header(HttpHeaders.LOCATION, StringContains.containsString("code="))
+      .header(HttpHeaders.LOCATION, StringContains.containsString("http://domain.mine/oidc/authorize"))
   }
 
   def 'should successfully get jwt token for external resource server'() {

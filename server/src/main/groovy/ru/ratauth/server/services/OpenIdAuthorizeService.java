@@ -76,10 +76,12 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         sessionObs
             .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.TOKEN_NOT_FOUND))),
         (oldRP, newRP, session) -> new ImmutablePair<>(newRP, session)
-    ).flatMap(rpSession ->
-        sessionService.addEntry(rpSession.getRight(), rpSession.getLeft(), request.getScopes(), request.getRedirectURI())
+    ).flatMap(rpSession -> {
+      String redirectURI = createRedirectURI(rpSession.getLeft(), request.getRedirectURI());
+      return sessionService.addEntry(rpSession.getRight(), rpSession.getLeft(), request.getScopes(), redirectURI)
             .map(session -> buildResponse(rpSession.getLeft(), session,
-                AuthResult.builder().status(AuthResult.Status.NEED_APPROVAL).build(), null, request.getRedirectURI()))
+                AuthResult.builder().status(AuthResult.Status.NEED_APPROVAL).build(), null, request.getRedirectURI()));
+      }
     ).doOnCompleted(() -> log.info("Cross-authorization succeed"));
   }
 
