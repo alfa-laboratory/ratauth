@@ -127,6 +127,58 @@ class CrossAuthorizationAPISpec  extends BaseDocumentationSpec {
       .header(HttpHeaders.LOCATION, StringContains.containsString("http://domain.mine/oidc/authorize"))
   }
 
+
+  def 'should successfully return cross-authorization code for session token with redirect uri'() {
+    given:
+    def setup = given(this.documentationSpec)
+            .accept(ContentType.URLENC)
+            .filter(document('session_cross_auth_succeed',
+            preprocessResponse(prettyPrint()),
+            requestParameters(
+                    parameterWithName('response_type')
+                            .description('Response type, this case it must be CODE'),
+                    parameterWithName('grant_type')
+                            .description('grant type for operation'),
+                    parameterWithName('scope')
+                            .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+                    parameterWithName('client_id')
+                            .description('relying party identifier'),
+                    parameterWithName('redirect_uri')
+                            .description('Redirect URL'),
+                    parameterWithName('session_token')
+                            .description('session token')
+            ),
+            requestHeaders(
+                    headerWithName(HttpHeaders.AUTHORIZATION)
+                            .description('Authorization header for relying party basic authorization')
+            ),
+            responseHeaders(
+                    headerWithName(HttpHeaders.LOCATION)
+                            .description('Header that contains authorization code for the next step of authorization code flow,' +
+                            '\nits expiration date and optional user identifier')
+            )
+    ))
+            .given()
+            .formParam('response_type', AuthzResponseType.CODE.name())
+            .formParam('grant_type', GrantType.SESSION_TOKEN.name())
+            .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME + '2')
+            .formParam('scope', 'rs.read')
+            .formParam('redirect_uri', 'https://domain.mine/test/mobile-web/web/repayment/early/0003')
+            .formParam('session_token', PersistenceServiceStubConfiguration.SESSION_TOKEN)
+            .header(IntegrationSpecUtil.createAuthHeaders(PersistenceServiceStubConfiguration.CLIENT_NAME,
+            PersistenceServiceStubConfiguration.PASSWORD))
+    when:
+    def result = setup
+            .when()
+            .post("authorize")
+    then:
+    result
+            .then()
+            .statusCode(HttpStatus.FOUND.value())
+            .header(HttpHeaders.LOCATION, StringContains.containsString("code="))
+            .header(HttpHeaders.LOCATION, StringContains.containsString("https://domain.mine/test/mobile-web/web/repayment/early/0003"))
+  }
+
   def 'should successfully get jwt token for external resource server'() {
     given:
     def setup = given(this.documentationSpec)
