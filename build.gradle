@@ -51,7 +51,7 @@ allprojects {
 
   dependencyManagement {
     imports {
-      mavenBom 'io.spring.platform:platform-bom:2.0.8.RELEASE'
+      mavenBom 'io.spring.platform:platform-bom:Brussels-SR1'
     }
 
     dependencies {
@@ -73,7 +73,6 @@ allprojects {
       dependency 'com.nimbusds:nimbus-jose-jwt:4.20'
 
       //test
-      dependency "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
       dependency "io.ratpack:ratpack-test:${ratpackVersion}"
       dependency 'org.spockframework:spock-core:1.1-groovy-2.4-rc-2'
       dependency 'org.spockframework:spock-spring:1.1-groovy-2.4-rc-2'
