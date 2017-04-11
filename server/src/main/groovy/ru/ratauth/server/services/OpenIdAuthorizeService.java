@@ -19,6 +19,9 @@ import ru.ratauth.utils.StringUtils;
 import ru.ratauth.utils.URIUtils;
 import rx.Observable;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
@@ -78,7 +81,8 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         (oldRP, newRP, session) -> new ImmutablePair<>(newRP, session)
     ).flatMap(rpSession -> {
       String redirectURI = createRedirectURI(rpSession.getLeft(), request.getRedirectURI());
-      return sessionService.addEntry(rpSession.getRight(), rpSession.getLeft(), request.getScopes(), redirectURI)
+      String location = withRedirectUrl(rpSession.getLeft().getAuthorizationRedirectURI(), redirectURI);
+      return sessionService.addEntry(rpSession.getRight(), rpSession.getLeft(), request.getScopes(), location)
             .map(session -> buildResponse(rpSession.getLeft(), session,
                 AuthResult.builder().status(AuthResult.Status.NEED_APPROVAL).build(), null, request.getRedirectURI()));
       }
@@ -111,12 +115,20 @@ public class OpenIdAuthorizeService implements AuthorizeService {
             .relyingParty(relyingPartyName).build());
   }
 
-  private static AuthzResponse buildResponse(RelyingParty relyingParty, Session session,AuthResult authResult, TokenCache tokenCache, String redirectUri) {
+  private static String withRedirectUrl(String s, String redirectUrl) {
+    try {
+      return s + (s.contains("?") ? "&" : "?") + "redirect_url=" + URLEncoder.encode(redirectUrl,"UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      throw new AssertionError("UTF-8 encoding is unsupported");
+    }
+  }
+
+  private static AuthzResponse buildResponse(RelyingParty relyingParty, Session session, AuthResult authResult, TokenCache tokenCache, String redirectUri) {
     final String targetRedirectURI = createRedirectURI(relyingParty, redirectUri);
     //in case of autCode sent by authProvider
     if (session == null || CollectionUtils.isEmpty(session.getEntries())) {
       return AuthzResponse.builder()
-          .location(targetRedirectURI)
+          .location(withRedirectUrl(relyingParty.getAuthorizationRedirectURI(), targetRedirectURI))
           .data(authResult.getData())
           .build();
     }

@@ -14,6 +14,7 @@ import ru.ratauth.server.local.PersistenceServiceStubConfiguration
 
 import static com.jayway.restassured.RestAssured.given
 import static org.hamcrest.Matchers.equalToIgnoringCase
+import static org.hamcrest.Matchers.startsWith
 import static org.springframework.restdocs.headers.HeaderDocumentation.*
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint
@@ -175,8 +176,9 @@ class CrossAuthorizationAPISpec  extends BaseDocumentationSpec {
     result
             .then()
             .statusCode(HttpStatus.FOUND.value())
+            .header(HttpHeaders.LOCATION, startsWith("http://domain.mine/oidc/authorize"))
+            .header(HttpHeaders.LOCATION, StringContains.containsString("?redirect_url=https%3A%2F%2Fdomain.mine%2Ftest%2Fmobile-web%2Fweb%2Frepayment%2Fearly%2F0003?code="))
             .header(HttpHeaders.LOCATION, StringContains.containsString("code="))
-            .header(HttpHeaders.LOCATION, StringContains.containsString("https://domain.mine/test/mobile-web/web/repayment/early/0003"))
   }
 
   def 'should successfully get jwt token for external resource server'() {
