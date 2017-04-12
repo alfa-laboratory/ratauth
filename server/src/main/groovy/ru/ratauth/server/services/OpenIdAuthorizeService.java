@@ -115,9 +115,9 @@ public class OpenIdAuthorizeService implements AuthorizeService {
             .relyingParty(relyingPartyName).build());
   }
 
-  private static String withRedirectUrl(String s, String redirectUrl) {
+  private static String withRedirectUrl(String origUrl, String redirectUrl) {
     try {
-      return s + (s.contains("?") ? "&" : "?") + "redirect_url=" + URLEncoder.encode(redirectUrl, "UTF-8");
+      return origUrl + (origUrl.contains("?") ? "&" : "?") + "redirect_url=" + URLEncoder.encode(redirectUrl, "UTF-8");
     } catch (UnsupportedEncodingException e) {
       throw new AssertionError("UTF-8 encoding is unsupported");
     }
