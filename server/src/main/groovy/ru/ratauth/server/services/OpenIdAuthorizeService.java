@@ -20,11 +20,11 @@ import ru.ratauth.utils.URIUtils;
 import rx.Observable;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 /**
  * @author mgorelikov
@@ -88,9 +88,40 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     ).doOnCompleted(() -> log.info("Cross-authorization succeed"));
   }
 
-  private static void setRedirectURI(AuthzResponse authzResponse, String redirectURI) {
+  private static AuthzResponse withRedirectURI(AuthzResponse authzResponse, String redirectURI) {
     try {
-      authzResponse.redirect = URLEncoder.encode(redirectURI, "UTF-8");
+      String uri = URLEncoder.encode(redirectURI, "UTF-8");
+      return new AuthzResponse() {
+        @Override
+        public String buildURL() {
+
+          StringJoiner joiner = new StringJoiner("&");
+          if(!StringUtils.isBlank(uri)) {
+            joiner.add("redirect_uri=" + uri);
+          }
+          if(!StringUtils.isBlank(authzResponse.getCode())) {
+            joiner.add("code="+authzResponse.getCode());
+          }
+          if(authzResponse.getExpiresIn() != null) {
+            joiner.add("expires_in="+authzResponse.getExpiresIn());
+          }
+          if(!StringUtils.isBlank(authzResponse.getToken())) {
+            joiner.add("token="+authzResponse.getToken());
+            joiner.add("token_type="+authzResponse.getTokenType());
+
+          }
+          if(!StringUtils.isBlank(authzResponse.getRefreshToken())) {
+            joiner.add("refresh_token="+ authzResponse.getRefreshToken());
+          }
+          if(!StringUtils.isBlank(authzResponse.getIdToken())) {
+            joiner.add("id_token="+ authzResponse.getIdToken());
+          }
+          if(authzResponse.getData() != null && !authzResponse.getData().isEmpty()) {
+            authzResponse.getData().entrySet().forEach(entry -> joiner.add(entry.getKey() + "=" + entry.getValue().toString()));
+          }
+          return authzResponse.getLocation() + "?" + joiner.toString();
+        }
+      };
     } catch (UnsupportedEncodingException e) {
       throw new AssertionError("This should never happen: UTF-8 encoding is unsupported");
     }
@@ -130,7 +161,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
           .location(relyingParty.getAuthorizationRedirectURI())
           .data(authResult.getData())
           .build();
-      setRedirectURI(resp, targetRedirectURI);
+      resp = withRedirectURI(resp, targetRedirectURI);
       return resp;
     }
 
@@ -152,7 +183,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     } else {//auth code authorization
       resp.setCode(entry.getAuthCode());
       resp.setExpiresIn(entry.getCodeExpiresIn().getTime());
-      setRedirectURI(resp, targetRedirectURI);
+      resp = withRedirectURI(resp, targetRedirectURI);
     }
     return resp;
   }
