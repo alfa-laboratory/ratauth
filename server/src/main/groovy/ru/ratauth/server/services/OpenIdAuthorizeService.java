@@ -80,9 +80,8 @@ public class OpenIdAuthorizeService implements AuthorizeService {
             .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.TOKEN_NOT_FOUND))),
         (oldRP, newRP, session) -> new ImmutablePair<>(newRP, session)
     ).flatMap(rpSession -> {
-      String redirectURI = createRedirectURI(rpSession.getLeft(), request.getRedirectURI());
-      String location = withRedirectUrl(rpSession.getLeft().getAuthorizationRedirectURI(), redirectURI);
-      return sessionService.addEntry(rpSession.getRight(), rpSession.getLeft(), request.getScopes(), location)
+      String redirectURI = rpSession.getLeft().getAuthorizationRedirectURI();
+      return sessionService.addEntry(rpSession.getRight(), rpSession.getLeft(), request.getScopes(), redirectURI)
             .map(session -> buildResponse(rpSession.getLeft(), session,
                 AuthResult.builder().status(AuthResult.Status.NEED_APPROVAL).build(), null, request.getRedirectURI()));
       }
@@ -115,21 +114,14 @@ public class OpenIdAuthorizeService implements AuthorizeService {
             .relyingParty(relyingPartyName).build());
   }
 
-  private static String withRedirectUrl(String origUrl, String redirectUrl) {
-    try {
-      return origUrl + (origUrl.contains("?") ? "&" : "?") + "redirect_url=" + URLEncoder.encode(redirectUrl, "UTF-8");
-    } catch (UnsupportedEncodingException e) {
-      throw new AssertionError("UTF-8 encoding is unsupported");
-    }
-  }
-
   private static AuthzResponse buildResponse(RelyingParty relyingParty, Session session, AuthResult authResult, TokenCache tokenCache, String redirectUri) {
     final String targetRedirectURI = createRedirectURI(relyingParty, redirectUri);
     //in case of autCode sent by authProvider
     if (session == null || CollectionUtils.isEmpty(session.getEntries())) {
       return AuthzResponse.builder()
-          .location(withRedirectUrl(relyingParty.getAuthorizationRedirectURI(), targetRedirectURI))
+          .location(relyingParty.getAuthorizationRedirectURI())
           .data(authResult.getData())
+          .redirectURI(targetRedirectURI)
           .build();
     }
 
@@ -151,6 +143,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     } else {//auth code authorization
       resp.setCode(entry.getAuthCode());
       resp.setExpiresIn(entry.getCodeExpiresIn().getTime());
+      resp.setRedirectURI(targetRedirectURI);
     }
     return resp;
   }
