@@ -90,7 +90,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
 
   private static void setRedirectURI(AuthzResponse authzResponse, String redirectURI) {
     try {
-      authzResponse.setRedirect(URLEncoder.encode(redirectURI, "UTF-8"));
+      authzResponse.redirect = URLEncoder.encode(redirectURI, "UTF-8");
     } catch (UnsupportedEncodingException e) {
       throw new AssertionError("This should never happen: UTF-8 encoding is unsupported");
     }

@@ -26,7 +26,8 @@ public class AuthzResponse {
   private TokenType tokenType;
   private String refreshToken;
   private String idToken;
-  private String redirect;
+
+  public String redirect;
 
   public String buildURL() {
     StringJoiner joiner = new StringJoiner("&");
