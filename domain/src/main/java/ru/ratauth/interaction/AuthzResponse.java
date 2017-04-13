@@ -32,7 +32,7 @@ public class AuthzResponse {
     try {
       this.redirectURI = URLEncoder.encode(redirectURI, "UTF-8");
     } catch (UnsupportedEncodingException e) {
-      throw new AssertionError("UTF-8 encoding is unsupported");
+      throw new AssertionError("This should never happen: UTF-8 encoding is unsupported");
     }
   }
 
