@@ -17,9 +17,6 @@ import static org.springframework.restdocs.request.RequestDocumentation.paramete
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document
 
-/**
- * Created by june on 13/04/2017.
- */
 class SessionHandlerSpec extends BaseDocumentationSpec{
 
   def 'should successfully invalidate session by refresh token'(){

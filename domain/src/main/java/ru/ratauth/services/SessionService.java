@@ -90,12 +90,12 @@ public interface SessionService {
    */
   Observable<Boolean> invalidateForClient(String relyingParty, Date blocked);
 
-//  todo ищем аксесс токен в AuthEntry.tokens или смотри как это уже реализовано в
-// todo see also getByValidToken
-//  OpenIdTokenService  в jmba создать свой интерфейс, создать его имплементацию
-//  refreshtokenRequest openIdManager
-//        EncodedField CustomUrlEncoded
-//                openIdService  pull request на Андрей Трофимов
+  /**
+   * Invalidates session by refresh token from current moment
+   * @param relyingParty client unique name
+   * @param refreshToken invalidated session search refresh token
+   * @return true when session was successfully invalidated
+   */
   Observable<Boolean> invalidateByRefreshToken(String relyingParty, String refreshToken);
   /**
    * Updates session lastCheck date
