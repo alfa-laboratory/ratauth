@@ -249,6 +249,11 @@ class PersistenceServiceStubConfiguration {
       }
 
       @Override
+      Observable<Boolean> invalidateByRefreshToken(String relyingParty, String refreshToken) {
+        return Observable.just(true)
+      }
+
+      @Override
       Observable<Boolean> updateCheckDate(String sessionId, Date lastCheck) {
         return null
       }

@@ -14,6 +14,7 @@ import ru.ratauth.interaction.TokenResponse
 import ru.ratauth.server.handlers.dto.CheckTokenDTO
 import ru.ratauth.server.handlers.dto.TokenDTO
 import ru.ratauth.server.services.AuthTokenService
+import ru.ratauth.services.SessionService
 
 import static ratpack.jackson.Jackson.json
 import static ratpack.rx.RxRatpack.observe
