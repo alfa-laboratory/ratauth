@@ -26,11 +26,11 @@ public class AuthzResponse {
   private TokenType tokenType;
   private String refreshToken;
   private String idToken;
-  private String redirectURI;
+  private String redirect;
 
   public String buildURL() {
     StringJoiner joiner = new StringJoiner("&");
-    if(!StringUtils.isBlank(redirectURI)) {
+    if(!StringUtils.isBlank(redirect)) {
       joiner.add("redirect_uri="+redirectURI);
     }
     if(!StringUtils.isBlank(code)) {
