@@ -129,7 +129,6 @@ public class OpenIdAuthorizeService implements AuthorizeService {
       AuthzResponse resp = AuthzResponse.builder()
           .location(relyingParty.getAuthorizationRedirectURI())
           .data(authResult.getData())
-          .redirectURI(targetRedirectURI)
           .build();
       setRedirectURI(resp, targetRedirectURI);
       return resp;

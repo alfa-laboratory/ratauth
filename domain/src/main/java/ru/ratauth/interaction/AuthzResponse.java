@@ -31,7 +31,7 @@ public class AuthzResponse {
   public String buildURL() {
     StringJoiner joiner = new StringJoiner("&");
     if(!StringUtils.isBlank(redirect)) {
-      joiner.add("redirect_uri="+redirectURI);
+      joiner.add("redirect_uri="+redirect);
     }
     if(!StringUtils.isBlank(code)) {
       joiner.add("code="+code);
