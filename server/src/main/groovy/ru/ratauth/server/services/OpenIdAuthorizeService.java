@@ -88,6 +88,14 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     ).doOnCompleted(() -> log.info("Cross-authorization succeed"));
   }
 
+  private static void setRedirectURI(AuthzResponse authzResponse, String redirectURI) {
+    try {
+      authzResponse.setRedirectURI(URLEncoder.encode(redirectURI, "UTF-8"));
+    } catch (UnsupportedEncodingException e) {
+      throw new AssertionError("This should never happen: UTF-8 encoding is unsupported");
+    }
+  }
+
   private Observable<TokenCache> createIdToken(RelyingParty relyingParty, Session session) {
     Optional<AuthEntry> entry = session.getEntry(relyingParty.getName());
     Optional<Token> token = entry.flatMap(el -> el.getLatestToken());
@@ -118,11 +126,13 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     final String targetRedirectURI = createRedirectURI(relyingParty, redirectUri);
     //in case of autCode sent by authProvider
     if (session == null || CollectionUtils.isEmpty(session.getEntries())) {
-      return AuthzResponse.builder()
+      AuthzResponse resp = AuthzResponse.builder()
           .location(relyingParty.getAuthorizationRedirectURI())
           .data(authResult.getData())
           .redirectURI(targetRedirectURI)
           .build();
+      setRedirectURI(resp, targetRedirectURI);
+      return resp;
     }
 
     AuthEntry entry = session.getEntry(relyingParty.getName()).get();
@@ -143,7 +153,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     } else {//auth code authorization
       resp.setCode(entry.getAuthCode());
       resp.setExpiresIn(entry.getCodeExpiresIn().getTime());
-      resp.setRedirectURI(targetRedirectURI);
+      setRedirectURI(resp, targetRedirectURI);
     }
     return resp;
   }
