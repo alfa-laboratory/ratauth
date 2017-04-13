@@ -28,9 +28,12 @@ public class AuthzResponse {
   private String idToken;
   private String redirectURI;
 
-  @SneakyThrows(UnsupportedEncodingException.class)
   public void setRedirectURI(String redirectURI) {
-    this.redirectURI = URLEncoder.encode(redirectURI, "UTF-8");
+    try {
+      this.redirectURI = URLEncoder.encode(redirectURI, "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      throw new AssertionError("UTF-8 encoding is unsupported");
+    }
   }
 
   public String buildURL() {
