@@ -1,14 +1,14 @@
 package ru.ratauth.server.handlers.readers
 
-import groovy.transform.CompileStatic;
-import ratpack.form.Form;
-import ratpack.http.Headers;
-import ru.ratauth.interaction.InvalidateSessionRequest;
-import ru.ratauth.server.services.log.ActionLogger;
-import ru.ratauth.server.services.log.AuthAction;
+import groovy.transform.CompileStatic
+import ratpack.form.Form
+import ratpack.http.Headers
+import ru.ratauth.interaction.InvalidateSessionRequest
+import ru.ratauth.server.services.log.ActionLogger
+import ru.ratauth.server.services.log.AuthAction
 
-import static ru.ratauth.server.handlers.readers.RequestUtil.extractAuth;
-import static ru.ratauth.server.handlers.readers.RequestUtil.extractField;
+import static ru.ratauth.server.handlers.readers.RequestUtil.extractAuth
+import static ru.ratauth.server.handlers.readers.RequestUtil.extractField
 
 @CompileStatic
 class SessionRequestReader {

@@ -20,7 +20,7 @@ class SessionHandler implements Action<Chain> {
 
   public static final String INVALIDATE_SESSION_BY_REFRESH_TOKEN = 'invalidate_session_by_refresh_token'
 
-  @Autowired SessionService sessionService;
+  @Autowired SessionService sessionService
 
   @Override
   void execute(Chain chain) throws Exception {
