@@ -1,11 +1,10 @@
 package ru.ratauth.interaction;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.ratauth.utils.StringUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Map;
 import java.util.StringJoiner;
 
@@ -27,9 +26,18 @@ public class AuthzResponse {
   private TokenType tokenType;
   private String refreshToken;
   private String idToken;
+  private String redirectURI;
+
+  @SneakyThrows(UnsupportedEncodingException.class)
+  public void setRedirectURI(String redirectURI) {
+    this.redirectURI = URLEncoder.encode(redirectURI, "UTF-8");
+  }
 
   public String buildURL() {
     StringJoiner joiner = new StringJoiner("&");
+    if(!StringUtils.isBlank(redirectURI)) {
+      joiner.add("redirect_uri="+redirectURI);
+    }
     if(!StringUtils.isBlank(code)) {
       joiner.add("code="+code);
     }

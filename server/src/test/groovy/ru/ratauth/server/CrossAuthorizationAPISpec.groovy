@@ -177,8 +177,9 @@ class CrossAuthorizationAPISpec  extends BaseDocumentationSpec {
             .then()
             .statusCode(HttpStatus.FOUND.value())
             .header(HttpHeaders.LOCATION, startsWith("http://domain.mine/oidc/authorize"))
-            .header(HttpHeaders.LOCATION, StringContains.containsString("?redirect_url=https%3A%2F%2Fdomain.mine%2Ftest%2Fmobile-web%2Fweb%2Frepayment%2Fearly%2F0003?code="))
             .header(HttpHeaders.LOCATION, StringContains.containsString("code="))
+            .header(HttpHeaders.LOCATION, StringContains.containsString("redirect_uri="))
+            .header(HttpHeaders.LOCATION, startsWith("http://domain.mine/oidc/authorize?redirect_uri=https%3A%2F%2Fdomain.mine%2Ftest%2Fmobile-web%2Fweb%2Frepayment%2Fearly%2F0003&code="))
   }
 
   def 'should successfully get jwt token for external resource server'() {
