@@ -26,13 +26,20 @@ public class AuthzResponse {
   private TokenType tokenType;
   private String refreshToken;
   private String idToken;
+  private String redirectURI;
 
-  public String redirect;
+  private String getEncodedRedirectURI() {
+    try {
+      return URLEncoder.encode(redirectURI, "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      throw new AssertionError("This should never happen: UTF-8 encoding is unsupported");
+    }
+  }
 
   public String buildURL() {
     StringJoiner joiner = new StringJoiner("&");
-    if(!StringUtils.isBlank(redirect)) {
-      joiner.add("redirect_uri="+redirect);
+    if(!StringUtils.isBlank(redirectURI)) {
+      joiner.add("redirect_uri=" + getEncodedRedirectURI());
     }
     if(!StringUtils.isBlank(code)) {
       joiner.add("code="+code);
