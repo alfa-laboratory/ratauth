@@ -15,7 +15,6 @@ import java.util.HashMap;
 
 public class InMemoryAuthProvider implements AuthProvider, RegistrationProvider {
 
-
   public static final String REG_CREDENTIAL = "credential";
   public static final String REG_CODE = "123";
 

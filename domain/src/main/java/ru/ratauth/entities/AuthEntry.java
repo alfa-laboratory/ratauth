@@ -48,8 +48,8 @@ public class AuthEntry {
     if (tokens == null)
       return Optional.empty();
     return tokens.stream()
-            .filter(el -> el != null)
-            .sorted((el1, el2) -> el2.getExpiresIn().compareTo(el1.getExpiresIn()))
-            .findFirst();
+        .filter(el -> el != null)
+        .sorted((el1, el2) -> el2.getExpiresIn().compareTo(el1.getExpiresIn()))
+        .findFirst();
   }
 }

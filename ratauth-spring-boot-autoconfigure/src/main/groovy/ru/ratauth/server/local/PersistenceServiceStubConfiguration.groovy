@@ -12,6 +12,7 @@ import ru.ratauth.services.TokenCacheService
 import rx.Observable
 
 import java.time.LocalDateTime
+
 /**
  * @author mgorelikov
  * @since 25/02/16
@@ -26,7 +27,8 @@ class PersistenceServiceStubConfiguration {
   public static final String REFRESH_TOKEN = '12345'
   public static final String CODE = '123'
   public static final String CODE_EXPIRED = '1111'
-  public static final String ID_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vcmF0YXV0aC5ydSIsImlhdCI6MTQ1Nzg1NzAzOCwiZXhwIjoxNDg5MzkyODcxLCJhdWQiOiJzb21lLWFwcCIsInN1YiI6InVzZXJfaWQiLCJqdGkiOiJiZDYzNjkyOC03MTk2LTM5YTctODlmNi03OGY5NDY3NjU0ZWIiLCJycF9iYXNlX2FkZHJlc3MiOlsiaHR0cDovL3JhdGF1dGgucnUiLCJodHRwOi8vcmF0YXV0aC5ydSJdLCJ1c2VyX2lkIjoidXNlcl9pZCJ9.rqxqXV9X0kdjmyWxuVJkYU8sNC5sW9dC9NUqT-CodEM'
+  public static
+  final String ID_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vcmF0YXV0aC5ydSIsImlhdCI6MTQ1Nzg1NzAzOCwiZXhwIjoxNDg5MzkyODcxLCJhdWQiOiJzb21lLWFwcCIsInN1YiI6InVzZXJfaWQiLCJqdGkiOiJiZDYzNjkyOC03MTk2LTM5YTctODlmNi03OGY5NDY3NjU0ZWIiLCJycF9iYXNlX2FkZHJlc3MiOlsiaHR0cDovL3JhdGF1dGgucnUiLCJodHRwOi8vcmF0YXV0aC5ydSJdLCJ1c2VyX2lkIjoidXNlcl9pZCJ9.rqxqXV9X0kdjmyWxuVJkYU8sNC5sW9dC9NUqT-CodEM'
 
   private static final LocalDateTime NOW = LocalDateTime.now()
   private static final LocalDateTime TOMORROW = NOW.plusDays(1)
@@ -97,18 +99,18 @@ class PersistenceServiceStubConfiguration {
       Observable<SessionClient> getSessionClient(String name) {
         if (name == CLIENT_NAME)
           return Observable.just(new SessionClient(
-            id: 'id',
-            name: CLIENT_NAME,
-            secret: CLIENT_SECRET,
-            salt: SALT,
-            password: SecurityUtils.hashPassword(PASSWORD, SALT),
+              id: 'id',
+              name: CLIENT_NAME,
+              secret: CLIENT_SECRET,
+              salt: SALT,
+              password: SecurityUtils.hashPassword(PASSWORD, SALT),
           ))
         else
           return Observable.just(new SessionClient(
-            id: 'id',
-            name: CLIENT_NAME + '3',
-            secret: CLIENT_SECRET,
-            password: PASSWORD
+              id: 'id',
+              name: CLIENT_NAME + '3',
+              secret: CLIENT_SECRET,
+              password: PASSWORD
           ))
       }
     }
@@ -180,17 +182,17 @@ class PersistenceServiceStubConfiguration {
       Observable<Session> getByValidSessionToken(String token, Date now) {
         if (token == SESSION_TOKEN)
           return Observable.just(
-            new Session(
-              identityProvider: 'STUB',
-              sessionToken: SESSION_TOKEN,
-              userInfo: ID_TOKEN,
-              status: Status.ACTIVE,
-              entries: [
-                new AuthEntry(authCode: 'code',
-                  relyingParty: CLIENT_NAME,
-                  scopes: ['rs.read'] as Set,
-                  refreshToken: REFRESH_TOKEN
-                )] as Set)
+              new Session(
+                  identityProvider: 'STUB',
+                  sessionToken: SESSION_TOKEN,
+                  userInfo: ID_TOKEN,
+                  status: Status.ACTIVE,
+                  entries: [
+                      new AuthEntry(authCode: 'code',
+                          relyingParty: CLIENT_NAME,
+                          scopes: ['rs.read'] as Set,
+                          refreshToken: REFRESH_TOKEN
+                      )] as Set)
           )
         else
           return Observable.error(new ExpiredException(ExpiredException.ID.AUTH_CODE_EXPIRED))

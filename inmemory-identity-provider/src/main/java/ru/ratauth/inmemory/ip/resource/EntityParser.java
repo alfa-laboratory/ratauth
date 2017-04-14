@@ -19,16 +19,9 @@ public class EntityParser {
 
   @SneakyThrows
   public <T> T load(String fileName, Class<T> clazz) {
-    Gson gson = getGson();
+    Gson gson = new Gson();
     InputStream inputStream = entityResourceLoader.inputStream(fileName);
     return gson.fromJson(new InputStreamReader(inputStream, UTF_8), clazz);
-  }
-
-  private Gson getGson() {
-    GsonBuilder gsonBuilder = new GsonBuilder();
-    gsonBuilder.registerTypeAdapter(Session[].class, new SessionDeserializer());
-//    return gsonBuilder.create();
-    return new Gson();
   }
 
 }
