@@ -5,12 +5,6 @@ ext {
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'nebula.maven-publish'
 
-//configurations.all {
-//  resolutionStrategy {
-//    preferProjectModules()
-//  }
-//}
-
 dependencies {
 
   compile project(':domain')
@@ -41,14 +35,3 @@ dependencies {
   testCompile 'org.springframework.boot:spring-boot-starter-test'
 
 }
-
-//compileJava.dependsOn(processResources)
-//
-//task cleanTempDirs(type: Delete) {
-//  delete fileTree(dir: snippetsDir)
-//}
-//
-//test {
-//  outputs.dir snippetsDir
-//  dependsOn cleanTempDirs
-//}

@@ -12,11 +12,17 @@ import ru.ratauth.providers.registrations.dto.RegResult;
 import rx.Observable;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class InMemoryAuthProvider implements AuthProvider, RegistrationProvider {
 
   public static final String REG_CREDENTIAL = "credential";
   public static final String REG_CODE = "123";
+  private final List<User> users;
+
+  public InMemoryAuthProvider(List<User> users) {
+    this.users = users;
+  }
 
   @Override
   public Observable<AuthResult> authenticate(AuthInput input) {
@@ -51,18 +57,18 @@ public class InMemoryAuthProvider implements AuthProvider, RegistrationProvider 
         HashMap<String, Object> map = new HashMap<>();
         map.put(BaseAuthFields.USER_ID.val(), "user_id");
         return Observable.just(RegResult.builder()
-                .data(map)
-                .status(RegResult.Status.SUCCESS)
-                .build());
+            .data(map)
+            .status(RegResult.Status.SUCCESS)
+            .build());
       } else if (input.getData().get(REG_CREDENTIAL).equals("credential")) {
         //two step registration
         HashMap<String, Object> map = new HashMap<>();
         map.put(BaseAuthFields.USERNAME.val(), loginStub);
         map.put(BaseAuthFields.CODE.val(), "code");
         return Observable.just(RegResult.builder()
-                .data(map)
-                .status(RegResult.Status.NEED_APPROVAL)
-                .build());
+            .data(map)
+            .status(RegResult.Status.NEED_APPROVAL)
+            .build());
       } else {
         return Observable.error(new RegistrationException("Registration failed"));
       }
@@ -71,10 +77,10 @@ public class InMemoryAuthProvider implements AuthProvider, RegistrationProvider 
         HashMap<String, Object> map = new HashMap<>();
         map.put(BaseAuthFields.USER_ID.val(), "user_id");
         return Observable.just(RegResult.builder()
-                .redirectUrl("http://relying.party/gateway")
-                .data(map)
-                .status(RegResult.Status.SUCCESS)
-                .build());
+            .redirectUrl("http://relying.party/gateway")
+            .data(map)
+            .status(RegResult.Status.SUCCESS)
+            .build());
       } else {
         return Observable.error(new RegistrationException("Registration failed"));
       }

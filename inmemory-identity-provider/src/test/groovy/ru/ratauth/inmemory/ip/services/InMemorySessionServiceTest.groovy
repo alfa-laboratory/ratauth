@@ -14,7 +14,6 @@ import ru.ratauth.exception.ExpiredException
 import ru.ratauth.inmemory.ip.resource.ClassPathEntityResourceLoader
 import ru.ratauth.inmemory.ip.resource.EntityParser
 import ru.ratauth.inmemory.ip.resource.EntityResourceLoader
-import ru.ratauth.inmemory.ip.services.InMemorySessionService
 import ru.ratauth.services.SessionService
 
 import static junit.framework.TestCase.assertEquals
@@ -24,17 +23,12 @@ import static junit.framework.TestCase.assertTrue
 class InMemorySessionServiceTest {
 
   private static final String TEST_ID = 'test-id'
-  public static final String CLIENT_SECRET = 'HdC4t2Wpjn/obYj9JHLVwmGzSqQ5SlatYqMF6zuAL0s='
-  public static final String SESSION_TOKEN = 'session_token'
-  public static final String CLIENT_NAME = 'mine'
-  public static final String PASSWORD = 'password'
-  public static final String SALT = 'JBn7SnEzMy0MXdNsh5GVvktSGuRs0+BNVZ47kmm3TDM='
-  public static final String TOKEN = '1234'
-  public static final String REFRESH_TOKEN = '12345'
-  public static final String CODE = '123'
-  public static final String CODE_EXPIRED = '1111'
-  public static final String ID_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vcmF0YXV0aC5ydSIsImlhdCI6MTQ1Nzg1NzAzOCwiZXhwIjoxNDg5MzkyODcxLCJhdWQiOiJzb21lLWFwcCIsInN1YiI6InVzZXJfaWQiLCJqdGkiOiJiZDYzNjkyOC03MTk2LTM5YTctODlmNi03OGY5NDY3NjU0ZWIiLCJycF9iYXNlX2FkZHJlc3MiOlsiaHR0cDovL3JhdGF1dGgucnUiLCJodHRwOi8vcmF0YXV0aC5ydSJdLCJ1c2VyX2lkIjoidXNlcl9pZCJ9.rqxqXV9X0kdjmyWxuVJkYU8sNC5sW9dC9NUqT-CodEM'
-
+  private static final String SESSION_TOKEN = 'session_token'
+  private static final String CLIENT_NAME = 'mine'
+  private static final String TOKEN = '1234'
+  private static final String REFRESH_TOKEN = '12345'
+  private static final String CODE = '123'
+  private static final String ID_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vcmF0YXV0aC5ydSIsImlhdCI6MTQ1Nzg1NzAzOCwiZXhwIjoxNDg5MzkyODcxLCJhdWQiOiJzb21lLWFwcCIsInN1YiI6InVzZXJfaWQiLCJqdGkiOiJiZDYzNjkyOC03MTk2LTM5YTctODlmNi03OGY5NDY3NjU0ZWIiLCJycF9iYXNlX2FkZHJlc3MiOlsiaHR0cDovL3JhdGF1dGgucnUiLCJodHRwOi8vcmF0YXV0aC5ydSJdLCJ1c2VyX2lkIjoidXNlcl9pZCJ9.rqxqXV9X0kdjmyWxuVJkYU8sNC5sW9dC9NUqT-CodEM'
   private static final Date NOW = new Date()
   private static final Date YESTERDAY = DateUtils.addDays(NOW, -1)
   private static final Date TOMORROW = DateUtils.addDays(NOW, 1)
@@ -86,8 +80,8 @@ class InMemorySessionServiceTest {
     sessionService.create(session)
 
     Session result = sessionService.getByValidRefreshToken(REFRESH_TOKEN, YESTERDAY)
-            .toBlocking()
-            .single()
+        .toBlocking()
+        .single()
 
     assertEquals(result, session)
   }
@@ -108,8 +102,8 @@ class InMemorySessionServiceTest {
     sessionService.create(session)
 
     Session result = sessionService.getByValidSessionToken(SESSION_TOKEN, YESTERDAY)
-            .toBlocking()
-            .single()
+        .toBlocking()
+        .single()
 
     assertEquals(result, session)
   }
@@ -130,8 +124,8 @@ class InMemorySessionServiceTest {
     sessionService.create(session)
 
     Session result = sessionService.getByValidToken(TOKEN, YESTERDAY)
-            .toBlocking()
-            .single()
+        .toBlocking()
+        .single()
 
     assertEquals(result, session)
   }
@@ -150,9 +144,9 @@ class InMemorySessionServiceTest {
   void testAddEntrySuccess() {
     Session session = createSession()
     AuthEntry authEntry = new AuthEntry(authCode: "789",
-            relyingParty: CLIENT_NAME,
-            scopes: ['rs.read'] as Set,
-            refreshToken: REFRESH_TOKEN,
+        relyingParty: CLIENT_NAME,
+        scopes: ['rs.read'] as Set,
+        refreshToken: REFRESH_TOKEN,
     )
 
     sessionService.create(session)
@@ -169,9 +163,9 @@ class InMemorySessionServiceTest {
     expectedException.expectMessage("Auth code has expired")
 
     AuthEntry authEntry = new AuthEntry(authCode: "789",
-            relyingParty: CLIENT_NAME,
-            scopes: ['rs.read'] as Set,
-            refreshToken: REFRESH_TOKEN,
+        relyingParty: CLIENT_NAME,
+        scopes: ['rs.read'] as Set,
+        refreshToken: REFRESH_TOKEN,
     )
 
     sessionService.addEntry(TEST_ID, authEntry)
@@ -181,9 +175,9 @@ class InMemorySessionServiceTest {
   void addTokenSuccess() {
     Session session = createSession()
     Token token = new Token(
-            token: 'test-token',
-            expiresIn: NOW,
-            created: YESTERDAY
+        token: 'test-token',
+        expiresIn: NOW,
+        created: YESTERDAY
     )
     sessionService.create(session)
 
@@ -233,26 +227,26 @@ class InMemorySessionServiceTest {
 
   private Session createSession() {
     new Session(
-            id: TEST_ID,
-            userId: "test_user_id",
-            identityProvider: 'STUB',
-            sessionToken: SESSION_TOKEN,
-            userInfo: ID_TOKEN,
-            status: Status.ACTIVE,
-            expiresIn: NOW,
-            entries: [
-                    new AuthEntry(authCode: CODE,
-                            relyingParty: CLIENT_NAME,
-                            scopes: ['rs.read'] as Set,
-                            refreshToken: REFRESH_TOKEN,
-                            tokens: [
-                                    new Token(
-                                            token: TOKEN,
-                                            expiresIn: NOW,
-                                            created: YESTERDAY
-                                    )
-                            ] as Set
-                    )] as Set)
+        id: TEST_ID,
+        userId: "test_user_id",
+        identityProvider: 'STUB',
+        sessionToken: SESSION_TOKEN,
+        userInfo: ID_TOKEN,
+        status: Status.ACTIVE,
+        expiresIn: NOW,
+        entries: [
+            new AuthEntry(authCode: CODE,
+                relyingParty: CLIENT_NAME,
+                scopes: ['rs.read'] as Set,
+                refreshToken: REFRESH_TOKEN,
+                tokens: [
+                    new Token(
+                        token: TOKEN,
+                        expiresIn: NOW,
+                        created: YESTERDAY
+                    )
+                ] as Set
+            )] as Set)
   }
 
 }
