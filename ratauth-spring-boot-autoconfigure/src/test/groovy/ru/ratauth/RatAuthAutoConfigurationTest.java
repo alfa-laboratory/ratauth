@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ratpack.spring.config.RatpackConfiguration;
 import ratpack.spring.config.RatpackProperties;
-import ru.ratauth.server.RatAuthApplication;
 import ru.ratauth.server.autoconfig.RatpackSpringEndpointsAutoConfiguration;
 import ru.ratauth.server.configuration.OpenIdConnectDiscoveryProperties;
 import ru.ratauth.server.configuration.renderer.RenderedConfiguration;
@@ -21,7 +20,6 @@ import static ru.ratauth.RatAuthAutoConfigurationTest.ManagementServerProperties
 public class RatAuthAutoConfigurationTest {
 
   public static final ImmutableMap<String, Object> DEFAULT_PROPERTIES = ImmutableMap.<String, Object>builder()
-
       .put("ratpack.base-dir", "file:server/src/main/resources")
       .put("ratpack.templates-path", "templates")
       .build();
@@ -30,7 +28,6 @@ public class RatAuthAutoConfigurationTest {
   @Test
   public void testDefaultConfiguration() {
     registerAndRefresh(TestDefaultConfiguration.class);
-    assertThat(this.context.getBean(RatAuthApplication.class)).isNotNull();
     assertThat(this.context.getBean(RatpackConfiguration.class)).isNotNull();
     assertThat(this.context.getBean(RenderedConfiguration.class)).isNotNull();
     assertThat(this.context.getBean(RatpackSpringEndpointsAutoConfiguration.class)).isNotNull();

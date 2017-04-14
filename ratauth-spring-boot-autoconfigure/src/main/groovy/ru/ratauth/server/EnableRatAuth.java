@@ -1,4 +1,4 @@
-package ru.ratauth;
+package ru.ratauth.server;
 
 import org.springframework.context.annotation.Import;
 

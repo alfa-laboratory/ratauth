@@ -18,7 +18,6 @@ apply plugin: 'nebula.maven-publish'
 
 bootRepackage {
   mainClass = 'ru.ratauth.server.RatAuthApplication'
-  enabled = false
 }
 
 configurations.all {
@@ -28,30 +27,10 @@ configurations.all {
 }
 
 dependencies {
-  //commons
-  compile project(':domain')
+
   compile project(':inmemory-identity-provider-starter')
-  compile 'org.apache.commons:commons-lang3:'
+  compile project(':ratauth-spring-boot-starter')
 
-  //web/reactive
-  compile 'org.springframework.boot:spring-boot-starter-actuator'
-  compile 'org.springframework.boot:spring-boot-starter-web'
-  compile 'io.ratpack:ratpack-rx'
-  compile 'io.ratpack:ratpack-spring-boot'
-  compile 'io.ratpack:ratpack-groovy'
-  compile 'com.google.inject:guice'
-
-  //crypto
-  compile 'com.nimbusds:nimbus-jose-jwt'
-
-  compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
-
-  //docs/test
-  testCompile 'org.springframework.restdocs:spring-restdocs-restassured:1.1.0.RELEASE'
-  testCompile 'org.springframework.boot:spring-boot-starter-test'
-
-  dockerJava 'com.github.docker-java:docker-java:3.0.6'
-  dockerJava 'cglib:cglib:3.2.0'
 }
 
 compileJava.dependsOn(processResources)

@@ -18,10 +18,10 @@ import ru.ratauth.server.services.RegistrationService
 import rx.Subscription
 
 import static ratpack.jackson.Jackson.json
-import static ratpack.rx.RxRatpack.bindExec
 import static ratpack.rx.RxRatpack.observe
 import static ru.ratauth.server.handlers.readers.AuthzRequestReader.readClientId
 import static ru.ratauth.server.handlers.readers.RegistrationRequestReader.readRegistrationRequest
+
 /**
  * @author mgorelikov
  * @since 11/11/16

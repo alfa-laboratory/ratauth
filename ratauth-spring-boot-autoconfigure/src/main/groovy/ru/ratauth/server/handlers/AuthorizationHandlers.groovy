@@ -14,9 +14,11 @@ import ru.ratauth.server.services.AuthorizeService
 import rx.Observable
 
 import static ratpack.rx.RxRatpack.observe
+import static ru.ratauth.interaction.GrantType.AUTHENTICATION_TOKEN
+import static ru.ratauth.interaction.GrantType.SESSION_TOKEN
 import static ru.ratauth.server.handlers.readers.AuthzRequestReader.readAuthzRequest
 import static ru.ratauth.server.handlers.readers.AuthzRequestReader.readClientId
-import static ru.ratauth.interaction.GrantType.*
+
 /**
  * @author mgorelikov
  * @since 30/10/15

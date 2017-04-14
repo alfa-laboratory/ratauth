@@ -17,5 +17,5 @@ public interface TokenProcessor {
                      String userId, Map<String, Object> userInfo);
 
   Map<String,Object> extractInfo(String jwt, String secret);
-  Map<String,Object> filterUserInfo(Map<String,Object>  info);
+  Map<String,Object> filterUserInfo(Map<String, Object> info);
 }

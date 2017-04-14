@@ -1,9 +1,54 @@
+ext {
+  snippetsDir = file("/build/docs/generated-snippets")
+}
+
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'nebula.maven-publish'
+
+//configurations.all {
+//  resolutionStrategy {
+//    preferProjectModules()
+//  }
+//}
+
 dependencies {
-  compile project(':server')
+
+  compile project(':domain')
+
   compile 'org.springframework.boot:spring-boot'
   compile 'org.springframework.boot:spring-boot-starter'
   compile 'org.springframework.boot:spring-boot-starter-test'
   compile 'org.springframework.boot:spring-boot-starter-actuator'
   compile 'org.springframework.boot:spring-boot-configuration-processor'
+
+  compile 'org.apache.commons:commons-lang3:'
+
+  //web/reactive
+  compile 'org.springframework.boot:spring-boot-starter-actuator'
+  compile 'org.springframework.boot:spring-boot-starter-web'
+  compile 'io.ratpack:ratpack-rx'
+  compile 'io.ratpack:ratpack-spring-boot'
+  compile 'io.ratpack:ratpack-groovy'
+  compile 'com.google.inject:guice'
+
+  //crypto
+  compile 'com.nimbusds:nimbus-jose-jwt'
+
+  compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
+
+  //docs/test
+  testCompile 'org.springframework.restdocs:spring-restdocs-restassured:1.1.0.RELEASE'
+  testCompile 'org.springframework.boot:spring-boot-starter-test'
+
 }
 
+//compileJava.dependsOn(processResources)
+//
+//task cleanTempDirs(type: Delete) {
+//  delete fileTree(dir: snippetsDir)
+//}
+//
+//test {
+//  outputs.dir snippetsDir
+//  dependsOn cleanTempDirs
+//}

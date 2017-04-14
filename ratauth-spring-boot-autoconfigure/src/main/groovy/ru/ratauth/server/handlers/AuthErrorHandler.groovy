@@ -10,11 +10,7 @@ import org.springframework.stereotype.Component
 import ratpack.error.ServerErrorHandler
 import ratpack.handling.Context
 import ratpack.http.MediaType
-import ru.ratauth.exception.AuthorizationException
-import ru.ratauth.exception.BaseAuthServerException
-import ru.ratauth.exception.ExpiredException
-import ru.ratauth.exception.IdentifiedException
-import ru.ratauth.exception.RegistrationException
+import ru.ratauth.exception.*
 import ru.ratauth.server.handlers.readers.ReadRequestException
 import ru.ratauth.utils.ExceptionUtils
 

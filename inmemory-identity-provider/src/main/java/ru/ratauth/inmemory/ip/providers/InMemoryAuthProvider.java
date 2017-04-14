@@ -44,9 +44,11 @@ public class InMemoryAuthProvider implements AuthProvider, RegistrationProvider 
   public Observable<RegResult> register(RegInput input) {
     String login = input.getData().get(BaseAuthFields.USERNAME.val());
     String password = input.getData().get(BaseAuthFields.PASSWORD.val());
+    String loginStub = "login";
+    String passwordStub = "password";
     if (!input.getData().containsKey(BaseAuthFields.CODE.val())) { //first step of registration
       //one step registration
-      if (login != null && login.equals("login") && password != null & password.equals("password")) {
+      if (login != null && login.equals(loginStub) && password != null && password.equals(passwordStub)) {
         HashMap<String, Object> map = new HashMap<>();
         map.put(BaseAuthFields.USER_ID.val(), "user_id");
         return Observable.just(RegResult.builder()
@@ -56,7 +58,7 @@ public class InMemoryAuthProvider implements AuthProvider, RegistrationProvider 
       } else if (input.getData().get(REG_CREDENTIAL).equals("credential")) {
         //two step registration
         HashMap<String, Object> map = new HashMap<>();
-        map.put(BaseAuthFields.USERNAME.val(), "login");
+        map.put(BaseAuthFields.USERNAME.val(), loginStub);
         map.put(BaseAuthFields.CODE.val(), "code");
         return Observable.just(RegResult.builder()
                 .data(map)
@@ -66,7 +68,7 @@ public class InMemoryAuthProvider implements AuthProvider, RegistrationProvider 
         return Observable.error(new RegistrationException("Registration failed"));
       }
     } else {//second step of registration
-      if (input.getData().get(BaseAuthFields.CODE.val()).equals(REG_CODE) && login.equals("login")) {
+      if (input.getData().get(BaseAuthFields.CODE.val()).equals(REG_CODE) && login.equals(loginStub)) {
         HashMap<String, Object> map = new HashMap<>();
         map.put(BaseAuthFields.USER_ID.val(), "user_id");
         return Observable.just(RegResult.builder()

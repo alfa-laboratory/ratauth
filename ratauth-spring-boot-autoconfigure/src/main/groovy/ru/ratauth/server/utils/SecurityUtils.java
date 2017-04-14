@@ -4,7 +4,6 @@ package ru.ratauth.server.utils;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ArrayUtils;
 
-
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;

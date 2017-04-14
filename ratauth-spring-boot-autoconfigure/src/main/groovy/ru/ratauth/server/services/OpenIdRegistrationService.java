@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.exception.RegistrationException;
-import ru.ratauth.interaction.GrantType;
 import ru.ratauth.interaction.RegistrationRequest;
 import ru.ratauth.interaction.RegistrationResponse;
 import ru.ratauth.interaction.TokenResponse;
@@ -18,7 +17,6 @@ import ru.ratauth.utils.StringUtils;
 import ru.ratauth.utils.URIUtils;
 import rx.Observable;
 
-import java.net.URI;
 import java.util.Map;
 
 /**

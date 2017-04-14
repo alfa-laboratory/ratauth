@@ -17,15 +17,6 @@ public class RatAuthServerTest {
   private static final int DEFAULT_RATPACK_PORT = 5050;
   private ConfigurableApplicationContext context;
 
-  private void registerAndRefresh(Class<?> configClass, String... properties) {
-    HashMap<String, Object> mergedPropsMap = mergePropertiesWithDefault(properties);
-    context = new SpringApplicationBuilder(configClass)
-        .web(false)
-        .properties(mergedPropsMap)
-        .profiles("local")
-        .run();
-  }
-
   @Test
   public void testRatpackServerBeanShouldBeLoadedAndStarted() {
     registerAndRefresh(TestDefaultConfiguration.class);
@@ -57,6 +48,15 @@ public class RatAuthServerTest {
     if (context != null) {
       context.close();
     }
+  }
+
+  private void registerAndRefresh(Class<?> configClass, String... properties) {
+    HashMap<String, Object> mergedPropsMap = mergePropertiesWithDefault(properties);
+    context = new SpringApplicationBuilder(configClass)
+            .web(false)
+            .properties(mergedPropsMap)
+            .profiles("local")
+            .run();
   }
 
   private HashMap<String, Object> mergePropertiesWithDefault(String[] properties) {
