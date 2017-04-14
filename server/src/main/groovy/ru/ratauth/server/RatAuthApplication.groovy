@@ -10,7 +10,7 @@ import ru.ratauth.server.configuration.OpenIdConnectDiscoveryProperties
 @Slf4j
 @SpringBootApplication
 @EnableRatpack
-@EnableConfigurationProperties([OpenIdConnectDiscoveryProperties])
+@EnableConfigurationProperties(OpenIdConnectDiscoveryProperties)
 class RatAuthApplication {
   public static final int DEFAULT_PADDING = 50
 

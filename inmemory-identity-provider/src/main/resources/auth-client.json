@@ -1,0 +1,15 @@
+[
+  {
+    "id": "id",
+    "name": "mine",
+    "secret": "HdC4t2Wpjn/obYj9JHLVwmGzSqQ5SlatYqMF6zuAL0s=",
+    "password": "2Fdu5u4mx7395XcbjOfCJ9g2U5b1vNMuO0FtLFbY4+8=",
+    "salt": "JBn7SnEzMy0MXdNsh5GVvktSGuRs0+BNVZ47kmm3TDM="
+  },
+  {
+    "id": "id",
+    "name": "mine3",
+    "secret": "HdC4t2Wpjn/obYj9JHLVwmGzSqQ5SlatYqMF6zuAL0s=",
+    "password": "password"
+  }
+]

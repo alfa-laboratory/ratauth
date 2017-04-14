@@ -6,6 +6,7 @@ spring:
      WRITE_NULL_MAP_VALUES: false
 
 auth:
+ master_secret: "cnlqV2hVQml3aWdrc1RqWXBSaFpma3l5enhNVU1TS1A="
  secret:
   ttl: 2678400
  token:

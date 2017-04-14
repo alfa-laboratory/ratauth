@@ -30,6 +30,7 @@ configurations.all {
 dependencies {
   //commons
   compile project(':domain')
+  compile project(':inmemory-identity-provider-starter')
   compile 'org.apache.commons:commons-lang3:'
 
   //web/reactive

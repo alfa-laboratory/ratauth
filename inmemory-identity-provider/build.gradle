@@ -1,0 +1,12 @@
+apply plugin: "java"
+
+dependencies {
+  compile project(':domain')
+  compile 'org.apache.commons:commons-lang3:'
+  compile 'org.springframework.boot:spring-boot-starter'
+
+  compile 'org.springframework.boot:spring-boot-starter-data-jpa'
+  compile 'org.hsqldb:hsqldb'
+  compile 'io.ratpack:ratpack-rx'
+  compile 'com.google.code.gson:gson'
+}

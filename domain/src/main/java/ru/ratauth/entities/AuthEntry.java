@@ -34,20 +34,22 @@ public class AuthEntry {
   private AuthType authType;
   private String redirectUrl;
 
-  public void addToken(Token token) {
-    if(token == null)
-      return;
-    if (this.tokens == null || this.tokens.isEmpty())
+  public boolean addToken(Token token) {
+    if (token == null) {
+      return false;
+    }
+    if (this.tokens == null || this.tokens.isEmpty()) {
       this.tokens = new HashSet<>();
-    this.tokens.add(token);
+    }
+    return this.tokens.add(token);
   }
 
   public Optional<Token> getLatestToken() {
     if (tokens == null)
       return Optional.empty();
     return tokens.stream()
-        .filter(el -> el != null)
-        .sorted((el1, el2) -> el2.getExpiresIn().compareTo(el1.getExpiresIn()))
-        .findFirst();
+            .filter(el -> el != null)
+            .sorted((el1, el2) -> el2.getExpiresIn().compareTo(el1.getExpiresIn()))
+            .findFirst();
   }
 }

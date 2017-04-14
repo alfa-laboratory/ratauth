@@ -1,0 +1,8 @@
+dependencies {
+    provided project(':inmemory-identity-provider'), optional
+    provided 'org.springframework.boot:spring-boot', optional
+    provided 'org.springframework.boot:spring-boot-starter', optional
+    provided 'org.springframework.boot:spring-boot-configuration-processor', optional
+
+    testCompile 'org.springframework.boot:spring-boot-starter-test', optional
+}

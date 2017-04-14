@@ -5,4 +5,6 @@ include 'domain'
 include 'docs'
 include 'ratauth-spring-boot-starter'
 include 'ratauth-spring-boot-autoconfigure'
-
+include 'inmemory-identity-provider'
+include 'inmemory-identity-provider-autoconfigure'
+include 'inmemory-identity-provider-starter'

@@ -37,6 +37,8 @@ allprojects {
   apply plugin: 'idea'
   apply plugin: 'nebula.release'
   apply plugin: 'nebula.info'
+  apply plugin: 'nebula.provided-base'
+  apply plugin: 'nebula.optional-base'
 
   repositories {
     mavenCentral()

@@ -1,0 +1,35 @@
+[
+  {
+    "id": "id",
+    "name": "mine",
+    "identityProvider": "STUB",
+    "secret": "HdC4t2Wpjn/obYj9JHLVwmGzSqQ5SlatYqMF6zuAL0s=",
+    "password": "2Fdu5u4mx7395XcbjOfCJ9g2U5b1vNMuO0FtLFbY4+8=",
+    "salt": "JBn7SnEzMy0MXdNsh5GVvktSGuRs0+BNVZ47kmm3TDM=",
+    "codeTTL": 36000,
+    "refreshTokenTTL": 36000,
+    "sessionTTL": 36000,
+    "tokenTTL": 36000,
+    "redirectURIs": [
+      "domain.mine",
+      "mine.domain"
+    ],
+    "registrationRedirectURI": "http://domain.mine/oidc/register",
+    "authorizationRedirectURI": "http://domain.mine/oidc/authorize",
+    "authorizationPageURI": "http://domain.mine/oidc/web/authorize?is_webview=true",
+    "registrationPageURI": "http://domain.mine/oidc//web/register?is_webview=true",
+    "incAuthLevelPageURI": "http://domain.mine/oidc//web/inc_auth_level?is_webview=true"
+  },
+  {
+    "id": "id2",
+    "name": "mine2",
+    "identityProvider": "STUB2",
+    "secret": "HdC4t2Wpjn/obYj9JHLVwmGzSqQ5SlatYqMF6zuAL0s=",
+    "password": "password",
+    "codeTTL": 36000,
+    "refreshTokenTTL": 36000,
+    "sessionTTL": 36000,
+    "tokenTTL": 36000,
+    "authorizationRedirectURI": "http://domain.mine/oidc/authorize"
+  }
+]

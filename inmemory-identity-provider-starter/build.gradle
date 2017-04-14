@@ -1,0 +1,11 @@
+apply plugin: 'nebula.compile-api'
+
+dependencies {
+    compileApi project(':inmemory-identity-provider-autoconfigure')
+    compileApi project(':inmemory-identity-provider')
+
+    compile 'org.springframework.boot:spring-boot-starter'
+
+    compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
+}
