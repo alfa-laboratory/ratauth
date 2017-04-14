@@ -2,6 +2,7 @@ package ru.ratauth.inmemory.ip.resource;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.core.io.UrlResource;
 
 import java.io.FileInputStream;
 import java.io.InputStream;

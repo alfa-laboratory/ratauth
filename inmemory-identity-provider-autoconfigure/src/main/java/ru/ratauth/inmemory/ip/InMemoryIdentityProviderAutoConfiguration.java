@@ -1,11 +1,14 @@
 package ru.ratauth.inmemory.ip;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import ru.ratauth.entities.AuthClient;
 import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.entities.SessionClient;
@@ -43,12 +46,16 @@ import static org.springframework.core.Ordered.LOWEST_PRECEDENCE;
         AuthProvider.class,
         RegistrationProvider.class})
 @AutoConfigureOrder(LOWEST_PRECEDENCE)
+@ConditionalOnProperty(prefix = "ru.ratauth.inmemory.ip", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class InMemoryIdentityProviderAutoConfiguration {
 
   private static final String RELYING_PARTY_FILE = "relying-party.json";
   private static final String AUTH_CLIENT_FILE = "auth-client.json";
   private static final String SESSION_CLIENT_FILE = "session-client.json";
   private static final String RP_SOURCE_DIR = "rp.source.dir";
+
+  @Autowired
+  private Environment environment;
 
   @Bean(name = "STUB")
   public InMemoryAuthProvider authProvider() {
@@ -80,9 +87,9 @@ public class InMemoryIdentityProviderAutoConfiguration {
 
   @Bean
   public EntityResourceLoader fileEntityResourceLoader() {
-    String property = System.getProperty(RP_SOURCE_DIR);
-    if (property != null) {
-      return new FileEntityResourceLoader(property);
+    String rpSourceDir = environment.getProperty(RP_SOURCE_DIR);
+    if (rpSourceDir != null) {
+      return new FileEntityResourceLoader(rpSourceDir);
     }
     return new ClassPathEntityResourceLoader();
   }
