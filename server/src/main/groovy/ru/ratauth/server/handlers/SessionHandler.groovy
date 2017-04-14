@@ -20,7 +20,8 @@ class SessionHandler implements Action<Chain> {
 
   public static final String INVALIDATE_SESSION_BY_REFRESH_TOKEN = 'invalidate_session_by_refresh_token'
 
-  @Autowired SessionService sessionService
+  @Autowired
+  SessionService sessionService
 
   @Override
   void execute(Chain chain) throws Exception {
@@ -36,8 +37,8 @@ class SessionHandler implements Action<Chain> {
       sessionService.invalidateByRefreshToken(request.clientId, request.refreshToken)
     } subscribe({
       res -> ctx.response.status HttpStatus.OK.value() send()
-    }, { /*on error*/
-    throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable)
+    }, {
+      throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable)
     }
     )
   }
