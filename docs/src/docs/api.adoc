@@ -169,6 +169,19 @@ include::../../../server/build/docs/generated-snippets/api/check_token_for_3rd_p
 .Fields
 include::../../../server/build/docs/generated-snippets/api/check_token_for_3rd_party_succeed/response-fields.adoc[]
 
+==== Invalidate session
+===== Request example
+include::../../../server/build/docs/generated-snippets/api/session_invalidation_succeed/http-request.adoc[]
+include::../../../server/build/docs/generated-snippets/api/session_invalidation_succeed/httpie-request.adoc[]
+include::../../../server/build/docs/generated-snippets/api/session_invalidation_succeed/curl-request.adoc[]
+.Headers
+include::../../../server/build/docs/generated-snippets/api/session_invalidation_succeed/request-headers.adoc[]
+.Parameters
+include::../../../server/build/docs/generated-snippets/api/session_invalidation_succeed/request-parameters.adoc[]
+
+====== Succeed
+include::../../../server/build/docs/generated-snippets/api/session_invalidation_succeed/http-response.adoc[]
+
 ==== OpenID Connect Discovery Configuration
 ===== Request example
 include::../../../server/build/docs/generated-snippets/api/should_return_openid_discovery_fields/http-request.adoc[]

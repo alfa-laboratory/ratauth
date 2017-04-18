@@ -91,6 +91,13 @@ public interface SessionService {
   Observable<Boolean> invalidateForClient(String relyingParty, Date blocked);
 
   /**
+   * Invalidates session by refresh token from current moment
+   * @param relyingParty client unique name
+   * @param refreshToken invalidated session search refresh token
+   * @return true when session was successfully invalidated
+   */
+  Observable<Boolean> invalidateByRefreshToken(String relyingParty, String refreshToken);
+  /**
    * Updates session lastCheck date
    * @param sessionId session identifier
    * @param lastCheck date of lastCheck
