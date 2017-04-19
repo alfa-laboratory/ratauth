@@ -184,6 +184,7 @@ subprojects {
   dependencies {
     compileOnly 'org.projectlombok:lombok'
     compileOnly 'com.google.code.findbugs:annotations'
+    compileOnly 'org.slf4j:slf4j-api'
     compile 'org.codehaus.groovy:groovy-all'
     compile 'io.reactivex:rxjava'
 

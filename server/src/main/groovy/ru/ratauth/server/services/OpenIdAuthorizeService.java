@@ -20,7 +20,6 @@ import ru.ratauth.utils.URIUtils;
 import rx.Observable;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Date;
 import java.util.Map;

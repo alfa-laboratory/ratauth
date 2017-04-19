@@ -4,7 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
@@ -14,6 +16,7 @@ import java.util.Set;
  * @since 16/02/16
  */
 @Data
+@Slf4j
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -57,10 +60,13 @@ public class Session {
   public Optional<AuthEntry> getEntry(String relyingPartyId) {
     if(entries == null)
       return Optional.empty();
-    return entries.stream().filter(it -> it.getRelyingParty().equals(relyingPartyId)).findFirst();
+    return entries.stream()
+        .filter(it -> it.getRelyingParty().equals(relyingPartyId))
+        .sorted(Comparator.comparing(AuthEntry::getCodeExpiresIn).reversed())
+        .findFirst();
   }
   public Optional<Token> getToken(String relyingPartyId) {
-    return this.getEntry(relyingPartyId).flatMap(el -> el.getLatestToken());
+    return this.getEntry(relyingPartyId).flatMap(AuthEntry::getLatestToken);
   }
 
   public AuthEntry getPrimaryEntry() {
