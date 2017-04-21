@@ -1,8 +1,15 @@
 [
   {
+<<<<<<< HEAD
     "userName" : "vadim",
     "userId" : "vadik0110",
     "password" : "vadim-passowrd",
     "code" : "0000"
+=======
+    "userName": "login",
+    "userId": "user_id",
+    "password": "password",
+    "code": "code"
+>>>>>>> e95d3cb914224c844b405550c2620b69b4288609
   }
 ]
