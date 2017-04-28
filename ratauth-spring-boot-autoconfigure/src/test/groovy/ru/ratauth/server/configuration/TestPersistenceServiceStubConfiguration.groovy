@@ -8,7 +8,7 @@ import ru.ratauth.server.local.PersistenceServiceStubConfiguration
  * @author mgorelikov
  * @since 25/02/16
  */
-@TestConfiguration
+//@TestConfiguration
 class TestPersistenceServiceStubConfiguration extends PersistenceServiceStubConfiguration {
 
 }

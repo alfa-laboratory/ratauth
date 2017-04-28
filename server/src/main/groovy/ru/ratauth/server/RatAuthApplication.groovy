@@ -8,15 +8,15 @@ import org.springframework.boot.builder.SpringApplicationBuilder
 @SpringBootApplication
 class RatAuthApplication {
 
-  public static final int DEFAULT_PADDING = 50
+    public static final int DEFAULT_PADDING = 50
 
-  static void main(String[] args) {
-    log.debug 'Starting'.center(DEFAULT_PADDING, '=')
+    static void main(String[] args) {
+        log.debug 'Starting'.center(DEFAULT_PADDING, '=')
 
-    new SpringApplicationBuilder(RatAuthApplication)
-        .web(false)
-        .run(args)
+        new SpringApplicationBuilder(RatAuthApplication)
+                .web(false)
+                .run(args)
 
-    log.debug 'Started'.center(DEFAULT_PADDING, '=')
-  }
+        log.debug 'Started'.center(DEFAULT_PADDING, '=')
+    }
 }

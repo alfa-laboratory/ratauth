@@ -6,7 +6,7 @@ import ru.ratauth.server.local.ProvidersStubConfiguration
  * @author mgorelikov
  * @since 03/11/15
  */
-@TestConfiguration
+//@TestConfiguration
 class TestProvidersStubConfiguration extends ProvidersStubConfiguration {
 
 }
