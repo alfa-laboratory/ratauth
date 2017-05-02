@@ -16,7 +16,7 @@ import ru.ratauth.server.services.log.LogFields;
  */
 @Component
 public class LoggingModule extends AbstractModule {
-  public static final String PERFORATING_TRACE_ID = "X-B3-TraceId";
+  private static final String PERFORATING_TRACE_ID = "X-B3-TraceId";
 
   @Value("${spring.application.name}")
   private String applicationName;
@@ -27,7 +27,6 @@ public class LoggingModule extends AbstractModule {
     bind(MDCInterceptor.class).toInstance(MDCInterceptor.instance());
     Multibinder.newSetBinder(binder(), HandlerDecorator.class).addBinding().toInstance(HandlerDecorator.prepend(ctx -> {
       String requestId = ctx.get(RequestId.class).toString();
-      MDC.put(LogFields.REQUEST_ID.val(), requestId);
       MDC.put(PERFORATING_TRACE_ID, requestId);
       MDC.put(LogFields.APPLICATION.val(), applicationName);
       ctx.next();
