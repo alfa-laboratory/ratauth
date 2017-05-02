@@ -1,5 +1,6 @@
 package ru.ratauth.server.handlers
 
+import groovy.transform.CompileStatic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import ratpack.func.Action
@@ -8,12 +9,12 @@ import ratpack.handling.Context
 import ru.ratauth.server.configuration.OpenIdConnectDiscoveryProperties
 
 import static ratpack.jackson.Jackson.json
-
 /**
  * @author tolkv
  * @version 09/11/2016
  */
 @Component
+@CompileStatic
 class WellKnownHandler implements Action<Chain> {
 
   @Autowired
