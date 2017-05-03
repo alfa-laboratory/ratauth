@@ -1,0 +1,53 @@
+= Интеграция с PASSPORT
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 4
+:sectlinks:
+
+[description]
+== Установка cerberus-web
+Для установки cerberus-web необходимо переопределить следующие поля в config сервере
+[source,yml]
+----
+include::./yml/application-example.yml[]
+----
+
+manifest.json.template для marathon
+[source,json]
+----
+include::./json/marathon.json.template[]
+----
+
+== Настройка Relying Party на примере выписки:
+=== Заводим клиента в mongodb сервера авторизации
+
+Для интеграции с PASSPORT Вашей системе потребуются свои настройки на сервере авторизации.
+
+Чтобы создать relying party можно связаться с Егором Морозовым:
+
+slack: @eamorozov
+
+[source,json]
+----
+include::./json/mongo.json[]
+----
+
+IMPORTANT: Важно обратить внимание на следущие поля при настройке:
+
+"clientType" : "RELYING_PARTY"
+
+"identityProvider" : "DummyIdentityProvider"
+
+"redirectURIs" : [ "https://testjmb.alfabank.ru" ]
+
+"authorizationRedirectURI" : "https://testjmb.alfabank.ru/retail-statement-api/gateway/token"
+
+== Работа без SSL
+При интеграции на тестовой среде cerberus-web запускается без использования ssl:
+
+[source,bash]
+----
+--spring.profiles.active=whore
+----

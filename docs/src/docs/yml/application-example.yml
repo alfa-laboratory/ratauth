@@ -1,0 +1,76 @@
+# Описание маршрутов до веб приложений
+zuul:
+  routes:
+    # параметр может принимать любое значение, не влияет на работу приложения (нельзя дублировать)
+    repayment-ui:
+      # url по которому cerberus-web будет маршрутизировать запрос,
+      # если не указать /** в конце паттерна, будет искать прямое совпадение
+      path: /web/repayment-ui-only/**
+      # uri по которому смаршрутизирован запрос
+      url: http://asappdev3:10044
+      # альтернативный вариант для маршрутизации запроса, будет использован если не указан url
+      serviceId: repayment-ui-application
+      # убирает path из uri запроса если выставлен true
+      # (пример: http://web-gateway/web/repayment-ui-only/0003 -> http://asappdev3:10044/0003)
+      stripPrefix: true
+      # Имя relying party на серевере авторизации (параметр нужен для поиска в конфиге ниже gateway.client)
+      clientId: pfm-rp
+    notification:
+      path: /notification/api/**
+      service-id: notification-api
+      stripPrefix: true
+      clientId: mobile-app
+  # Обяхательный параметр. Нужен для вызова API cerberus-web.
+  # Для игнорирования сервисов не требующих маршрутизации через cerberus-web
+  ignoredPatterns: ${gateway.context-url}/**
+
+# Используется для сервисов не трубующих авторизацию
+security:
+  ignored: /zuul, /health, /notification/api/push/deliveryConfirm, /non_finance/api/**
+
+# адрес сервера авторизации. Можно использовать service discovery.
+auth-server:
+  # если указан URL, используется он
+  url: https://testsense.alfabank.ru/oidctest/auth_server
+  service-id: oidc-auth-api
+
+# Настройки cerberus-web
+gateway:
+  # Путь по которому доступен API cerberus-web
+  context-url: /gateway/oauth
+  # Интервал проверки access token в mills
+  token-check-interval: 120000
+  # URL до API кроссавторизации веб приложений
+  redirect-url: https://testsense.alfabank.ru/oidctest/cerberus-mini/passport_gateway/cross_auth
+  # URL на который происходит перенаправление в случае ошибки
+  error-url: https://testsense.alfabank.ru/oidctest/cerberus-mini/error
+  # Путь к session cookie. Указывается контекстный путь по которому доступен cerberus-web
+  cookie.path: /retail-statement-api
+  # Relying parties
+  clients:
+    # имя relying party на серевере авторизации = client_id
+    mobile-bank:
+      password: 1231239
+      secret: Ho5cL8OmMmBCATAxj9naD6Aadqo6CXz/1nk80bamPho=
+      scope: mobile-bank.read
+      header-name: customerid
+    mobile-app:
+      password: 1231238
+      secret: ItGMEktWuqqG7LQIs5sTDx/M0cDLKsE9opN8cMzkW6Y=
+      scope: mobile-app.read
+      header-name: customerid
+    pfm-rp:
+      password: Bz0QdU2PTjnuGtWRs1habCaiSaqbarbZ
+      secret: xQi6PpIt642xDRLx/Fccej6/s4oqNi6suAgJA9pVmEWdXFnGpOvnSrWgcFdV42cSJLRVMZvj8minaTW2gvMysDPLUxa2uH++p5jo/xbwe2Mx2NcJSPzz8cC+aMSN+XzjzRb407/ISeaIyJTo4juOmzGtLQzRR3ezazI9UMdvzG4=
+      scope: pfm-rp.read
+      header-name: customerid
+
+hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 15000
+
+# Необходим кластер hazelcast. http://git/projects/DOPS/repos/ansible-hazelcast/browse
+hazelcast:
+  nodes: asappdev1:5701, asappdev2:5701, asappdev3:5701
+  # порт hazelcast стартующего с приложением
+  local.port: 5701
+  name: test
+  password: test1

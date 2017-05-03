@@ -1,0 +1,30 @@
+= Интеграция с PASSPORT
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 4
+:sectlinks:
+
+== Пример выполнения запросов к API
+* Регистрируемся
+----
+curl -XGET -k -i 'https://testsense.alfabank.ru/passport/openid-blue/register?client_id=mobile-app&scope=openid%20retail-statement-rp&account_number=40817810804440002233&response_type=code' -H 'Accept: application/json'
+----
+* Копируем референс и получаем токены под mobile-app
+----
+curl -XPOST -k -i 'https://testsense.alfabank.ru/passport/openid-blue/token' -d 'reference=P3102051700081fw&code=0000&username=18630703&grant_type=AUTHORIZATION_CODE&response_type=token&scope=retail-statement-rp.read' -u 'mobile-app:1231238'
+----
+* Пытаемся авторизоваться через сервер по своему refresh_token
+----
+curl -i -k "https://testjmb.alfabank.ru/retail-statement-api/gateway/crossauth?refresh_token=8ba73b51-7f0f-3731-a3d6-bdc3840fdce9&client_id=retail-statement-rp" -u "mobile-app:1231238"
+----
+* Прямой вызов сервера авторизации для cross_auth (кросс-авторизации)
+----
+curl -i -k "https://testsense.moscow.alfaintra.net/passport/openid-blue/token" -d "refresh_token=35ff1f34-4cfc-3f30-b338-b44fd59a3a37&grant_type=REFRESH_TOKEN&response_type=TOKEN" -XPOST -u "mobile-app:1231238"
+----
+* Получаем redirect_url с кодом авторизации (соответствует api mongo "authorizationRedirectURI" : "https://testjmb.alfabank.ru/retail-statement-api/token")
+
+----
+curl -i -k "https://testjmb.alfabank.ru/retail-statement-api/gateway/token?redirect_uri=https%3A%2F%2Ftestjmb.alfabank.ru%2Fretail-statement-api%2Fgateway%2Ftoken&code=5f9c6ad0-6a08-3bd6-aa67-5b62480198f4&expires_in=1493753052064"
+----

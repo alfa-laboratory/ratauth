@@ -1,0 +1,25 @@
+{
+  "_id" : ObjectId("58f4f605acb5d703a0349eaf"),
+  "name" : "retail-statement-rp",
+  "clientType" : "RELYING_PARTY",
+  "description" : "Online Retail blablabla",
+  "password" : "SwvqsafasfasfdasQuMm2S",
+  "salt" : "sdfasdfa",
+  "secret" : "erewrwrwqre",
+  "created" : ISODate("2017-04-17T17:06:13.633Z"),
+  "secretExpiresIn" : ISODate("2020-01-12T17:06:13.633Z"),
+  "status" : "ACTIVE",
+  "identityProvider" : "DummyIdentityProvider",
+  "codeTTL" : "180",
+  "tokenTTL" : "120",
+  "refreshTokenTTL" : "180",
+  "sessionTTL" : "7776000",
+  "redirectURIs" : [
+    "https://testjmb.alfabank.ru"
+  ],
+  "registrationRedirectURI" :
+  "http://localhost:8082//register",
+  "authorizationRedirectURI" : "https://testjmb.alfabank.ru/retail-statement-api/gateway/token",
+  "registrationPageURI" : "https://testjmb.alfabank.ru/retail-statement-api/registration?is_webview=true",
+  "authorizationPageURI" : "https://testjmb.alfabank.ru/retail-statement-api/auth?is_webview=true"
+}

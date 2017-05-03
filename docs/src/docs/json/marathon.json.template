@@ -1,22 +1,52 @@
 {
-    // Имя приложения в marathon
-    "id": "/mobile/gateway-web",
-
-    // Найтройки config сервера
-    "env": {
-        "APPLICATION_NAME": "${manifest.mobile_gateway_api.app_name}",
-        "APP": "${manifest.mobile_gateway_api.log_name}",
-        "EUREKA_SERV": "${manifest.mobile_gateway_api.eureka_servers}",
-        "CONFIG_BRANCH": "${manifest.mobile_gateway_api.config_branch}",
-        "CONFIG_SERV": "${manifest.mobile_gateway_api.config_server}"
-    },
-
-    // Настройки HAPROXY
-    "labels": {
-        "HAPROXY_DEPLOYMENT_GROUP": "${manifest.mobile_gateway_api.deployment_group}",
-        "HAPROXY_GROUP": "${manifest.mobile_gateway_api.ha_group}",
-        "HAPROXY_0_HTTP_BACKEND_PROXYPASS_PATH": "${manifest.mobile_gateway_api.ha_path}",
-        "HAPROXY_0_PATH": "${manifest.mobile_gateway_api.ha_path}",
-        "HAPROXY_0_VHOST": "${manifest.mobile_gateway_api.ha_vhost}"
+  "id": "{{ app_id }}",
+  "container": {
+    "docker": {
+      "image": "docker.moscow.alfaintra.net/java:alpine-server-jre112-standard",
+      "network": "BRIDGE",
+      "portMappings": [
+        { "containerPort": 8080 },
+        { "containerPort": 5701 }
+      ],
+      "parameters": [
+        { "key": "memory", "value": "{{ cerberus_web_container_memory_mb }}M" },
+        { "key": "memory-swap", "value": "{{ cerberus_web_container_memory_mb }}M" }
+      ]
     }
+  },
+  "healthChecks": [{
+    "protocol": "HTTP",
+    "path": "/health",
+    "portIndex": 0,
+    "gracePeriodSeconds": 300,
+    "intervalSeconds": 10,
+    "timeoutSeconds": 20,
+    "maxConsecutiveFailures": 6
+  }],
+  "backoffFactor": 2,
+  "backoffSeconds": 1,
+  "maxLaunchDelaySeconds": 100,
+  "upgradeStrategy": {
+    "minimumHealthCapacity": 0.5,
+    "maximumOverCapacity": 0.2
+  },
+  "cmd": "java -Xmx512M -Djava.awt.headless=true -Duser.timezone=Europe/Moscow -server -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark -jar $MESOS_SANDBOX/cerberus-web-{{ retail_cerberus_web_version }}.jar --logging.config=$MESOS_SANDBOX/logback.groovy --server.port=8080 --logging.level.com.netflix.discovery=OFF --debug {% if cerberus_web_active_profile is defined and cerberus_web_active_profile %} --spring.profiles.active={{ cerberus_web_active_profile }} {% endif %} --logging.level.ru.cerberus=DEBUG",
+  "cpus": 0.1,
+  "mem": {{ cerberus_web_mem_mb }},
+  "uris": [
+    "http://mvn/artifactory/snapshots/ru/ratauth/cerberus-web/{{ retail_cerberus_web_version }}/cerberus-web-{{ retail_cerberus_web_version }}.jar",
+    "http://mvn/artifactory/releases/ru/sense/resources/logback_config/1.3.2/logback_config-1.3.2.tar.gz"
+  ],
+  "env": {
+    "APP": "retail-credit-repayment-cerberus-web",
+    "SERVICE_NAME": "retail-credit-repayment-cerberus-web",
+    "SERVICE_5701_IGNORE": "true",
+    "spring.application.name": "${APP}",
+    "spring.cloud.config.enabled": "false",
+    "spring.cloud.config.discovery.enabled": "false",
+    "eureka.client.enabled": "false",
+    "LOGSTASH_PORT_5959_TCP_ADDR": "${HOST}",
+    "LOGSTASH_PORT_5959_TCP_PORT": "{{ logstash_port }}"
+  },
+  "instances": 1
 }
