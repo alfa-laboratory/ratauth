@@ -1,0 +1,22 @@
+{
+    // Имя приложения в marathon
+    "id": "/mobile/gateway-web",
+
+    // Найтройки config сервера
+    "env": {
+        "APPLICATION_NAME": "${manifest.mobile_gateway_api.app_name}",
+        "APP": "${manifest.mobile_gateway_api.log_name}",
+        "EUREKA_SERV": "${manifest.mobile_gateway_api.eureka_servers}",
+        "CONFIG_BRANCH": "${manifest.mobile_gateway_api.config_branch}",
+        "CONFIG_SERV": "${manifest.mobile_gateway_api.config_server}"
+    },
+
+    // Настройки HAPROXY
+    "labels": {
+        "HAPROXY_DEPLOYMENT_GROUP": "${manifest.mobile_gateway_api.deployment_group}",
+        "HAPROXY_GROUP": "${manifest.mobile_gateway_api.ha_group}",
+        "HAPROXY_0_HTTP_BACKEND_PROXYPASS_PATH": "${manifest.mobile_gateway_api.ha_path}",
+        "HAPROXY_0_PATH": "${manifest.mobile_gateway_api.ha_path}",
+        "HAPROXY_0_VHOST": "${manifest.mobile_gateway_api.ha_vhost}"
+    }
+}

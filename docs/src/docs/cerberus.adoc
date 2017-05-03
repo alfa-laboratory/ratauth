@@ -1,0 +1,58 @@
+= Интеграция с PASSPORT
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 4
+:sectlinks:
+
+[description]
+== Установка cerberus-web
+Для установки cerberus-web необходимо переопределить следующие поля в manifest.json.template файле
+[source,json]
+----
+include::./json/marathon.json.template[Open the JSON file]
+----
+== Необходимые доступы для интеграции
+
+* -> ratauth server
+
+* ->
+
+== Создание relying party
+Для интеграции с PASSPORT Вашей системе потребуется свой relying party.
+Чтобы создать relying party можно связаться с Егором Морозовым:
+
+slack: @eamorozov
+
+== Работа без SSL
+При интеграции на тестовой среде cerberus-web запускается без использования ssl:
+
+[source,bash]
+----
+--spring.profiles.active=whore
+----
+
+//require 'asciidoctor'  # <1>
+//
+//Asciidoctor.convert_file 'mysample.adoc'  # <2>
+
+//[processes_scheme]
+//== Processes' schemes
+//=== Registration
+//.Two steps authorization scheme that uses code sent by registration provider.
+//[plantuml, "registration-by-code-scheme","png"]
+//----------
+//include::../uml/RegistrationByCode.puml[]
+//----------
+//
+//=== Authorization
+//.Two steps authorization scheme.
+//[plantuml, "auth-by-code-authentication","png"]
+//----------
+//include::../uml/AuthCodeAuthentication.puml[]
+//----------
+//
+//[api]
+//== Api description
+//include::api.adoc[]
