@@ -50,4 +50,4 @@ task docsToJar(type: Jar) {
 }
 
 docsToJar.dependsOn asciidoctor
-publish.dependsOn docsToJar
+bintrayUpload.dependsOn docsToJar
