@@ -44,3 +44,10 @@ asciidoctor {
   dependsOn jrubyPrepare
   dependsOn project(':server').test
 }
+
+task docsToJar(type: Jar) {
+  from(docsDir)
+}
+
+docsToJar.dependsOn asciidoctor
+publish.dependsOn docsToJar
