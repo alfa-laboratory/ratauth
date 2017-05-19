@@ -22,6 +22,8 @@ public interface SessionService {
    */
   Observable<Session> create(Session session);
 
+  Observable<Session> getById(String id);
+
   /**
    * Loads AuthEntry by code with expiration date check. Session must be loaded with only one entry
    * @param code code value
@@ -103,4 +105,5 @@ public interface SessionService {
    * @param lastCheck date of lastCheck
    */
   Observable<Boolean> updateCheckDate(String sessionId, Date lastCheck);
+
 }
