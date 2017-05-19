@@ -229,6 +229,11 @@ class PersistenceServiceStubConfiguration {
       }
 
       @Override
+      Observable<Session> getById(String id) {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
       Observable<Boolean> addEntry(String sessionId, AuthEntry entry) {
         return Observable.just(true)
       }
