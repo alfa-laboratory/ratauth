@@ -30,22 +30,8 @@ public class OAuthIssuerImpl implements OAuthIssuer {
                 .build();
 
         AuthCode authCode = authCodeService.createAuthCode(scope);
-        String jwtAuthCode = jwtSigner.createJWT(authCode, new AuthCodeJWTConverter());
-        return jwtAuthCode;
-//        return vg.generateValue();
+        return jwtSigner.createJWT(authCode, new AuthCodeJWTConverter());
     }
-
-//    @SneakyThrows
-//    public String accessToken() {
-//
-//        Scope scope = Scope.builder()
-//                .scope(authCodeProperties.getDefaultScope())
-//                .build();
-//
-//        AuthCode authCode = authCodeService.createAuthCode(scope);
-//        String jwtAuthCode = jwtSigner.createJWT(authCode, new AuthCodeJWTConverter());
-//        return vg.generateValue();
-//    }
 
     @SneakyThrows
     public String refreshToken() {
