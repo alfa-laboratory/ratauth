@@ -39,6 +39,7 @@ dependencies {
   compile 'io.ratpack:ratpack-spring-boot'
   compile 'io.ratpack:ratpack-groovy'
   compile 'com.google.inject:guice'
+  compile 'com.auth0:java-jwt:3.2.0'
 
   //crypto
   compile 'com.nimbusds:nimbus-jose-jwt'

@@ -62,6 +62,7 @@ allprojects {
       dependency 'com.google.guava:guava:19.0'
       dependency 'com.google.inject:guice:4.1.0'
       dependency 'org.codehaus.groovy:groovy-all:2.4.7'//for ratpack server config
+      dependency 'com.auth0:java-jwt:3.2.0'
 
       //reactive
       dependency 'io.reactivex:rxjava:1.1.6'

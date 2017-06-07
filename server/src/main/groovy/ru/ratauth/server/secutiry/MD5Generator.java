@@ -1,34 +1,35 @@
 package ru.ratauth.server.secutiry;
 
 
-import org.springframework.stereotype.Service;
-
 import java.security.MessageDigest;
 import java.util.UUID;
 
 
 /**
  * Exemplar OAuth Token Generator
+ *
+ *
+ *
  */
 public class MD5Generator implements ValueGenerator {
-
-    private static final char[] hexCode = "0123456789abcdef".toCharArray();
-
-    public static String toHexString(byte[] data) {
-        if (data == null) {
-            return null;
-        }
-        StringBuilder r = new StringBuilder(data.length * 2);
-        for (byte b : data) {
-            r.append(hexCode[(b >> 4) & 0xF]);
-            r.append(hexCode[(b & 0xF)]);
-        }
-        return r.toString();
-    }
 
     @Override
     public String generateValue() throws OAuthSystemException {
         return generateValue(UUID.randomUUID().toString());
+    }
+
+    private static final char[] hexCode = "0123456789abcdef".toCharArray();
+
+    public static String toHexString(byte[] data) {
+        if(data == null) {
+            return null;
+        }
+        StringBuilder r = new StringBuilder(data.length*2);
+        for ( byte b : data) {
+            r.append(hexCode[(b >> 4) & 0xF]);
+            r.append(hexCode[(b & 0xF)]);
+        }
+        return r.toString();
     }
 
     @Override
