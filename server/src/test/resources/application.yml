@@ -50,3 +50,13 @@ openid.properties.discovery:
     - openid
     - profile
   jwks_uri: http://example.com/oauth2/certs
+
+ru.ratauth.auth.code:
+  expires_in_second: 120
+
+ru.ratauth.jwt:
+  issuer: "http://ratauth.ru"
+  secret: "secret"
+
+ru.ratauth.scope:
+  default_scope: "mobile.read"

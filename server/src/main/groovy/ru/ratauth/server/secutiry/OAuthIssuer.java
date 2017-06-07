@@ -1,9 +1,9 @@
 package ru.ratauth.server.secutiry;
 
 public interface OAuthIssuer {
-    public String accessToken() throws OAuthSystemException;
+    String accessToken();
 
-    public String authorizationCode() throws OAuthSystemException;
+    String authorizationCode();
 
-    public String refreshToken() throws OAuthSystemException;
+    String refreshToken();
 }

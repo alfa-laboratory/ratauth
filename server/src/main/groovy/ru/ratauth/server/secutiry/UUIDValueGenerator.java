@@ -1,7 +1,10 @@
 package ru.ratauth.server.secutiry;
 
+import org.springframework.stereotype.Service;
+
 import java.util.UUID;
 
+@Service
 public class UUIDValueGenerator implements ValueGenerator {
 
     @Override

@@ -18,3 +18,13 @@ auth:
  session:
   check_threads: 10
   check_interval: 300
+
+ru.ratauth.auth.code:
+  expires_in_second: 120
+
+ru.ratauth.jwt:
+  issuer: "http://ratauth.ru"
+  secret: "secret"
+
+ru.ratauth.scope:
+  default_scope: "mobile.read"
