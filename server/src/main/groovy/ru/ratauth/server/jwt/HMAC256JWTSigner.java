@@ -22,5 +22,4 @@ public class HMAC256JWTSigner implements JWTSigner {
                 .sign(algorithm);
     }
 
-
 }
