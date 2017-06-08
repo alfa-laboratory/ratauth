@@ -17,7 +17,7 @@ import static org.springframework.restdocs.restassured.RestAssuredRestDocumentat
  */
 @SpringBootTest(
     webEnvironment = NONE,
-    classes = [TestBaseConfiguration],
+    classes = [RatAuthApplication, TestBaseConfiguration],
     properties = [
         "ratpack.port=8080"
     ]
