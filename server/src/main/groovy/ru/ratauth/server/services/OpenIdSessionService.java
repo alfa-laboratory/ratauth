@@ -8,9 +8,8 @@ import org.springframework.stereotype.Service;
 import ru.ratauth.entities.*;
 import ru.ratauth.providers.Fields;
 import ru.ratauth.providers.auth.dto.BaseAuthFields;
-import ru.ratauth.server.secutiry.OAuthIssuerImpl;
+import ru.ratauth.server.secutiry.OAuthIssuer;
 import ru.ratauth.server.secutiry.TokenProcessor;
-import ru.ratauth.server.secutiry.UUIDValueGenerator;
 import ru.ratauth.server.services.log.ActionLogger;
 import ru.ratauth.server.utils.DateUtils;
 import ru.ratauth.services.SessionService;
@@ -30,7 +29,7 @@ public class OpenIdSessionService implements AuthSessionService {
   private final SessionService sessionService;
   private final TokenProcessor tokenProcessor;
   private final TokenCacheService tokenCacheService;
-  private final OAuthIssuerImpl codeGenerator = new OAuthIssuerImpl(new UUIDValueGenerator());
+  private final OAuthIssuer codeGenerator;
   private final ActionLogger actionLogger;
 
   @Value("${auth.master_secret}")

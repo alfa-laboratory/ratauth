@@ -5,12 +5,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import ratpack.spring.config.EnableRatpack
+import ru.ratauth.server.authcode.AuthCodeProperties
 import ru.ratauth.server.configuration.OpenIdConnectDiscoveryProperties
+import ru.ratauth.server.jwt.JWTProperties
+import ru.ratauth.server.scope.ScopeProperties
 
 @Slf4j
 @SpringBootApplication
 @EnableRatpack
-@EnableConfigurationProperties([OpenIdConnectDiscoveryProperties])
+@EnableConfigurationProperties([OpenIdConnectDiscoveryProperties, AuthCodeProperties, ScopeProperties, JWTProperties])
 class RatAuthApplication {
   public static final int DEFAULT_PADDING = 50
 
