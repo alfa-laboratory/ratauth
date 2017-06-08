@@ -24,13 +24,7 @@ public class OAuthIssuerImpl implements OAuthIssuer {
 
     @SneakyThrows
     public String accessToken() {
-
-        Scope scope = Scope.builder()
-                .scope(scopeProperties.getDefaultScope())
-                .build();
-
-        AuthCode authCode = authCodeService.createAuthCode(scope);
-        return jwtSigner.createJWT(authCode, new AuthCodeJWTConverter());
+        return vg.generateValue();
     }
 
     @SneakyThrows
@@ -40,6 +34,9 @@ public class OAuthIssuerImpl implements OAuthIssuer {
 
     @SneakyThrows
     public String authorizationCode() {
-        return vg.generateValue();
-    }
+        Scope scope = Scope.builder()
+                .scope(scopeProperties.getDefaultScope())
+                .build();
+        AuthCode authCode = authCodeService.createAuthCode(scope);
+        return jwtSigner.createJWT(authCode, new AuthCodeJWTConverter());    }
 }
