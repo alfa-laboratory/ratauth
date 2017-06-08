@@ -49,6 +49,7 @@ dependencies {
   //docs/test
   testCompile 'org.springframework.restdocs:spring-restdocs-restassured:1.1.0.RELEASE'
   testCompile 'org.springframework.boot:spring-boot-starter-test'
+  testCompile 'org.skyscreamer:jsonassert'
 
   dockerJava 'com.github.docker-java:docker-java:3.0.6'
   dockerJava 'cglib:cglib:3.2.0'

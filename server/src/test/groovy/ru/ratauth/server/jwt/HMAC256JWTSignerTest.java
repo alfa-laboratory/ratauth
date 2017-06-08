@@ -1,5 +1,6 @@
 package ru.ratauth.server.jwt;
 
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,13 +10,21 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.client.match.JsonPathRequestMatchers;
+import org.springframework.test.web.servlet.ResultActions;
 import ru.ratauth.server.authcode.AuthCode;
 import ru.ratauth.server.authcode.AuthCodeJWTConverter;
 import ru.ratauth.server.scope.Scope;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
+import static com.jayway.restassured.path.json.JsonPath.with;
 import static junit.framework.TestCase.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -53,7 +62,14 @@ public class HMAC256JWTSignerTest {
 
         String signedAuthCode = jwtSigner.createJWT(authCode, new AuthCodeJWTConverter());
 
-        assertEquals(AUTH_CODE, signedAuthCode);
+        assertThat(signedAuthCode, is(notNullValue()));
+
+        String[] parts = signedAuthCode.split("\\.");
+        String bodyJson = new String(Base64.decodeBase64(parts[1]), StandardCharsets.UTF_8);
+
+        assertEquals("read:write", with(bodyJson).getString("scope"));
+        assertEquals("alfa-bank", with(bodyJson).getString("iss"));
+        assertEquals("1493586000", with(bodyJson).getString("exp"));
     }
 
     @TestConfiguration
