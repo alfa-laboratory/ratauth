@@ -69,7 +69,6 @@ public class HMAC256JWTSignerTest {
 
         assertEquals("read:write", with(bodyJson).getString("scope"));
         assertEquals("alfa-bank", with(bodyJson).getString("iss"));
-        assertEquals("1493586000", with(bodyJson).getString("exp"));
     }
 
     @TestConfiguration
