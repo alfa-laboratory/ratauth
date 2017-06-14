@@ -19,12 +19,10 @@ import ru.ratauth.utils.StringUtils;
 import ru.ratauth.utils.URIUtils;
 import rx.Observable;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
-import java.util.StringJoiner;
+import java.util.Set;
 
 /**
  * @author mgorelikov
@@ -51,7 +49,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
             createSession(request, rpAuth.getRight(), rpAuth.getLeft())
                 .map(ses -> new ImmutableTriple<>(rpAuth.getLeft(), rpAuth.getRight(), ses)))
         .flatMap(rpAuthSession ->
-            createIdToken(rpAuthSession.getLeft(), rpAuthSession.getRight())
+            createIdToken(rpAuthSession.getLeft(), rpAuthSession.getRight(), rpAuthSession.getMiddle().getAuthContext())
                 .map(idToken -> buildResponse(rpAuthSession.getLeft(), rpAuthSession.getRight(),
                     rpAuthSession.getMiddle(), idToken, request.getRedirectURI()))
         )
@@ -88,11 +86,15 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     ).doOnCompleted(() -> log.info("Cross-authorization succeed"));
   }
 
-  private Observable<TokenCache> createIdToken(RelyingParty relyingParty, Session session) {
+  private Observable<TokenCache> createIdToken(RelyingParty relyingParty, Session session, Set<String> authContext) {
     Optional<AuthEntry> entry = session.getEntry(relyingParty.getName());
-    Optional<Token> token = entry.flatMap(el -> el.getLatestToken());
-    if (token.isPresent())
+    Optional<Token> token = entry.flatMap(AuthEntry::getLatestToken);
+    if (token.isPresent()){
+      assert entry.isPresent();
+      AuthEntry authEntry = entry.get();
+      authEntry.mergeAuthContext(authContext);
       return tokenCacheService.getToken(session, relyingParty, entry.get());
+    }
     else
       return Observable.just((TokenCache) null);
   }
@@ -100,9 +102,9 @@ public class OpenIdAuthorizeService implements AuthorizeService {
   private Observable<Session> createSession(AuthzRequest oauthRequest, AuthResult authResult, RelyingParty relyingParty) {
     if (AuthResult.Status.SUCCESS == authResult.getStatus())
       if (AuthzResponseType.TOKEN == oauthRequest.getResponseType())//implicit auth
-        return sessionService.createSession(relyingParty, authResult.getData(), oauthRequest.getScopes(), oauthRequest.getRedirectURI());
+        return sessionService.createSession(relyingParty, authResult.getData(), oauthRequest.getScopes(), authResult.getAuthContext(), oauthRequest.getRedirectURI());
       else//auth code auth
-        return sessionService.initSession(relyingParty, authResult.getData(), oauthRequest.getScopes(), oauthRequest.getRedirectURI());
+        return sessionService.initSession(relyingParty, authResult.getData(), oauthRequest.getScopes(), authResult.getAuthContext(), oauthRequest.getRedirectURI());
     else
       return Observable.just(new Session());//authCode provided by external Auth provider
   }

@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.exception.RegistrationException;
-import ru.ratauth.interaction.GrantType;
 import ru.ratauth.interaction.RegistrationRequest;
 import ru.ratauth.interaction.RegistrationResponse;
 import ru.ratauth.interaction.TokenResponse;
@@ -18,7 +17,6 @@ import ru.ratauth.utils.StringUtils;
 import ru.ratauth.utils.URIUtils;
 import rx.Observable;
 
-import java.net.URI;
 import java.util.Map;
 
 /**
@@ -50,7 +48,8 @@ public class OpenIdRegistrationService implements RegistrationService {
         .flatMap(rp -> registerProviders.get(rp.getIdentityProvider())
                 .register(RegInput.builder().relyingParty(rp.getName()).data(request.getData()).build())
                 .map(regResult -> new ImmutablePair<>(rp, regResult)))
-        .flatMap(rpRegResult -> authSessionService.createSession(rpRegResult.getLeft(), rpRegResult.getRight().getData(), request.getScopes(), null)
+            //TODO@ruslan разделить смс и авторизацию
+        .flatMap(rpRegResult -> authSessionService.createSession(rpRegResult.getLeft(), rpRegResult.getRight().getData(), request.getScopes(), rpRegResult.getRight().getAuthContext(), null)
                 .map(session -> new ImmutablePair<>(rpRegResult.getLeft(), session)))
         .flatMap(rpSession -> tokenService.createIdTokenAndResponse(rpSession.getRight(), rpSession.getLeft()))
         .doOnCompleted(() -> log.info("Second step of registration succeed"));

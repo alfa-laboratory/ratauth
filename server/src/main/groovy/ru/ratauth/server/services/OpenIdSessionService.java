@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.ratauth.entities.*;
+import ru.ratauth.interaction.TokenRequest;
 import ru.ratauth.providers.Fields;
 import ru.ratauth.providers.auth.dto.BaseAuthFields;
 import ru.ratauth.server.secutiry.OAuthIssuer;
@@ -38,14 +39,14 @@ public class OpenIdSessionService implements AuthSessionService {
   public static final String RATAUTH = "ratauth";
 
   @Override
-  public Observable<Session> initSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes,
+  public Observable<Session> initSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, Set<String> authContext,
                                          String redirectUrl) {
     final LocalDateTime now = LocalDateTime.now();
-    return createSession(relyingParty, userInfo, scopes, redirectUrl, now, null);
+    return createSession(relyingParty, userInfo, scopes, authContext, redirectUrl, now, null);
   }
 
   @Override
-  public Observable<Session> createSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes,
+  public Observable<Session> createSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, Set<String> authContext,
                                            String redirectUrl) {
     final LocalDateTime now = LocalDateTime.now();
     final LocalDateTime tokenExpires = now.plus(relyingParty.getTokenTTL(), ChronoUnit.SECONDS);
@@ -54,11 +55,11 @@ public class OpenIdSessionService implements AuthSessionService {
         .expiresIn(DateUtils.fromLocal(tokenExpires))
         .created(DateUtils.fromLocal(now))
         .build();
-    return createSession(relyingParty, userInfo, scopes, redirectUrl, now, token);
+    return createSession(relyingParty, userInfo, scopes, authContext, redirectUrl, now, token);
   }
 
   private Observable<Session> createSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes,
-                                            String redirectUrl, LocalDateTime now, Token token) {
+                                            Set<String> authContext, String redirectUrl, LocalDateTime now, Token token) {
     final LocalDateTime sessionExpires = now.plus(relyingParty.getSessionTTL(), ChronoUnit.SECONDS);
     final LocalDateTime refreshExpires = now.plus(relyingParty.getRefreshTokenTTL(), ChronoUnit.SECONDS);
     final LocalDateTime authCodeExpires = now.plus(relyingParty.getCodeTTL(), ChronoUnit.SECONDS);
@@ -66,7 +67,7 @@ public class OpenIdSessionService implements AuthSessionService {
 
     final String jwtInfo = tokenProcessor.createToken(RATAUTH, masterSecret, null,
         DateUtils.fromLocal(now), DateUtils.fromLocal(sessionExpires),
-        tokenCacheService.extractAudience(scopes), scopes, userInfo.get(Fields.USER_ID.val()).toString(), userInfo);
+        tokenCacheService.extractAudience(scopes), scopes, authContext, userInfo.get(Fields.USER_ID.val()).toString(), userInfo);
 
     final AuthEntry authEntry = AuthEntry.builder()
         .created(DateUtils.fromLocal(now))
@@ -75,6 +76,7 @@ public class OpenIdSessionService implements AuthSessionService {
         .refreshToken(codeGenerator.refreshToken())
         .refreshTokenExpiresIn(DateUtils.fromLocal(refreshExpires))
         .scopes(scopes)
+        .authContext(new HashSet<>())
         .relyingParty(relyingParty.getName())
         .authType(AuthType.COMMON)
         .redirectUrl(redirectUrl)
@@ -96,9 +98,13 @@ public class OpenIdSessionService implements AuthSessionService {
   }
 
   @Override
-  public Observable<Boolean> addToken(Session session, RelyingParty relyingParty) {
+  public Observable<Boolean> addToken(TokenRequest oauthRequest, Session session, RelyingParty relyingParty) {
     final LocalDateTime now = LocalDateTime.now();
     final LocalDateTime tokenExpires = now.plus(relyingParty.getTokenTTL(), ChronoUnit.SECONDS);
+    String accessToken = session.getToken(relyingParty.getId())
+            .map(Token::getToken)
+            .orElse(null);
+    String authCode = oauthRequest.getAuthzCode();
     final Token token = Token.builder()
         .token(codeGenerator.accessToken())
         .expiresIn(DateUtils.fromLocal(tokenExpires))
