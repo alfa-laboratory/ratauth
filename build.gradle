@@ -79,7 +79,9 @@ allprojects {
       dependency 'org.spockframework:spock-spring:1.1-groovy-2.4-rc-2'
       dependency 'org.springframework.restdocs:spring-restdocs-restassured:1.1.2.RELEASE'
       dependency 'org.assertj:assertj-core:3.6.2'
-      dependency  'org.skyscreamer:jsonassert:1.5.0'
+      dependency 'org.skyscreamer:jsonassert:1.5.0'
+      dependency 'io.rest-assured:rest-assured:3.0.2'
+
     }
   }
 }

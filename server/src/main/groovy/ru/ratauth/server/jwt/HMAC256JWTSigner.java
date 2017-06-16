@@ -11,16 +11,15 @@ import org.springframework.stereotype.Service;
 public class HMAC256JWTSigner implements JWTSigner {
 
     private final JWTProperties jwtProperties;
+    private final Algorithm algorithm;
 
     @SneakyThrows
     public <T, S extends JWTConverter<T>> String createJWT(T object, S jwtConverter) {
-        Algorithm algorithm = Algorithm.HMAC256(jwtProperties.getSecret());
         String issuer = jwtProperties.getIssuer();
 
-        return jwtConverter.convert(object)
+        return jwtConverter.decode(object)
                 .withIssuer(issuer)
                 .sign(algorithm);
     }
-
 
 }
