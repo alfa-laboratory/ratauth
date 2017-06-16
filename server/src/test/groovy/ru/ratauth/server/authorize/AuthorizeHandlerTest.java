@@ -67,29 +67,6 @@ public class AuthorizeHandlerTest {
         assertQuery(location);
     }
 
-//    @Test
-//    public void testRedirectToAuthPageWithAcrFromAccessToken() throws Exception {
-//
-//        String responseLocation = when()
-//                .queryParam("client_id", "mobile-app")
-//                .queryParam("scope", "read")
-//                .queryParam("acr", "card_account:sms")
-//                .queryParam("access_token", ACR_CARD_ACCOUNT_SMS)
-//                .get("/auth")
-//                .then()
-//                .statusCode(302)
-//                .extract()
-//                .response()
-//                .getHeader("Location");
-//
-//        URL location = new URL(responseLocation);
-//        URL authorizationEndpoint = new URL(openIdConnectDiscoveryProperties.getAuthorizationEndpoint());
-//
-//        assertEquals(location.getHost(), authorizationEndpoint.getHost());
-//        assertEquals(location.getPath(), authorizationEndpoint.getPath() + "/card");
-//        assertQuery(location);
-//    }
-
     private void assertQuery(URL location) {
         assertTrue(location.getQuery().contains("client_id=mobile-app"));
         assertTrue(location.getQuery().contains("scope=read"));
