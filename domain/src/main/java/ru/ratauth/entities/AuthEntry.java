@@ -5,10 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * @author mgorelikov
@@ -26,6 +25,7 @@ public class AuthEntry {
   private String refreshToken;
   private Date refreshTokenExpiresIn;
   private Set<String> scopes;
+  private Set<String> authContext;
   /**
    * unique name
    */
@@ -33,6 +33,10 @@ public class AuthEntry {
   private Set<Token> tokens;
   private AuthType authType;
   private String redirectUrl;
+
+  public void mergeAuthContext(Set<String> authContext) {
+    this.authContext.addAll(requireNonNull(authContext));
+  }
 
   public void addToken(Token token) {
     if(token == null)

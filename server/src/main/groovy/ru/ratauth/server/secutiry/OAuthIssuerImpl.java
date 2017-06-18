@@ -6,12 +6,13 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.ratauth.server.authcode.AuthCode;
-import ru.ratauth.server.authcode.AuthCodeProperties;
-import ru.ratauth.server.authcode.AuthCodeService;
 import ru.ratauth.server.authcode.AuthCodeJWTConverter;
+import ru.ratauth.server.authcode.AuthCodeService;
 import ru.ratauth.server.jwt.JWTSigner;
 import ru.ratauth.server.scope.Scope;
 import ru.ratauth.server.scope.ScopeProperties;
+
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))

@@ -147,6 +147,7 @@ class PersistenceServiceStubConfiguration {
                       new AuthEntry(authCode: 'code',
                           relyingParty: CLIENT_NAME,
                           scopes: ['rs.read'] as Set,
+                          authContext: ["credentials"],
                           refreshToken: REFRESH_TOKEN
                       )] as Set)
           )
@@ -169,6 +170,7 @@ class PersistenceServiceStubConfiguration {
                           relyingParty: CLIENT_NAME,
                           scopes: ['rs.read'] as Set,
                           refreshToken: REFRESH_TOKEN,
+                          authContext: ["credentials"],
                           tokens: [new Token(token: TOKEN,
                               expiresIn: DateUtils.fromLocal(TOMORROW),
                               created: new Date())] as Set
@@ -215,6 +217,7 @@ class PersistenceServiceStubConfiguration {
                       new AuthEntry(authCode: 'code',
                           relyingParty: CLIENT_NAME,
                           scopes: ['rs.read'] as Set,
+                          authContext: ["credentials"] as Set,
                           refreshToken: REFRESH_TOKEN,
                           tokens: [new Token(token: TOKEN,
                               expiresIn: DateUtils.fromLocal(TOMORROW),

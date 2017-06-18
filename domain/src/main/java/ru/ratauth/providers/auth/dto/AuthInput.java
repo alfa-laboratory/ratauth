@@ -1,6 +1,7 @@
 package ru.ratauth.providers.auth.dto;
 
 import lombok.*;
+import ru.ratauth.entities.RelyingParty;
 
 import java.util.Map;
 

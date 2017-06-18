@@ -6,6 +6,8 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
+
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HMAC256JWTSigner implements JWTSigner {
@@ -20,6 +22,13 @@ public class HMAC256JWTSigner implements JWTSigner {
         return jwtConverter.convert(object)
                 .withIssuer(issuer)
                 .sign(algorithm);
+    }
+
+    @SneakyThrows(UnsupportedEncodingException.class)
+    public <T, S extends JWTConverter<T>> T parseJWT(String object, S jwtConverter) {
+        Algorithm algorithm = Algorithm.HMAC256(jwtProperties.getSecret());
+        String issuer = jwtProperties.getIssuer();
+        return jwtConverter.decode(object);
     }
 
 

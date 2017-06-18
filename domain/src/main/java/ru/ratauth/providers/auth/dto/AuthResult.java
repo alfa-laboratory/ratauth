@@ -3,6 +3,7 @@ package ru.ratauth.providers.auth.dto;
 import lombok.*;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author mgorelikov
@@ -19,6 +20,7 @@ public class AuthResult {
   private Map<String, Object> data;
 
   private Status status;
+  private Set<String> authContext;
 
   public enum Status {
     SUCCESS,

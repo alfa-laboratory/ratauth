@@ -13,7 +13,7 @@ public interface TokenProcessor {
 
   String createToken(String clientId, String secret, String identifier,
                      Date created, Date expiresIn,
-                     Set<String> audience, Set<String> scopes,
+                     Set<String> audience, Set<String> scopes, Set<String> authContext,
                      String userId, Map<String, Object> userInfo);
 
   Map<String,Object> extractInfo(String jwt, String secret);

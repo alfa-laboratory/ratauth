@@ -43,7 +43,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     final Observable<RelyingParty> relyingPartyObservable = clientService.loadAndAuthRelyingParty(oauthRequest.getClientId(), oauthRequest.getClientSecret(), true);
     return relyingPartyObservable
         .flatMap(rp -> loadSession(oauthRequest, rp).map(ses -> new ImmutablePair<>(rp, ses)))
-        .flatMap(rpSess -> authSessionService.addToken(rpSess.getRight(), rpSess.getLeft()).map(res -> rpSess))
+        .flatMap(rpSess -> authSessionService.addToken(oauthRequest, rpSess.getRight(), rpSess.getLeft()).map(res -> rpSess))
         .flatMap(rpSess -> createIdTokenAndResponse(rpSess.getRight(), rpSess.getLeft()))
         .doOnCompleted(() -> log.info("Get-token succeed"));
   }
@@ -108,7 +108,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     AuthProvider provider = authProviders.get(relyingParty.getIdentityProvider());
     if (provider.isAuthCodeSupported() && oauthRequest.getGrantType() == GrantType.AUTHORIZATION_CODE) {
       authObs = provider.authenticate(AuthInput.builder().relyingParty(relyingParty.getName()).data(oauthRequest.getAuthData()).build())
-          .flatMap(res -> authSessionService.createSession(relyingParty, res.getData(), oauthRequest.getScopes(), null));
+          .flatMap(res -> authSessionService.createSession(relyingParty, res.getData(), oauthRequest.getScopes(), res.getAuthContext(), null));
     } else if (oauthRequest.getGrantType() == GrantType.AUTHORIZATION_CODE)
       authObs = authSessionService.getByValidCode(oauthRequest.getAuthzCode(), new Date())
           //check that session belongs to target relying party and contains no tokens

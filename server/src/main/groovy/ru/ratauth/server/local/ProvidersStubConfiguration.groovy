@@ -31,7 +31,10 @@ class ProvidersStubConfiguration {
       @Override
       Observable<AuthResult> authenticate(AuthInput input) {
         if (input.data.get(BaseAuthFields.USERNAME.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
-          return Observable.just(AuthResult.builder().data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map).status(AuthResult.Status.SUCCESS).build())
+          return Observable.just(AuthResult.builder()
+                  .data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
+                  .authContext(["credentials"] as Set)
+                  .status(AuthResult.Status.SUCCESS).build())
         else
           return Observable.error(new AuthorizationException(AuthorizationException.ID.CREDENTIALS_WRONG))
       }
@@ -51,7 +54,7 @@ class ProvidersStubConfiguration {
         if (!input.data.containsKey(BaseAuthFields.CODE.val())) { //first step of registration
           //one step registration
           if (input.data.get(BaseAuthFields.USERNAME.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
-            return Observable.just(RegResult.builder().data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
+            return Observable.just(RegResult.builder().authContext(["credentials"] as Set).data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
               .status(RegResult.Status.SUCCESS).build())
           else if (input.data.get(REG_CREDENTIAL) == 'credential') //two step registration
             return Observable.just(RegResult.builder().data([
@@ -63,6 +66,8 @@ class ProvidersStubConfiguration {
         } else {//second step of registration
           if (input.data.get(BaseAuthFields.CODE.val()) == REG_CODE && input.data.get(BaseAuthFields.USERNAME.val()) == 'login')
             return Observable.just(RegResult.builder().redirectUrl('http://relying.party/gateway')
+            // TODO@ruslan когда приходит код, это место должен обрабатывать сам сервер авторизации
+              .authContext(["code"] as Set)
               .data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
               .status(RegResult.Status.SUCCESS).build())
           else
