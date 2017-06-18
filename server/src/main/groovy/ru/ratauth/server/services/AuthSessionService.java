@@ -19,7 +19,7 @@ public interface AuthSessionService {
    * @param relyingParty
    * @param userInfo info got from provider
    * @param authContext
-   *@param scopes
+   * @param scopes
    * @param redirectUrl   @return session entity
    */
   Observable<Session> initSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, Set<String> authContext, String redirectUrl);
@@ -29,7 +29,7 @@ public interface AuthSessionService {
    * @param relyingParty
    * @param userInfo info got from provider
    * @param authContext
-   *@param scopes
+   * @param scopes
    * @param redirectUrl   @return session entity
    */
   Observable<Session> createSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, Set<String> authContext, String redirectUrl);

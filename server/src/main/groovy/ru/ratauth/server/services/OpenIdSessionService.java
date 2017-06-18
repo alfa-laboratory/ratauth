@@ -101,10 +101,6 @@ public class OpenIdSessionService implements AuthSessionService {
   public Observable<Boolean> addToken(TokenRequest oauthRequest, Session session, RelyingParty relyingParty) {
     final LocalDateTime now = LocalDateTime.now();
     final LocalDateTime tokenExpires = now.plus(relyingParty.getTokenTTL(), ChronoUnit.SECONDS);
-    String accessToken = session.getToken(relyingParty.getId())
-            .map(Token::getToken)
-            .orElse(null);
-    String authCode = oauthRequest.getAuthzCode();
     final Token token = Token.builder()
         .token(codeGenerator.accessToken())
         .expiresIn(DateUtils.fromLocal(tokenExpires))
