@@ -2,7 +2,6 @@ package ru.ratauth.server.configuration;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import ru.ratauth.server.local.LocalProfile;
 
 import java.util.List;
 
