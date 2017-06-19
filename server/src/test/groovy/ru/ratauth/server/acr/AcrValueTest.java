@@ -27,7 +27,26 @@ public class AcrValueTest {
                 .build();
 
         assertEquals("card:sms", acrValue.toString());
+    }
 
+    @Test
+    public void testDifferenceRemoveFirstField() {
+        AcrValue requiredAcrValues = AcrValue.valueOf("card:account:sms");
+        AcrValue existsAcrValue = AcrValue.valueOf("card");
+
+        AcrValue difference = requiredAcrValues.difference(existsAcrValue);
+
+        assertEquals(AcrValue.valueOf("account:sms"), difference);
+    }
+
+    @Test
+    public void testDifferenceRemoveSecondField() {
+        AcrValue requiredAcrValues = AcrValue.valueOf("card:account:sms");
+        AcrValue existsAcrValue = AcrValue.valueOf("account");
+
+        AcrValue difference = requiredAcrValues.difference(existsAcrValue);
+
+        assertEquals(AcrValue.valueOf("card:sms"), difference);
     }
 
 }

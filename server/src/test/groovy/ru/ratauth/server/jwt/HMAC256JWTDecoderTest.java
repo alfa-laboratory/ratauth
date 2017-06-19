@@ -13,7 +13,7 @@ import ru.ratauth.server.authcode.AuthCodeJWTConverter;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = HMAC256JWTVerifierTestConfiguration.class)
-public class HMAC256JWTVerifierTest {
+public class HMAC256JWTDecoderTest {
 
     private static final String AUTH_CODE = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzY29wZSI6InJlYWQ6d3JpdGUiLCJpc3MiOiJhbGZhLWJhbmsiLCJleHAiOjE0OTM1ODYwMDB9.g0IhAKWL41UJzyCb8P34p3RqYMHuiv6MlN4q6AK0ctg";
 
@@ -21,7 +21,7 @@ public class HMAC256JWTVerifierTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Autowired
-    private JWTVerifier jwtVerifier;
+    private JWTDecoder jwtDecoder;
 
     @Before
     public void setUp() {
@@ -32,7 +32,7 @@ public class HMAC256JWTVerifierTest {
     public void testVerifyExpired() throws Exception {
         expectedException.expect(TokenExpiredException.class);
         expectedException.expectMessage("The Token has expired");
-        jwtVerifier.verify(AUTH_CODE, new AuthCodeJWTConverter());
+        jwtDecoder.verify(AUTH_CODE, new AuthCodeJWTConverter());
     }
 
 
@@ -40,7 +40,7 @@ public class HMAC256JWTVerifierTest {
     public void testVerify() throws Exception {
         expectedException.expect(TokenExpiredException.class);
         expectedException.expectMessage("The Token has expired");
-        jwtVerifier.verify(AUTH_CODE, new AuthCodeJWTConverter());
+        jwtDecoder.verify(AUTH_CODE, new AuthCodeJWTConverter());
     }
 
 }

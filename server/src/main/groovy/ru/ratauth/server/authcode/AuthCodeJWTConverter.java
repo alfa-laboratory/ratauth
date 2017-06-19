@@ -14,7 +14,7 @@ public class AuthCodeJWTConverter implements JWTConverter<AuthCode> {
     private static final String SCOPE = "scope";
 
     @Override
-    public JWTCreator.Builder decode(AuthCode authCode) {
+    public JWTCreator.Builder encode(AuthCode authCode) {
         Date expiresAt = DateUtils.fromLocal(authCode.getExpiresIn());
 
         return JWT.create()
@@ -23,7 +23,7 @@ public class AuthCodeJWTConverter implements JWTConverter<AuthCode> {
     }
 
     @Override
-    public AuthCode encode(DecodedJWT decodedJWT) {
+    public AuthCode decode(DecodedJWT decodedJWT) {
         return AuthCode.builder()
                 .expiresIn(DateUtils.toLocal(decodedJWT.getExpiresAt()))
                 .scope(Scope.valueOf(decodedJWT.getClaim(SCOPE).asString()))

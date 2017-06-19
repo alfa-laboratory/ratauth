@@ -22,4 +22,9 @@ public class JWTConfiguration {
         return Algorithm.HMAC256(jwtProperties.getSecret());
     }
 
+    @Bean
+    public JWTDecoder jwtDecoder() {
+        return new HMAC256JWTDecoder(algorithm());
+    }
+
 }

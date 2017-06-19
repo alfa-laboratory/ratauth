@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import ru.ratauth.server.authcode.AuthCodeService;
 import ru.ratauth.server.configuration.OpenIdConnectDiscoveryProperties;
 
 import java.net.URL;
@@ -28,16 +27,13 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 public class AuthorizeHandlerTest {
 
     private static final String LOCALHOST = "http://localhost";
-    private static final String ACR_CARD_ACCOUNT_SMS = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY3IiOiJjYXJkX2FjY291bnQ6c21zIn0.ew-3YGxETmrdKYhbeXOsgU2ccMfoP_G7hWxXtjbyLwo";
+    private static final String MFA_TOKEN_ACR_CARD = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY3IiOiJjYXJkIiwic2NvcGUiOiJtb2JpbGUucmVhZCIsImlzcyI6ImFsZmEtYmFuayIsImlkIjoiMSIsImV4cCI6OTQ2Njc0MDAwMH0.vxValRJ4bN0c3KftC0mMx0Fajm4Ub9Bhb-fiuuJSz4g";
 
     @Value("${ratpack.port}")
     private int ratpackPort;
 
     @Autowired
     private OpenIdConnectDiscoveryProperties openIdConnectDiscoveryProperties;
-
-    @Autowired
-    private AuthCodeService authCodeService;
 
     @Before
     public void setup() {
@@ -51,7 +47,7 @@ public class AuthorizeHandlerTest {
         String responseLocation = when()
                 .queryParam("client_id", "mobile-app")
                 .queryParam("scope", "read")
-                .queryParam("acr", "card")
+                .queryParam("acr", "card:sms")
                 .get("/auth")
                 .then()
                 .statusCode(302)
@@ -64,6 +60,29 @@ public class AuthorizeHandlerTest {
 
         assertEquals(location.getHost(), authorizationEndpoint.getHost());
         assertEquals(location.getPath(), authorizationEndpoint.getPath() + "/card");
+        assertQuery(location);
+    }
+
+    @Test
+    public void testRedirectToAuthPageWithSmsWhenCardAlreadyAuth() throws Exception {
+
+        String responseLocation = when()
+                .queryParam("client_id", "mobile-app")
+                .queryParam("scope", "read")
+                .queryParam("acr", "card:sms")
+                .queryParam("mfa_token", MFA_TOKEN_ACR_CARD)
+                .get("/auth")
+                .then()
+                .statusCode(302)
+                .extract()
+                .response()
+                .getHeader("Location");
+
+        URL location = new URL(responseLocation);
+        URL authorizationEndpoint = new URL(openIdConnectDiscoveryProperties.getAuthorizationEndpoint());
+
+        assertEquals(location.getHost(), authorizationEndpoint.getHost());
+        assertEquals(location.getPath(), authorizationEndpoint.getPath() + "/sms");
         assertQuery(location);
     }
 

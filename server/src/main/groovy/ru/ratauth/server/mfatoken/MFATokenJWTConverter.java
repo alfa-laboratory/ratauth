@@ -1,4 +1,4 @@
-package ru.ratauth.server.accesstoken;
+package ru.ratauth.server.mfatoken;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
@@ -8,24 +8,24 @@ import ru.ratauth.server.jwt.JWTConverter;
 import ru.ratauth.server.scope.Scope;
 import ru.ratauth.server.utils.DateUtils;
 
-public class AccessTokenJWTConverter implements JWTConverter<AccessToken> {
+public class MFATokenJWTConverter implements JWTConverter<MFAToken> {
 
     private static final String ID = "id";
     private static final String ACR = "acr";
     private static final String SCOPE = "scope";
 
     @Override
-    public JWTCreator.Builder decode(AccessToken accessToken) {
+    public JWTCreator.Builder encode(MFAToken mfaToken) {
         return JWT.create()
-                .withClaim(ID, accessToken.getId())
-                .withExpiresAt(DateUtils.fromLocal(accessToken.getExpiredAt()))
-                .withClaim(ACR, accessToken.getAcrValue().toString())
-                .withClaim(SCOPE, accessToken.getScope().toString());
+                .withClaim(ID, mfaToken.getId())
+                .withExpiresAt(DateUtils.fromLocal(mfaToken.getExpiredAt()))
+                .withClaim(ACR, mfaToken.getAcrValue().toString())
+                .withClaim(SCOPE, mfaToken.getScope().toString());
     }
 
     @Override
-    public AccessToken encode(DecodedJWT decodedJWT) {
-        return AccessToken.builder()
+    public MFAToken decode(DecodedJWT decodedJWT) {
+        return MFAToken.builder()
                 .id(decodedJWT.getClaim(ID).asString())
                 .expiredAt(DateUtils.toLocal(decodedJWT.getExpiresAt()))
                 .acrValue(AcrValue.valueOf(decodedJWT.getClaim(ACR).asString()))

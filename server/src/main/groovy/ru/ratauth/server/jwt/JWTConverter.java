@@ -6,8 +6,8 @@ import static com.auth0.jwt.JWTCreator.Builder;
 
 public interface JWTConverter<T> {
 
-    Builder decode(T t);
+    Builder encode(T t);
 
-    T encode(DecodedJWT decodedJWT);
+    T decode(DecodedJWT decodedJWT);
 
 }

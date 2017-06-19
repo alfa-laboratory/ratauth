@@ -1,6 +1,7 @@
-package ru.ratauth.server.accesstoken;
+package ru.ratauth.server.mfatoken;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import ru.ratauth.server.acr.AcrValue;
@@ -10,7 +11,8 @@ import java.time.LocalDateTime;
 
 @Builder
 @Getter
-public class AccessToken {
+@EqualsAndHashCode(exclude = "scope")
+public class MFAToken {
 
     @NonNull
     private final String id;

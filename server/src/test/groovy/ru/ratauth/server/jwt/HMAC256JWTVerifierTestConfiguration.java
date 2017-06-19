@@ -10,8 +10,8 @@ import org.springframework.context.annotation.Import;
 public class HMAC256JWTVerifierTestConfiguration {
 
     @Bean
-    public JWTVerifier jwtVerifier(Algorithm algorithm) {
-        return new HMAC256JWTVerifier(algorithm);
+    public JWTDecoder jwtVerifier(Algorithm algorithm) {
+        return new HMAC256JWTDecoder(algorithm);
     }
 
 }

@@ -17,7 +17,7 @@ public class HMAC256JWTSigner implements JWTSigner {
     public <T, S extends JWTConverter<T>> String createJWT(T object, S jwtConverter) {
         String issuer = jwtProperties.getIssuer();
 
-        return jwtConverter.decode(object)
+        return jwtConverter.encode(object)
                 .withIssuer(issuer)
                 .sign(algorithm);
     }
