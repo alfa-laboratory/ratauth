@@ -12,8 +12,6 @@ import ru.ratauth.server.jwt.JWTSigner;
 import ru.ratauth.server.scope.Scope;
 import ru.ratauth.server.scope.ScopeProperties;
 
-import java.util.ArrayList;
-
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OAuthIssuerImpl implements OAuthIssuer {

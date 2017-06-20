@@ -75,16 +75,12 @@ public class BackgroundSessionStatusChecker implements SessionStatusChecker {
         || Status.BLOCKED == session.getStatus()) {
       return;
     }
-    RelyingParty rp = clientService
-            .loadAndAuthRelyingParty(session.getAuthClient(), null, false)
-            .toBlocking()
-            .single();
 
     Map<String, String> userInfo =
         tokenCacheService.extractUserInfo(session.getUserInfo()).entrySet().stream()
             .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue().toString()));
     authProviders.get(session.getIdentityProvider())
-        .checkUserStatus(AuthInput.builder().relyingParty(rp.getName()).data(userInfo).build())
+        .checkUserStatus(AuthInput.builder().relyingParty(session.getAuthClient()).data(userInfo).build())
         .flatMap(userNotBlocked -> {
           if (!userNotBlocked)
             return sessionService.invalidateSession(session.getId(), new Date());
