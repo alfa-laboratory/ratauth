@@ -23,6 +23,8 @@ import rx.Observable;
 import java.util.Date;
 import java.util.Map;
 
+import static java.util.Collections.singleton;
+
 /**
  * @author mgorelikov
  * @since 03/11/15
@@ -55,6 +57,16 @@ public class OpenIdAuthTokenService implements AuthTokenService {
         .map(idToken -> new ImmutablePair<>(entry, idToken))
         .map(entryToken -> convertToResponse(entryToken.getLeft(), entryToken.getRight().getIdToken(), session.getSessionToken()))
         .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.TOKEN_NOT_FOUND)));
+  }
+
+  @Override
+  public Observable<TokenResponse> createIdTokenAndResponse(Session session, RelyingParty relyingParty, String authContext) {
+    AuthEntry entry = session.getEntry(relyingParty.getName()).get();
+    entry.mergeAuthContext(singleton(authContext));
+    return tokenCacheService.getToken(session, relyingParty, entry)
+            .map(idToken -> new ImmutablePair<>(entry, idToken))
+            .map(entryToken -> convertToResponse(entryToken.getLeft(), entryToken.getRight().getIdToken(), session.getSessionToken()))
+            .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.TOKEN_NOT_FOUND)));
   }
 
   @Override
