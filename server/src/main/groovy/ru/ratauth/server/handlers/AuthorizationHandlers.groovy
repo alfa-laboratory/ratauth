@@ -9,10 +9,13 @@ import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
 import ru.ratauth.interaction.AuthzRequest
+import ru.ratauth.server.acr.AcrResolver
+import ru.ratauth.server.utils.AuthorizeHandlerValidator
 import ru.ratauth.server.services.AuthClientService
 import ru.ratauth.server.services.AuthorizeService
 import rx.Observable
 
+import static javaslang.control.Option.of
 import static ratpack.rx.RxRatpack.observe
 import static ru.ratauth.server.handlers.readers.AuthzRequestReader.readAuthzRequest
 import static ru.ratauth.server.handlers.readers.AuthzRequestReader.readClientId
@@ -26,8 +29,15 @@ class AuthorizationHandlers implements Action<Chain> {
 
   @Autowired
   private AuthorizeService authorizeService
+
   @Autowired
   private AuthClientService authClientService
+
+  @Autowired
+  private final AcrResolver acrResolver;
+
+  @Autowired
+  private final AuthorizeHandlerValidator authorizeHandlerValidator;
 
   @Override
   void execute(Chain chain) throws Exception {
@@ -52,13 +62,29 @@ class AuthorizationHandlers implements Action<Chain> {
     }
   }
 
-  private void redirectToWeb(Context ctx) {
-    def clientId = readClientId(ctx.request.queryParams)
-    def pageURIObs = authClientService.getAuthorizationPageURI(clientId, ctx.request.query)
-    pageURIObs.bindExec()
-    pageURIObs.subscribe {
-      res -> ctx.redirect(HttpResponseStatus.MOVED_PERMANENTLY.code(), res)
-    }
+  private void redirectToWeb(Context context) {
+
+    String acr = resolveAcr(context)
+
+    def clientId = readClientId(context.request.queryParams)
+    def pageURIObs = authClientService.getAuthorizationPageURI(clientId, context.request.query)
+
+      pageURIObs.map({url -> new URL(url)})
+              .map({url -> url.path = "$url.path/$acr"; url})
+              .map({url -> url.toString()})
+              .bindExec()
+              .subscribe {
+        res -> context.redirect(HttpResponseStatus.MOVED_PERMANENTLY.code(), res)
+      }
+  }
+
+  private String resolveAcr(Context context) {
+    of(context)
+            .filter({ authorizeHandlerValidator.validate(it) })
+            .map({ it.request })
+            .map({ acrResolver.resolve(it) })
+            .map({ acrMatcher -> acrMatcher.match(context.request) })
+            .get()
   }
 
   private void authorize(Context ctx, Observable<AuthzRequest> requestObs) {

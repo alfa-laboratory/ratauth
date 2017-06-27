@@ -1,6 +1,7 @@
-package ru.ratauth.server.authorize;
+package ru.ratauth.server.utils;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ratpack.handling.Context;
@@ -38,7 +39,8 @@ public class AuthorizeHandlerValidator {
     }
 
     private boolean isExist(Request request, String queryParam) {
-        return request.getQueryParams().containsKey(queryParam);
+        String param = request.getQueryParams().get(queryParam);
+        return !StringUtils.isBlank(param);
     }
 
     private void verifyMfaToken(Context context) {
