@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -24,5 +25,9 @@ public class Scope {
     @Override
     public String toString() {
         return String.join(":", scopes);
+    }
+
+    public static Scope fromString(String scope) {
+        return Scope.builder().scopes(Arrays.asList(scope.split(":"))).build();
     }
 }

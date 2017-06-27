@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author mgorelikov
@@ -19,6 +20,7 @@ public class RegResult {
   private Status status;
   private String redirectUrl;
   private Map<String, Object> data;//login
+  private Set<String> authContext;
 
   public enum Status {
     SUCCESS,

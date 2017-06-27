@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.entities.Session;
 import ru.ratauth.entities.Status;
 import ru.ratauth.providers.auth.AuthProvider;
@@ -36,6 +37,7 @@ public class BackgroundSessionStatusChecker implements SessionStatusChecker {
   private final SessionService sessionService;
   private final Map<String, AuthProvider> authProviders;
   private final TokenCacheService tokenCacheService;
+  private final AuthClientService clientService;
 
   @Value("${auth.session.background_check_enabled:false}")
   private Boolean backgroundCheckEnabled;
@@ -73,6 +75,7 @@ public class BackgroundSessionStatusChecker implements SessionStatusChecker {
         || Status.BLOCKED == session.getStatus()) {
       return;
     }
+
     Map<String, String> userInfo =
         tokenCacheService.extractUserInfo(session.getUserInfo()).entrySet().stream()
             .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue().toString()));

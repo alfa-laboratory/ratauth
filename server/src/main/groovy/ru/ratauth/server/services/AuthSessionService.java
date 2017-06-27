@@ -2,6 +2,7 @@ package ru.ratauth.server.services;
 
 import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.entities.Session;
+import ru.ratauth.interaction.TokenRequest;
 import rx.Observable;
 
 import java.util.Date;
@@ -17,29 +18,31 @@ public interface AuthSessionService {
    * Creates and saves empty session with authEntry for input relyingParty
    * @param relyingParty
    * @param userInfo info got from provider
+   * @param authContext
    * @param scopes
-   * @param redirectUrl
-   * @return session entity
+   * @param redirectUrl   @return session entity
    */
-  Observable<Session> initSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, String redirectUrl);
+  Observable<Session> initSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, Set<String> authContext, String redirectUrl);
 
   /**
    * Creates and saves session with authEntry and token granted for input relyingParty
    * @param relyingParty
    * @param userInfo info got from provider
+   * @param authContext
    * @param scopes
-   * @param redirectUrl
-   * @return session entity
+   * @param redirectUrl   @return session entity
    */
-  Observable<Session> createSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, String redirectUrl);
+  Observable<Session> createSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, Set<String> authContext, String redirectUrl);
 
   /**
    * Adds token to session. Could be used in refresh token flow
+   *
+   * @param oauthRequest
    * @param session
    * @param relyingParty
    * @return
    */
-  Observable<Boolean> addToken(Session session, RelyingParty relyingParty);
+  Observable<Boolean> addToken(TokenRequest oauthRequest, Session session, RelyingParty relyingParty);
 
   /**
    * Creates new entry for relyingParty within existing session.

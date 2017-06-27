@@ -20,14 +20,13 @@ public class HMAC256JWTDecoder implements JWTDecoder {
                 .map(JWT::require)
                 .map(Verification::build)
                 .map(jwtVerifier -> jwtVerifier.verify(token))
-                .map(jwtConverter::decode)
+                .map(decodedJWT -> jwtConverter.decode(token))
                 ._1();
     }
 
     @Override
     public <T, S extends JWTConverter<T>> T decode(String token, S jwtConverter) {
         return of(token)
-                .map(JWT::decode)
                 .map(jwtConverter::decode)
                 ._1();
     }

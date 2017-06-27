@@ -22,6 +22,7 @@ import java.util.*;
 public class HS256TokenProcessor implements TokenProcessor {
   private static final String SCOPE = "scope";
   private static final String CLIENT_ID = "client_id";
+  private static final String ACR = "acr";
 
   private static final List<String> LOCAL_REGISTERED_CLAIMS = Arrays.asList(SCOPE, CLIENT_ID);
 
@@ -32,7 +33,7 @@ public class HS256TokenProcessor implements TokenProcessor {
   @SneakyThrows
   public String createToken(String clientId, String secret, String identifier,
                             Date created, Date expiresIn,
-                            Set<String> audience, Set<String> scopes,
+                            Set<String> audience, Set<String> scopes, Set<String> authContext,
                             String userId, Map<String, Object> userInfo) {
     final JWSSigner signer = new MACSigner(Base64.getDecoder().decode(secret));
     final List<String> aud = new ArrayList<>(audience);
@@ -45,6 +46,7 @@ public class HS256TokenProcessor implements TokenProcessor {
         .audience(aud)
         .claim(SCOPE, scopes)
         .claim(CLIENT_ID, clientId)
+        .claim(ACR, String.join(":", authContext))
         .jwtID(identifier)
         .issueTime(created);
     userInfo.forEach(jwtBuilder::claim);

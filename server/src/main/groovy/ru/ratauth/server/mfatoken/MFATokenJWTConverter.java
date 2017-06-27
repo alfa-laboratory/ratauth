@@ -15,7 +15,7 @@ public class MFATokenJWTConverter implements JWTConverter<MFAToken> {
     private static final String SCOPE = "scope";
 
     @Override
-    public JWTCreator.Builder encode(MFAToken mfaToken) {
+    public JWTCreator.Builder convert(MFAToken mfaToken) {
         return JWT.create()
                 .withClaim(ID, mfaToken.getId())
                 .withExpiresAt(DateUtils.fromLocal(mfaToken.getExpiredAt()))
@@ -24,7 +24,8 @@ public class MFATokenJWTConverter implements JWTConverter<MFAToken> {
     }
 
     @Override
-    public MFAToken decode(DecodedJWT decodedJWT) {
+    public MFAToken decode(String token) {
+        DecodedJWT decodedJWT = JWT.decode(token);
         return MFAToken.builder()
                 .id(decodedJWT.getClaim(ID).asString())
                 .expiredAt(DateUtils.toLocal(decodedJWT.getExpiresAt()))

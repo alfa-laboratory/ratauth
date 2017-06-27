@@ -32,4 +32,7 @@ public interface AuthTokenService {
    * @return token response object with access, refresh and id(jwt) token
    */
   Observable<TokenResponse> createIdTokenAndResponse(Session session, RelyingParty relyingParty);
+
+  Observable<TokenResponse> createIdTokenAndResponse(Session session, RelyingParty relyingParty, String authContext);
+
 }
