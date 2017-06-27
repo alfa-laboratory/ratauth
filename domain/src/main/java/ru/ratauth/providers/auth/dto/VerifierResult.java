@@ -12,6 +12,5 @@ public class VerifierResult {
 
     @Singular("field")
     private Map<String, String> data;
-    private String relyingParty;
 
 }
