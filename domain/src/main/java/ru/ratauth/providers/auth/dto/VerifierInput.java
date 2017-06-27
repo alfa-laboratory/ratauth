@@ -7,7 +7,7 @@ import java.util.Map;
 
 @Data
 @AllArgsConstructor
-public class ValidateInput {
+public class VerifierInput {
 
     private Map<String, String> data;
     private String relyingParty;

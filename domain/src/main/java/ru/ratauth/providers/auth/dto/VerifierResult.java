@@ -8,7 +8,7 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ValidateResult {
+public class VerifierResult {
 
     @Singular("field")
     private Map<String, String> data;
