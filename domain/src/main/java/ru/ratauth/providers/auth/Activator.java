@@ -4,6 +4,6 @@ import ru.ratauth.providers.auth.dto.ActivateInput;
 import ru.ratauth.providers.auth.dto.ActivateResult;
 import rx.Observable;
 
-interface Activator {
+public interface Activator {
     Observable<ActivateResult> activate(ActivateInput input);
 }
