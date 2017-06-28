@@ -12,5 +12,10 @@ public class VerifierResult {
 
     @Singular("field")
     private Map<String, String> data;
+    private Status status;
 
+    public enum Status {
+        SUCCESS,
+        NEED_APPROVAL
+    }
 }
