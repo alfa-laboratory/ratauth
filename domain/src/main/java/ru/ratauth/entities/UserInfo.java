@@ -11,7 +11,7 @@ public class UserInfo {
         this.userInfo = new HashMap<>(userInfo);
     }
 
-    public String get(String key) {
+    public String getAt(String key) {
         Object o = userInfo.get(key);
         return o != null ? o.toString() : null;
     }

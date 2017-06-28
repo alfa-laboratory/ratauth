@@ -2,7 +2,6 @@ package ru.ratauth.providers.auth.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Singular;
 import ru.ratauth.entities.UserInfo;
 
 import java.util.Map;
