@@ -37,9 +37,6 @@ public class RatAuthServerCustomizer implements RatpackServerCustomizer {
     return spec -> {
       spec.bindInstance(ServerErrorHandler.class, errorHandler);
       spec.module(loggingModule);
-      spec.module(TextTemplateModule.class, (TextTemplateModule.Config config) -> {
-        config.setStaticallyCompile(true);
-      });
     };
   }
 
