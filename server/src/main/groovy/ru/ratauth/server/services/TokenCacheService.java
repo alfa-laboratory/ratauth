@@ -31,7 +31,7 @@ public interface TokenCacheService {
    */
   Map<String,Object> extractUserInfo(String jwtToken);
   /**
-   * Just extract from scopes like 'some_resource_server.read,some_resource_server.write' audience 'some_resource_server'
+   * Just extract from scope like 'some_resource_server.read,some_resource_server.write' audience 'some_resource_server'
    * @param scopes
    * @return audience
    */

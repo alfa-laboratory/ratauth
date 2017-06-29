@@ -2,6 +2,7 @@ package ru.ratauth.providers.auth.dto;
 
 import lombok.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Data
@@ -11,6 +12,6 @@ import java.util.Map;
 public class ActivateResult {
 
     @Singular("field")
-    private Map<String, String> data;
+    private Map<String, String> data = new HashMap<>();
 
 }

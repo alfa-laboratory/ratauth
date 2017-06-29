@@ -1,9 +1,9 @@
 package ru.ratauth.providers.auth;
 
-import ru.ratauth.providers.auth.dto.VerifierInput;
-import ru.ratauth.providers.auth.dto.VerifierResult;
+import ru.ratauth.providers.auth.dto.VerifyInput;
+import ru.ratauth.providers.auth.dto.VerifyResult;
 import rx.Observable;
 
 public interface Verifier {
-        Observable<VerifierResult> verify(VerifierInput input);
+        Observable<VerifyResult> verify(VerifyInput input);
 }

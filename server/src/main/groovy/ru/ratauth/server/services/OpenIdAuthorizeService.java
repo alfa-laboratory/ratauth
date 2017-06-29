@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static ru.ratauth.server.utils.RedirectUtils.createRedirectURI;
+
 /**
  * @author mgorelikov
  * @since 02/11/15
@@ -149,16 +151,5 @@ public class OpenIdAuthorizeService implements AuthorizeService {
       resp.setRedirectURI(targetRedirectURI);
     }
     return resp;
-  }
-
-  private static String createRedirectURI(RelyingParty relyingParty, String redirectUri) {
-    if(StringUtils.isBlank(redirectUri)) {
-      return relyingParty.getAuthorizationRedirectURI();
-    } else {
-      if(!URIUtils.compareHosts(redirectUri, relyingParty.getRedirectURIs()))
-        throw new AuthorizationException(AuthorizationException.ID.REDIRECT_NOT_CORRECT);
-      else
-        return redirectUri;
-    }
   }
 }

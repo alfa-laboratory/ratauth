@@ -23,6 +23,7 @@ class PersistenceServiceStubConfiguration {
   public static final String PASSWORD = 'password'
   public static final String SALT = 'JBn7SnEzMy0MXdNsh5GVvktSGuRs0+BNVZ47kmm3TDM='
   public static final String TOKEN = '1234'
+  public static final String MFA_TOKEN = 'mfa-token-test'
   public static final String REFRESH_TOKEN = '12345'
   public static final String CODE = '123'
   public static final String CODE_EXPIRED = '1111'
@@ -227,6 +228,30 @@ class PersistenceServiceStubConfiguration {
       }
 
       @Override
+      Observable<Session> getByValidMFAToken(String token, Date now) {
+        if (token == MFA_TOKEN) {
+          return Observable.just(
+                  new Session(
+                          identityProvider: 'STUB',
+                          sessionToken: SESSION_TOKEN,
+                          userInfo: ID_TOKEN,
+                          status: Status.ACTIVE,
+                          expiresIn: DateUtils.fromLocal(LocalDateTime.now().plusDays(1)),
+                          entries: [
+                                  new AuthEntry(authCode: 'code',
+                                          relyingParty: CLIENT_NAME,
+                                          scopes: ['rs.read'] as Set,
+                                          authContext: ["credentials"] as Set,
+                                          refreshToken: REFRESH_TOKEN,
+                                          tokens: [new Token(token: TOKEN,
+                                                  expiresIn: DateUtils.fromLocal(TOMORROW),
+                                                  created: new Date())] as Set
+                                  )] as Set)
+          )
+        }
+      }
+
+      @Override
       Observable<Session> create(Session session) {
         return Observable.just(session)
       }
@@ -258,6 +283,11 @@ class PersistenceServiceStubConfiguration {
 
       @Override
       Observable<Boolean> updateCheckDate(String sessionId, Date lastCheck) {
+        return null
+      }
+
+      @Override
+      Observable<Boolean> updateUserInfo(String sessionId, String userInfo) {
         return null
       }
     }

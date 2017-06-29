@@ -2,6 +2,7 @@ package ru.ratauth.server.services;
 
 import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.entities.Session;
+import ru.ratauth.entities.UserInfo;
 import ru.ratauth.interaction.TokenRequest;
 import rx.Observable;
 
@@ -90,4 +91,16 @@ public interface AuthSessionService {
    * @return Observable of single AuthEntry with single token or Observable.empty if token not found or Observable.error if token has expired
    */
   Observable<Session> getByValidToken(String token, Date now);
+
+  /**
+   * Loads AuthEntry by mfaToken with expiration date check. Session must be loaded with only one entry
+   *
+   * @param token sessionToken value
+   * @param now   current date
+   * @return Observable of single AuthEntry or Observable.empty if refresh token not found or Observable.error if session token has expired
+   */
+  Observable<Session> getByValidMFAToken(String token, Date now);
+
+  Observable<Boolean> updateIdToken(Session session, UserInfo userInfo, Set<String> scopes, Set<String> authContext);
+
 }

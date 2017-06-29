@@ -5,14 +5,23 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import ru.ratauth.exception.AuthorizationException
 import ru.ratauth.exception.RegistrationException
+import ru.ratauth.providers.auth.Activator
 import ru.ratauth.providers.auth.AuthProvider
+import ru.ratauth.providers.auth.Verifier
+import ru.ratauth.providers.auth.dto.ActivateInput
+import ru.ratauth.providers.auth.dto.ActivateResult
 import ru.ratauth.providers.auth.dto.AuthInput
 import ru.ratauth.providers.auth.dto.AuthResult
 import ru.ratauth.providers.auth.dto.BaseAuthFields
+import ru.ratauth.providers.auth.dto.VerifyInput
+import ru.ratauth.providers.auth.dto.VerifyResult
+
 import ru.ratauth.providers.registrations.RegistrationProvider
 import ru.ratauth.providers.registrations.dto.RegInput
 import ru.ratauth.providers.registrations.dto.RegResult
 import rx.Observable
+
+import static ru.ratauth.providers.auth.dto.VerifyResult.Status.NEED_APPROVAL
 /**
  * @author mgorelikov
  * @since 03/11/15
@@ -23,6 +32,34 @@ class ProvidersStubConfiguration {
   public static final String REG_CODE = '123'
 
   abstract class AbstractAuthProvider implements AuthProvider, RegistrationProvider {}
+
+  abstract class AbstractProvider implements Activator, Verifier {}
+
+  @Bean(name = 'mineIdentityProvider')
+  @Primary
+  Activator activator() {
+    return new AbstractProvider() {
+      @Override
+      Observable<ActivateResult> activate(ActivateInput input) {
+        return Observable.just(new ActivateResult().with {
+          if(input.data.username) {
+            it.data << [username: input.data.username.reverse()]
+          }
+          return it
+        })
+      }
+
+      @Override
+      Observable<VerifyResult> verify(VerifyInput input) {
+        return Observable.just(new VerifyResult(status: NEED_APPROVAL).with {
+          if(input.data.username) {
+            it.data << [username: input.data.username.reverse()]
+          }
+          return it
+        })
+      }
+    }
+  }
 
   @Bean(name = 'STUB')
   @Primary
