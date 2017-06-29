@@ -113,9 +113,9 @@ public interface SessionService {
 
   /**
    * Loads Session by MFA-token with expiration date check. Session must be loaded with only one entry and token entity
-   * @param token access token value
+   * @param token mfa token value
    * @param now current date
-   * @return Observable of single AuthEntry with single token or Observable.empty if token not found or Observable.error if token has expired
+   * @return Observable session linked with that mfa-token
    */
   Observable<Session> getByValidMFAToken(String token, Date now);
 

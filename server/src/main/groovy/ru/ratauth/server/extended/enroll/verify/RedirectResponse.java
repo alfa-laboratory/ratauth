@@ -18,7 +18,7 @@ abstract public class RedirectResponse {
     abstract Map<String, String> getRedirectParameters();
 
     public String getRedirectURL() {
-        return getLocation() + "/" + getRedirectParameters().entrySet().stream()
+        return getLocation() + "?" + getRedirectParameters().entrySet().stream()
                 .filter(e -> e.getValue() != null)
                 .map(e -> e.getKey() + "=" + encoded(e.getValue()))
                 .collect(Collectors.joining("&"));

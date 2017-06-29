@@ -214,7 +214,7 @@ class EnrollAPISpec extends BaseDocumentationSpec {
         result
                 .then()
                 .statusCode(HttpStatus.FOUND.value())
-                .header(HttpHeaders.LOCATION, equalTo("https://domain.mine/login/"))
+                .header(HttpHeaders.LOCATION, equalTo("https://domain.mine/login?code=code"))
     }
 
 }

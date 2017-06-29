@@ -37,10 +37,14 @@ public class VerifyEnrollService {
 
     private final Map<String, Verifier> authProviders;
 
-    private static RedirectResponse createResponse(RelyingParty relyingParty, VerifyEnrollRequest request, VerifyResult verifyResult) {
+    private static RedirectResponse createResponse(Session session, RelyingParty relyingParty, VerifyEnrollRequest request, VerifyResult verifyResult) {
         request.getAuthContext().removeAll(request.getEnroll());
         if (request.getAuthContext().isEmpty()) {
-            return new SuccessResponse(createRedirectURI(relyingParty, request.getRedirectURI()));
+            String authCode = session
+                    .getEntry(relyingParty.getName())
+                    .orElseThrow(() -> new IllegalStateException("sessionID = " + session.getId() + ", relyingParty = " + relyingParty))
+                    .getAuthCode();
+            return new SuccessResponse(createRedirectURI(relyingParty, request.getRedirectURI()), authCode);
         } else {
             String location = relyingParty.getAuthorizationPageURI() + "/" + request.getAuthContext().iterator().next();
             return new NeedApprovalResponse(location, request.getRedirectURI(), request.getMfaToken(), request.getClientId(), request.getScope(), request.getAuthContext());
@@ -54,7 +58,7 @@ public class VerifyEnrollService {
                 ImmutablePair::new
         )
                 .flatMap(p -> verifyAndUpdateUserInfo(p.right, request, p.left)
-                        .map(result -> createResponse(p.left, request, result)));
+                        .map(result -> createResponse(p.right, p.left, request, result)));
     }
 
     private Observable<VerifyResult> verifyAndUpdateUserInfo(Session session, VerifyEnrollRequest request, RelyingParty relyingParty) {
