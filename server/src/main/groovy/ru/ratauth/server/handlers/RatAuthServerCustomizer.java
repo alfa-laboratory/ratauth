@@ -36,14 +36,7 @@ public class RatAuthServerCustomizer implements RatpackServerCustomizer {
   public Action<BindingsSpec> getBindings() {
     return spec -> {
       spec.bindInstance(ServerErrorHandler.class, errorHandler);
-      spec.module(MarkupTemplateModule.class, config -> {
-        config.setTemplatesDirectory(ratpackProperties.getTemplatesPath());
-      });
       spec.module(loggingModule);
-      spec.module(TextTemplateModule.class, (TextTemplateModule.Config config) -> {
-        config.setTemplatesPath(ratpackProperties.getTemplatesPath());
-        config.setStaticallyCompile(true);
-      });
     };
   }
 
