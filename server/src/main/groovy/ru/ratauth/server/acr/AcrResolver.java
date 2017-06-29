@@ -8,10 +8,9 @@ import ratpack.http.Request;
 public class AcrResolver {
 
     private final DefaultAcrMatcher defaultAcrMatcher;
-    private final MfaTokenAcrMatcher mfaTokenAcrMatcher;
 
     public AcrMatcher resolve(Request request) {
-        return request.getQueryParams().containsKey("mfa_token") ? mfaTokenAcrMatcher : defaultAcrMatcher;
+        return defaultAcrMatcher;
     }
 
 }

@@ -8,7 +8,6 @@ import ratpack.handling.Context;
 import ratpack.http.Request;
 import ru.ratauth.server.handlers.readers.ReadRequestException;
 import ru.ratauth.server.jwt.JWTDecoder;
-import ru.ratauth.server.mfatoken.MFATokenJWTConverter;
 
 import static ru.ratauth.server.handlers.readers.ReadRequestException.ID.WRONG_REQUEST;
 
@@ -20,7 +19,6 @@ public class AuthorizeHandlerValidator {
 
     public boolean validate(Context context) {
         verifyQueryParams(context);
-        verifyMfaToken(context);
         return true;
     }
 
@@ -41,17 +39,6 @@ public class AuthorizeHandlerValidator {
     private boolean isExist(Request request, String queryParam) {
         String param = request.getQueryParams().get(queryParam);
         return !StringUtils.isBlank(param);
-    }
-
-    private void verifyMfaToken(Context context) {
-        try {
-            String mfaToken = context.getRequest().getQueryParams().get("mfa_token");
-            if (mfaToken != null) {
-                jwtDecoder.verify(mfaToken, new MFATokenJWTConverter());
-            }
-        } catch (Exception e) {
-            context.error(new ReadRequestException(WRONG_REQUEST, e));
-        }
     }
 
 }

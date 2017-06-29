@@ -12,7 +12,7 @@ public class AcrResolverConfiguration {
 
     @Bean
     public AcrResolver acrResolver(JWTDecoder jwtDecoder) {
-        return new AcrResolver(defaultAcrMatcher(), mfaTokenAcrMatcher(jwtDecoder));
+        return new AcrResolver(defaultAcrMatcher());
     }
 
     @Bean
@@ -20,9 +20,5 @@ public class AcrResolverConfiguration {
         return new DefaultAcrMatcher();
     }
 
-    @Bean
-    public MfaTokenAcrMatcher mfaTokenAcrMatcher(JWTDecoder jwtDecoder) {
-        return new MfaTokenAcrMatcher(jwtDecoder);
-    }
 
 }

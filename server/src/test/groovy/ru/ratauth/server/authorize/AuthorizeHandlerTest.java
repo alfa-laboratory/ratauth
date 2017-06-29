@@ -69,29 +69,6 @@ public class AuthorizeHandlerTest {
         assertQuery(location);
     }
 
-    @Test
-    public void testRedirectToAuthPageWithSmsWhenCardAlreadyAuth() throws Exception {
-
-        String responseLocation = when()
-                .queryParam("client_id", CLIENT_ID)
-                .queryParam("scope", "read")
-                .queryParam("acr", "card:sms")
-                .queryParam("mfa_token", MFA_TOKEN_ACR_CARD)
-                .header("Content-Type", "text/html")
-                .get("/authorize")
-                .then()
-                .statusCode(301)
-                .extract()
-                .response()
-                .getHeader("Location");
-
-        URL location = new URL(responseLocation);
-
-        assertEquals(location.getHost(), authorizationEndpoint.getHost());
-        assertEquals(location.getPath(), authorizationEndpoint.getPath() + "/sms");
-        assertQuery(location);
-    }
-
     private void assertQuery(URL location) {
         assertTrue(location.getQuery().contains(format("client_id=%s", CLIENT_ID)));
         assertTrue(location.getQuery().contains("scope=read"));
