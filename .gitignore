@@ -13,6 +13,7 @@ hs_err_pid*
 .gradle
 build/
 gradle.properties
+.gradletasknamecache
 
 # Ignore Gradle GUI config
 gradle-app.setting
@@ -20,6 +21,7 @@ gradle-app.setting
 # IntelliJ
 *.ipr
 *.iws
+*.iml
 .idea/
 /out/
 .idea_modules/
