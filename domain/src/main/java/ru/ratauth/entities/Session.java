@@ -38,6 +38,8 @@ public class Session {
 
   private String sessionToken;
 
+  private String mfaToken;
+
   /**
    * Abstract user identifier got from provider
    */
