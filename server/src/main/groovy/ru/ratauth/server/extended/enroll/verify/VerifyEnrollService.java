@@ -35,7 +35,7 @@ public class VerifyEnrollService {
     private final TokenCacheService tokenCacheService;
     private final TokenProcessor tokenProcessor;
 
-    private final Map<String, Verifier> authProviders;
+    private final Map<String, Verifier> providers;
 
     private static RedirectResponse createResponse(Session session, RelyingParty relyingParty, VerifyEnrollRequest request, VerifyResult verifyResult) {
         request.getAuthContext().removeAll(request.getEnroll());
@@ -87,7 +87,7 @@ public class VerifyEnrollService {
     }
 
     private Verifier verifierFor(String name) {
-        return ofNullable(authProviders.get(name.concat("IdentityProvider")))
+        return ofNullable(providers.get(name.concat("IdentityProvider")))
                 .orElseThrow(() -> new MissingProviderException(name.concat("IdentityProvider")));
     }
 }

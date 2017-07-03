@@ -35,7 +35,7 @@ public class ActivateEnrollService {
     private final TokenCacheService tokenCacheService;
     private final TokenProcessor tokenProcessor;
 
-    private final Map<String, Activator> authProviders;
+    private final Map<String, Activator> providers;
 
     public Observable<ActivateEnrollResponse> incAuthLevel(ActivateEnrollRequest request) {
         return Observable.zip(
@@ -83,7 +83,7 @@ public class ActivateEnrollService {
     }
 
     private Activator activatorFor(String name) {
-        return ofNullable(authProviders.get(name.concat("IdentityProvider")))
+        return ofNullable(providers.get(name.concat("IdentityProvider")))
                 .orElseThrow(() -> new MissingProviderException(name.concat("IdentityProvider")));
     }
 

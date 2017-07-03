@@ -36,7 +36,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
   private final AuthClientService clientService;
   private final TokenCacheService tokenCacheService;
   private final AuthSessionService sessionService;
-  private final Map<String, Verifier> authProviders;
+  private final Map<String, Verifier> providers;
 
   @Override
   @SneakyThrows
@@ -111,7 +111,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
   }
 
   private Verifier verifierFor(String name) {
-    return ofNullable(authProviders.get(name.concat("IdentityProvider")))
+    return ofNullable(providers.get(name.concat("IdentityProvider")))
             .orElseThrow(() -> new MissingProviderException(name.concat("IdentityProvider")));
   }
 

@@ -39,7 +39,7 @@ class ProvidersStubConfiguration {
 
   @Bean(name = 'STUBIdentityProvider')
   @Primary
-  Activator activator() {
+  AbstractProvider provider() {
     return new AbstractProvider() {
       @Override
       Observable<ActivateResult> activate(ActivateInput input) {
