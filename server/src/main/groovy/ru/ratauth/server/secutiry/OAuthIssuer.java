@@ -7,4 +7,6 @@ public interface OAuthIssuer {
     String authorizationCode();
 
     String refreshToken();
+
+    String mfaToken();
 }
