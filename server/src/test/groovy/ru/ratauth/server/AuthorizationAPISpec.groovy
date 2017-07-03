@@ -22,6 +22,7 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.pr
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName
+import static org.springframework.restdocs.request.RequestDocumentation.partWithName
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document
 
@@ -347,6 +348,8 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
                 .description('relying party identifier'),
             parameterWithName('scope')
                 .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+                parameterWithName('acr')
+                .description('Authentication context class reference'),
             parameterWithName('username')
                 .description('part of user\'s credentials'),
             parameterWithName('password')
@@ -362,6 +365,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
         .formParam('response_type', AuthzResponseType.CODE.name())
         .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
         .formParam('scope', 'rs.read')
+        .formParam('acr', 'card')
         .formParam('username', 'login')
         .formParam('password', 'password')
     when:
