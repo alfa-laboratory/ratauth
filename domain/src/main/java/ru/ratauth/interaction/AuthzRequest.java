@@ -16,6 +16,7 @@ import java.util.Set;
 public class AuthzRequest {
   private AuthzResponseType responseType;
   private @Singular Set<String> scopes;
+  private @Singular("acr") Set<String> authContext;
   private String clientId;
   private String clientSecret;
   private String redirectURI;

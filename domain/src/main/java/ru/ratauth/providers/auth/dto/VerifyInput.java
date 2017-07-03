@@ -5,12 +5,14 @@ import lombok.Data;
 import ru.ratauth.entities.UserInfo;
 
 import java.util.Map;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
-public class VerifierInput {
+public class VerifyInput {
 
     private Map<String, String> data;
+    private Set<String> authContext;
     private UserInfo userInfo;
     private String relyingParty;
 

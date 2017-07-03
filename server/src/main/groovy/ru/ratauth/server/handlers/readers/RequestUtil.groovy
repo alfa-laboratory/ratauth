@@ -2,7 +2,6 @@ package ru.ratauth.server.handlers.readers
 
 import groovy.transform.CompileStatic
 import ratpack.http.Headers
-import ratpack.util.MultiValueMap
 import ru.ratauth.utils.StringUtils
 
 import java.nio.charset.Charset
@@ -16,13 +15,28 @@ class RequestUtil {
   private static final String AUTHORIZATION = "Authorization"
 
   /**
+   * Extracts field according to it's name and remove it from map
+   * @param params input map
+   * @param name name of parameter that must be exctracted
+   * @param required if true and parameter with name was not found throws ReadRequestException
+   * @return extracted param value
+   */
+  static String removeField(Map<String, String> params, String name, boolean required) {
+    String value = params.remove(name)
+    if (StringUtils.isBlank(value) && required) {
+      throw new ReadRequestException(ReadRequestException.ID.FIELD_MISSED, name)
+    }
+    return value
+  }
+
+  /**
    * Extracts field according to it's name
    * @param params input map
    * @param name name of parameter that must be exctracted
    * @param required if true and parameter with name was not found throws ReadRequestException
    * @return extracted param value
    */
-  static String extractField(MultiValueMap<String, String> params, String name, boolean required) {
+  static String extractField(Map<String, String> params, String name, boolean required) {
     String value = params.get(name)
     if (StringUtils.isBlank(value) && required) {
       throw new ReadRequestException(ReadRequestException.ID.FIELD_MISSED, name)
@@ -37,7 +51,7 @@ class RequestUtil {
    * @param required if true and parameter with name was not found throws ReadRequestException
    * @return extracted param value
    */
-  static <T extends Enum> T extractEnumField(MultiValueMap<String, String> params, String name, boolean required, Class<T> enumType) {
+  static <T extends Enum> T extractEnumField(Map<String, String> params, String name, boolean required, Class<T> enumType) {
     String value = extractField(params, name, required)
     if (!StringUtils.isBlank(value)) {
       return Enum.valueOf(enumType, value.toUpperCase())
@@ -52,7 +66,7 @@ class RequestUtil {
    * @param required if true and parameter with name was not found throws ReadRequestException
    * @return extracted param value
    */
-  static <T extends Enum> List<T> extractEnumFields(MultiValueMap<String, String> params, String name, String splitter,
+  static <T extends Enum> List<T> extractEnumFields(Map<String, String> params, String name, String splitter,
                                                     boolean required, Class<T> enumType) {
     List<T> result = extractField(params, name, required).split(splitter)
         .findAll { !StringUtils.isBlank(it) }
@@ -69,7 +83,7 @@ class RequestUtil {
    * @param excludedNames names that must be excluded from result
    * @return resulted map of params
    */
-  static Map<String, String> extractRest(MultiValueMap<String, String> params, Set<String> excludedNames) {
+  static Map<String, String> extractRest(Map<String, String> params, Set<String> excludedNames = []) {
     //since duplicate must be removed we won't use clone method
     Map<String, String> result = [:]
     params.entrySet().stream().filter { !excludedNames.contains(it.key) } forEach { result.put(it.key, it.value) }

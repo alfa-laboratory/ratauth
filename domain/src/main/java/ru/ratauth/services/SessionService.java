@@ -103,4 +103,20 @@ public interface SessionService {
    * @param lastCheck date of lastCheck
    */
   Observable<Boolean> updateCheckDate(String sessionId, Date lastCheck);
+
+  /**
+   * Updates session user info data
+   * @param sessionId session identifier
+   * @param userInfo user info
+   */
+    Observable<Boolean> updateUserInfo(String sessionId, String userInfo);
+
+  /**
+   * Loads Session by MFA-token with expiration date check. Session must be loaded with only one entry and token entity
+   * @param token mfa token value
+   * @param now current date
+   * @return Observable session linked with that mfa-token
+   */
+  Observable<Session> getByValidMFAToken(String token, Date now);
+
 }

@@ -155,4 +155,18 @@ public class OpenIdSessionService implements AuthSessionService {
         return sessionService.getByValidToken(token, now)
                 .doOnNext(actionLogger::addSessionInfo);
     }
+    
+    @Override
+    public Observable<Session> getByValidMFAToken(String token, Date now) {
+        return sessionService.getByValidMFAToken(token, now)
+                .doOnNext(actionLogger::addSessionInfo);
+    }
+
+    @Override
+    public Observable<Boolean> updateIdToken(Session session, UserInfo userInfo, Set<String> scopes, Set<String> authContext) {
+        final String jwtInfo = tokenProcessor.createToken(RATAUTH, masterSecret, null,
+                DateUtils.fromLocal(LocalDateTime.now()), session.getExpiresIn(),
+                tokenCacheService.extractAudience(scopes), scopes, authContext, session.getUserId(), userInfo.toMap());
+        return sessionService.updateUserInfo(session.getId(), jwtInfo);
+    }
 }

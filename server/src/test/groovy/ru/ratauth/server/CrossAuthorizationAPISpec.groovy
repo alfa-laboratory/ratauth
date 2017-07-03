@@ -212,7 +212,7 @@ class CrossAuthorizationAPISpec  extends BaseDocumentationSpec {
           .description('relying party identifier')
           .type(JsonFieldType.STRING),
         fieldWithPath('scope')
-          .description('scopes of access token')
+          .description('scope of access token')
           .type(JsonFieldType.ARRAY)
       )
     ))
