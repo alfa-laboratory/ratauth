@@ -14,7 +14,9 @@ import rx.functions.Action1
 import static ratpack.rx.RxRatpack.observe
 
 @Component
-public class VerifyEnrollHandler implements Action<Chain> {
+class VerifyEnrollHandler implements Action<Chain> {
+
+    private static final String ACR_SPLITTER = ':'
 
     @Autowired
     VerifyEnrollService enrollService
@@ -36,13 +38,13 @@ public class VerifyEnrollHandler implements Action<Chain> {
 
     static VerifyEnrollRequest readVerifyEnrollRequest(RequestReader params) {
         return new VerifyEnrollRequest(
-                clientId: params.removeField("client_id", true),
-                mfaToken: params.removeField("mfa_token", true),
-                redirectURI: params.removeField("redirect_uri", false),
-                scope: params.removeField("scope", true).split(' ').toList(),
-                authContext: params.removeField("acr_values", true).split(':').toList(),
-                enroll: params.removeField("enroll", true).split(':').toList(),
-                data: params.toMap()
+                clientId:params.removeField("client_id", true),
+                mfaToken:params.removeField("mfa_token", true),
+                redirectURI:params.removeField("redirect_uri", false),
+                scope:params.removeField("scope", true).split(' ').toList(),
+                authContext:params.removeField("acr_values", true).split(ACR_SPLITTER).toList(),
+                enroll:params.removeField("enroll", true).split(ACR_SPLITTER).toList(),
+                data:params.toMap()
         )
     }
 

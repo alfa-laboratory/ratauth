@@ -15,8 +15,9 @@ import rx.functions.Action1
 import static ratpack.rx.RxRatpack.observe
 
 @Component
-public class ActivateEnrollHandler implements Action<Chain> {
+class ActivateEnrollHandler implements Action<Chain> {
 
+    private static final String ACR_SPLITTER = ':'
     @Autowired ActivateEnrollService enrollService
 
     @Override
@@ -36,12 +37,12 @@ public class ActivateEnrollHandler implements Action<Chain> {
 
     static ActivateEnrollRequest readActivateEnrollRequest(RequestReader params) {
         return new ActivateEnrollRequest(
-                clientId: params.removeField("client_id", true),
-                mfaToken: params.removeField("mfa_token", true),
-                scope: params.removeField("scope", true).split(' ').toList(),
-                authContext: params.removeField("acr_values", true).split(':').toList(),
-                enroll: params.removeField("enroll", true).split(':').toList(),
-                data: params.toMap()
+                clientId:params.removeField("client_id", true),
+                mfaToken:params.removeField("mfa_token", true),
+                scope:params.removeField("scope", true).split(' ').toList(),
+                authContext:params.removeField("acr_values", true).split(ACR_SPLITTER).toList(),
+                enroll:params.removeField("enroll", true).split(ACR_SPLITTER).toList(),
+                data:params.toMap()
         )
     }
 
