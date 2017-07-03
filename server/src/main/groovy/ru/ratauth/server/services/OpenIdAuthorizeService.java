@@ -12,18 +12,17 @@ import ru.ratauth.entities.*;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.interaction.*;
 import ru.ratauth.interaction.TokenType;
-import ru.ratauth.providers.auth.AuthProvider;
-import ru.ratauth.providers.auth.dto.AuthInput;
-import ru.ratauth.providers.auth.dto.AuthResult;
-import ru.ratauth.utils.StringUtils;
-import ru.ratauth.utils.URIUtils;
+import ru.ratauth.providers.auth.Verifier;
+import ru.ratauth.providers.auth.dto.VerifyInput;
+import ru.ratauth.providers.auth.dto.VerifyResult;
+import ru.ratauth.server.extended.enroll.MissingProviderException;
 import rx.Observable;
 
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
 
+import static java.util.Optional.ofNullable;
+import static ru.ratauth.providers.auth.dto.VerifyResult.Status.NEED_APPROVAL;
 import static ru.ratauth.server.utils.RedirectUtils.createRedirectURI;
 
 /**
@@ -37,7 +36,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
   private final AuthClientService clientService;
   private final TokenCacheService tokenCacheService;
   private final AuthSessionService sessionService;
-  private final Map<String, AuthProvider> authProviders;
+  private final Map<String, Verifier> authProviders;
 
   @Override
   @SneakyThrows
@@ -45,16 +44,12 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     return clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(),
         request.getResponseType() != AuthzResponseType.CODE)
         .flatMap(rp ->
-            authenticateUser(request.getAuthData(), rp.getIdentityProvider(), rp.getName())
-                .map(authRes -> new ImmutablePair<>(rp, authRes)))
+            authenticateUser(request.getAuthData(), request.getAuthContext(), rp.getIdentityProvider(), rp.getName())
+                .map(authRes -> new ImmutableTriple<>(rp, authRes, request.getAuthContext())))
         .flatMap(rpAuth ->
-            createSession(request, rpAuth.getRight(), rpAuth.getLeft())
-                .map(ses -> new ImmutableTriple<>(rpAuth.getLeft(), rpAuth.getRight(), ses)))
-        .flatMap(rpAuthSession ->
-            createIdToken(rpAuthSession.getLeft(), rpAuthSession.getRight(), rpAuthSession.getMiddle().getAuthContext())
-                .map(idToken -> buildResponse(rpAuthSession.getLeft(), rpAuthSession.getRight(),
-                    rpAuthSession.getMiddle(), idToken, request.getRedirectURI()))
-        )
+            createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
+                .flatMap(ses -> createIdToken(rpAuth.left, ses, rpAuth.right)
+                                .map(idToken -> buildResponse(rpAuth.left, ses, rpAuth.middle, idToken, request.getRedirectURI()))))
         .doOnCompleted(() -> log.info("Authorization succeed"));
   }
 
@@ -83,7 +78,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
       String redirectURI = rpSession.getLeft().getAuthorizationRedirectURI();
       return sessionService.addEntry(rpSession.getRight(), rpSession.getLeft(), request.getScopes(), redirectURI)
             .map(session -> buildResponse(rpSession.getLeft(), session,
-                AuthResult.builder().status(AuthResult.Status.NEED_APPROVAL).build(), null, request.getRedirectURI()));
+                new VerifyResult(Collections.emptyMap(), NEED_APPROVAL), null, request.getRedirectURI()));
       }
     ).doOnCompleted(() -> log.info("Cross-authorization succeed"));
   }
@@ -101,30 +96,32 @@ public class OpenIdAuthorizeService implements AuthorizeService {
       return Observable.just((TokenCache) null);
   }
 
-  private Observable<Session> createSession(AuthzRequest oauthRequest, AuthResult authResult, RelyingParty relyingParty) {
-    if (AuthResult.Status.SUCCESS == authResult.getStatus())
+  private Observable<Session> createSession(AuthzRequest oauthRequest, VerifyResult verifyResult, Set<String> authContext, RelyingParty relyingParty) {
+    if (VerifyResult.Status.SUCCESS == verifyResult.getStatus())
       if (AuthzResponseType.TOKEN == oauthRequest.getResponseType())//implicit auth
-        return sessionService.createSession(relyingParty, authResult.getData(), oauthRequest.getScopes(), authResult.getAuthContext(), oauthRequest.getRedirectURI());
+        return sessionService.createSession(relyingParty, verifyResult.getData(), oauthRequest.getScopes(), authContext, oauthRequest.getRedirectURI());
       else//auth code auth
-        return sessionService.initSession(relyingParty, authResult.getData(), oauthRequest.getScopes(), authResult.getAuthContext(), oauthRequest.getRedirectURI());
+        return sessionService.initSession(relyingParty, verifyResult.getData(), oauthRequest.getScopes(), authContext, oauthRequest.getRedirectURI());
     else
       return Observable.just(new Session());//authCode provided by external Auth provider
   }
 
-  private Observable<AuthResult> authenticateUser(Map<String, String> authData, String identityProvider, String relyingPartyName) {
-    return authProviders.get(identityProvider).authenticate(
-        AuthInput.builder().
-            data(authData)
-            .relyingParty(relyingPartyName).build());
+  private Observable<VerifyResult> authenticateUser(Map<String, String> authData, Set<String> authContext, String identityProvider, String relyingPartyName) {
+    return verifierFor(identityProvider).verify(new VerifyInput(authData, authContext, new UserInfo(), relyingPartyName));
   }
 
-  private static AuthzResponse buildResponse(RelyingParty relyingParty, Session session, AuthResult authResult, TokenCache tokenCache, String redirectUri) {
+  private Verifier verifierFor(String name) {
+    return ofNullable(authProviders.get(name.concat("IdentityProvider")))
+            .orElseThrow(() -> new MissingProviderException(name.concat("IdentityProvider")));
+  }
+
+  private static AuthzResponse buildResponse(RelyingParty relyingParty, Session session, VerifyResult verifyResult, TokenCache tokenCache, String redirectUri) {
     final String targetRedirectURI = createRedirectURI(relyingParty, redirectUri);
     //in case of autCode sent by authProvider
     if (session == null || CollectionUtils.isEmpty(session.getEntries())) {
       AuthzResponse resp = AuthzResponse.builder()
           .location(relyingParty.getAuthorizationRedirectURI())
-          .data(authResult.getData())
+          .data(verifyResult.getData())
           .redirectURI(targetRedirectURI)
           .build();
       return resp;
@@ -133,7 +130,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     AuthEntry entry = session.getEntry(relyingParty.getName()).get();
     AuthzResponse resp = AuthzResponse.builder()
         .location(entry.getRedirectUrl())
-        .data(authResult.getData())
+        .data(verifyResult.getData())
         .build();
     final Optional<Token> tokenOptional = entry.getLatestToken();
     //implicit auth

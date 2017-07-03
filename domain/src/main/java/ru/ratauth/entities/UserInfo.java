@@ -8,6 +8,10 @@ public class UserInfo {
 
     private final Map<String, Object> userInfo;
 
+    public UserInfo() {
+        this.userInfo = new HashMap<>();
+    }
+
     public UserInfo(Map<String, Object> userInfo) {
         this.userInfo = new HashMap<>(userInfo);
     }
@@ -21,7 +25,7 @@ public class UserInfo {
         return new HashMap<>(userInfo);
     }
 
-    public UserInfo putAll(Map<String, String> data) {
+    public UserInfo putAll(Map<String, Object> data) {
         userInfo.putAll(data);
         return this;
     }

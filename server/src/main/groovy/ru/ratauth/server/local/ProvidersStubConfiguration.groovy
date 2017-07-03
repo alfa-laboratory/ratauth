@@ -22,6 +22,8 @@ import ru.ratauth.providers.registrations.dto.RegResult
 import rx.Observable
 
 import static ru.ratauth.providers.auth.dto.VerifyResult.Status.NEED_APPROVAL
+import static ru.ratauth.providers.auth.dto.VerifyResult.Status.SUCCESS
+
 /**
  * @author mgorelikov
  * @since 03/11/15
@@ -35,7 +37,7 @@ class ProvidersStubConfiguration {
 
   abstract class AbstractProvider implements Activator, Verifier {}
 
-  @Bean(name = 'mineIdentityProvider')
+  @Bean(name = 'STUBIdentityProvider')
   @Primary
   Activator activator() {
     return new AbstractProvider() {
@@ -43,7 +45,7 @@ class ProvidersStubConfiguration {
       Observable<ActivateResult> activate(ActivateInput input) {
         return Observable.just(new ActivateResult().with {
           if(input.data.username) {
-            it.data << [username: input.data.username.reverse()]
+            it.data.put("user_id", input.data.username.reverse())
           }
           return it
         })
@@ -51,12 +53,14 @@ class ProvidersStubConfiguration {
 
       @Override
       Observable<VerifyResult> verify(VerifyInput input) {
-        return Observable.just(new VerifyResult(status: NEED_APPROVAL).with {
-          if(input.data.username) {
-            it.data << [username: input.data.username.reverse()]
-          }
-          return it
-        })
+        if(input.data.password == "password") {
+          return Observable.just(new VerifyResult(status: SUCCESS).with {
+            if(input.data.username) {
+              it.data.put("user_id", input.data.username.reverse())
+            }
+            return it
+          })
+        } else return Observable.error(new AuthorizationException(AuthorizationException.ID.CREDENTIALS_WRONG))
       }
     }
   }

@@ -82,11 +82,11 @@ public class VerifyEnrollService {
     }
 
     private Observable<VerifyResult> verify(VerifyEnrollRequest request, UserInfo userInfo, RelyingParty relyingParty) {
-        return activatorFor(relyingParty.getName())
+        return verifierFor(relyingParty.getIdentityProvider())
                 .verify(new VerifyInput(request.getData(), request.getEnroll(), userInfo, relyingParty.getName()));
     }
 
-    private Verifier activatorFor(String name) {
+    private Verifier verifierFor(String name) {
         return ofNullable(authProviders.get(name.concat("IdentityProvider")))
                 .orElseThrow(() -> new MissingProviderException(name.concat("IdentityProvider")));
     }

@@ -12,6 +12,6 @@ import java.util.Map;
 public class ActivateResult {
 
     @Singular("field")
-    private Map<String, String> data = new HashMap<>();
+    private Map<String, Object> data = new HashMap<>();
 
 }

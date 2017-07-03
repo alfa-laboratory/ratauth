@@ -145,6 +145,8 @@ class EnrollAPISpec extends BaseDocumentationSpec {
                                 .description('Relying party identifier'),
                         parameterWithName('username')
                                 .description('part of user\'s credentials'),
+                        parameterWithName('password')
+                                .description('part of user\'s credentials'),
                         parameterWithName('scope')
                                 .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
                         parameterWithName('acr_values')
@@ -156,6 +158,7 @@ class EnrollAPISpec extends BaseDocumentationSpec {
         ))
                 .given()
                 .formParam("username", "username")
+                .formParam("password", "password")
                 .formParam('mfa_token', PersistenceServiceStubConfiguration.MFA_TOKEN)
                 .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
                 .formParam('scope', 'rs.read')
@@ -189,6 +192,8 @@ class EnrollAPISpec extends BaseDocumentationSpec {
                                 .description('Relying party identifier'),
                         parameterWithName('username')
                                 .description('part of user\'s credentials'),
+                        parameterWithName('password')
+                                .description('part of user\'s credentials'),
                         parameterWithName('scope')
                                 .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
                         parameterWithName('acr_values')
@@ -200,6 +205,7 @@ class EnrollAPISpec extends BaseDocumentationSpec {
         ))
                 .given()
                 .formParam("username", "username")
+                .formParam("password", "password")
                 .formParam("redirect_uri", "https://domain.mine/login")
                 .formParam('mfa_token', PersistenceServiceStubConfiguration.MFA_TOKEN)
                 .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)

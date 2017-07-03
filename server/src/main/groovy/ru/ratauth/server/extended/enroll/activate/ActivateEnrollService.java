@@ -78,7 +78,7 @@ public class ActivateEnrollService {
     }
 
     private Observable<ActivateResult> activate(ActivateEnrollRequest request, UserInfo userInfo, RelyingParty relyingParty) {
-        return activatorFor(relyingParty.getName())
+        return activatorFor(relyingParty.getIdentityProvider())
                 .activate(new ActivateInput(request.getData(), request.getEnroll(), userInfo, relyingParty.getName()));
     }
 
