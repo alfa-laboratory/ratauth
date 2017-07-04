@@ -18,6 +18,8 @@ import java.util.StringJoiner;
 @NoArgsConstructor
 public class AuthzResponse {
   private String code;
+  private String mfaToken;
+
   //intermediate step data for two step authentication
   private Map<String,Object> data;
   private Long expiresIn;
@@ -43,6 +45,9 @@ public class AuthzResponse {
     }
     if(!StringUtils.isBlank(code)) {
       joiner.add("code="+code);
+    }
+    if(!StringUtils.isBlank(mfaToken)) {
+      joiner.add("mfa_token="+mfaToken);
     }
     if(expiresIn != null) {
       joiner.add("expires_in="+expiresIn);

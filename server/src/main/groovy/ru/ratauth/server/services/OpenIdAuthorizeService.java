@@ -19,10 +19,9 @@ import ru.ratauth.server.extended.enroll.MissingProviderException;
 import rx.Observable;
 
 import java.util.*;
-import java.util.function.Function;
 
 import static java.util.Optional.ofNullable;
-import static ru.ratauth.providers.auth.dto.VerifyResult.Status.NEED_APPROVAL;
+import static ru.ratauth.providers.auth.dto.VerifyResult.Status.SUCCESS;
 import static ru.ratauth.server.utils.RedirectUtils.createRedirectURI;
 
 /**
@@ -78,7 +77,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
       String redirectURI = rpSession.getLeft().getAuthorizationRedirectURI();
       return sessionService.addEntry(rpSession.getRight(), rpSession.getLeft(), request.getScopes(), redirectURI)
             .map(session -> buildResponse(rpSession.getLeft(), session,
-                new VerifyResult(Collections.emptyMap(), NEED_APPROVAL), null, request.getRedirectURI()));
+                new VerifyResult(Collections.emptyMap(), SUCCESS), null, request.getRedirectURI()));
       }
     ).doOnCompleted(() -> log.info("Cross-authorization succeed"));
   }
@@ -143,9 +142,14 @@ public class OpenIdAuthorizeService implements AuthorizeService {
       resp.setRefreshToken(entry.getRefreshToken());
       resp.setExpiresIn(token.getExpiresIn().getTime());
     } else {//auth code authorization
-      resp.setCode(entry.getAuthCode());
-      resp.setExpiresIn(entry.getCodeExpiresIn().getTime());
-      resp.setRedirectURI(targetRedirectURI);
+      if(verifyResult.getStatus() == SUCCESS) {
+        resp.setCode(entry.getAuthCode());
+        resp.setExpiresIn(entry.getCodeExpiresIn().getTime());
+        resp.setRedirectURI(targetRedirectURI);
+      } else {
+        resp.setLocation(relyingParty.getIncAuthLevelPageURI());
+        resp.setMfaToken(session.getMfaToken());
+      }
     }
     return resp;
   }
