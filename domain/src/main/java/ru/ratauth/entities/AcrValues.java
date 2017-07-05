@@ -3,7 +3,7 @@ package ru.ratauth.entities;
 import lombok.*;
 import lombok.experimental.Wither;
 
-import java.util.Collections;
+import javax.annotation.Nonnull;
 import java.util.Iterator;
 import java.util.List;
 
@@ -20,31 +20,32 @@ public class AcrValues implements AcrValue, Enroll {
     @Wither
     @NonNull
     @Singular("acr")
-    private final List<String> acrValues;
+    private final List<String> values;
 
     public static AcrValues valueOf(String acrValue) {
         return AcrValues.builder()
-                .acrValues(unmodifiableList(asList(acrValue.split(":"))))
+                .values(unmodifiableList(asList(acrValue.split(":"))))
                 .build();
     }
 
     public String getFirst() {
-        return this.getAcrValues().get(0);
+        return this.getValues().get(0);
     }
 
     public AcrValues difference(AcrValues acrValues) {
-        return this.withAcrValues(this.getAcrValues().stream()
-                .filter(value -> !acrValues.getAcrValues().contains(value))
+        return this.withValues(this.getValues().stream()
+                .filter(value -> !acrValues.getValues().contains(value))
                 .collect(toList()));
     }
 
     @Override
     public String toString() {
-        return String.join(":", acrValues);
+        return String.join(":", values);
     }
     
+    @Nonnull
     @Override
     public Iterator<String> iterator() {
-        return acrValues.iterator();
+        return values.iterator();
     }
 }
