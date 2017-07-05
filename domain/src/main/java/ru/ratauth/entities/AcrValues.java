@@ -3,6 +3,7 @@ package ru.ratauth.entities;
 import lombok.*;
 import lombok.experimental.Wither;
 
+import javax.annotation.Nonnull;
 import java.util.Iterator;
 import java.util.List;
 
@@ -42,6 +43,7 @@ public class AcrValues implements AcrValue, Enroll {
         return String.join(":", values);
     }
     
+    @Nonnull
     @Override
     public Iterator<String> iterator() {
         return values.iterator();
