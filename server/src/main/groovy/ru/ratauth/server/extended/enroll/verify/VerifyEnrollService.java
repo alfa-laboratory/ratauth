@@ -17,7 +17,7 @@ import ru.ratauth.server.secutiry.TokenProcessor;
 import ru.ratauth.server.services.AuthClientService;
 import ru.ratauth.server.services.AuthSessionService;
 import ru.ratauth.server.services.TokenCacheService;
-import ru.ratauth.server.services.VerifierResolver;
+import ru.ratauth.server.providers.VerifierResolver;
 import rx.Observable;
 
 import java.net.URL;

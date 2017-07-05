@@ -1,8 +1,7 @@
-package ru.ratauth.server.services;
+package ru.ratauth.server.providers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import ru.ratauth.providers.auth.Verifier;
 import ru.ratauth.server.extended.enroll.MissingProviderException;
@@ -17,10 +16,9 @@ public class VerifierResolver {
 
     private final Map<String, Verifier> providers;
 
-
-    public Verifier find(String clientId) {
-        return ofNullable(providers.get(clientId.concat("IdentityProvider")))
-                .orElseThrow(() -> new MissingProviderException(clientId.concat("IdentityProvider")));
+    public Verifier find(String enroll) {
+        return ofNullable(providers.get(enroll.concat("IdentityProvider")))
+                .orElseThrow(() -> new MissingProviderException(enroll.concat("IdentityProvider")));
     }
 
 }

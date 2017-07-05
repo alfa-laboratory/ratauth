@@ -5,5 +5,7 @@ import ru.ratauth.providers.auth.dto.VerifyResult;
 import rx.Observable;
 
 public interface Verifier {
-        Observable<VerifyResult> verify(VerifyInput input);
+
+    Observable<VerifyResult> verify(VerifyInput input);
+
 }

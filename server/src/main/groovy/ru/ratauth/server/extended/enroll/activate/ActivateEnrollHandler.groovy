@@ -8,6 +8,7 @@ import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
 import ratpack.jackson.Jackson
+import ru.ratauth.entities.AcrValues
 import ru.ratauth.server.handlers.readers.RequestReader
 import rx.Observable
 import rx.functions.Action1
@@ -17,8 +18,8 @@ import static ratpack.rx.RxRatpack.observe
 @Component
 class ActivateEnrollHandler implements Action<Chain> {
 
-    private static final String ACR_SPLITTER = ':'
-    @Autowired ActivateEnrollService enrollService
+    @Autowired
+    ActivateEnrollService enrollService
 
     @Override
     void execute(Chain chain) throws Exception {
@@ -40,8 +41,8 @@ class ActivateEnrollHandler implements Action<Chain> {
                 clientId:params.removeField("client_id", true),
                 mfaToken:params.removeField("mfa_token", true),
                 scope:params.removeField("scope", true).split(' ').toList(),
-                authContext:params.removeField("acr_values", true).split(ACR_SPLITTER).toList(),
-                enroll:params.removeField("enroll", true).split(ACR_SPLITTER).toList(),
+                authContext:AcrValues.valueOf(params.removeField("acr_values", true)),
+                enroll:AcrValues.valueOf(params.removeField("enroll", true)),
                 data:params.toMap()
         )
     }

@@ -15,6 +15,7 @@ import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.Verifier;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
+import ru.ratauth.server.providers.VerifierResolver;
 import rx.Observable;
 
 import java.util.*;

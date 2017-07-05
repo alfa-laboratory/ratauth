@@ -77,7 +77,7 @@ class AuthzRequestReader {
                 builder.scopes(scope)
             }
         }
-        builder.acrValues(AcrValues.valueOf(extractField(params, "acr", false) ?: ""));
+        builder.acrValues(AcrValues.valueOf(extractField(params, "acr", false) ?: ""))
         builder.enroll(extractField(params, "enroll", false))
         builder.authData(extractRest(params, BASE_FIELDS))
         def request = builder.build()
