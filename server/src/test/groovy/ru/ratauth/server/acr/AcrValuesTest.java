@@ -13,7 +13,7 @@ public class AcrValuesTest {
     public void testValueOf() {
         String value = "card:sms";
 
-        List<String> acrValues = AcrValues.valueOf(value).getAcrValues();
+        List<String> acrValues = AcrValues.valueOf(value).getValues();
 
         assertEquals("card", acrValues.get(0));
         assertEquals("sms", acrValues.get(1));

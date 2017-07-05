@@ -87,7 +87,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     if (token.isPresent()){
       assert entry.isPresent();
       AuthEntry authEntry = entry.get();
-      authEntry.mergeAuthContext(acrValues.getAcrValues());
+      authEntry.mergeAuthContext(acrValues.getValues());
       return tokenCacheService.getToken(session, relyingParty, entry.get());
     }
     else

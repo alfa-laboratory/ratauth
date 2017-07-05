@@ -13,7 +13,7 @@ public class DefaultAcrMatcher implements AcrMatcher {
         return of(request.getQueryParams().get("acr"))
                 .map(acr -> requireNonNull(acr, "acr can not be null"))
                 .map(AcrValues::valueOf)
-                .map(AcrValues::getAcrValues)
+                .map(AcrValues::getValues)
                 .map(acrValues -> acrValues.get(0))
                 ._1();
     }
