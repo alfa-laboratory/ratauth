@@ -1,6 +1,7 @@
 package ru.ratauth.server.acr;
 
 import ratpack.http.Request;
+import ru.ratauth.entities.AcrValues;
 
 import static java.util.Objects.requireNonNull;
 import static javaslang.Tuple.of;
@@ -11,8 +12,8 @@ public class DefaultAcrMatcher implements AcrMatcher {
     public String match(Request request) {
         return of(request.getQueryParams().get("acr"))
                 .map(acr -> requireNonNull(acr, "acr can not be null"))
-                .map(AcrValue::valueOf)
-                .map(AcrValue::getAcrValues)
+                .map(AcrValues::valueOf)
+                .map(AcrValues::getAcrValues)
                 .map(acrValues -> acrValues.get(0))
                 ._1();
     }

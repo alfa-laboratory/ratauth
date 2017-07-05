@@ -39,14 +39,14 @@ public class OpenIdSessionService implements AuthSessionService {
     private String masterSecret;//final
 
     @Override
-    public Observable<Session> initSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, Set<String> authContext,
+    public Observable<Session> initSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, AcrValues acrValues,
                                            String redirectUrl) {
         final LocalDateTime now = LocalDateTime.now();
-        return createSession(relyingParty, userInfo, scopes, authContext, redirectUrl, now, null);
+        return createSession(relyingParty, userInfo, scopes, acrValues, redirectUrl, now, null);
     }
 
     @Override
-    public Observable<Session> createSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, Set<String> authContext,
+    public Observable<Session> createSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, AcrValues acrValues,
                                              String redirectUrl) {
         final LocalDateTime now = LocalDateTime.now();
         final LocalDateTime tokenExpires = now.plus(relyingParty.getTokenTTL(), ChronoUnit.SECONDS);
@@ -55,11 +55,11 @@ public class OpenIdSessionService implements AuthSessionService {
                 .expiresIn(DateUtils.fromLocal(tokenExpires))
                 .created(DateUtils.fromLocal(now))
                 .build();
-        return createSession(relyingParty, userInfo, scopes, authContext, redirectUrl, now, token);
+        return createSession(relyingParty, userInfo, scopes, acrValues, redirectUrl, now, token);
     }
 
     private Observable<Session> createSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes,
-                                              Set<String> authContext, String redirectUrl, LocalDateTime now, Token token) {
+                                              AcrValues acrValues, String redirectUrl, LocalDateTime now, Token token) {
         final LocalDateTime sessionExpires = now.plus(relyingParty.getSessionTTL(), ChronoUnit.SECONDS);
         final LocalDateTime refreshExpires = now.plus(relyingParty.getRefreshTokenTTL(), ChronoUnit.SECONDS);
         final LocalDateTime authCodeExpires = now.plus(relyingParty.getCodeTTL(), ChronoUnit.SECONDS);
@@ -67,7 +67,7 @@ public class OpenIdSessionService implements AuthSessionService {
 
         final String jwtInfo = tokenProcessor.createToken(RATAUTH, masterSecret, null,
                 DateUtils.fromLocal(now), DateUtils.fromLocal(sessionExpires),
-                tokenCacheService.extractAudience(scopes), scopes, authContext, userInfo.get(Fields.USER_ID.val()).toString(), userInfo);
+                tokenCacheService.extractAudience(scopes), scopes, acrValues.getAcrValues(), userInfo.get(Fields.USER_ID.val()).toString(), userInfo);
 
         final AuthEntry authEntry = AuthEntry.builder()
                 .created(DateUtils.fromLocal(now))

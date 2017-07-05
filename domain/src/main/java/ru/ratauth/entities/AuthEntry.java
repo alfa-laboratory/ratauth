@@ -34,7 +34,7 @@ public class AuthEntry {
   private AuthType authType;
   private String redirectUrl;
 
-  public void mergeAuthContext(Set<String> authContext) {
+  public void mergeAuthContext(Collection<String> authContext) {
     this.authContext.addAll(requireNonNull(authContext));
   }
 

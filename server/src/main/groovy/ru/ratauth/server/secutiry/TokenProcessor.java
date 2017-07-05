@@ -1,5 +1,6 @@
 package ru.ratauth.server.secutiry;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -13,7 +14,7 @@ public interface TokenProcessor {
 
     String createToken(String clientId, String secret, String identifier,
                        Date created, Date expiresIn,
-                       Set<String> audience, Set<String> scopes, Set<String> authContext,
+                       Set<String> audience, Set<String> scopes, Collection<String> authContext,
                        String userId, Map<String, Object> userInfo);
 
     Map<String, Object> extractInfo(String jwt, String secret);

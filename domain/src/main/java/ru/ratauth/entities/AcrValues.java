@@ -1,4 +1,4 @@
-package ru.ratauth.server.acr;
+package ru.ratauth.entities;
 
 import lombok.*;
 import lombok.experimental.Wither;
@@ -11,7 +11,7 @@ import static java.util.stream.Collectors.toList;
 @Builder
 @RequiredArgsConstructor
 @EqualsAndHashCode
-public class AcrValue {
+public class AcrValues {
 
     @Getter
     @Wither
@@ -19,10 +19,20 @@ public class AcrValue {
     @Singular("acr")
     private final List<String> acrValues;
 
-    public static AcrValue valueOf(String acrValue) {
-        return AcrValue.builder()
+    public static AcrValues valueOf(String acrValue) {
+        return AcrValues.builder()
                 .acrValues(asList(acrValue.split(":")))
                 .build();
+    }
+
+    public String getFirst() {
+        return this.getAcrValues().get(0);
+    }
+
+    public AcrValues difference(AcrValues acrValues) {
+        return this.withAcrValues(this.getAcrValues().stream()
+                .filter(value -> !acrValues.getAcrValues().contains(value))
+                .collect(toList()));
     }
 
     @Override
@@ -30,10 +40,5 @@ public class AcrValue {
         return String.join(":", acrValues);
     }
 
-    public AcrValue difference(AcrValue acrValue) {
-        return this.withAcrValues(this.getAcrValues().stream()
-                .filter(value -> !acrValue.getAcrValues().contains(value))
-                .collect(toList()));
-    }
 
 }

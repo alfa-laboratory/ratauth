@@ -15,13 +15,10 @@ import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.Verifier;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
-import ru.ratauth.server.extended.enroll.MissingProviderException;
 import rx.Observable;
 
 import java.util.*;
-import java.util.function.Function;
 
-import static java.util.Optional.ofNullable;
 import static ru.ratauth.providers.auth.dto.VerifyResult.Status.NEED_APPROVAL;
 import static ru.ratauth.server.utils.RedirectUtils.createRedirectURI;
 
@@ -36,7 +33,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
   private final AuthClientService clientService;
   private final TokenCacheService tokenCacheService;
   private final AuthSessionService sessionService;
-  private final Map<String, Verifier> providers;
+  private final VerifierResolver verifierResolver;
 
   @Override
   @SneakyThrows
@@ -44,8 +41,8 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     return clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(),
         request.getResponseType() != AuthzResponseType.CODE)
         .flatMap(rp ->
-            authenticateUser(request.getAuthData(), request.getAuthContext(), rp.getIdentityProvider(), rp.getName())
-                .map(authRes -> new ImmutableTriple<>(rp, authRes, request.getAuthContext())))
+            authenticateUser(request.getAuthData(), request.getAcrValues(), rp.getIdentityProvider(), rp.getName())
+                .map(authRes -> new ImmutableTriple<>(rp, authRes, request.getAcrValues())))
         .flatMap(rpAuth ->
             createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
                 .flatMap(ses -> createIdToken(rpAuth.left, ses, rpAuth.right)
@@ -83,36 +80,35 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     ).doOnCompleted(() -> log.info("Cross-authorization succeed"));
   }
 
-  private Observable<TokenCache> createIdToken(RelyingParty relyingParty, Session session, Set<String> authContext) {
+  private Observable<TokenCache> createIdToken(RelyingParty relyingParty, Session session, AcrValues acrValues) {
     Optional<AuthEntry> entry = session.getEntry(relyingParty.getName());
     Optional<Token> token = entry.flatMap(AuthEntry::getLatestToken);
     if (token.isPresent()){
       assert entry.isPresent();
       AuthEntry authEntry = entry.get();
-      authEntry.mergeAuthContext(authContext);
+      authEntry.mergeAuthContext(acrValues.getAcrValues());
       return tokenCacheService.getToken(session, relyingParty, entry.get());
     }
     else
       return Observable.just((TokenCache) null);
   }
 
-  private Observable<Session> createSession(AuthzRequest oauthRequest, VerifyResult verifyResult, Set<String> authContext, RelyingParty relyingParty) {
-    if (VerifyResult.Status.SUCCESS == verifyResult.getStatus())
-      if (AuthzResponseType.TOKEN == oauthRequest.getResponseType())//implicit auth
-        return sessionService.createSession(relyingParty, verifyResult.getData(), oauthRequest.getScopes(), authContext, oauthRequest.getRedirectURI());
-      else//auth code auth
-        return sessionService.initSession(relyingParty, verifyResult.getData(), oauthRequest.getScopes(), authContext, oauthRequest.getRedirectURI());
-    else
+  private Observable<Session> createSession(AuthzRequest oauthRequest, VerifyResult verifyResult, AcrValues acrValues, RelyingParty relyingParty) {
+    if (VerifyResult.Status.SUCCESS == verifyResult.getStatus()) {
+        if (AuthzResponseType.TOKEN == oauthRequest.getResponseType()) {//implicit auth
+            return sessionService.createSession(relyingParty, verifyResult.getData(), oauthRequest.getScopes(), acrValues, oauthRequest.getRedirectURI());
+        } else {//auth code auth
+            return sessionService.initSession(relyingParty, verifyResult.getData(), oauthRequest.getScopes(), acrValues, oauthRequest.getRedirectURI());
+        }
+    } else{
       return Observable.just(new Session());//authCode provided by external Auth provider
+    }
   }
 
-  private Observable<VerifyResult> authenticateUser(Map<String, String> authData, Set<String> authContext, String identityProvider, String relyingPartyName) {
-    return verifierFor(identityProvider).verify(new VerifyInput(authData, authContext, new UserInfo(), relyingPartyName));
-  }
-
-  private Verifier verifierFor(String name) {
-    return ofNullable(providers.get(name.concat("IdentityProvider")))
-            .orElseThrow(() -> new MissingProviderException(name.concat("IdentityProvider")));
+  private Observable<VerifyResult> authenticateUser(Map<String, String> authData, AcrValues enroll, String identityProvider, String relyingPartyName) {
+      Verifier verifier = verifierResolver.find(identityProvider);
+      VerifyInput verifyInput = new VerifyInput(authData, enroll, new UserInfo(), relyingPartyName);
+      return verifier.verify(verifyInput);
   }
 
   private static AuthzResponse buildResponse(RelyingParty relyingParty, Session session, VerifyResult verifyResult, TokenCache tokenCache, String redirectUri) {
