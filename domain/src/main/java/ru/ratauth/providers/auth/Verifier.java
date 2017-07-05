@@ -6,6 +6,8 @@ import rx.Observable;
 
 public interface Verifier {
 
+    String name();
+
     Observable<VerifyResult> verify(VerifyInput input);
 
 }

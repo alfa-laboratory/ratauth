@@ -1,7 +1,6 @@
 package ru.ratauth.server.handlers
 
 import com.jayway.restassured.http.ContentType
-import groovy.transform.CompileStatic
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import ru.ratauth.server.BaseDocumentationSpec
@@ -16,6 +15,7 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.pr
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document
+import static ru.ratauth.server.handlers.SessionHandler.INVALIDATE_SESSION_BY_REFRESH_TOKEN
 
 class SessionHandlerSpec extends BaseDocumentationSpec {
 
@@ -41,7 +41,7 @@ class SessionHandlerSpec extends BaseDocumentationSpec {
         when:
         def result = setup
                 .when()
-                .post(SessionHandler.INVALIDATE_SESSION_BY_REFRESH_TOKEN)
+                .post(INVALIDATE_SESSION_BY_REFRESH_TOKEN)
         then:
         result
                 .then()

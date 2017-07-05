@@ -38,10 +38,15 @@ class ProvidersStubConfiguration {
 
   abstract class AbstractProvider implements Activator, Verifier {}
 
-  @Bean(name = 'STUBIdentityProvider')
+  @Bean
   @Primary
   AbstractProvider provider() {
     return new AbstractProvider() {
+      @Override
+      String name() {
+        return "username";
+      }
+
       @Override
       Observable<ActivateResult> activate(ActivateInput input) {
         return Observable.just(new ActivateResult().with {

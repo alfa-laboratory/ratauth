@@ -8,6 +8,8 @@ import rx.Observable;
 
 public interface IdentityProvider {
 
+    String name();
+
     Observable<ActivateResult> activate(ActivateInput input);
 
     Observable<VerifyResult> verify(VerifyInput input);

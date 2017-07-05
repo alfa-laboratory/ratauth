@@ -69,6 +69,8 @@ class AuthzRequestReader {
             if (scope) {
                 builder.scopes(scope)
             }
+            builder.acrValues(AcrValues.valueOf(extractField(params, "acr", false)))
+            builder.enroll(extractField(params, "enroll", false))
         } else {
             authAction = AuthAction.AUTHORIZATION
             builder.clientId(extractField(params, CLIENT_ID, true))
@@ -76,9 +78,9 @@ class AuthzRequestReader {
             if (scope) {
                 builder.scopes(scope)
             }
+            builder.acrValues(AcrValues.valueOf(extractField(params, "acr", false)))
+            builder.enroll(extractField(params, "enroll", false))
         }
-        builder.acrValues(AcrValues.valueOf(extractField(params, "acr", false) ?: ""))
-        builder.enroll(extractField(params, "enroll", false))
         builder.authData(extractRest(params, BASE_FIELDS))
         def request = builder.build()
         ActionLogger.addBaseRequestInfo(request.clientId, authAction)

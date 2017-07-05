@@ -5,13 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.ratauth.entities.IdentityProvider;
 import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.entities.Session;
 import ru.ratauth.entities.UserInfo;
-import ru.ratauth.providers.auth.Activator;
 import ru.ratauth.providers.auth.dto.ActivateInput;
 import ru.ratauth.providers.auth.dto.ActivateResult;
-import ru.ratauth.server.extended.enroll.MissingProviderException;
+import ru.ratauth.server.providers.ActivatorResolver;
+import ru.ratauth.server.providers.IdentityProviderResolver;
 import ru.ratauth.server.secutiry.TokenProcessor;
 import ru.ratauth.server.services.AuthClientService;
 import ru.ratauth.server.services.AuthSessionService;
@@ -34,8 +35,7 @@ public class ActivateEnrollService {
     private final AuthSessionService sessionService;
     private final TokenCacheService tokenCacheService;
     private final TokenProcessor tokenProcessor;
-
-    private final Map<String, Activator> providers;
+    private final IdentityProviderResolver identityProviderResolver;
 
     public Observable<ActivateEnrollResponse> incAuthLevel(ActivateEnrollRequest request) {
         return Observable.zip(
@@ -78,13 +78,9 @@ public class ActivateEnrollService {
     }
 
     private Observable<ActivateResult> activate(ActivateEnrollRequest request, UserInfo userInfo, RelyingParty relyingParty) {
-        return activatorFor(relyingParty.getIdentityProvider())
-                .activate(new ActivateInput(request.getData(), request.getEnroll(), userInfo, relyingParty.getName()));
-    }
-
-    private Activator activatorFor(String name) {
-        return ofNullable(providers.get(name.concat("IdentityProvider")))
-                .orElseThrow(() -> new MissingProviderException(name.concat("IdentityProvider")));
+        IdentityProvider identityProvider = identityProviderResolver.getProvider(relyingParty.getIdentityProvider());
+        ActivateInput activateInput = new ActivateInput(request.getData(), request.getEnroll(), userInfo, relyingParty.getName());
+        return identityProvider.activate(activateInput);
     }
 
 }

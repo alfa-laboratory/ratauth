@@ -15,6 +15,7 @@ import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.Verifier;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
+import ru.ratauth.server.providers.IdentityProviderResolver;
 import ru.ratauth.server.providers.VerifierResolver;
 import rx.Observable;
 
@@ -34,7 +35,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
   private final AuthClientService clientService;
   private final TokenCacheService tokenCacheService;
   private final AuthSessionService sessionService;
-  private final VerifierResolver verifierResolver;
+  private final IdentityProviderResolver identityProviderResolver;
 
   @Override
   @SneakyThrows
@@ -106,10 +107,10 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     }
   }
 
-  private Observable<VerifyResult> authenticateUser(Map<String, String> authData, AcrValues enroll, String identityProvider, String relyingPartyName) {
-      Verifier verifier = verifierResolver.find(identityProvider);
+  private Observable<VerifyResult> authenticateUser(Map<String, String> authData, AcrValues enroll, String identityProviderName, String relyingPartyName) {
+      IdentityProvider provider = identityProviderResolver.getProvider(identityProviderName);
       VerifyInput verifyInput = new VerifyInput(authData, enroll, new UserInfo(), relyingPartyName);
-      return verifier.verify(verifyInput);
+      return provider.verify(verifyInput);
   }
 
   private static AuthzResponse buildResponse(RelyingParty relyingParty, Session session, VerifyResult verifyResult, TokenCache tokenCache, String redirectUri) {

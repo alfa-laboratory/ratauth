@@ -6,18 +6,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.ratauth.entities.AcrValues;
-import ru.ratauth.entities.RelyingParty;
-import ru.ratauth.entities.Session;
-import ru.ratauth.entities.UserInfo;
-import ru.ratauth.providers.auth.Verifier;
+import ru.ratauth.entities.*;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
+import ru.ratauth.server.providers.IdentityProviderResolver;
 import ru.ratauth.server.secutiry.TokenProcessor;
 import ru.ratauth.server.services.AuthClientService;
 import ru.ratauth.server.services.AuthSessionService;
 import ru.ratauth.server.services.TokenCacheService;
-import ru.ratauth.server.providers.VerifierResolver;
 import rx.Observable;
 
 import java.net.URL;
@@ -37,7 +33,7 @@ public class VerifyEnrollService {
     private final AuthSessionService sessionService;
     private final TokenCacheService tokenCacheService;
     private final TokenProcessor tokenProcessor;
-    private final VerifierResolver verifierResolver;
+    private final IdentityProviderResolver identityProviderResolver;
 
     @SneakyThrows
     private static RedirectResponse createResponse(Session session, RelyingParty relyingParty, VerifyEnrollRequest request, VerifyResult verifyResult) {
@@ -90,10 +86,9 @@ public class VerifyEnrollService {
     }
 
     private Observable<VerifyResult> verify(VerifyEnrollRequest request, UserInfo userInfo, RelyingParty relyingParty) {
-
-        Verifier verifier = verifierResolver.find(relyingParty.getIdentityProvider());
-
-        return verifier.verify(new VerifyInput(request.getData(), request.getEnroll(), userInfo, relyingParty.getName()));
+        IdentityProvider identityProvider = identityProviderResolver.getProvider(relyingParty.getIdentityProvider());
+        VerifyInput verifyInput = new VerifyInput(request.getData(), request.getEnroll(), userInfo, relyingParty.getName());
+        return identityProvider.verify(verifyInput);
     }
 
 }

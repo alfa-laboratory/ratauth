@@ -70,7 +70,7 @@ class EnrollAPISpec extends BaseDocumentationSpec {
                 .formParam('mfa_token', PersistenceServiceStubConfiguration.MFA_TOKEN)
                 .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
                 .formParam('scope', 'rs.read')
-                .formParam('acr_values', 'account_card:sms')
+                .formParam('acr_values', 'username:sms')
                 .formParam('enroll', 'username')
         when:
         def result = setup
