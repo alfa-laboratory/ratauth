@@ -26,6 +26,8 @@ class AuthzRequestReader {
     private static final String REDIRECT_URI = "redirect_uri"
     private static final String REFRESH_TOKEN = "refresh_token"
     private static final String SESSION_TOKEN = "session_token"
+    private static final String ENROLL = "enroll"
+    private static final String ACR = "acr"
     private static final Set<String> BASE_FIELDS = [
             RESPONSE_TYPE,
             CLIENT_ID,
@@ -36,6 +38,7 @@ class AuthzRequestReader {
             GRANT_TYPE
     ] as Set
 
+    @SuppressWarnings("AbcMetric")
     static AuthzRequest readAuthzRequest(MultiValueMap<String, String> params, Headers headers) {
         AuthzResponseType responseType = extractEnumField(params, RESPONSE_TYPE, true, AuthzResponseType)
         GrantType grantType = extractEnumField(params, GRANT_TYPE, false, GrantType)
@@ -69,8 +72,8 @@ class AuthzRequestReader {
             if (scope) {
                 builder.scopes(scope)
             }
-            builder.acrValues(AcrValues.valueOf(extractField(params, "acr", false)))
-            builder.enroll(extractField(params, "enroll", false))
+            builder.acrValues(AcrValues.valueOf(extractField(params, ACR, false)))
+            builder.enroll(extractField(params, ENROLL, false))
         } else {
             authAction = AuthAction.AUTHORIZATION
             builder.clientId(extractField(params, CLIENT_ID, true))
@@ -78,8 +81,8 @@ class AuthzRequestReader {
             if (scope) {
                 builder.scopes(scope)
             }
-            builder.acrValues(AcrValues.valueOf(extractField(params, "acr", false)))
-            builder.enroll(extractField(params, "enroll", false))
+            builder.acrValues(AcrValues.valueOf(extractField(params, ACR, false)))
+            builder.enroll(extractField(params, ENROLL, false))
         }
         builder.authData(extractRest(params, BASE_FIELDS))
         def request = builder.build()
