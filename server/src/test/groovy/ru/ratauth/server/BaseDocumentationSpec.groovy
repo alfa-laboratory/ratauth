@@ -11,27 +11,28 @@ import spock.lang.Specification
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.documentationConfiguration
+
 /**
  * @author mgorelikov
  * @since 26/06/16
  */
 @SpringBootTest(
-    webEnvironment = NONE,
-    classes = [TestBaseConfiguration],
-    properties = [
-        "ratpack.port=8080"
-    ]
+        webEnvironment = NONE,
+        classes = [TestBaseConfiguration],
+        properties = [
+                "ratpack.port=8080"
+        ]
 )
 class BaseDocumentationSpec extends Specification {
-  @Rule
-  JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation('../server/build/docs/generated-snippets/api')
+    @Rule
+    JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation('../server/build/docs/generated-snippets/api')
 
-  protected RequestSpecification documentationSpec
+    protected RequestSpecification documentationSpec
 
-  void setup() {
-    this.documentationSpec = new RequestSpecBuilder()
-        .addFilter(documentationConfiguration(restDocumentation))
-        .setConfig(RestAssuredConfig.config().redirect(RestAssuredConfig.config().getRedirectConfig().followRedirects(false)))
-        .build()
-  }
+    void setup() {
+        this.documentationSpec = new RequestSpecBuilder()
+                .addFilter(documentationConfiguration(restDocumentation))
+                .setConfig(RestAssuredConfig.config().redirect(RestAssuredConfig.config().getRedirectConfig().followRedirects(false)))
+                .build()
+    }
 }

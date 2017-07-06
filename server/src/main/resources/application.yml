@@ -28,3 +28,5 @@ ru.ratauth.jwt:
 
 ru.ratauth.scope:
   default_scope: "mobile.read"
+
+ru.ratauth.idp.default: "DCA"

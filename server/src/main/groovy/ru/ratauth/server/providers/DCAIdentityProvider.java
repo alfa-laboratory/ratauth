@@ -2,6 +2,7 @@ package ru.ratauth.server.providers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ru.ratauth.entities.Enroll;
 import ru.ratauth.entities.IdentityProvider;
@@ -20,9 +21,12 @@ public class DCAIdentityProvider implements IdentityProvider {
     private final ActivatorResolver activatorResolver;
     private final VerifierResolver verifierResolver;
 
+    @Value("${ru.ratauth.idp.default}")
+    private String name;
+
     @Override
     public String name() {
-        return "STUB";
+        return name;
     }
 
     @Override
