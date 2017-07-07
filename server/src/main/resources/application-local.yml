@@ -43,3 +43,5 @@ openid.properties.discovery:
     - openid
     - profile
   jwks_uri: http://example.com/oauth2/certs
+
+ru.ratauth.idp.default: "STUB"

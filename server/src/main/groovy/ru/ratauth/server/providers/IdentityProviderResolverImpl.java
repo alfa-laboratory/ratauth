@@ -21,7 +21,6 @@ public class IdentityProviderResolverImpl implements IdentityProviderResolver {
         this.identityProviders = identityProviders.stream().collect(toMap(IdentityProvider::name, v -> v));
     }
 
-
     @Override
     public IdentityProvider getProvider(String identityProviderName) {
         return ofNullable(identityProviders.get(identityProviderName))

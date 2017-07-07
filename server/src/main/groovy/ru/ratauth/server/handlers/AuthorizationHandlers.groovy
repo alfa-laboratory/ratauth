@@ -44,7 +44,7 @@ class AuthorizationHandlers implements Action<Chain> {
 
     @Override
     void execute(Chain chain) throws Exception {
-        chain.path('authorize') { Context ctx ->
+        chain.path('authorize') {ctx ->
             ctx.byMethod { meth ->
                 meth.get { // GET
                     ctx.byContent { cont ->
