@@ -3,7 +3,6 @@ package ru.ratauth.server.services;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +19,11 @@ import rx.Observable;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
+import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static ru.ratauth.providers.auth.dto.VerifyResult.Status.NEED_APPROVAL;
 import static ru.ratauth.server.utils.RedirectUtils.createRedirectURI;
 
@@ -78,38 +77,68 @@ public class OpenIdAuthorizeService implements AuthorizeService {
 
     private static void generateAuthCode(RelyingParty relyingParty, Session session, AuthzRequest authzRequest, String targetRedirectURI, AuthEntry entry, AuthzResponse resp) throws MalformedURLException {
         AcrValues acrValues = authzRequest.getAcrValues();
-        AcrValues receivedAcrValues = AcrValues.builder()
-                .acr(authzRequest.getEnroll())
-                .build();
 
-        AcrValues difference = acrValues.difference(receivedAcrValues);
-
-        String firstAcr = difference.getFirst();
-
-        if (firstAcr == null) {
-            resp.setCode(entry.getAuthCode());
-            resp.setExpiresIn(entry.getCodeExpiresIn().getTime());
-            resp.setLocation(targetRedirectURI);
+        if (isDefaultFlow(acrValues)) {
+            defaultFlow(targetRedirectURI, entry, resp);
             return;
         }
 
-        URL resultLocation =  createRedirectUrl(relyingParty, firstAcr);
+        AcrValues receivedAcrValues = AcrValues.builder().acr(authzRequest.getEnroll()).build();
+        AcrValues difference = acrValues.difference(receivedAcrValues);
+
+        if (isReceivedRequiredAcrs(difference)) {
+            onFinishAuthorization(targetRedirectURI, entry, resp);
+            return;
+        }
+
+        onNextAuthMethod(relyingParty, session, targetRedirectURI, resp, difference.getFirst());
+    }
+
+    private static boolean isDefaultFlow(AcrValues acrValues) {
+        return acrValues == null;
+    }
+
+    private static void defaultFlow(String targetRedirectURI, AuthEntry entry, AuthzResponse resp) {
+        resp.setCode(entry.getAuthCode());
+        resp.setExpiresIn(entry.getCodeExpiresIn().getTime());
+        resp.setRedirectURI(targetRedirectURI);
+    }
+
+    private static boolean isReceivedRequiredAcrs(AcrValues difference) {
+        return difference.getFirst() == null;
+    }
+
+    private static void onFinishAuthorization(String targetRedirectURI, AuthEntry entry, AuthzResponse resp) {
+        resp.setCode(entry.getAuthCode());
+        resp.setExpiresIn(entry.getCodeExpiresIn().getTime());
+        resp.setLocation(targetRedirectURI);
+    }
+
+    private static void onNextAuthMethod(RelyingParty relyingParty, Session session, String targetRedirectURI, AuthzResponse resp, String firstAcr) throws MalformedURLException {
+        URL resultLocation = createRedirectUrl(relyingParty, firstAcr);
         resp.setLocation(resultLocation.toString());
         resp.setRedirectURI(targetRedirectURI);
         resp.setMfaToken(session.getMfaToken());
     }
 
     private static URL createRedirectUrl(RelyingParty relyingParty, String firstAcr) throws MalformedURLException {
-        URL url = new URL(relyingParty.getAuthorizationRedirectURI());
+        URL url = new URL(relyingParty.getAuthorizationPageURI());
 
-        String path = url.getPath() + "/" + firstAcr;
+        String resultPathWithAcr = addToPathIfExistCurry()
+                .apply(url.getPath())
+                .apply("/")
+                .apply(firstAcr);
 
-        String query = url.getQuery();
-        if (StringUtils.isNoneBlank(query)) {
-            path = path + "?" + query;
-        }
+        String resultPathWithQuery = addToPathIfExistCurry()
+                .apply(resultPathWithAcr)
+                .apply("&")
+                .apply(url.getQuery());
 
-        return new URL(url.getProtocol(), url.getHost(), url.getPort(), path);
+        return new URL(url.getProtocol(), url.getHost(), url.getPort(), resultPathWithQuery);
+    }
+
+    private static Function<String, Function<String, Function<String, String>>> addToPathIfExistCurry() {
+        return path -> sign -> parameter -> isNoneBlank(parameter) ? path + sign + parameter : path;
     }
 
     @Override
