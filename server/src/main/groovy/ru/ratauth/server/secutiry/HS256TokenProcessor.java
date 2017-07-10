@@ -9,12 +9,14 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.SneakyThrows;
+import net.minidev.json.JSONArray;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * @author mgorelikov
@@ -86,6 +88,6 @@ public class HS256TokenProcessor implements TokenProcessor {
     @Override
     @SuppressWarnings("unchecked")
     public Set<String> extractAuthContext(Map<String, Object> info) {
-        return info.get(ACR) != null ? (Set<String>) info.get(ACR) : new HashSet<>(asList("account", "sms"));//    @TODO default acr as config
+        return info.get(ACR) != null ? ((JSONArray) info.get(ACR)).stream().map(Object::toString).collect(toSet()) : new HashSet<>(asList("account", "sms"));//    @TODO default acr as config
     }
 }
