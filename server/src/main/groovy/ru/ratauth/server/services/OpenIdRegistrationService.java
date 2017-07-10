@@ -49,7 +49,7 @@ public class OpenIdRegistrationService implements RegistrationService {
                 .register(RegInput.builder().relyingParty(rp.getName()).data(request.getData()).build())
                 .map(regResult -> new ImmutablePair<>(rp, regResult)))
             //TODO@ruslan разделить смс и авторизацию
-        .flatMap(rpRegResult -> authSessionService.createSession(rpRegResult.getLeft(), rpRegResult.getRight().getData(), request.getScopes(), rpRegResult.getRight().getAuthContext(), null)
+        .flatMap(rpRegResult -> authSessionService.createSession(rpRegResult.getLeft(), rpRegResult.getRight().getData(), request.getScopes(), rpRegResult.getRight().getAcrValues(), null)
                 .map(session -> new ImmutablePair<>(rpRegResult.getLeft(), session)))
         .flatMap(rpSession -> tokenService.createIdTokenAndResponse(rpSession.getRight(), rpSession.getLeft()))
         .doOnCompleted(() -> log.info("Second step of registration succeed"));

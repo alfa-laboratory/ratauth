@@ -1,25 +1,17 @@
 package ru.ratauth.entities;
 
-import groovy.transform.builder.Builder;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import ru.ratauth.providers.auth.dto.ActivateInput;
+import ru.ratauth.providers.auth.dto.ActivateResult;
+import ru.ratauth.providers.auth.dto.VerifyInput;
+import ru.ratauth.providers.auth.dto.VerifyResult;
+import rx.Observable;
 
-/**
- * @author mgorelikov
- * @since 02/11/15
- */
-@Builder
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class IdentityProvider {
-  /**
-   * unique primary key
-   */
-  private String id;
-  /**
-   * unique name
-   */
-  private String name;
+public interface IdentityProvider {
+
+    String name();
+
+    Observable<ActivateResult> activate(ActivateInput input);
+
+    Observable<VerifyResult> verify(VerifyInput input);
+
 }

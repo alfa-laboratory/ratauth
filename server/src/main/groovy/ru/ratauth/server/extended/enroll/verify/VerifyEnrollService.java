@@ -1,23 +1,22 @@
 package ru.ratauth.server.extended.enroll.verify;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.ratauth.entities.RelyingParty;
-import ru.ratauth.entities.Session;
-import ru.ratauth.entities.UserInfo;
-import ru.ratauth.providers.auth.Verifier;
+import ru.ratauth.entities.*;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
-import ru.ratauth.server.extended.enroll.MissingProviderException;
+import ru.ratauth.server.providers.IdentityProviderResolver;
 import ru.ratauth.server.secutiry.TokenProcessor;
 import ru.ratauth.server.services.AuthClientService;
 import ru.ratauth.server.services.AuthSessionService;
 import ru.ratauth.server.services.TokenCacheService;
 import rx.Observable;
 
+import java.net.URL;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -34,20 +33,25 @@ public class VerifyEnrollService {
     private final AuthSessionService sessionService;
     private final TokenCacheService tokenCacheService;
     private final TokenProcessor tokenProcessor;
+    private final IdentityProviderResolver identityProviderResolver;
 
-    private final Map<String, Verifier> providers;
-
+    @SneakyThrows
     private static RedirectResponse createResponse(Session session, RelyingParty relyingParty, VerifyEnrollRequest request, VerifyResult verifyResult) {
-        request.getAuthContext().removeAll(request.getEnroll());
-        if (request.getAuthContext().isEmpty()) {
+        AcrValues difference = request.getAuthContext().difference(request.getEnroll());
+        if (difference.getValues().isEmpty()) {
             String authCode = session
                     .getEntry(relyingParty.getName())
                     .orElseThrow(() -> new IllegalStateException("sessionID = " + session.getId() + ", relyingParty = " + relyingParty))
                     .getAuthCode();
             return new SuccessResponse(createRedirectURI(relyingParty, request.getRedirectURI()), authCode);
         } else {
-            String location = relyingParty.getAuthorizationPageURI() + "/" + request.getAuthContext().iterator().next();
-            return new NeedApprovalResponse(location, request.getRedirectURI(), request.getMfaToken(), request.getClientId(), request.getScope(), request.getAuthContext());
+
+            String authorizationPageURI = relyingParty.getAuthorizationPageURI();
+            URL url = new URL(authorizationPageURI);
+            String pathWithEnroll = url.getPath().concat("/" + request.getAuthContext().getFirst());
+            String redirectUrl = url.getHost() + pathWithEnroll + url.getQuery();
+
+            return new NeedApprovalResponse(redirectUrl, request.getRedirectURI(), request.getMfaToken(), request.getClientId(), request.getScope(), request.getAuthContext());
         }
     }
 
@@ -82,12 +86,9 @@ public class VerifyEnrollService {
     }
 
     private Observable<VerifyResult> verify(VerifyEnrollRequest request, UserInfo userInfo, RelyingParty relyingParty) {
-        return verifierFor(relyingParty.getIdentityProvider())
-                .verify(new VerifyInput(request.getData(), request.getEnroll(), userInfo, relyingParty.getName()));
+        IdentityProvider identityProvider = identityProviderResolver.getProvider(relyingParty.getIdentityProvider());
+        VerifyInput verifyInput = new VerifyInput(request.getData(), request.getEnroll(), userInfo, relyingParty.getName());
+        return identityProvider.verify(verifyInput);
     }
 
-    private Verifier verifierFor(String name) {
-        return ofNullable(providers.get(name.concat("IdentityProvider")))
-                .orElseThrow(() -> new MissingProviderException(name.concat("IdentityProvider")));
-    }
 }

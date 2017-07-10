@@ -35,7 +35,7 @@ public class HS256TokenProcessor implements TokenProcessor {
     @SneakyThrows
     public String createToken(String clientId, String secret, String identifier,
                               Date created, Date expiresIn,
-                              Set<String> audience, Set<String> scopes, Set<String> authContext,
+                              Set<String> audience, Set<String> scopes, Collection<String> authContext,
                               String userId, Map<String, Object> userInfo) {
         final JWSSigner signer = new MACSigner(Base64.getDecoder().decode(secret));
         final List<String> aud = new ArrayList<>(audience);

@@ -1,6 +1,7 @@
 package ru.ratauth.server.extended.enroll.verify;
 
 import lombok.Data;
+import ru.ratauth.entities.AcrValues;
 
 import java.util.Map;
 import java.util.Set;
@@ -11,8 +12,8 @@ public class VerifyEnrollRequest {
     private Map<String, String> data;
     private String clientId;
     private Set<String> scope;
-    private Set<String> authContext;
-    private Set<String> enroll;
+    private AcrValues authContext;
+    private AcrValues enroll;
 
     private String redirectURI;
 }

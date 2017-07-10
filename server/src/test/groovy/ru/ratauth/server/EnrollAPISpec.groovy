@@ -13,6 +13,7 @@ import ru.ratauth.interaction.GrantType
 import ru.ratauth.server.local.PersistenceServiceStubConfiguration
 
 import static com.jayway.restassured.RestAssured.given
+import static java.net.URLEncoder.*
 import static org.hamcrest.Matchers.contains
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.equalToIgnoringCase
@@ -69,7 +70,7 @@ class EnrollAPISpec extends BaseDocumentationSpec {
                 .formParam('mfa_token', PersistenceServiceStubConfiguration.MFA_TOKEN)
                 .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
                 .formParam('scope', 'rs.read')
-                .formParam('acr_values', 'account_card:sms')
+                .formParam('acr_values', 'username:sms')
                 .formParam('enroll', 'username')
         when:
         def result = setup
@@ -173,7 +174,7 @@ class EnrollAPISpec extends BaseDocumentationSpec {
                 .then()
                 .statusCode(HttpStatus.FOUND.value())
                 .header(HttpHeaders.LOCATION, StringContains.containsString('mfa_token='))
-                .header(HttpHeaders.LOCATION, StringContains.containsString('acr_values=sms'))
+                .header(HttpHeaders.LOCATION, StringContains.containsString("acr_values=${encode('username:sms', 'UTF-8')}"))
     }
 
 

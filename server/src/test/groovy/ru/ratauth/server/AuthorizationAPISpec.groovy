@@ -53,7 +53,11 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
             parameterWithName('username')
                 .description('part of user\'s credentials'),
             parameterWithName('password')
-                .description('part of user\'s credentials')
+                .description('part of user\'s credentials'),
+                parameterWithName('acr')
+                        .description('Authentication Context Class Reference'),
+                parameterWithName('enroll')
+                        .description('Required Authentication Context Class Reference')
                 .optional()
         ),
         responseHeaders(
@@ -67,6 +71,8 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
         .formParam('scope', 'rs.read')
         .formParam('username', 'login')
         .formParam('password', 'password')
+            .formParam('acr', 'username')
+            .formParam('enroll', 'username')
     when:
     def result = setup
         .when()
@@ -146,6 +152,8 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
         .formParam('scope', 'rs.read')
         .formParam('username', 'login')
         .formParam('password', 'bad')
+            .formParam('acr', 'username')
+            .formParam('enroll', 'username')
     when:
     def result = setup
         .when()
@@ -269,7 +277,11 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
             parameterWithName('username')
                 .description('part of user\'s credentials'),
             parameterWithName('password')
-                .description('part of user\'s credentials')
+                .description('part of user\'s credentials'),
+                parameterWithName('acr')
+                        .description('Authentication Context Class Reference'),
+                parameterWithName('enroll')
+                        .description('Required Authentication Context Class Reference')
                 .optional()
         ),
         requestHeaders(
@@ -285,6 +297,8 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
         .formParam('scope', 'read')
         .formParam('username', 'login')
         .formParam('password', 'password')
+            .formParam('acr', 'username')
+            .formParam('enroll', 'username')
         .header(IntegrationSpecUtil.createAuthHeaders(PersistenceServiceStubConfiguration.CLIENT_NAME,
                                                       PersistenceServiceStubConfiguration.PASSWORD))
     when:
@@ -313,7 +327,11 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
             parameterWithName('username')
                 .description('part of user\'s credentials'),
             parameterWithName('password')
-                .description('part of user\'s credentials')
+                .description('part of user\'s credentials'),
+                parameterWithName('acr')
+                        .description('Authentication Context Class Reference'),
+                parameterWithName('enroll')
+                        .description('Required Authentication Context Class Reference')
                 .optional(),
             parameterWithName('redirect_uri')
                 .description('end-user will be redirected on that URI with authorization code')
@@ -326,6 +344,8 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
         .formParam('username', 'login')
         .formParam('password', 'password')
         .formParam('redirect_uri', 'http://blabla.com')
+            .formParam('acr', 'username')
+            .formParam('enroll', 'username')
     when:
     def result = setup
         .when()

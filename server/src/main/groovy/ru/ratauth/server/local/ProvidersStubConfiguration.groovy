@@ -3,6 +3,7 @@ package ru.ratauth.server.local
 import groovy.transform.CompileStatic
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
+import ru.ratauth.entities.AcrValues
 import ru.ratauth.exception.AuthorizationException
 import ru.ratauth.exception.RegistrationException
 import ru.ratauth.providers.auth.Activator
@@ -37,10 +38,15 @@ class ProvidersStubConfiguration {
 
   abstract class AbstractProvider implements Activator, Verifier {}
 
-  @Bean(name = 'STUBIdentityProvider')
+  @Bean
   @Primary
   AbstractProvider provider() {
     return new AbstractProvider() {
+      @Override
+      String name() {
+        return "username";
+      }
+
       @Override
       Observable<ActivateResult> activate(ActivateInput input) {
         return Observable.just(new ActivateResult().with {
@@ -74,7 +80,7 @@ class ProvidersStubConfiguration {
         if (input.data.get(BaseAuthFields.USERNAME.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
           return Observable.just(AuthResult.builder()
                   .data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
-                  .authContext(["credentials"] as Set)
+                  .acrValues(AcrValues.valueOf("credentials"))
                   .status(AuthResult.Status.SUCCESS).build())
         else
           return Observable.error(new AuthorizationException(AuthorizationException.ID.CREDENTIALS_WRONG))
@@ -95,7 +101,7 @@ class ProvidersStubConfiguration {
         if (!input.data.containsKey(BaseAuthFields.CODE.val())) { //first step of registration
           //one step registration
           if (input.data.get(BaseAuthFields.USERNAME.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
-            return Observable.just(RegResult.builder().authContext(["credentials"] as Set).data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
+            return Observable.just(RegResult.builder().acrValues(AcrValues.valueOf("credentials")).data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
               .status(RegResult.Status.SUCCESS).build())
           else if (input.data.get(REG_CREDENTIAL) == 'credential') //two step registration
             return Observable.just(RegResult.builder().data([
@@ -108,7 +114,7 @@ class ProvidersStubConfiguration {
           if (input.data.get(BaseAuthFields.CODE.val()) == REG_CODE && input.data.get(BaseAuthFields.USERNAME.val()) == 'login')
             return Observable.just(RegResult.builder().redirectUrl('http://relying.party/gateway')
             // TODO@ruslan когда приходит код, это место должен обрабатывать сам сервер авторизации
-              .authContext(["code"] as Set)
+              .acrValues(AcrValues.valueOf("code"))
               .data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
               .status(RegResult.Status.SUCCESS).build())
           else

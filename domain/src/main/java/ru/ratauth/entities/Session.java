@@ -53,6 +53,7 @@ public class Session {
   private Date created;
   private Date blocked;
   private Date expiresIn;
+  private AcrValues receivedAcrValues;
   /**
    * for optional process that checks user status in background
    */

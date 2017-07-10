@@ -1,6 +1,7 @@
 package ru.ratauth.providers.auth.dto;
 
 import lombok.*;
+import ru.ratauth.entities.AcrValues;
 
 import java.util.Map;
 import java.util.Set;
@@ -20,7 +21,7 @@ public class AuthResult {
   private Map<String, Object> data;
 
   private Status status;
-  private Set<String> authContext;
+  private AcrValues acrValues;
 
   public enum Status {
     SUCCESS,
