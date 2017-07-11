@@ -76,6 +76,7 @@ public class VerifyEnrollService {
 
     private void updateUserInfo(Session session, UserInfo userInfo, Set<String> scopes, Set<String> authContext) {
         sessionService.updateIdToken(session, userInfo, scopes, authContext);
+        sessionService.updateAcrValues(session);
     }
 
     private Map<String, Object> extractUserInfo(Session session) {

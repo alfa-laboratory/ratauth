@@ -169,4 +169,9 @@ public class OpenIdSessionService implements AuthSessionService {
                 tokenCacheService.extractAudience(scopes), scopes, authContext, session.getUserId(), userInfo.toMap());
         return sessionService.updateUserInfo(session.getId(), jwtInfo);
     }
+
+    @Override
+    public Observable<Boolean> updateAcrValues(Session session) {
+        return sessionService.updateAcrValues(session);
+    }
 }

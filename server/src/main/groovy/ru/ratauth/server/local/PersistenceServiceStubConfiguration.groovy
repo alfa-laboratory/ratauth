@@ -252,6 +252,11 @@ class PersistenceServiceStubConfiguration {
       }
 
       @Override
+      Observable<Boolean> updateAcrValues(Session session) {
+        return null
+      }
+
+      @Override
       Observable<Session> create(Session session) {
         return Observable.just(session)
       }
