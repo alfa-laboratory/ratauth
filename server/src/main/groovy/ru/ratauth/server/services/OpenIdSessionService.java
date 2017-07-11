@@ -85,6 +85,7 @@ public class OpenIdSessionService implements AuthSessionService {
         final Session session = Session.builder()
                 .sessionToken(codeGenerator.refreshToken())
                 .mfaToken(codeGenerator.mfaToken())
+                .receivedAcrValues(AcrValues.valueOf(acrValues.getFirst()))
                 .identityProvider(relyingParty.getIdentityProvider())
                 .authClient(relyingParty.getName())
                 .status(Status.ACTIVE)
