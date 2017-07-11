@@ -153,7 +153,10 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                                 .map(authRes -> new ImmutableTriple<>(rp, authRes, request.getAcrValues())))
                 .flatMap(rpAuth ->
                         createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
-                                .doOnNext(session -> sessionService.updateAcrValues(session))
+                                .map(session -> {
+                                    sessionService.updateAcrValues(session).toBlocking().single();
+                                    return session;
+                                })
                                 .flatMap(session -> createIdToken(rpAuth.left, session, rpAuth.right)
                                         .map(idToken -> buildResponse(rpAuth.left, session, rpAuth.middle, idToken, request))))
                 .doOnCompleted(() -> log.info("Authorization succeed"));
