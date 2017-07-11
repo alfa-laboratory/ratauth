@@ -71,10 +71,13 @@ public class VerifyEnrollService {
         Set<String> authContext = tokenProcessor.extractAuthContext(tokenInfo);
 
         return verify(request, userInfo, relyingParty)
-                .doOnNext(result -> updateUserInfo(session, userInfo.putAll(result.getData()), request.getScope(), authContext));
+                .doOnNext(result -> updateUserInfo(session, request.getEnroll().getFirst(), userInfo.putAll(result.getData()), request.getScope(), authContext));
     }
 
-    private void updateUserInfo(Session session, UserInfo userInfo, Set<String> scopes, Set<String> authContext) {
+    private void updateUserInfo(Session session, String enroll, UserInfo userInfo, Set<String> scopes, Set<String> authContext) {
+        AcrValues receivedAcrValues = session.getReceivedAcrValues();
+        AcrValues newAcr = receivedAcrValues.add(enroll);
+        session.setReceivedAcrValues(newAcr);
         sessionService.updateIdToken(session, userInfo, scopes, authContext);
         sessionService.updateAcrValues(session);
     }
