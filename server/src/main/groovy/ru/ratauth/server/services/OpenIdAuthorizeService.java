@@ -19,9 +19,11 @@ import rx.Observable;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static ru.ratauth.providers.auth.dto.VerifyResult.Status.NEED_APPROVAL;
@@ -151,6 +153,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                                 .map(authRes -> new ImmutableTriple<>(rp, authRes, request.getAcrValues())))
                 .flatMap(rpAuth ->
                         createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
+                                .doOnNext(session -> sessionService.updateAcrValues(session))
                                 .flatMap(session -> createIdToken(rpAuth.left, session, rpAuth.right)
                                         .map(idToken -> buildResponse(rpAuth.left, session, rpAuth.middle, idToken, request))))
                 .doOnCompleted(() -> log.info("Authorization succeed"));
