@@ -37,7 +37,7 @@ public class VerifyEnrollService {
 
     @SneakyThrows
     private static RedirectResponse createResponse(Session session, RelyingParty relyingParty, VerifyEnrollRequest request, VerifyResult verifyResult) {
-        AcrValues difference = request.getAuthContext().difference(request.getAuthContext());
+        AcrValues difference = request.getAuthContext().difference(session.getReceivedAcrValues());
         if (difference.getValues().isEmpty()) {
             String authCode = session
                     .getEntry(relyingParty.getName())

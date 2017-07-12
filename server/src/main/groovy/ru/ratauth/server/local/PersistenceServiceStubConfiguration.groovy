@@ -140,6 +140,7 @@ class PersistenceServiceStubConfiguration {
         if (code == CODE)
           return Observable.just(
               new Session(
+                  id: 'id-1',
                   identityProvider: 'STUB',
                   sessionToken: SESSION_TOKEN,
                   userInfo: ID_TOKEN,
@@ -162,6 +163,7 @@ class PersistenceServiceStubConfiguration {
         if (token == REFRESH_TOKEN)
           return Observable.just(
               new Session(
+                  id: 'id-2',
                   identityProvider: 'STUB',
                   sessionToken: SESSION_TOKEN,
                   userInfo: ID_TOKEN,
@@ -184,6 +186,7 @@ class PersistenceServiceStubConfiguration {
         if (token == SESSION_TOKEN)
           return Observable.just(
             new Session(
+              id: 'id-3',
               identityProvider: 'STUB',
               sessionToken: SESSION_TOKEN,
               userInfo: ID_TOKEN,
@@ -209,6 +212,7 @@ class PersistenceServiceStubConfiguration {
         if (token == TOKEN)
           return Observable.just(
               new Session(
+                  id: 'id-4',
                   identityProvider: 'STUB',
                   sessionToken: SESSION_TOKEN,
                   userInfo: ID_TOKEN,
@@ -232,10 +236,13 @@ class PersistenceServiceStubConfiguration {
         if (token == MFA_TOKEN) {
           return Observable.just(
                   new Session(
+                          id: 'id-5',
                           identityProvider: 'STUB',
                           sessionToken: SESSION_TOKEN,
                           userInfo: ID_TOKEN,
                           status: Status.ACTIVE,
+                          mfaToken: MFA_TOKEN,
+                          receivedAcrValues: AcrValues.valueOf("none"),
                           expiresIn: DateUtils.fromLocal(LocalDateTime.now().plusDays(1)),
                           entries: [
                                   new AuthEntry(authCode: 'code',
@@ -253,7 +260,7 @@ class PersistenceServiceStubConfiguration {
 
       @Override
       Observable<Boolean> updateAcrValues(Session session) {
-        return null
+        return Observable.just(true)
       }
 
       @Override
