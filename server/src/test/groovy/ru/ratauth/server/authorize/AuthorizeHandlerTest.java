@@ -53,7 +53,7 @@ public class AuthorizeHandlerTest {
         String responseLocation = when()
                 .queryParam("client_id", CLIENT_ID)
                 .queryParam("scope", "read")
-                .queryParam("acr", "card:sms")
+                .queryParam("acr_values", "card:sms")
                 .header("Content-Type", "text/html")
                 .get("/authorize")
                 .then()
@@ -72,7 +72,7 @@ public class AuthorizeHandlerTest {
     private void assertQuery(URL location) {
         assertTrue(location.getQuery().contains(format("client_id=%s", CLIENT_ID)));
         assertTrue(location.getQuery().contains("scope=read"));
-        assertTrue(location.getQuery().contains("acr=card"));
+        assertTrue(location.getQuery().contains("acr_values=card"));
     }
 
     private RequestSpecification when() {

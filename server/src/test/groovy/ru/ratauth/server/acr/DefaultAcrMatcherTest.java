@@ -37,21 +37,10 @@ public class DefaultAcrMatcherTest {
 
     @Test
     public void testMatchSuccess() throws Exception {
-        when(multiValueMap.get("acr")).thenReturn(CARD_SMS_ACR);
+        when(multiValueMap.get("acr_values")).thenReturn(CARD_SMS_ACR);
 
         String acr = defaultAcrMatcher.match(request);
 
         assertEquals("card", acr);
     }
-
-    @Test
-    public void testMatchShouldThrowNPEWhenAcrIsNull() {
-        when(multiValueMap.get("acr")).thenReturn(null);
-
-        expectedException.expect(NullPointerException.class);
-        expectedException.expectMessage("acr can not be null");
-
-        defaultAcrMatcher.match(request);
-    }
-
 }

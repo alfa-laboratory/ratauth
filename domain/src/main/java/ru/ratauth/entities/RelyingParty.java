@@ -33,6 +33,7 @@ public class RelyingParty extends AuthClient {
    * Set of unique grants (means only internal grants, it's not resource server scope)
    */
   private Set<String> grants;
+  private AcrValues defaultAcrValues;
 
   // URIs
   // array of redirects uris, will be checked in case of custom redirect_uri param in request

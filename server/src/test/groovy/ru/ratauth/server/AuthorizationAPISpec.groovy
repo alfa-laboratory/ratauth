@@ -368,7 +368,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
                 .description('relying party identifier'),
             parameterWithName('scope')
                 .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
-                parameterWithName('acr')
+                parameterWithName('acr_values')
                 .description('Authentication context class reference'),
             parameterWithName('username')
                 .description('part of user\'s credentials'),
@@ -385,7 +385,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
         .formParam('response_type', AuthzResponseType.CODE.name())
         .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
         .formParam('scope', 'rs.read')
-        .formParam('acr', 'card')
+        .formParam('acr_values', 'card')
         .formParam('username', 'login')
         .formParam('password', 'password')
     when:
