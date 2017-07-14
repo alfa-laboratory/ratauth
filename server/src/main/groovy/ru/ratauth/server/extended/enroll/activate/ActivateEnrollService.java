@@ -67,7 +67,7 @@ public class ActivateEnrollService {
 
     @SuppressWarnings("unchecked")
     private Set<String> extractAuthContextFromTokenInfo(Map<String, Object> tokenInfo) {
-        return tokenInfo.get("acr") == null ? (Set<String>) tokenInfo.get("acr") : Collections.emptySet();
+        return tokenInfo.get("acr_values") == null ? (Set<String>) tokenInfo.get("acr_values") : Collections.emptySet();
     }
 
     private Map<String, Object> extractUserInfo(Session session) {

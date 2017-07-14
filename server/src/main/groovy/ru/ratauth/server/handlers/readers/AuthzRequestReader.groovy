@@ -27,7 +27,7 @@ class AuthzRequestReader {
     private static final String REFRESH_TOKEN = "refresh_token"
     private static final String SESSION_TOKEN = "session_token"
     private static final String ENROLL = "enroll"
-    private static final String ACR = "acr"
+    private static final String ACR_VALUES = "acr_values"
     private static final Set<String> BASE_FIELDS = [
             RESPONSE_TYPE,
             CLIENT_ID,
@@ -72,7 +72,7 @@ class AuthzRequestReader {
             if (scope) {
                 builder.scopes(scope)
             }
-            builder.acrValues(AcrValues.valueOf(extractField(params, ACR, false)))
+            builder.acrValues(AcrValues.valueOf(extractField(params, ACR_VALUES, false)))
             builder.enroll(extractField(params, ENROLL, false))
         } else {
             authAction = AuthAction.AUTHORIZATION
@@ -81,7 +81,7 @@ class AuthzRequestReader {
             if (scope) {
                 builder.scopes(scope)
             }
-            builder.acrValues(AcrValues.valueOf(extractField(params, ACR, false)))
+            builder.acrValues(AcrValues.valueOf(extractField(params, ACR_VALUES, false)))
             builder.enroll(extractField(params, ENROLL, false))
         }
         builder.authData(extractRest(params, BASE_FIELDS))

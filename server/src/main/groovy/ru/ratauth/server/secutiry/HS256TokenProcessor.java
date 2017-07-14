@@ -26,7 +26,7 @@ import static java.util.stream.Collectors.toSet;
 public class HS256TokenProcessor implements TokenProcessor {
     private static final String SCOPE = "scope";
     private static final String CLIENT_ID = "client_id";
-    private static final String ACR = "acr";
+    private static final String ACR_VALUES = "acr_values";
 
     private static final List<String> LOCAL_REGISTERED_CLAIMS = asList(SCOPE, CLIENT_ID);
 
@@ -50,7 +50,7 @@ public class HS256TokenProcessor implements TokenProcessor {
                 .audience(aud)
                 .claim(SCOPE, scopes)
                 .claim(CLIENT_ID, clientId)
-                .claim(ACR, authContext)
+                .claim(ACR_VALUES, authContext)
                 .jwtID(identifier)
                 .issueTime(created);
         userInfo.forEach(jwtBuilder::claim);
@@ -88,6 +88,6 @@ public class HS256TokenProcessor implements TokenProcessor {
     @Override
     @SuppressWarnings("unchecked")
     public Set<String> extractAuthContext(Map<String, Object> info) {
-        return info.get(ACR) != null ? ((JSONArray) info.get(ACR)).stream().map(Object::toString).collect(toSet()) : new HashSet<>(asList("account", "sms"));//    @TODO default acr as config
+        return info.get(ACR_VALUES) != null ? ((JSONArray) info.get(ACR_VALUES)).stream().map(Object::toString).collect(toSet()) : new HashSet<>(asList("account", "sms"));//    @TODO default acr as config
     }
 }
