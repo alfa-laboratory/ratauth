@@ -1,7 +1,7 @@
 buildscript {
   ext {
-    springBootVersion = '1.4.2.RELEASE'
-    ratpackVersion = '1.4.4'
+    springBootVersion = '1.5.4.RELEASE'
+    ratpackVersion = '1.4.5'
   }
   repositories {
     jcenter()
@@ -51,7 +51,7 @@ allprojects {
 
   dependencyManagement {
     imports {
-      mavenBom 'io.spring.platform:platform-bom:Brussels-SR1'
+      mavenBom 'io.spring.platform:platform-bom:Brussels-SR3'
     }
 
     dependencies {
