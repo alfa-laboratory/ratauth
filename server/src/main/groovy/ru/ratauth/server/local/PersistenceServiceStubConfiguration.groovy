@@ -300,7 +300,7 @@ class PersistenceServiceStubConfiguration {
 
       @Override
       Observable<Boolean> updateUserInfo(String sessionId, String userInfo) {
-        return null
+        return Observable.just(true)
       }
     }
   }
