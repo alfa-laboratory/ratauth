@@ -47,8 +47,8 @@ public class ActivateEnrollService {
                 .map(result -> new ActivateEnrollResponse(request.getMfaToken(), result.getData()));
     }
 
-    private void updateUserInfo(Session session, UserInfo userInfo, Set<String> scopes, Set<String> authContext) {
-        sessionService.updateIdToken(session, userInfo, scopes, authContext);
+    private Observable<Boolean> updateUserInfo(Session session, UserInfo userInfo, Set<String> scopes, Set<String> authContext) {
+        return sessionService.updateIdToken(session, userInfo, scopes, authContext);
     }
 
     private Observable<ActivateResult> activateAndUpdateUserInfo(Session session, ActivateEnrollRequest request, RelyingParty relyingParty) {
@@ -57,7 +57,7 @@ public class ActivateEnrollService {
         Set<String> authContext = tokenProcessor.extractAuthContext(tokenInfo);
 
         return activate(request, userInfo, relyingParty)
-                .doOnNext(result -> updateUserInfo(session, userInfo.putAll(result.getData()), request.getScope(), authContext));
+                .flatMap(result -> updateUserInfo(session, userInfo.putAll(result.getData()), request.getScope(), authContext).map(b -> result));
     }
 
     @SuppressWarnings("unchecked")
