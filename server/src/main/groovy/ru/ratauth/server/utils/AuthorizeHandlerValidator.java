@@ -18,10 +18,6 @@ public class AuthorizeHandlerValidator {
 
         Request request = context.getRequest();
 
-        if (!isExist(request, "acr_values")) {
-            context.error(new ReadRequestException("acr can not be null"));
-        }
-
         if (!isExist(request, "client_id")) {
             context.error(new ReadRequestException("client_id can not be null"));
         }
