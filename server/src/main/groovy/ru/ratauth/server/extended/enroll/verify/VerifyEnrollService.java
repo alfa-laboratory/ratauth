@@ -96,5 +96,4 @@ public class VerifyEnrollService {
         VerifyInput verifyInput = new VerifyInput(request.getData(), request.getEnroll(), userInfo, relyingParty.getName());
         return identityProvider.verify(verifyInput);
     }
-
 }

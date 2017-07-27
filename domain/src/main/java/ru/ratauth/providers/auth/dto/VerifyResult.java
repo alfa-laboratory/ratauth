@@ -1,6 +1,7 @@
 package ru.ratauth.providers.auth.dto;
 
 import lombok.*;
+import ru.ratauth.entities.AcrValues;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +15,7 @@ public class VerifyResult {
     @Singular("field")
     private Map<String, Object> data = new HashMap<>();
     private Status status;
+    private AcrValues acrValues;
 
     public enum Status {
         SUCCESS,

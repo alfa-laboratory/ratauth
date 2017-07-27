@@ -14,6 +14,5 @@ public class VerifyEnrollRequest {
     private Set<String> scope;
     private AcrValues authContext;
     private AcrValues enroll;
-
     private String redirectURI;
 }
