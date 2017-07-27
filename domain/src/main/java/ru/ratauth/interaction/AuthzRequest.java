@@ -2,8 +2,10 @@ package ru.ratauth.interaction;
 
 import lombok.*;
 import ru.ratauth.entities.AcrValues;
+import ru.ratauth.providers.auth.dto.VerifyResult;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -29,4 +31,11 @@ public class AuthzRequest {
   private String sessionToken;
   private String externalClientId;
 
+    public VerifyResult addVerifyResultAcrToRequest(VerifyResult verifyResult) {
+        AcrValues merged = Optional.ofNullable(verifyResult.getAcrValues())
+                .map(verifyAcrValues -> this.getAcrValues().add(verifyAcrValues.getFirst()))
+                .orElseGet(this::getAcrValues);
+        this.setAcrValues(merged);
+        return verifyResult;
+    }
 }
