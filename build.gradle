@@ -43,6 +43,7 @@ allprojects {
     jcenter()
     mavenLocal()
     maven { url "https://repo.spring.io/milestone" }
+      maven { url 'http://mvn/artifactory/public' }
   }
 
   configurations {
@@ -84,6 +85,9 @@ allprojects {
       dependency 'org.skyscreamer:jsonassert:1.5.0'
       dependency 'io.rest-assured:rest-assured:3.0.2'
 
+      dependency 'ru.alfabank.ws:cmd-auth-reference-by-card-rx:10.5.+'
+      dependency 'ru.alfalab.starter.cxf:starter:1.2.3'
+      dependency 'ru.alfabank.ws:common-types:10.3.1'
     }
   }
 }
