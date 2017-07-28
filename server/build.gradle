@@ -44,10 +44,6 @@ dependencies {
   //crypto
   compile 'com.nimbusds:nimbus-jose-jwt'
 
-  compile 'ru.alfabank.ws:cmd-auth-reference-by-card-rx:10.5.+'
-  compile 'ru.alfalab.starter.cxf:starter:1.2.3'
-  compile 'ru.alfabank.ws:common-types:10.3.1'
-
   compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
 
   //docs/test
