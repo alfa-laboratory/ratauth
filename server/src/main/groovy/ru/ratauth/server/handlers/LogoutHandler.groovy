@@ -3,6 +3,7 @@ package ru.ratauth.server.handlers
 import groovy.transform.CompileStatic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.stereotype.Component
 import ratpack.error.ServerErrorHandler
 import ratpack.form.Form
 import ratpack.func.Action
@@ -15,6 +16,7 @@ import ru.ratauth.services.SessionService
 import static ratpack.rx.RxRatpack.observe
 
 @CompileStatic
+@Component
 class LogoutHandler implements Action<Chain> {
 
     @Autowired SessionService sessionService
