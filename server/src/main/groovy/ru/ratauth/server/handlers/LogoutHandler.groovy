@@ -1,5 +1,7 @@
 package ru.ratauth.server.handlers
 
+import groovy.transform.CompileStatic
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
@@ -17,7 +19,9 @@ import rx.functions.Func2
 import static ratpack.rx.RxRatpack.observe
 import static rx.Observable.zip
 
+@Slf4j
 @Component
+@CompileStatic
 class LogoutHandler implements Action<Chain> {
 
     @Autowired SessionService sessionService
@@ -32,7 +36,7 @@ class LogoutHandler implements Action<Chain> {
                     return zip(
                             clientService.loadAndAuthClient(auth[0], auth[1], true),
                             sessionService.invalidateByRefreshToken(auth[0], request["refresh_token"] as String),
-                            { AuthClient client, Boolean bool -> bool } as Func2)
+                            { AuthClient client, Boolean bool -> log.debug(/Logout event for session with refresh_token "${request["refresh_token"]}": $bool/); bool } as Func2)
                 })
                 .subscribe(
                     { Boolean res -> ctx.response.status HttpStatus.OK.value() send(); res },
