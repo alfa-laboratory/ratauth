@@ -1,6 +1,5 @@
 package ru.ratauth.server.handlers
 
-import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -21,7 +20,6 @@ import static rx.Observable.zip
 
 @Slf4j
 @Component
-@CompileStatic
 class LogoutHandler implements Action<Chain> {
 
     @Autowired SessionService sessionService
@@ -32,7 +30,7 @@ class LogoutHandler implements Action<Chain> {
         chain.post('logout') { Context ctx ->
             def auth = RequestUtil.extractAuth(ctx.request.headers)
             observe(ctx.parse(Form))
-                .flatMap( { request ->
+                .flatMap( { Form request ->
                     return zip(
                             clientService.loadAndAuthClient(auth[0], auth[1], true),
                             sessionService.invalidateByRefreshToken(auth[0], request.refresh_token as String),
