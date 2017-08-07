@@ -35,8 +35,11 @@ class LogoutHandler implements Action<Chain> {
                 .flatMap( { request ->
                     return zip(
                             clientService.loadAndAuthClient(auth[0], auth[1], true),
-                            sessionService.invalidateByRefreshToken(auth[0], request["refresh_token"] as String),
-                            { AuthClient client, Boolean bool -> log.debug(/Logout event for session with refresh_token "${request["refresh_token"]}": $bool/); bool } as Func2)
+                            sessionService.invalidateByRefreshToken(auth[0], request.refresh_token as String),
+                            { AuthClient client, Boolean bool ->
+                                log.debug(/Logout event for session with refresh_token "${request.refresh_token}": $bool/)
+                                return bool
+                            } as Func2)
                 })
                 .subscribe(
                     { Boolean res -> ctx.response.status HttpStatus.OK.value() send(); res },
