@@ -116,7 +116,9 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     else if (oauthRequest.getGrantType() == GrantType.REFRESH_TOKEN || oauthRequest.getGrantType() == GrantType.AUTHENTICATION_TOKEN)
       authObs = authSessionService.getByValidRefreshToken(oauthRequest.getRefreshToken(), new Date());
     else return Observable.error(new AuthorizationException(AuthorizationException.ID.INVALID_GRANT_TYPE));
-    return authObs.switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.SESSION_NOT_FOUND)));
+    return authObs
+            .doOnNext(this::checkSession)
+            .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.SESSION_NOT_FOUND)));
   }
 
   /**
