@@ -1,5 +1,6 @@
 package ru.ratauth.entities;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.List;
  * Created by sserdyuk on 9/8/17.
  */
 @Data
+@Builder
 public class OpenidDiscoveryProperties implements DiscoveryProperties {
     // Required
     private String issuer;
