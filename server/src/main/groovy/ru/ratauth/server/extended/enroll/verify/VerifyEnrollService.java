@@ -62,7 +62,12 @@ public class VerifyEnrollService {
                 ImmutablePair::new
         )
                 .flatMap(p -> verifyAndUpdateUserInfo(p.right, request, p.left)
-                        .map(result -> createResponse(p.right, p.left, request, result)));
+                        .map(result -> {
+                            Session session = p.right;
+                            RedirectResponse response = createResponse(session, p.left, request, result);
+                            response.putRedirectParameters("session_token", session.getSessionToken());
+                            return response;
+                        }));
     }
 
     private Observable<VerifyResult> verifyAndUpdateUserInfo(Session session, VerifyEnrollRequest request, RelyingParty relyingParty) {

@@ -15,9 +15,11 @@ import ru.ratauth.server.local.PersistenceServiceStubConfiguration
 import static com.jayway.restassured.RestAssured.given
 import static java.net.URLEncoder.*
 import static org.hamcrest.Matchers.contains
+import static org.hamcrest.Matchers.containsInAnyOrder
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.equalToIgnoringCase
 import static org.hamcrest.Matchers.notNullValue
+import static org.hamcrest.Matchers.startsWith
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse
@@ -221,7 +223,9 @@ class EnrollAPISpec extends BaseDocumentationSpec {
         result
                 .then()
                 .statusCode(HttpStatus.FOUND.value())
-                .header(HttpHeaders.LOCATION, equalTo("https://domain.mine/login?code=code"))
+                .header(HttpHeaders.LOCATION, startsWith("https://domain.mine/login?"))
+                .header(HttpHeaders.LOCATION, StringContains.containsString("code=code"))
+                .header(HttpHeaders.LOCATION, StringContains.containsString("session_token=session_token"))
     }
 
 }

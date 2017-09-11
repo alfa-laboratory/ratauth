@@ -29,6 +29,7 @@ public class AuthzResponse {
     private TokenType tokenType;
     private String mfaToken;
     private String refreshToken;
+    private String sessionToken;
     private String idToken;
     private String redirectURI;
 
@@ -64,6 +65,9 @@ public class AuthzResponse {
         }
         if (!StringUtils.isBlank(mfaToken)) {
             joiner.add("mfa_token=" + mfaToken.toString());
+        }
+        if (!StringUtils.isBlank(sessionToken)) {
+            joiner.add("session_token=" + sessionToken.toString());
         }
         if (data != null && !data.isEmpty()) {
             data.entrySet().forEach(entry -> joiner.add(entry.getKey() + "=" + entry.getValue().toString()));

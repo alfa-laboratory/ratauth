@@ -15,6 +15,7 @@ public class NeedApprovalResponse extends RedirectResponse {
     private final String clientId;
     private final Set<String> scope;
     private final AcrValues acrValues;
+    private Map<String, String> result;
 
     public NeedApprovalResponse(String location, String redirectURI, String mfaToken, String clientId, Set<String> scope, AcrValues acrValues) {
         super(location);
@@ -23,16 +24,21 @@ public class NeedApprovalResponse extends RedirectResponse {
         this.mfaToken = mfaToken;
         this.scope = scope;
         this.acrValues = acrValues;
-    }
-
-    @Override
-    Map<String, String> getRedirectParameters() {
-        Map<String, String> result = new HashMap<>();
+        result = new HashMap<>();
         result.put("redirect_uri", redirectURI);
         result.put("mfa_token", mfaToken);
         result.put("client_id", clientId);
         result.put("scope", scope.stream().collect(joining(" ")));
         result.put("acr_values", acrValues.toString());
+    }
+
+    @Override
+    String putRedirectParameters(String key, String value) {
+        return result.put(key, value);
+    }
+
+    @Override
+    Map<String, String> getRedirectParameters() {
         return result;
     }
 
