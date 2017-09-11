@@ -66,7 +66,7 @@ public class AuthzResponse {
         if (!StringUtils.isBlank(mfaToken)) {
             joiner.add("mfa_token=" + mfaToken.toString());
         }
-        if (!StringUtils.isBlank(sessionToken)) {
+        if (StringUtils.isBlank(mfaToken) && !StringUtils.isBlank(sessionToken)) {
             joiner.add("session_token=" + sessionToken.toString());
         }
         if (data != null && !data.isEmpty()) {
