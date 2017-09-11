@@ -5,9 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -46,4 +44,5 @@ public class RelyingParty extends AuthClient {
   private String registrationPageURI;
   private String incAuthLevelPageURI; // page for increase NIST auth level of end-user
 
+  private DiscoveryProperties discoveryProperties;
 }
