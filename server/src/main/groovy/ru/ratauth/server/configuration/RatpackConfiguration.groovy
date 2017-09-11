@@ -1,6 +1,10 @@
 package ru.ratauth.server.configuration
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import ru.ratauth.server.services.OpenIdDefaultDiscoveryService
+import ru.ratauth.services.OpenIdConnectDiscoveryService
 
 /**
  * @author tolkv
@@ -8,4 +12,10 @@ import org.springframework.context.annotation.Configuration
  */
 @Configuration
 class RatpackConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    OpenIdConnectDiscoveryService getOpenIdConnectDiscoveryService(OpenIdConnectDefaultDiscoveryProperties properties) {
+        return new OpenIdDefaultDiscoveryService(properties)
+    }
 }

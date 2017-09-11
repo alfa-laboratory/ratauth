@@ -2,7 +2,7 @@ package ru.ratauth.server.configuration;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import ru.ratauth.entities.DiscoveryProperties;
+import ru.ratauth.entities.OpenIdConnectDiscoveryProperties;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import java.util.List;
  */
 @Data
 @ConfigurationProperties(prefix = "openid.properties.discovery")
-public class OpenIdConnectDiscoveryProperties implements DiscoveryProperties {
+public class OpenIdConnectDefaultDiscoveryProperties implements OpenIdConnectDiscoveryProperties {
   // Required
   private String issuer;
   private String jwksUri;
