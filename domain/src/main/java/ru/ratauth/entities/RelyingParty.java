@@ -44,5 +44,5 @@ public class RelyingParty extends AuthClient {
   private String registrationPageURI;
   private String incAuthLevelPageURI; // page for increase NIST auth level of end-user
 
-  private DiscoveryProperties discoveryProperties;
+  private OpenidDiscoveryProperties discoveryProperties;
 }
