@@ -12,7 +12,7 @@ import ratpack.spring.config.RatpackConfiguration;
 import ratpack.spring.config.RatpackProperties;
 import ru.ratauth.server.RatAuthApplication;
 import ru.ratauth.server.autoconfig.RatpackSpringEndpointsAutoConfiguration;
-import ru.ratauth.server.configuration.OpenIdConnectDiscoveryProperties;
+import ru.ratauth.server.configuration.OpenIdConnectDefaultDiscoveryProperties;
 import ru.ratauth.server.configuration.renderer.RenderedConfiguration;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -40,7 +40,7 @@ public class RatAuthAutoConfigurationTest {
   public void testAllRequiredPropertiesAreLoaded() {
     registerAndRefresh(TestDefaultConfiguration.class);
     assertThat(this.context.getBean(RatpackProperties.class)).isNotNull();
-    assertThat(this.context.getBean(OpenIdConnectDiscoveryProperties.class)).isNotNull();
+    assertThat(this.context.getBean(OpenIdConnectDefaultDiscoveryProperties.class)).isNotNull();
   }
 
   @Test

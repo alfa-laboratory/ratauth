@@ -15,6 +15,8 @@ abstract public class RedirectResponse {
 
     final private String location;
 
+    abstract String putRedirectParameters(String key, String value);
+
     abstract Map<String, String> getRedirectParameters();
 
     public String getRedirectURL() {

@@ -70,6 +70,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         AuthEntry entry = session.getEntry(relyingParty.getName()).get();
         AuthzResponse resp = AuthzResponse.builder()
                 .location(entry.getRedirectUrl())
+                .sessionToken(session.getSessionToken())
                 .data(verifyResult.getData())
                 .build();
         final Optional<Token> tokenOptional = entry.getLatestToken();

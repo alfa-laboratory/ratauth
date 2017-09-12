@@ -82,6 +82,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
         .then()
         .statusCode(HttpStatus.FOUND.value())
         .header(HttpHeaders.LOCATION, StringContains.containsString("code="))
+            .header(HttpHeaders.LOCATION, StringContains.containsString("session_token="))
   }
 
   def 'should return bad request status for authorization code request'() {
