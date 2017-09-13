@@ -40,7 +40,7 @@ class AuthorizationHandlers implements Action<Chain> {
     private AuthorizeService authorizeService
 
     @Autowired
-    private AcrResolver acrResolver;
+    private AcrResolver acrResolver
 
     @Override
     void execute(Chain chain) throws Exception {
