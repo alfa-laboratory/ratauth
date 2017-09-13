@@ -27,7 +27,7 @@ public class AcrMatcherWithDefaultClientValues implements AcrMatcher {
 
             String acrValues = Optional
                     .ofNullable(request.getQueryParams().get("acr_values"))
-                    .orElse(defaultAcrValues.toString());
+                    .orElse(defaultAcrValues != null ? defaultAcrValues.toString() : null);
 
             return of(acrValues)
                     .map(AcrValues::valueOf)
