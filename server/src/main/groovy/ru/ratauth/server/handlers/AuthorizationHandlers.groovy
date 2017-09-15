@@ -1,7 +1,6 @@
 package ru.ratauth.server.handlers
 
 import io.netty.handler.codec.http.HttpResponseStatus
-import lombok.RequiredArgsConstructor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import ratpack.error.ServerErrorHandler
@@ -9,6 +8,7 @@ import ratpack.form.Form
 import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
+import ru.ratauth.entities.AcrValues
 import ru.ratauth.interaction.AuthzRequest
 import ru.ratauth.server.acr.AcrResolver
 import ru.ratauth.server.services.AuthClientService
@@ -22,6 +22,7 @@ import static ru.ratauth.interaction.GrantType.AUTHENTICATION_TOKEN
 import static ru.ratauth.interaction.GrantType.SESSION_TOKEN
 import static ru.ratauth.server.handlers.readers.AuthzRequestReader.readAuthzRequest
 import static ru.ratauth.server.handlers.readers.AuthzRequestReader.readClientId
+import static ru.ratauth.utils.URIUtils.appendQuery
 
 /**
  * @author mgorelikov
@@ -70,15 +71,29 @@ class AuthorizationHandlers implements Action<Chain> {
         String acr = resolveAcr(context)
 
         def clientId = readClientId(context.request.queryParams)
+
         def pageURIObs = authClientService.getAuthorizationPageURI(clientId, context.request.query)
 
         pageURIObs.map({ url -> new URL(url) })
                 .map({ url -> url.path = "$url.path/$acr"; url })
+                .map({ url -> appendAcrValues(url, clientId) })
                 .map({ url -> url.toString() })
                 .bindExec()
                 .subscribe {
             res -> context.redirect(HttpResponseStatus.MOVED_PERMANENTLY.code(), res)
         }
+    }
+
+    private URL appendAcrValues(URL url, String clientId) {
+        if (!url.query?.contains("acr_values=")) {
+            AcrValues defaultAcrValues = authClientService.loadRelyingParty(clientId)
+                    .toBlocking()
+                    .single()
+                    .defaultAcrValues
+
+            return new URL(appendQuery(url.toString(), defaultAcrValues.toString()))
+        }
+        return url
     }
 
     private String resolveAcr(Context context) {
