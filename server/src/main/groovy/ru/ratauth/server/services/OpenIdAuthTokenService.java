@@ -72,7 +72,6 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     @Override
     public Observable<TokenResponse> createIdTokenAndResponse(Session session, RelyingParty relyingParty, String authContext) {
         AuthEntry entry = session.getEntry(relyingParty.getName()).get();
-        entry.mergeAuthContext(singleton(authContext));
         return tokenCacheService.getToken(session, relyingParty, entry)
                 .map(idToken -> new ImmutablePair<>(entry, idToken))
                 .map(entryToken -> convertToResponse(entryToken.getLeft(), entryToken.getRight().getIdToken(), session.getSessionToken()))

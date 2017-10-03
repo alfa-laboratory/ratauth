@@ -76,7 +76,6 @@ public class OpenIdSessionService implements AuthSessionService {
                 .refreshToken(codeGenerator.refreshToken())
                 .refreshTokenExpiresIn(DateUtils.fromLocal(refreshExpires))
                 .scopes(scopes)
-                .authContext(new HashSet<>())
                 .relyingParty(relyingParty.getName())
                 .authType(AuthType.COMMON)
                 .redirectUrl(redirectUrl)
