@@ -213,8 +213,6 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         Optional<Token> token = entry.flatMap(AuthEntry::getLatestToken);
         if (token.isPresent()) {
             assert entry.isPresent();
-            AuthEntry authEntry = entry.get();
-            authEntry.mergeAuthContext(acrValues.getValues());
             return tokenCacheService.getToken(session, relyingParty, entry.get());
         } else
             return Observable.just((TokenCache) null);
