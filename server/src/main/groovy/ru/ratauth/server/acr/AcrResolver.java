@@ -7,10 +7,9 @@ import ratpack.http.Request;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AcrResolver {
 
-    private final DefaultAcrMatcher defaultAcrMatcher;
+    private final AcrMatcher acrMatcher;
 
     public AcrMatcher resolve(Request request) {
-        return defaultAcrMatcher;
+        return acrMatcher;
     }
-
 }
