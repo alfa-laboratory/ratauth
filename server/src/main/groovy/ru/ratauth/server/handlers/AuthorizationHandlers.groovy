@@ -91,7 +91,7 @@ class AuthorizationHandlers implements Action<Chain> {
                     .single()
                     .defaultAcrValues
 
-            return new URL(appendQuery(url.toString(), defaultAcrValues.toString()))
+            return new URL(appendQuery(url.toString(), "acr_values=" + defaultAcrValues.toString()))
         }
         return url
     }
