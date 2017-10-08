@@ -42,5 +42,5 @@ asciidoctor {
 
   dependsOn cleanTempDirs
   dependsOn jrubyPrepare
-  dependsOn project(':server').test
+  dependsOn project(':ratauth:server').test
 }
