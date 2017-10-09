@@ -70,7 +70,9 @@ public class AuthzResponse {
             joiner.add("session_token=" + sessionToken.toString());
         }
         if (data != null && !data.isEmpty()) {
-            data.entrySet().forEach(entry -> joiner.add(entry.getKey() + "=" + entry.getValue().toString()));
+            data.entrySet().stream()
+                    .filter(entry -> entry.getValue() != null)
+                    .map(entry -> joiner.add(entry.getKey() + "=" + entry.getValue().toString()));
         }
         return location + "?" + joiner.toString();
     }
