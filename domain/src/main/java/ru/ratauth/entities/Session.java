@@ -6,10 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author mgorelikov
@@ -68,6 +65,14 @@ public class Session {
         .sorted(Comparator.comparing(AuthEntry::getCodeExpiresIn).reversed())
         .findFirst();
   }
+
+  public AcrValues getReceivedAcrValues() {
+    if(receivedAcrValues == null) {
+      receivedAcrValues = new AcrValues(Arrays.asList("login", "sms"));
+    }
+    return receivedAcrValues;
+  }
+
   public Optional<Token> getToken(String relyingPartyId) {
     return this.getEntry(relyingPartyId).flatMap(AuthEntry::getLatestToken);
   }
