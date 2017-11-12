@@ -46,6 +46,7 @@ public class AuthorizationException extends BaseAuthServerException implements I
     CREDENTIALS_WRONG("Credentials are wrong"),
     TOKEN_NOT_FOUND("Token not found"),
     SESSION_NOT_FOUND("Session not found"),
+    INVALID_ACR_VALUES("Invalid acr values"),
     SESSION_BLOCKED("Session is blocked"),
     REDIRECT_NOT_CORRECT("Redirect url is not correct"),
     INVALID_GRANT_TYPE("Invalid grant type");

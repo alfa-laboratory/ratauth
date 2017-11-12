@@ -27,6 +27,7 @@ import ru.ratauth.providers.auth.dto.AuthInput;
 import ru.ratauth.server.secutiry.OAuthSystemException;
 import rx.Observable;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
@@ -82,9 +83,9 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     public Observable<CheckTokenResponse> checkToken(CheckTokenRequest oauthRequest) {
         return authSessionService.getByValidToken(oauthRequest.getToken(), new Date())
                 .doOnNext(session -> sessionStatusChecker.checkAndUpdateSession(session))
-                .doOnNext(session -> checkSession(session))
                 .zipWith(loadRelyingParty(oauthRequest),
                         (session, client) -> new ImmutablePair<>(session, client))
+                .doOnNext(sessionClient -> checkSession(sessionClient.getLeft(), sessionClient.getRight()))
                 .flatMap(sessionClient -> {
                     //load idToken(jwt) from cache or create new
                     AuthEntry entry = sessionClient.getLeft().getEntries().iterator().next();
@@ -105,7 +106,16 @@ public class OpenIdAuthTokenService implements AuthTokenService {
                 .doOnCompleted(() -> log.info("Check token succeed"));
     }
 
-    private void checkSession(Session session) {
+    private void checkSession(Session session, AuthClient authClient) {
+
+        if (!session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("account", "sms"))
+                && !session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("card", "sms"))
+                && !session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("login", "sms"))
+                && !session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("upupcard"))
+                && !"private-vr-api".equals(authClient.getName())) {
+            log.error("Invalid acr values: " + session.getReceivedAcrValues());
+            throw new AuthorizationException(AuthorizationException.ID.INVALID_ACR_VALUES);
+        }
         if (Status.BLOCKED == session.getStatus())
             throw new AuthorizationException(AuthorizationException.ID.SESSION_BLOCKED);
         if (session.getExpiresIn().before(new Date()))
