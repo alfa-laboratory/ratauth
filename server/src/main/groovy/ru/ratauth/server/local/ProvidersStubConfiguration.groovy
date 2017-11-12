@@ -80,7 +80,7 @@ class ProvidersStubConfiguration {
         if (input.data.get(BaseAuthFields.USERNAME.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
           return Observable.just(AuthResult.builder()
                   .data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
-                  .acrValues(AcrValues.valueOf("credentials"))
+                  .acrValues(AcrValues.valueOf("login:sms"))
                   .status(AuthResult.Status.SUCCESS).build())
         else
           return Observable.error(new AuthorizationException(AuthorizationException.ID.CREDENTIALS_WRONG))
@@ -101,7 +101,7 @@ class ProvidersStubConfiguration {
         if (!input.data.containsKey(BaseAuthFields.CODE.val())) { //first step of registration
           //one step registration
           if (input.data.get(BaseAuthFields.USERNAME.val()) == 'login' && input.data.get(BaseAuthFields.PASSWORD.val()) == 'password')
-            return Observable.just(RegResult.builder().acrValues(AcrValues.valueOf("credentials")).data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
+            return Observable.just(RegResult.builder().acrValues(AcrValues.valueOf("login:sms")).data([(BaseAuthFields.USER_ID.val()): 'user_id'] as Map)
               .status(RegResult.Status.SUCCESS).build())
           else if (input.data.get(REG_CREDENTIAL) == 'credential') //two step registration
             return Observable.just(RegResult.builder().data([
