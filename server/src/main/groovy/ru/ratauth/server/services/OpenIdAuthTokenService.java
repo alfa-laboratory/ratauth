@@ -149,7 +149,12 @@ public class OpenIdAuthTokenService implements AuthTokenService {
             return Observable.error(new AuthorizationException(AuthorizationException.ID.INVALID_GRANT_TYPE));
         }
 
-        return authObs.switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.SESSION_NOT_FOUND)));
+        return authObs
+                .map(session -> {
+                    checkSession(session, relyingParty);
+                    return session;
+                })
+                .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.SESSION_NOT_FOUND)));
     }
 
     /**
