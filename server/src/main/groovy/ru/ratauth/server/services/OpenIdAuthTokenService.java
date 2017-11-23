@@ -112,6 +112,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
                 && !session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("card", "sms"))
                 && !session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("login", "sms"))
                 && !session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("upupcard"))
+                && !session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("username"))
                 && !"private-vr-api".equals(authClient.getName())) {
             log.error("Invalid acr values: " + session.getReceivedAcrValues());
             throw new AuthorizationException(AuthorizationException.ID.INVALID_ACR_VALUES);
