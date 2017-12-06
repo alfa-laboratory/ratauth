@@ -29,12 +29,17 @@ class TokenRequestReader {
   private static final String FIELD_SPLITTER = ' '
   private static final Set<String> BASE_FIELDS = [RESPONSE_TYPE, SCOPE, GRANT_TYPE, TOKEN, REFRESH_TOKEN] as Set
 
+  private static final AuthzResponseType DEFAULT_RESPONSE_TYPE = AuthzResponseType.TOKEN
+
   static TokenRequest readTokenRequest(Form form, Headers headers) {
     def auth = extractAuth(headers)
     GrantType grantType = extractEnumField(form, GRANT_TYPE, true, GrantType)
+    List<AuthzResponseType> responseType =
+            extractEnumFields(form, RESPONSE_TYPE, FIELD_SPLITTER, false, AuthzResponseType) ?: [DEFAULT_RESPONSE_TYPE]
+
     AuthAction authAction
     def builder = TokenRequest.builder()
-        .responseTypes(extractEnumFields(form, RESPONSE_TYPE, FIELD_SPLITTER, true, AuthzResponseType))
+        .responseTypes(responseType)
         .grantType(grantType)
         .clientId(auth[0])
         .clientSecret(auth[1])

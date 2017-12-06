@@ -68,9 +68,9 @@ class RequestUtil {
    */
   static <T extends Enum> List<T> extractEnumFields(Map<String, String> params, String name, String splitter,
                                                     boolean required, Class<T> enumType) {
-    List<T> result = extractField(params, name, required).split(splitter)
-        .findAll { !StringUtils.isBlank(it) }
-        .collect { Enum.valueOf(enumType, it.toUpperCase()) }
+    List<T> result = extractField(params, name, required)?.split(splitter)
+        ?.findAll { !StringUtils.isBlank(it) }
+        ?.collect { Enum.valueOf(enumType, it.toUpperCase()) }
     if (required && result.isEmpty()) {
       throw new ReadRequestException(ReadRequestException.ID.FIELD_MISSED, name)
     }
