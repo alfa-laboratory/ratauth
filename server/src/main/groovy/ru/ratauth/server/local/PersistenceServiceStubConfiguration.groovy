@@ -145,6 +145,7 @@ class PersistenceServiceStubConfiguration {
                   sessionToken: SESSION_TOKEN,
                   userInfo: ID_TOKEN,
                   status: Status.ACTIVE,
+                  expiresIn: DateUtils.fromLocal(LocalDateTime.now().plusDays(1)),
                   receivedAcrValues: AcrValues.valueOf("login:sms"),
                   entries: [
                       new AuthEntry(authCode: 'code',
@@ -168,6 +169,7 @@ class PersistenceServiceStubConfiguration {
                   sessionToken: SESSION_TOKEN,
                   userInfo: ID_TOKEN,
                   status: Status.ACTIVE,
+                  expiresIn: DateUtils.fromLocal(LocalDateTime.now().plusDays(1)),
                   receivedAcrValues: AcrValues.valueOf("login:sms"),
                   entries: [
                       new AuthEntry(authCode: 'code',
@@ -192,6 +194,7 @@ class PersistenceServiceStubConfiguration {
               userInfo: ID_TOKEN,
               status: Status.ACTIVE,
               receivedAcrValues: AcrValues.valueOf("login:sms"),
+              expiresIn: DateUtils.fromLocal(LocalDateTime.now().plusDays(1)),
               entries: [
                 new AuthEntry(authCode: 'code',
                   relyingParty: CLIENT_NAME,
