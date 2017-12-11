@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.ratauth.entities.AcrValues;
 import ru.ratauth.utils.StringUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -32,6 +33,7 @@ public class AuthzResponse {
     private String sessionToken;
     private String idToken;
     private String redirectURI;
+    private AcrValues acrValues;
 
     private String getEncodedRedirectURI() {
         try {
@@ -68,6 +70,9 @@ public class AuthzResponse {
         }
         if (StringUtils.isBlank(mfaToken) && !StringUtils.isBlank(sessionToken)) {
             joiner.add("session_token=" + sessionToken.toString());
+        }
+        if (acrValues != null && acrValues.getValues() != null && !acrValues.getValues().isEmpty() ) {
+            joiner.add("acr_values=" + acrValues.toString());
         }
         if (data != null && !data.isEmpty()) {
             data.entrySet().stream()

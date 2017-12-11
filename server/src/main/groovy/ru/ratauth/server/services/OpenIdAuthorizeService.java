@@ -71,6 +71,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         AuthzResponse resp = AuthzResponse.builder()
                 .location(entry.getRedirectUrl())
                 .sessionToken(session.getSessionToken())
+                .acrValues(verifyResult.getAcrValues())
                 .data(verifyResult.getData())
                 .build();
         final Optional<Token> tokenOptional = entry.getLatestToken();
