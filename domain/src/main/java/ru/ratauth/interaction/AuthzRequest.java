@@ -36,6 +36,7 @@ public class AuthzRequest {
                 .map(verifyAcrValues -> this.getAcrValues().add(verifyAcrValues.getFirst()))
                 .orElseGet(this::getAcrValues);
         this.setAcrValues(merged);
+        verifyResult.setAcrValues(merged);
         return verifyResult;
     }
 }
