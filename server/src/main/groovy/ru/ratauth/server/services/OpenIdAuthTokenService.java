@@ -111,6 +111,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
         if (!session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("account", "sms"))
                 && !session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("card", "sms"))
                 && !session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("login", "sms"))
+                && !session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("ib-username-password"))
                 && !session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("upupcard"))
                 && !session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("username"))
                 && !"private-vr-api".equals(authClient.getName())) {
