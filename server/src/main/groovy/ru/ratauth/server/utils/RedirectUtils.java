@@ -1,9 +1,15 @@
 package ru.ratauth.server.utils;
 
+import lombok.SneakyThrows;
 import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.utils.StringUtils;
 import ru.ratauth.utils.URIUtils;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class RedirectUtils {
 
@@ -32,6 +38,30 @@ public class RedirectUtils {
             sb.append("?");
         }
         return sb.toString() + parameter;
+    }
+
+    public static String createRedirectURI(String url, Map<String, String> parameter) {
+        if (parameter.isEmpty()) {
+            return url;
+        }
+        StringBuilder sb = new StringBuilder(url);
+        if (url.contains("?")) {
+            if (!url.endsWith("?")) {
+                sb.append("&");
+            }
+        } else {
+            sb.append("?");
+        }
+
+        return sb.toString() + parameter.entrySet().stream()
+                .filter(e -> e.getValue() != null)
+                .map(e -> e.getKey() + "=" + silentEncode(e.getValue()))
+                .collect(Collectors.joining("&"));
+    }
+
+    @SneakyThrows(UnsupportedEncodingException.class)
+    private static String silentEncode(String value) {
+        return URLEncoder.encode(value, "UTF-8");
     }
 
 }

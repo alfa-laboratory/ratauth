@@ -3,6 +3,7 @@ package ru.ratauth.server.extended.enroll.verify;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.SneakyThrows;
+import ru.ratauth.server.utils.RedirectUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -20,10 +21,7 @@ abstract public class RedirectResponse {
     abstract Map<String, String> getRedirectParameters();
 
     public String getRedirectURL() {
-        return getLocation() + "?" + getRedirectParameters().entrySet().stream()
-                .filter(e -> e.getValue() != null)
-                .map(e -> e.getKey() + "=" + encoded(e.getValue()))
-                .collect(Collectors.joining("&"));
+        return RedirectUtils.createRedirectURI(getLocation(), getRedirectParameters());
     }
 
     @SneakyThrows(UnsupportedEncodingException.class)

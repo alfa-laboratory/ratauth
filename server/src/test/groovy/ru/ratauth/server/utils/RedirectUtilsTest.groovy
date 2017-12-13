@@ -18,4 +18,20 @@ class RedirectUtilsTest extends Specification {
         "https://domain.mine.ru?q2=p2&" | 'q1=p1'       | "https://domain.mine.ru?q2=p2&q1=p1"
         "https://domain.mine.ru"        | 'q1=p1&q2=p2' | "https://domain.mine.ru?q1=p1&q2=p2"
     }
+
+
+    def 'Redirect uri #uri generated from #mapParameters could be correct '() {
+        expect: 'Generated redirect uri is correct'
+        RedirectUtils.createRedirectURI(url, mapParameters) == redirectURI
+
+        where:
+        url                            | mapParameters            | redirectURI
+        "domain.mine.ru"               | [:]                      | "domain.mine.ru"
+        "https://domain.mine.ru"       | [:]                      | "https://domain.mine.ru"
+        "https://domain.mine.ru"       | ['q1': 'p1']             | "https://domain.mine.ru?q1=p1"
+        "https://domain.mine.ru?"      | ['q1': 'p1']             | "https://domain.mine.ru?q1=p1"
+        "https://domain.mine.ru?q2=p2" | ['q1': 'p1']             | "https://domain.mine.ru?q2=p2&q1=p1"
+        "https://domain.mine.ru?q2=p2" | ['q1': 'p1']             | "https://domain.mine.ru?q2=p2&q1=p1"
+        "https://domain.mine.ru"       | ['q1': 'p1', 'q2': 'p2'] | "https://domain.mine.ru?q1=p1&q2=p2"
+    }
 }
