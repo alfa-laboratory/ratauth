@@ -39,11 +39,14 @@ public class VerifyEnrollService {
     private static RedirectResponse createResponse(Session session, RelyingParty relyingParty, VerifyEnrollRequest request, VerifyResult verifyResult) {
         AcrValues difference = request.getAuthContext().difference(session.getReceivedAcrValues());
         if (difference.getValues().isEmpty()) {
-            String authCode = session
+            AuthEntry authEntry = session
                     .getEntry(relyingParty.getName())
-                    .orElseThrow(() -> new IllegalStateException("sessionID = " + session.getId() + ", relyingParty = " + relyingParty))
-                    .getAuthCode();
-            return new SuccessResponse(createRedirectURI(relyingParty, request.getRedirectURI()), authCode);
+                    .orElseThrow(() -> new IllegalStateException("sessionID = " + session.getId() + ", relyingParty = " + relyingParty));
+
+            String authCode = authEntry.getAuthCode();
+            long expiresIn = authEntry.getCodeExpiresIn().getTime();
+
+            return new SuccessResponse(createRedirectURI(relyingParty, request.getRedirectURI()), authCode, expiresIn);
         } else {
 
             String authorizationPageURI = relyingParty.getAuthorizationPageURI();
