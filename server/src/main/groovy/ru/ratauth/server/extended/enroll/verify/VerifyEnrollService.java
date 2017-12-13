@@ -14,6 +14,7 @@ import ru.ratauth.server.secutiry.TokenProcessor;
 import ru.ratauth.server.services.AuthClientService;
 import ru.ratauth.server.services.AuthSessionService;
 import ru.ratauth.server.services.TokenCacheService;
+import ru.ratauth.server.utils.RedirectUtils;
 import rx.Observable;
 
 import java.net.URL;
@@ -51,12 +52,15 @@ public class VerifyEnrollService {
 
             String authorizationPageURI = relyingParty.getAuthorizationPageURI();
             URL url = new URL(authorizationPageURI);
-            String pathWithEnroll = url.getPath().concat("/" + request.getAuthContext().getFirst());
-            String redirectUrl = url.getHost() + pathWithEnroll + url.getQuery();
+            String redirectUrl = RedirectUtils.createRedirectURI(
+                    url.getHost() + url.getPath() + "/" + request.getAuthContext().getFirst(),
+                    url.getQuery()
+            );
 
             return new NeedApprovalResponse(redirectUrl, request.getRedirectURI(), request.getMfaToken(), request.getClientId(), request.getScope(), request.getAuthContext());
         }
     }
+
 
     public Observable<RedirectResponse> incAuthLevel(VerifyEnrollRequest request) {
         return Observable.zip(

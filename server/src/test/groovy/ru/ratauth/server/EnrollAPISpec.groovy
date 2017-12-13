@@ -177,6 +177,7 @@ class EnrollAPISpec extends BaseDocumentationSpec {
                 .statusCode(HttpStatus.FOUND.value())
                 .header(HttpHeaders.LOCATION, StringContains.containsString('mfa_token='))
                 .header(HttpHeaders.LOCATION, StringContains.containsString("acr_values=${encode('username:sms', 'UTF-8')}"))
+                .header(HttpHeaders.LOCATION, StringContains.containsString('http://localhost:8080/domain.mine/oidc/web/authorize/username?is_webview=true&session_token=session_token&scope=rs.read&acr_values=username%3Asms&mfa_token=mfa-token-test&client_id=mine'))
     }
 
 
