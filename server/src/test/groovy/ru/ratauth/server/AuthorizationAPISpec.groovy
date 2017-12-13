@@ -401,5 +401,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
         .header(HttpHeaders.LOCATION, StringContains.containsString('username=login'))
         .header(HttpHeaders.LOCATION, StringContains.containsString('client_id=' + PersistenceServiceStubConfiguration.CLIENT_NAME))
         .header(HttpHeaders.LOCATION, StringContains.containsString('is_webview='))// according to test stub
+        .header(HttpHeaders.LOCATION, StringContains.containsString('http://domain.mine/oidc/web/authorize/card?is_webview=true&response_type=CODE&client_id=mine&scope=rs.read&acr_values=card&username=login&password=password'))
+
   }
 }
