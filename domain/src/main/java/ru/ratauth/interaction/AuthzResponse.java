@@ -79,6 +79,22 @@ public class AuthzResponse {
                     .filter(entry -> entry.getValue() != null)
                     .map(entry -> joiner.add(entry.getKey() + "=" + entry.getValue().toString()));
         }
-        return location + "?" + joiner.toString();
+        return createRedirectURI(location, joiner.toString());
     }
+
+    private static String createRedirectURI(String url, String parameter) {
+        if (parameter == null || parameter.isEmpty()) {
+            return url;
+        }
+        StringBuilder sb = new StringBuilder(url);
+        if (url.contains("?")) {
+            if (!url.endsWith("?") && !url.endsWith("&")) {
+                sb.append("&");
+            }
+        } else {
+            sb.append("?");
+        }
+        return sb.toString() + parameter;
+    }
+
 }
