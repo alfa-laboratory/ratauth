@@ -26,6 +26,7 @@ import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
 import ru.ratauth.server.providers.IdentityProviderResolver;
+import ru.ratauth.server.utils.RedirectUtils;
 import rx.Observable;
 
 import java.net.MalformedURLException;
@@ -130,26 +131,18 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     }
 
     private static void onNextAuthMethod(RelyingParty relyingParty, Session session, String targetRedirectURI, AuthzResponse resp, String firstAcr) throws MalformedURLException {
-        URL resultLocation = createRedirectUrl(relyingParty, firstAcr);
-        resp.setLocation(resultLocation.toString());
+        String resultLocation = createRedirectUrl(relyingParty, firstAcr);
+        resp.setLocation(resultLocation);
         resp.setRedirectURI(targetRedirectURI);
         resp.setMfaToken(session.getMfaToken());
     }
 
-    private static URL createRedirectUrl(RelyingParty relyingParty, String firstAcr) throws MalformedURLException {
+    private static String createRedirectUrl(RelyingParty relyingParty, String firstAcr) throws MalformedURLException {
         URL url = new URL(relyingParty.getAuthorizationPageURI());
-
-        String resultPathWithAcr = addToPathIfExistCurry()
-                .apply(url.getPath())
-                .apply("/")
-                .apply(firstAcr);
-
-        String resultPathWithQuery = addToPathIfExistCurry()
-                .apply(resultPathWithAcr)
-                .apply("&")
-                .apply(url.getQuery());
-
-        return new URL(url.getProtocol(), url.getHost(), url.getPort(), resultPathWithQuery);
+        return RedirectUtils.createRedirectURI(
+                url.getProtocol() + "://" + url.getHost() + url.getPath() + "/" + firstAcr,
+                url.getQuery()
+        );
     }
 
     private static Function<String, Function<String, Function<String, String>>> addToPathIfExistCurry() {
