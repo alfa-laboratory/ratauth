@@ -26,7 +26,7 @@ public class RedirectUtils {
 
 
     public static String createRedirectURI(String url, String parameter) {
-        if (parameter.isEmpty()) {
+        if (parameter == null || parameter.isEmpty()) {
             return url;
         }
         StringBuilder sb = new StringBuilder(url);
