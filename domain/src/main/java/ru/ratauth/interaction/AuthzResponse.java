@@ -86,6 +86,9 @@ public class AuthzResponse {
         if (parameter == null || parameter.isEmpty()) {
             return url;
         }
+        if(url == null) {
+            url = "";
+        }
         StringBuilder sb = new StringBuilder(url);
         if (url.contains("?")) {
             if (!url.endsWith("?") && !url.endsWith("&")) {

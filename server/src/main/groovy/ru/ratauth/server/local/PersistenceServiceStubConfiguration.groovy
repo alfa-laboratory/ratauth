@@ -249,7 +249,9 @@ class PersistenceServiceStubConfiguration {
                           receivedAcrValues: AcrValues.valueOf("none"),
                           expiresIn: DateUtils.fromLocal(LocalDateTime.now().plusDays(1)),
                           entries: [
-                                  new AuthEntry(authCode: 'code',
+                                  new AuthEntry(
+                                          codeExpiresIn: DateUtils.fromLocal(LocalDateTime.now().plusDays(1)),
+                                          authCode: 'code',
                                           relyingParty: CLIENT_NAME,
                                           scopes: ['rs.read'] as Set,
                                           refreshToken: REFRESH_TOKEN,
