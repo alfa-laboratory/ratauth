@@ -7,12 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ratpack.handling.HandlerDecorator;
 import ratpack.handling.RequestId;
-import ratpack.http.Request;
 import ratpack.logging.MDCInterceptor;
-
-import static ru.ratauth.server.handlers.readers.RequestUtil.extractField;
-import static ru.ratauth.server.services.log.LogFields.*;
-import static ru.ratauth.utils.StringUtils.isBlank;
+import ru.ratauth.server.services.log.LogFields;
 
 /**
  * @author mgorelikov
@@ -20,33 +16,20 @@ import static ru.ratauth.utils.StringUtils.isBlank;
  */
 @Component
 public class LoggingModule extends AbstractModule {
-    private final static String ALTERNATE_DEVICE_ID_1 = "deviceId";
-    private final static String ALTERNATE_DEVICE_ID_2 = "DEVICE-ID";
+  private static final String PERFORATING_TRACE_ID = "trace_id";
 
-    @Value("${spring.application.name}")
-    private String applicationName;
+  @Value("${spring.application.name}")
+  private String applicationName;
 
-    @Override
-    protected void configure() {
-        bind(RequestId.Generator.class).toInstance(RequestId.Generator.header(TRACE_ID.val(), RequestId.Generator.randomUuid()));
-        bind(MDCInterceptor.class).toInstance(MDCInterceptor.instance());
-        Multibinder.newSetBinder(binder(), HandlerDecorator.class).addBinding().toInstance(HandlerDecorator.prepend(ctx -> {
-            String requestId = ctx.get(RequestId.class).toString();
-            MDC.put(TRACE_ID.val(), requestId);
-            Request request = ctx.getRequest();
-            String deviceId = extractField(request.getQueryParams(), DEVICE_ID.val(), false);
-            if(isBlank(deviceId)) {
-                deviceId = request.getHeaders().get(ALTERNATE_DEVICE_ID_1);
-            }
-            if(isBlank(deviceId)) {
-                deviceId = request.getHeaders().get(ALTERNATE_DEVICE_ID_2);
-            }
-            if (!isBlank(deviceId)) {
-                MDC.put(DEVICE_ID.val(), deviceId);
-            }
-            MDC.put(APPLICATION.val(), applicationName);
-            MDC.put(SESSION_ID.val(), request.getHeaders().get(SESSION_ID.val()));
-            ctx.next();
-        }));
-    }
+  @Override
+  protected void configure() {
+    bind(RequestId.Generator.class).toInstance(RequestId.Generator.header(PERFORATING_TRACE_ID, RequestId.Generator.randomUuid()));
+    bind(MDCInterceptor.class).toInstance(MDCInterceptor.instance());
+    Multibinder.newSetBinder(binder(), HandlerDecorator.class).addBinding().toInstance(HandlerDecorator.prepend(ctx -> {
+      String requestId = ctx.get(RequestId.class).toString();
+      MDC.put(PERFORATING_TRACE_ID, requestId);
+      MDC.put(LogFields.APPLICATION.val(), applicationName);
+      ctx.next();
+    }));
+  }
 }
