@@ -7,6 +7,7 @@ import ratpack.error.ServerErrorHandler
 import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
+import ru.ratauth.server.utils.ResponseLogger
 import ru.ratauth.services.OpenIdConnectDiscoveryService
 import rx.functions.Action1
 
@@ -23,31 +24,33 @@ class WellKnownHandler implements Action<Chain> {
 
     @Autowired
     private OpenIdConnectDiscoveryService discoveryService
+    @Autowired
+    private ResponseLogger responseLogger
 
     @Override
     void execute(Chain chain) throws Exception {
         chain.path('.well-known/openid-configuration/:client_id?') { Context ctx ->
             def clientId = ctx.pathTokens["client_id"]
-            discoveryService.getWellKnown(clientId)
-                .map({
-                    json(
+            discoveryService.getWellKnown(clientId).map {
+                def response =
                         [
-                            issuer                                          : it.issuer,
-                            authorization_endpoint                          : it.authorizationEndpoint,
-                            token_endpoint                                  : it.tokenEndpoint,
-                            token_endpoint_auth_signing_alg_values_supported: it.tokenEndpointAuthSigningAlgValuesSupported,
-                            registration_endpoint                           : it.registrationEndpoint,
-                            userinfo_endpoint                               : it.userInfoEndpoint,
-                            check_session_iframe                            : it.checkSessionIframe,
-                            end_session_endpoint                            : it.endSessionEndpoint,
-                            subject_types_supported                         : it.subjectTypesSupported,
-                            response_types_supported                        : it.responseTypesSupported,
-                            jwks_uri                                        : it.jwksUri,
-                            scopes_supported                                : it.scopesSupported,
-                            claims_supported                                : it.claimsSupported,
-                        ])
-            })
-            .subscribe(ctx.&render, errorHandler(ctx))
+                                issuer                                          : it.issuer,
+                                authorization_endpoint                          : it.authorizationEndpoint,
+                                token_endpoint                                  : it.tokenEndpoint,
+                                token_endpoint_auth_signing_alg_values_supported: it.tokenEndpointAuthSigningAlgValuesSupported,
+                                registration_endpoint                           : it.registrationEndpoint,
+                                userinfo_endpoint                               : it.userInfoEndpoint,
+                                check_session_iframe                            : it.checkSessionIframe,
+                                end_session_endpoint                            : it.endSessionEndpoint,
+                                subject_types_supported                         : it.subjectTypesSupported,
+                                response_types_supported                        : it.responseTypesSupported,
+                                jwks_uri                                        : it.jwksUri,
+                                scopes_supported                                : it.scopesSupported,
+                                claims_supported                                : it.claimsSupported,
+                        ]
+                responseLogger.logResponse response
+                json(response)
+            }.subscribe(ctx.&render, errorHandler(ctx))
         }
     }
 
