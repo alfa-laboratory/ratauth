@@ -16,7 +16,7 @@ import ru.ratauth.server.services.log.LogFields;
  */
 @Component
 public class LoggingModule extends AbstractModule {
-  private static final String PERFORATING_TRACE_ID = "X-B3-TraceId";
+  private static final String PERFORATING_TRACE_ID = "trace_id";
 
   @Value("${spring.application.name}")
   private String applicationName;
