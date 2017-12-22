@@ -15,7 +15,7 @@ import ru.ratauth.interaction.TokenResponse
 import ru.ratauth.server.handlers.dto.TokenDTO
 import ru.ratauth.server.services.AuthClientService
 import ru.ratauth.server.services.RegistrationService
-import ru.ratauth.server.utils.ResponseLogger
+import ru.ratauth.server.services.log.ResponseLogger
 import rx.Subscription
 
 import static ratpack.jackson.Jackson.json
