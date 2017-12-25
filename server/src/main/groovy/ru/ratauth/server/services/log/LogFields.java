@@ -12,7 +12,8 @@ public enum LogFields {
   REQUEST_ID,
   MONGO_SESSION_ID,
   LONG_TERM,
-  RESPONSE_PAYLOAD;
+  RESPONSE_PAYLOAD,
+  ERROR_MESSAGE;
 
   public String val() {
     return name().toLowerCase();
