@@ -13,6 +13,8 @@ public enum LogFields {
   MONGO_SESSION_ID,
   LONG_TERM,
   RESPONSE_PAYLOAD,
+  DEVICE_ID,
+  TRACE_ID,
   ERROR_MESSAGE;
 
   public String val() {
