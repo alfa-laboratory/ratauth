@@ -14,6 +14,7 @@ public enum LogFields {
   LONG_TERM,
   RESPONSE_PAYLOAD,
   DEVICE_ID,
+  SESSION_ID,
   TRACE_ID,
   ERROR_MESSAGE;
 
