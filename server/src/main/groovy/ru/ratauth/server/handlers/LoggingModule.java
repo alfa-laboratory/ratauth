@@ -45,7 +45,10 @@ public class LoggingModule extends AbstractModule {
                 MDC.put(DEVICE_ID.val(), deviceId);
             }
             MDC.put(APPLICATION.val(), applicationName);
-            MDC.put(SESSION_ID.val(), request.getHeaders().get(SESSION_ID.val()));
+            String sessionId = request.getHeaders().get(SESSION_ID.val());
+            if(!isBlank(sessionId)) {
+                MDC.put(SESSION_ID.val(), sessionId);
+            }
             ctx.next();
         }));
     }
