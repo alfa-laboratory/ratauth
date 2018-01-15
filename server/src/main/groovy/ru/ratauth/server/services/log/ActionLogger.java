@@ -9,7 +9,7 @@ import ru.ratauth.entities.Session;
  */
 public interface ActionLogger {
   default void addSessionInfo(Session session) {
-    MDC.put(LogFields.SESSION_ID.val(), session.getId());
+    MDC.put(LogFields.MONGO_SESSION_ID.val(), session.getId());
     MDC.put(LogFields.USER_ID.val(), session.getUserId());
   }
 
