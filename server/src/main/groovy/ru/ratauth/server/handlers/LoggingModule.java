@@ -9,11 +9,9 @@ import ratpack.handling.HandlerDecorator;
 import ratpack.handling.RequestId;
 import ratpack.http.Request;
 import ratpack.logging.MDCInterceptor;
-import ru.ratauth.server.services.log.LogFields;
 
 import static ru.ratauth.server.handlers.readers.RequestUtil.extractField;
-import static ru.ratauth.server.services.log.LogFields.DEVICE_ID;
-import static ru.ratauth.server.services.log.LogFields.TRACE_ID;
+import static ru.ratauth.server.services.log.LogFields.*;
 import static ru.ratauth.utils.StringUtils.isBlank;
 
 /**
@@ -22,7 +20,8 @@ import static ru.ratauth.utils.StringUtils.isBlank;
  */
 @Component
 public class LoggingModule extends AbstractModule {
-    private final static String ALTERNATE_DEVICE_ID = "DEVICE-ID";
+    private final static String ALTERNATE_DEVICE_ID_1 = "deviceId";
+    private final static String ALTERNATE_DEVICE_ID_2 = "DEVICE-ID";
 
     @Value("${spring.application.name}")
     private String applicationName;
@@ -37,12 +36,16 @@ public class LoggingModule extends AbstractModule {
             Request request = ctx.getRequest();
             String deviceId = extractField(request.getQueryParams(), DEVICE_ID.val(), false);
             if(isBlank(deviceId)) {
-                deviceId = request.getHeaders().get(ALTERNATE_DEVICE_ID);
+                deviceId = request.getHeaders().get(ALTERNATE_DEVICE_ID_1);
+            }
+            if(isBlank(deviceId)) {
+                deviceId = request.getHeaders().get(ALTERNATE_DEVICE_ID_2);
             }
             if (!isBlank(deviceId)) {
                 MDC.put(DEVICE_ID.val(), deviceId);
             }
-            MDC.put(LogFields.APPLICATION.val(), applicationName);
+            MDC.put(APPLICATION.val(), applicationName);
+            MDC.put(SESSION_ID.val(), request.getHeaders().get(SESSION_ID.val()));
             ctx.next();
         }));
     }
