@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import io.netty.handler.codec.http.HttpResponseStatus
+import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import ratpack.error.ServerErrorHandler
@@ -35,6 +36,7 @@ class AuthErrorHandler implements ServerErrorHandler {
 
   @Override
   void error(Context context, Throwable throwable) throws Exception {
+    MDC.put("error_message", throwable.message)
     def exception = ExceptionUtils.getThrowable(throwable, BaseAuthServerException, MAX_EXCEPTION_DEPTH)
 
     if (exception instanceof ExpiredException) {
