@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import io.netty.handler.codec.http.HttpResponseStatus
+import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import ratpack.error.ServerErrorHandler
@@ -18,6 +19,7 @@ import ru.ratauth.exception.RegistrationException
 import ru.ratauth.server.handlers.readers.ReadRequestException
 import ru.ratauth.utils.ExceptionUtils
 
+import static ru.ratauth.server.services.log.LogFields.ERROR_MESSAGE
 /**
  * @author mgorelikov
  * @since 19/11/15
@@ -35,6 +37,7 @@ class AuthErrorHandler implements ServerErrorHandler {
 
   @Override
   void error(Context context, Throwable throwable) throws Exception {
+    MDC.put(ERROR_MESSAGE.val(), throwable.message)
     def exception = ExceptionUtils.getThrowable(throwable, BaseAuthServerException, MAX_EXCEPTION_DEPTH)
 
     if (exception instanceof ExpiredException) {
