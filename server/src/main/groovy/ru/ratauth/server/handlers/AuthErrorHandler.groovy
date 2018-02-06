@@ -66,7 +66,7 @@ class AuthErrorHandler implements ServerErrorHandler {
     context.response.status(code)
     context.response.contentType(MediaType.APPLICATION_JSON)
     def dto = jacksonObjectMapper.writeValueAsString(new ExceptionDTO(exception))
-    log.error(dto, exception)
+    log.error(dto, exception as Throwable)
     context.response.send(MediaType.APPLICATION_JSON, dto)
   }
 
