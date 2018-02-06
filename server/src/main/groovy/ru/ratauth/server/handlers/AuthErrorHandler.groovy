@@ -37,7 +37,6 @@ class AuthErrorHandler implements ServerErrorHandler {
 
   @Override
   void error(Context context, Throwable throwable) throws Exception {
-    MDC.put(ERROR_MESSAGE.val(), throwable.message)
     def exception = ExceptionUtils.getThrowable(throwable, BaseAuthServerException, MAX_EXCEPTION_DEPTH)
 
     if (exception instanceof ExpiredException) {
@@ -56,12 +55,14 @@ class AuthErrorHandler implements ServerErrorHandler {
   }
 
   private static void sendError(Context context, int code, Throwable throwable) {
+    MDC.put(ERROR_MESSAGE.val(), throwable.message)
     context.response.status(code)
     context.response.send(String.valueOf(throwable.message))
     log.error("Auth error: ", throwable)
   }
 
   private void sendIdentifiedError(Context context, int code, IdentifiedException exception) {
+    MDC.put(ERROR_MESSAGE.val(), exception.message)
     context.response.status(code)
     context.response.contentType(MediaType.APPLICATION_JSON)
     def dto = jacksonObjectMapper.writeValueAsString(new ExceptionDTO(exception))
