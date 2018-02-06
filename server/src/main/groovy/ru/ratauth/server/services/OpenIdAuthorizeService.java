@@ -95,7 +95,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         AcrValues acrValues = authzRequest.getAcrValues();
 
         if (isDefaultFlow(acrValues)) {
-            defaultFlow(targetRedirectURI, entry, resp);
+            defaultFlow(entry, resp);
             return;
         }
 
@@ -114,10 +114,9 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         return acrValues == null;
     }
 
-    private static void defaultFlow(String targetRedirectURI, AuthEntry entry, AuthzResponse resp) {
+    private static void defaultFlow(AuthEntry entry, AuthzResponse resp) {
         resp.setCode(entry.getAuthCode());
         resp.setExpiresIn(entry.getCodeExpiresIn().getTime());
-        resp.setRedirectURI(targetRedirectURI);
     }
 
     private static boolean isReceivedRequiredAcrs(AcrValues difference) {
