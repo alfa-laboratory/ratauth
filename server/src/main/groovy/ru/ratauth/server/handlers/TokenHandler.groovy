@@ -14,6 +14,7 @@ import ru.ratauth.interaction.TokenResponse
 import ru.ratauth.server.handlers.dto.CheckTokenDTO
 import ru.ratauth.server.handlers.dto.TokenDTO
 import ru.ratauth.server.services.AuthTokenService
+import ru.ratauth.server.services.log.ResponseLogger
 
 import static ratpack.jackson.Jackson.json
 import static ratpack.rx.RxRatpack.observe
@@ -23,11 +24,14 @@ import static ru.ratauth.server.handlers.readers.TokenRequestReader.readTokenReq
  * @author mgorelikov
  * @since 11/11/16
  */
+
 @Component
 class TokenHandler implements Action<Chain> {
 
   @Autowired
   private AuthTokenService authTokenService
+  @Autowired
+  private ResponseLogger responseLogger
 
   @Override
   void execute(Chain chain) throws Exception {
@@ -43,7 +47,10 @@ class TokenHandler implements Action<Chain> {
     observe(formPromise).flatMap { params ->
       authTokenService.checkToken readCheckTokenRequest(params, ctx.request.headers)
     } subscribe ({
-        res -> ctx.render json(new CheckTokenDTO(res))
+        res ->
+          def response = new CheckTokenDTO(res)
+          responseLogger.logResponse response
+          ctx.render json(response)
       }, { /*on error*/
         throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable)
       }
@@ -59,7 +66,10 @@ class TokenHandler implements Action<Chain> {
       }, { TokenRequest req, TokenResponse resp ->
         ImmutablePair.of(req, resp)
       }) subscribe ({
-        reqResp -> ctx.render json(new TokenDTO(reqResp.right, reqResp.left.responseTypes))
+        reqResp ->
+          def response = new TokenDTO(reqResp.right, reqResp.left.responseTypes)
+          responseLogger.logResponse response
+          ctx.render json(response)
       }, { /*on error*/
         throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable)
       }

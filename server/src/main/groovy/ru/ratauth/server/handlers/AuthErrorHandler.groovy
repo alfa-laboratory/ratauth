@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import io.netty.handler.codec.http.HttpResponseStatus
+import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import ratpack.error.ServerErrorHandler
@@ -18,6 +19,7 @@ import ru.ratauth.exception.RegistrationException
 import ru.ratauth.server.handlers.readers.ReadRequestException
 import ru.ratauth.utils.ExceptionUtils
 
+import static ru.ratauth.server.services.log.LogFields.ERROR_MESSAGE
 /**
  * @author mgorelikov
  * @since 19/11/15
@@ -53,16 +55,18 @@ class AuthErrorHandler implements ServerErrorHandler {
   }
 
   private static void sendError(Context context, int code, Throwable throwable) {
+    MDC.put(ERROR_MESSAGE.val(), throwable.message)
     context.response.status(code)
     context.response.send(String.valueOf(throwable.message))
     log.error("Auth error: ", throwable)
   }
 
   private void sendIdentifiedError(Context context, int code, IdentifiedException exception) {
+    MDC.put(ERROR_MESSAGE.val(), exception.message)
     context.response.status(code)
     context.response.contentType(MediaType.APPLICATION_JSON)
     def dto = jacksonObjectMapper.writeValueAsString(new ExceptionDTO(exception))
-    log.error(dto, exception)
+    log.error(dto, exception as Throwable)
     context.response.send(MediaType.APPLICATION_JSON, dto)
   }
 

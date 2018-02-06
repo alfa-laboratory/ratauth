@@ -10,8 +10,13 @@ public enum LogFields {
   USER_ID,
   ACTION,
   REQUEST_ID,
+  MONGO_SESSION_ID,
+  LONG_TERM,
+  RESPONSE_PAYLOAD,
+  DEVICE_ID,
   SESSION_ID,
-  LONG_TERM;
+  TRACE_ID,
+  ERROR_MESSAGE;
 
   public String val() {
     return name().toLowerCase();

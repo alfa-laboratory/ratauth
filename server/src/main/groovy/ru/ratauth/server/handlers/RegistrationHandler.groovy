@@ -15,10 +15,10 @@ import ru.ratauth.interaction.TokenResponse
 import ru.ratauth.server.handlers.dto.TokenDTO
 import ru.ratauth.server.services.AuthClientService
 import ru.ratauth.server.services.RegistrationService
+import ru.ratauth.server.services.log.ResponseLogger
 import rx.Subscription
 
 import static ratpack.jackson.Jackson.json
-import static ratpack.rx.RxRatpack.bindExec
 import static ratpack.rx.RxRatpack.observe
 import static ru.ratauth.server.handlers.readers.AuthzRequestReader.readClientId
 import static ru.ratauth.server.handlers.readers.RegistrationRequestReader.readRegistrationRequest
@@ -34,6 +34,8 @@ class RegistrationHandler implements Action<Chain> {
   private RegistrationService registrationService
   @Autowired
   private AuthClientService authClientService
+  @Autowired
+  private ResponseLogger responseLogger
 
   @Override
   void execute(Chain chain) throws Exception {
@@ -73,7 +75,11 @@ class RegistrationHandler implements Action<Chain> {
     }, { RegistrationRequest req, TokenResponse resp ->
       ImmutablePair.of(req, resp)
     }) subscribe({
-          reqRes -> ctx.render json(new TokenDTO(reqRes.right, reqRes.left.responseTypes))
+          reqRes ->
+            def response = new TokenDTO(reqRes.right, reqRes.left.responseTypes)
+            responseLogger.logResponse response
+            def jsonRender = json(response)
+            ctx.render jsonRender
         }, {  /*on error*/
           throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable)
         }

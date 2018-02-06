@@ -7,6 +7,7 @@ import ratpack.error.ServerErrorHandler
 import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
+import ru.ratauth.server.services.log.ResponseLogger
 import ru.ratauth.services.OpenIdConnectDiscoveryService
 import rx.functions.Action1
 
@@ -23,6 +24,8 @@ class WellKnownHandler implements Action<Chain> {
 
     @Autowired
     private OpenIdConnectDiscoveryService discoveryService
+    @Autowired
+    private ResponseLogger responseLogger
 
     @Override
     void execute(Chain chain) throws Exception {
@@ -47,6 +50,7 @@ class WellKnownHandler implements Action<Chain> {
                             claims_supported                                : it.claimsSupported,
                         ])
             })
+            .doOnNext(responseLogger.&logResponse)
             .subscribe(ctx.&render, errorHandler(ctx))
         }
     }
