@@ -37,6 +37,7 @@ class AuthErrorHandler implements ServerErrorHandler {
 
   @Override
   void error(Context context, Throwable throwable) throws Exception {
+    MDC.put(ERROR_MESSAGE.val(), throwable.message)
     def exception = ExceptionUtils.getThrowable(throwable, BaseAuthServerException, MAX_EXCEPTION_DEPTH)
 
     if (exception instanceof ExpiredException) {
