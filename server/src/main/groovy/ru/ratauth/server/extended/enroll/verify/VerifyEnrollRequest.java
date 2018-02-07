@@ -9,10 +9,12 @@ import java.util.Set;
 @Data
 public class VerifyEnrollRequest {
     private String mfaToken;
-    private Map<String, String> data;
     private String clientId;
     private Set<String> scope;
     private AcrValues authContext;
     private AcrValues enroll;
     private String redirectURI;
+    private String state;
+
+    private Map<String, String> data;
 }

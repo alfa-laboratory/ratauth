@@ -17,6 +17,7 @@ import static ratpack.rx.RxRatpack.observe
 class VerifyEnrollHandler implements Action<Chain> {
 
     private static final String ACR_SPLITTER = ':'
+    private static final String STATE = 'state'
 
     @Autowired
     VerifyEnrollService enrollService
@@ -36,9 +37,11 @@ class VerifyEnrollHandler implements Action<Chain> {
         }
     }
 
+
     static VerifyEnrollRequest readVerifyEnrollRequest(RequestReader params) {
         return new VerifyEnrollRequest(
                 clientId:params.removeField("client_id", true),
+                state:params.removeField(STATE, false),
                 mfaToken:params.removeField("mfa_token", true),
                 redirectURI:params.removeField("redirect_uri", false),
                 scope:params.removeField("scope", true).split(' ').toList(),
@@ -50,7 +53,10 @@ class VerifyEnrollHandler implements Action<Chain> {
 
     private void incAuthLevel(Context ctx, Observable<VerifyEnrollRequest> requestObservable) {
         requestObservable
-                .flatMap({ request -> enrollService.incAuthLevel(request) })
+                .flatMap({ request ->
+                        enrollService.incAuthLevel(request)
+                                .map({ response -> response.putRedirectParameters(STATE, request.state); response })
+        })
                 .map({ response -> response.redirectURL })
                 .subscribe({ response -> ctx.redirect(302, response) }, errorHandler(ctx))
     }

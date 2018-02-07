@@ -152,6 +152,8 @@ class EnrollAPISpec extends BaseDocumentationSpec {
                                 .description('part of user\'s credentials'),
                         parameterWithName('scope')
                                 .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+                        parameterWithName('state')
+                                .description('State from RP'),
                         parameterWithName('acr_values')
                                 .description('Authentication Context Class Reference'),
                         parameterWithName('enroll')
@@ -165,6 +167,7 @@ class EnrollAPISpec extends BaseDocumentationSpec {
                 .formParam('mfa_token', PersistenceServiceStubConfiguration.MFA_TOKEN)
                 .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
                 .formParam('scope', 'rs.read')
+                .formParam('state', 'relyingpartystate')
                 .formParam('acr_values', 'username:sms')
                 .formParam('enroll', 'username')
         when:
@@ -176,8 +179,9 @@ class EnrollAPISpec extends BaseDocumentationSpec {
                 .then()
                 .statusCode(HttpStatus.FOUND.value())
                 .header(HttpHeaders.LOCATION, StringContains.containsString('mfa_token='))
+                .header(HttpHeaders.LOCATION, StringContains.containsString('state=relyingpartystate'))
                 .header(HttpHeaders.LOCATION, StringContains.containsString("acr_values=${encode('username:sms', 'UTF-8')}"))
-                .header(HttpHeaders.LOCATION, StringContains.containsString('http://localhost:8080/domain.mine/oidc/web/authorize/username?is_webview=true&session_token=session_token&scope=rs.read&acr_values=username%3Asms&mfa_token=mfa-token-test&client_id=mine'))
+                .header(HttpHeaders.LOCATION, StringContains.containsString('http://localhost:8080/domain.mine/oidc/web/authorize/username?is_webview=true&session_token=session_token&scope=rs.read&acr_values=username%3Asms&mfa_token=mfa-token-test&state=relyingpartystate&client_id=mine'))
     }
 
 
@@ -227,6 +231,7 @@ class EnrollAPISpec extends BaseDocumentationSpec {
                 .header(HttpHeaders.LOCATION, startsWith("https://domain.mine/login?"))
                 .header(HttpHeaders.LOCATION, StringContains.containsString("code=code"))
                 .header(HttpHeaders.LOCATION, StringContains.containsString("session_token=session_token"))
+                .header(HttpHeaders.LOCATION, StringContains.containsString('https://domain.mine/login?session_token=session_token&code=code&expires_in=86399'))
     }
 
 }

@@ -14,10 +14,13 @@ import ru.ratauth.server.secutiry.TokenProcessor;
 import ru.ratauth.server.services.AuthClientService;
 import ru.ratauth.server.services.AuthSessionService;
 import ru.ratauth.server.services.TokenCacheService;
+import ru.ratauth.server.utils.DateUtils;
 import ru.ratauth.server.utils.RedirectUtils;
 import rx.Observable;
 
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -45,7 +48,7 @@ public class VerifyEnrollService {
                     .orElseThrow(() -> new IllegalStateException("sessionID = " + session.getId() + ", relyingParty = " + relyingParty));
 
             String authCode = authEntry.getAuthCode();
-            long expiresIn = authEntry.getCodeExpiresIn().getTime();
+            long expiresIn = ChronoUnit.SECONDS.between(LocalDateTime.now(), DateUtils.toLocal(authEntry.getCodeExpiresIn()));
 
             return new SuccessResponse(createRedirectURI(relyingParty, request.getRedirectURI()), authCode, expiresIn);
         } else {

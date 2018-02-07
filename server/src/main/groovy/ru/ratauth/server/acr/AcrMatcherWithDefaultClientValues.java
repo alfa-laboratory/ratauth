@@ -23,9 +23,9 @@ public class AcrMatcherWithDefaultClientValues implements AcrMatcher {
             return Observable.just(request.getQueryParams().get("acr_values"))
                     .filter(Objects::nonNull)
                     .map(AcrValues::valueOf)
+                    .switchIfEmpty(fetchDefaultACR(request))
                     .map(AcrValues::getValues)
                     .map(acr -> acr.get(0))
-                    .switchIfEmpty(fetchDefaultACR(request))
                     .toBlocking()
                     .single();
 
@@ -34,10 +34,9 @@ public class AcrMatcherWithDefaultClientValues implements AcrMatcher {
         }
     }
 
-    private Observable<? extends String> fetchDefaultACR(Request request) {
+    private Observable<? extends AcrValues> fetchDefaultACR(Request request) {
         return clientService
                 .getRelyingParty(request.getQueryParams().get("client_id"))
-                .map(RelyingParty::getDefaultAcrValues)
-                .map(Object::toString);
+                .map(RelyingParty::getDefaultAcrValues);
     }
 }
