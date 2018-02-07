@@ -16,7 +16,6 @@ import ru.ratauth.server.services.AuthorizeService
 import ru.ratauth.server.utils.AuthorizeHandlerValidator
 import rx.Observable
 
-import static javaslang.control.Option.of
 import static ratpack.rx.RxRatpack.observe
 import static ru.ratauth.interaction.GrantType.AUTHENTICATION_TOKEN
 import static ru.ratauth.interaction.GrantType.SESSION_TOKEN
@@ -97,7 +96,7 @@ class AuthorizationHandlers implements Action<Chain> {
     }
 
     private String resolveAcr(Context context) {
-        of(context)
+        Optional.of(context)
                 .filter({ authorizeHandlerValidator.validate(it) })
                 .map({ it.request })
                 .map({ acrResolver.resolve(it) })

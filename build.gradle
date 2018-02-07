@@ -63,8 +63,6 @@ allprojects {
       dependency 'com.google.inject:guice:4.1.0'
       dependency 'org.codehaus.groovy:groovy-all:2.4.7'//for ratpack server config
       dependency 'com.auth0:java-jwt:3.2.0'
-      dependency 'io.javaslang:javaslang:2.0.6'
-
 
       //reactive
       dependency 'io.reactivex:rxjava:1.1.6'
@@ -191,7 +189,6 @@ subprojects {
     compileOnly 'org.slf4j:slf4j-api'
     compile 'org.codehaus.groovy:groovy-all'
     compile 'io.reactivex:rxjava'
-    compile 'io.javaslang:javaslang'
 
     //test
     testCompile 'org.springframework.boot:spring-boot-starter-test'
