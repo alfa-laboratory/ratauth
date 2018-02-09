@@ -91,8 +91,7 @@ class RegistrationHandler implements Action<Chain> {
     def pageURIObs = authClientService.getRegistrationPageURI(clientId, ctx.request.query)
     pageURIObs.bindExec()
     pageURIObs.subscribe {
-      res -> ctx.redirect(HttpResponseStatus.MOVED_PERMANENTLY.code(), res)
+      res -> ctx.redirect(HttpResponseStatus.NOT_FOUND.code(), res)
     }
   }
-
 }

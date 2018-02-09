@@ -79,7 +79,7 @@ class AuthorizationHandlers implements Action<Chain> {
                 .map({ url -> url.toString() })
                 .bindExec()
                 .subscribe {
-            res -> context.redirect(HttpResponseStatus.MOVED_PERMANENTLY.code(), res)
+            res -> context.redirect(HttpResponseStatus.NOT_FOUND.code(), res)
         }
     }
 
