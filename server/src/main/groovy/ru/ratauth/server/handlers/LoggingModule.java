@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ratpack.handling.HandlerDecorator;
 import ratpack.handling.RequestId;
+import ratpack.http.Headers;
 import ratpack.http.Request;
 import ratpack.logging.MDCInterceptor;
 
@@ -20,8 +21,7 @@ import static ru.ratauth.utils.StringUtils.isBlank;
  */
 @Component
 public class LoggingModule extends AbstractModule {
-    private final static String ALTERNATIVE_DEVICE_ID_1 = "deviceId";
-    private final static String ALTERNATIVE_DEVICE_ID_2 = "DEVICE-ID";
+    private final static String ALTERNATIVE_DEVICE_ID = "DEVICE-ID";
 
     @Value("${spring.application.name}")
     private String applicationName;
@@ -35,17 +35,18 @@ public class LoggingModule extends AbstractModule {
             MDC.put(TRACE_ID.val(), requestId);
             Request request = ctx.getRequest();
             String deviceId = extractField(request.getQueryParams(), DEVICE_ID.val(), false);
+            Headers headers = request.getHeaders();
             if(isBlank(deviceId)) {
-                deviceId = request.getHeaders().get(ALTERNATIVE_DEVICE_ID_1);
+                deviceId = headers.get(DEVICE_ID.val());
             }
             if(isBlank(deviceId)) {
-                deviceId = request.getHeaders().get(ALTERNATIVE_DEVICE_ID_2);
+                deviceId = headers.get(ALTERNATIVE_DEVICE_ID);
             }
             if (!isBlank(deviceId)) {
                 MDC.put(DEVICE_ID.val(), deviceId);
             }
             MDC.put(APPLICATION.val(), applicationName);
-            String sessionId = request.getHeaders().get(SESSION_ID.val());
+            String sessionId = headers.get(SESSION_ID.val());
             if(!isBlank(sessionId)) {
                 MDC.put(SESSION_ID.val(), sessionId);
             }
