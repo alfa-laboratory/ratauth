@@ -80,7 +80,7 @@ class AuthorizationHandlers implements Action<Chain> {
                 .map({ url -> url.toString() })
                 .bindExec()
                 .subscribe {
-            res -> context.redirect(HttpResponseStatus.NOT_FOUND.code(), res)
+            res -> context.redirect(HttpResponseStatus.FOUND.code(), res)
         }
     }
 
