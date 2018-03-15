@@ -53,7 +53,7 @@ dependencies {
   testCompile 'io.rest-assured:rest-assured'
 
 
-  dockerJava 'com.github.docker-java:docker-java:3.0.6'
+  dockerJava 'com.github.docker-java:docker-java:3.0.14'
   dockerJava 'cglib:cglib:3.2.0'
 }
 
