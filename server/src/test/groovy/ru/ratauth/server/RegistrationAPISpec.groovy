@@ -170,7 +170,7 @@ class RegistrationAPISpec extends BaseDocumentationSpec {
     then:
     result
         .then()
-        .statusCode(HttpStatus.MOVED_PERMANENTLY.value())
+        .statusCode(HttpStatus.FOUND.value())
         .header(HttpHeaders.LOCATION, StringContains.containsString('scope=rs.read'))
         .header(HttpHeaders.LOCATION, StringContains.containsString('client_id=' + PersistenceServiceStubConfiguration.CLIENT_NAME))
         .header(HttpHeaders.LOCATION, StringContains.containsString('is_webview='))// according to test stub

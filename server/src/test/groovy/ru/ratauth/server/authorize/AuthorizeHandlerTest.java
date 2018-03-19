@@ -57,7 +57,7 @@ public class AuthorizeHandlerTest {
                 .header("Content-Type", "text/html")
                 .get("/authorize")
                 .then()
-                .statusCode(301)
+                .statusCode(302)
                 .extract()
                 .response()
                 .getHeader("Location");
