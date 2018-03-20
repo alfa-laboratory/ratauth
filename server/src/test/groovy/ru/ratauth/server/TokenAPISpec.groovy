@@ -34,6 +34,62 @@ class TokenAPISpec extends BaseDocumentationSpec {
   @Autowired
   ObjectMapper objectMapper
 
+  def 'refresh token (old scheme)'() {
+    given:
+    def setup = given(this.documentationSpec)
+            .accept(ContentType.URLENC)
+            .filter(document('token_refresh_succeed',
+            preprocessResponse(prettyPrint()),
+            requestParameters(
+                    parameterWithName('response_type')
+                            .description('Response type, this case it must be TOKEN'),
+                    parameterWithName('grant_type')
+                            .description('grant type for operation'),
+                    parameterWithName('refresh_token')
+                            .description('refresh token')
+            ),
+            requestHeaders(
+                    headerWithName(HttpHeaders.AUTHORIZATION)
+                            .description('Authorization header for relying party basic authorization')
+            ),
+            responseFields(
+                    fieldWithPath('access_token')
+                            .description('Access token')
+                            .type(JsonFieldType.STRING),
+                    fieldWithPath('refresh_token')
+                            .description('token that can be used to refresh expired access token')
+                            .type(JsonFieldType.STRING),
+                    fieldWithPath('token_type')
+                            .description('token type according to OpenID specification')
+                            .type(JsonFieldType.STRING),
+                    fieldWithPath('id_token')
+                            .description('JWT token')
+                            .type(JsonFieldType.STRING),
+                    fieldWithPath('expires_in')
+                            .description('expiration date of access token')
+                            .type(JsonFieldType.NUMBER),
+                    fieldWithPath('client_id')
+                            .description('identifier of relying party')
+                            .type(JsonFieldType.STRING),
+            )
+    ))
+            .given()
+            .formParam('response_type', AuthzResponseType.TOKEN.name())
+            .formParam('grant_type', GrantType.REFRESH_TOKEN.name())
+            .formParam('refresh_token', PersistenceServiceStubConfiguration.REFRESH_TOKEN_OLD_SCHEME)
+            .header(IntegrationSpecUtil.createAuthHeaders(PersistenceServiceStubConfiguration.CLIENT_NAME,
+            PersistenceServiceStubConfiguration.PASSWORD))
+    when:
+    def result = setup
+            .when()
+            .post("token")
+    then:
+    result
+            .then()
+            .statusCode(HttpStatus.OK.value())
+            .body("access_token", notNullValue())
+  }
+
   def 'refresh token'() {
     given:
     def setup = given(this.documentationSpec)

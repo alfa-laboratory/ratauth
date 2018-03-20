@@ -131,7 +131,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
                 .expiresIn(token.getExpiresIn().getTime())
                 .tokenType(TokenType.BEARER.toString())
                 .idToken(idToken)
-                .refreshToken(authEntry.getRefreshToken())
+                .refreshToken(token.getRefreshToken())
                 .clientId(authEntry.getRelyingParty())
                 .sessionToken(sessionToken)
                 .build();
