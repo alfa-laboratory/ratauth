@@ -50,7 +50,12 @@ public class OpenIdSessionService implements AuthSessionService {
                                              String redirectUrl) {
         final LocalDateTime now = LocalDateTime.now();
         final LocalDateTime tokenExpires = now.plus(relyingParty.getTokenTTL(), ChronoUnit.SECONDS);
+        final LocalDateTime refreshTokenExpires = now.plus(relyingParty.getRefreshTokenTTL(), ChronoUnit.SECONDS);
+
         final Token token = Token.builder()
+                .refreshToken(codeGenerator.refreshToken())
+                .refreshTokenExpiresIn(DateUtils.fromLocal(refreshTokenExpires))
+                .refreshCreated(DateUtils.fromLocal(now))
                 .token(codeGenerator.accessToken())
                 .expiresIn(DateUtils.fromLocal(tokenExpires))
                 .created(DateUtils.fromLocal(now))
@@ -102,7 +107,11 @@ public class OpenIdSessionService implements AuthSessionService {
     public Observable<Boolean> addToken(TokenRequest oauthRequest, Session session, RelyingParty relyingParty) {
         final LocalDateTime now = LocalDateTime.now();
         final LocalDateTime tokenExpires = now.plus(relyingParty.getTokenTTL(), ChronoUnit.SECONDS);
+        final LocalDateTime refreshTokenExpires = now.plus(relyingParty.getRefreshTokenTTL(), ChronoUnit.SECONDS);
         final Token token = Token.builder()
+                .refreshToken(codeGenerator.refreshToken())
+                .refreshTokenExpiresIn(DateUtils.fromLocal(refreshTokenExpires))
+                .refreshCreated(DateUtils.fromLocal(now))
                 .token(codeGenerator.accessToken())
                 .expiresIn(DateUtils.fromLocal(tokenExpires))
                 .created(DateUtils.fromLocal(now))

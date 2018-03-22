@@ -83,7 +83,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
             if (tokenCache != null)
                 resp.setIdToken(tokenCache.getIdToken());
             resp.setTokenType(TokenType.BEARER);
-            resp.setRefreshToken(entry.getRefreshToken());
+            resp.setRefreshToken(token.getRefreshToken());
             resp.setExpiresIn(token.getExpiresIn().getTime());
         } else {
             generateAuthCode(relyingParty, session, authzRequest, targetRedirectURI, entry, resp);
