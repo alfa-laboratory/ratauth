@@ -24,7 +24,8 @@ class PersistenceServiceStubConfiguration {
   public static final String SALT = 'JBn7SnEzMy0MXdNsh5GVvktSGuRs0+BNVZ47kmm3TDM='
   public static final String TOKEN = '1234'
   public static final String MFA_TOKEN = 'mfa-token-test'
-  public static final String REFRESH_TOKEN = '12345'
+  public static final String REFRESH_TOKEN_OLD_SCHEME = '12345'
+  public static final String REFRESH_TOKEN = '123456'
   public static final String CODE = '123'
   public static final String CODE_EXPIRED = '1111'
   public static final String ID_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vcmF0YXV0aC5ydSIsImlhdCI6MTQ1Nzg1NzAzOCwiZXhwIjoxNDg5MzkyODcxLCJhdWQiOiJzb21lLWFwcCIsInN1YiI6InVzZXJfaWQiLCJqdGkiOiJiZDYzNjkyOC03MTk2LTM5YTctODlmNi03OGY5NDY3NjU0ZWIiLCJycF9iYXNlX2FkZHJlc3MiOlsiaHR0cDovL3JhdGF1dGgucnUiLCJodHRwOi8vcmF0YXV0aC5ydSJdLCJ1c2VyX2lkIjoidXNlcl9pZCJ9.rqxqXV9X0kdjmyWxuVJkYU8sNC5sW9dC9NUqT-CodEM'
@@ -151,7 +152,7 @@ class PersistenceServiceStubConfiguration {
                       new AuthEntry(authCode: 'code',
                           relyingParty: CLIENT_NAME,
                           scopes: ['rs.read'] as Set,
-                          refreshToken: REFRESH_TOKEN
+                          refreshToken: REFRESH_TOKEN_OLD_SCHEME
                       )] as Set)
           )
         else
@@ -161,7 +162,7 @@ class PersistenceServiceStubConfiguration {
 
       @Override
       Observable<Session> getByValidRefreshToken(String token, Date now) {
-        if (token == REFRESH_TOKEN)
+        if (token in [REFRESH_TOKEN, REFRESH_TOKEN_OLD_SCHEME])
           return Observable.just(
               new Session(
                   id: 'id-2',
@@ -175,8 +176,10 @@ class PersistenceServiceStubConfiguration {
                       new AuthEntry(authCode: 'code',
                           relyingParty: CLIENT_NAME,
                           scopes: ['rs.read'] as Set,
-                          refreshToken: REFRESH_TOKEN,
+                          refreshToken: REFRESH_TOKEN_OLD_SCHEME,
                           tokens: [new Token(token: TOKEN,
+                              refreshToken: REFRESH_TOKEN,
+                              refreshTokenExpiresIn: DateUtils.fromLocal(TOMORROW),
                               expiresIn: DateUtils.fromLocal(TOMORROW),
                               created: new Date())] as Set
                       )] as Set)
@@ -199,7 +202,7 @@ class PersistenceServiceStubConfiguration {
                 new AuthEntry(authCode: 'code',
                   relyingParty: CLIENT_NAME,
                   scopes: ['rs.read'] as Set,
-                  refreshToken: REFRESH_TOKEN
+                  refreshToken: REFRESH_TOKEN_OLD_SCHEME
                 )] as Set)
           )
         else
@@ -227,8 +230,10 @@ class PersistenceServiceStubConfiguration {
                       new AuthEntry(authCode: 'code',
                           relyingParty: CLIENT_NAME,
                           scopes: ['rs.read'] as Set,
-                          refreshToken: REFRESH_TOKEN,
+                          refreshToken: REFRESH_TOKEN_OLD_SCHEME,
                           tokens: [new Token(token: TOKEN,
+                              refreshToken: REFRESH_TOKEN,
+                              refreshTokenExpiresIn: DateUtils.fromLocal(TOMORROW),
                               expiresIn: DateUtils.fromLocal(TOMORROW),
                               created: new Date())] as Set
                       )] as Set)
@@ -254,8 +259,10 @@ class PersistenceServiceStubConfiguration {
                                           authCode: 'code',
                                           relyingParty: CLIENT_NAME,
                                           scopes: ['rs.read'] as Set,
-                                          refreshToken: REFRESH_TOKEN,
+                                          refreshToken: REFRESH_TOKEN_OLD_SCHEME,
                                           tokens: [new Token(token: TOKEN,
+                                                  refreshToken: REFRESH_TOKEN,
+                                                  refreshTokenExpiresIn: DateUtils.fromLocal(TOMORROW),
                                                   expiresIn: DateUtils.fromLocal(TOMORROW),
                                                   created: new Date())] as Set
                                   )] as Set)
