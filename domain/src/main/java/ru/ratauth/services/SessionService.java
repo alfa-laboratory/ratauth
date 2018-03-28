@@ -110,6 +110,14 @@ public interface SessionService {
     Observable<Boolean> invalidateByRefreshToken(String relyingParty, String refreshToken);
 
     /**
+     * Invalidates session by refresh token from current moment
+     *
+     * @param refreshToken invalidated session search refresh token
+     * @return true when session was successfully invalidated
+     */
+    Observable<Boolean> invalidateByRefreshToken(String refreshToken);
+
+    /**
      * Updates session lastCheck date
      *
      * @param sessionId session identifier
