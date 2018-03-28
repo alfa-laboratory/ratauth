@@ -6,5 +6,6 @@ package ru.ratauth.entities;
  */
 public enum Status {
   ACTIVE,
-  BLOCKED
+  BLOCKED,
+  LOGGED_OUT
 }

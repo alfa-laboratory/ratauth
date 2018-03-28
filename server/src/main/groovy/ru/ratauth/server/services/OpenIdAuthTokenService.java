@@ -118,7 +118,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
             log.error("Invalid acr values: " + session.getReceivedAcrValues());
             throw new AuthorizationException(AuthorizationException.ID.INVALID_ACR_VALUES);
         }
-        if (Status.BLOCKED == session.getStatus())
+        if (Status.BLOCKED == session.getStatus() || Status.LOGGED_OUT == session.getStatus())
             throw new AuthorizationException(AuthorizationException.ID.SESSION_BLOCKED);
         if (session.getExpiresIn().before(new Date()))
             throw new ExpiredException(ExpiredException.ID.SESSION_EXPIRED);
