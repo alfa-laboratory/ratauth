@@ -72,7 +72,7 @@ public class BackgroundSessionStatusChecker implements SessionStatusChecker {
     //if not yet time
     if(session.getLastCheck() != null
         && DateUtils.toLocal(session.getLastCheck()).plusSeconds(checkInterval).isAfter(LocalDateTime.now())
-        || Status.BLOCKED == session.getStatus()) {
+        || Status.BLOCKED == session.getStatus() || Status.LOGGED_OUT == session.getStatus()) {
       return;
     }
 
