@@ -13,6 +13,7 @@ import ru.ratauth.entities.AuthClient
 import ru.ratauth.server.handlers.readers.RequestUtil
 import ru.ratauth.server.services.AuthClientService
 import ru.ratauth.services.SessionService
+import rx.functions.Func1
 import rx.functions.Func2
 
 import static ratpack.rx.RxRatpack.observe
@@ -31,13 +32,12 @@ class LogoutHandler implements Action<Chain> {
             def auth = RequestUtil.extractAuth(ctx.request.headers)
             observe(ctx.parse(Form))
                 .flatMap( { Form request ->
-                    return zip(
-                            clientService.loadAndAuthClient(auth[0], auth[1], true),
-                            sessionService.invalidateByRefreshToken(auth[0], request.refresh_token as String),
-                            { AuthClient client, Boolean bool ->
+                    return sessionService.invalidateByRefreshToken(request.refresh_token as String)
+                            .map(
+                            { Boolean bool ->
                                 log.debug(/Logout event for session with refresh_token "${request.refresh_token}": $bool/)
                                 return bool
-                            } as Func2)
+                            } as Func1)
                 })
                 .subscribe(
                     { Boolean res -> ctx.response.status HttpStatus.OK.value() send(); res },
