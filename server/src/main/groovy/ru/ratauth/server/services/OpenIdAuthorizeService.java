@@ -8,15 +8,7 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import ru.ratauth.entities.AcrValues;
-import ru.ratauth.entities.AuthClient;
-import ru.ratauth.entities.AuthEntry;
-import ru.ratauth.entities.IdentityProvider;
-import ru.ratauth.entities.RelyingParty;
-import ru.ratauth.entities.Session;
-import ru.ratauth.entities.Token;
-import ru.ratauth.entities.TokenCache;
-import ru.ratauth.entities.UserInfo;
+import ru.ratauth.entities.*;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.interaction.AuthzRequest;
 import ru.ratauth.interaction.AuthzResponse;
@@ -52,6 +44,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     private final AuthClientService clientService;
     private final TokenCacheService tokenCacheService;
     private final AuthSessionService sessionService;
+    private final DeviceService deviceService;
     private final IdentityProviderResolver identityProviderResolver;
 
     @SneakyThrows
@@ -160,10 +153,11 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                                 .map(authRes -> new ImmutableTriple<>(rp, authRes, request.getAcrValues())))
                 .flatMap(rpAuth ->
                         createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
-                                .map(session -> {
-                                    sessionService.updateAcrValues(session).toBlocking().single();
-                                    return session;
-                                })
+                                .flatMap(session -> Observable.zip(
+                                        deviceService.resolveDeviceInfo(new DeviceInfo(session.getUserId(), request.getDeviceId())),
+                                        sessionService.updateAcrValues(session),
+                                        ((deviceInfo, aBoolean) -> session)
+                                ))
                                 .flatMap(session -> createIdToken(rpAuth.left, session, rpAuth.right)
                                         .map(idToken -> buildResponse(rpAuth.left, session, rpAuth.middle, idToken, request))))
                 .doOnCompleted(() -> log.info("Authorization succeed"));

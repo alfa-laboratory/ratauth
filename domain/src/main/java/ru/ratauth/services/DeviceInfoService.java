@@ -1,9 +1,10 @@
 package ru.ratauth.services;
 
 import ru.ratauth.entities.DeviceInfo;
+import rx.Observable;
 
 public interface DeviceInfoService {
 
-    void create(DeviceInfo deviceInfo);
+    Observable<DeviceInfo> create(DeviceInfo deviceInfo);
 
 }

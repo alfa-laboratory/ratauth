@@ -7,6 +7,7 @@ import ru.ratauth.exception.ExpiredException
 import ru.ratauth.server.utils.DateUtils
 import ru.ratauth.server.utils.SecurityUtils
 import ru.ratauth.services.ClientService
+import ru.ratauth.services.DeviceInfoService
 import ru.ratauth.services.SessionService
 import ru.ratauth.services.TokenCacheService
 import rx.Observable
@@ -318,6 +319,17 @@ class PersistenceServiceStubConfiguration {
       @Override
       Observable<Boolean> updateUserInfo(String sessionId, String userInfo) {
         return Observable.just(true)
+      }
+    }
+  }
+
+  @Bean
+  @Primary
+  DeviceInfoService deviceInfoService() {
+    return new DeviceInfoService() {
+      @Override
+      Observable<DeviceInfo> create(DeviceInfo deviceInfo) {
+        return Observable.just(deviceInfo)
       }
     }
   }

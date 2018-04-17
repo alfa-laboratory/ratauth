@@ -20,6 +20,10 @@ public class AuthzRequest {
   private AuthzResponseType responseType;
   private @Singular Set<String> scopes;
   private AcrValues acrValues;
+
+  private String deviceId;
+  private String fingerprint;
+
   private String enroll;
   private String clientId;
   private String clientSecret;

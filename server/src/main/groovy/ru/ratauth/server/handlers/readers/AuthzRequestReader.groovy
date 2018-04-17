@@ -46,6 +46,8 @@ class AuthzRequestReader {
         def builder = AuthzRequest.builder()
                 .responseType(responseType)
                 .redirectURI(extractField(params, REDIRECT_URI, false))
+                .deviceId(extractField(params, "device_id", false))
+                .fingerprint(extractField(params, "fingerprint", false))
 
         if (GrantType.AUTHENTICATION_TOKEN == grantType || GrantType.SESSION_TOKEN == grantType) {
             if (responseType == AuthzResponseType.TOKEN) {
