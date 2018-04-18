@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DeviceInfo {
+    private String id;
     private String userId;
     private String deviceId;
 }
