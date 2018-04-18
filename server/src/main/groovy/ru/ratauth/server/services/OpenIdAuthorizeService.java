@@ -154,7 +154,10 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .flatMap(rpAuth ->
                         createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
                                 .flatMap(session -> Observable.zip(
-                                        deviceService.resolveDeviceInfo(new DeviceInfo(session.getUserId(), request.getDeviceId())),
+                                        deviceService.resolveDeviceInfo(DeviceInfo.builder()
+                                                .userId(session.getUserId())
+                                                .deviceId(request.getDeviceId())
+                                                .build()),
                                         sessionService.updateAcrValues(session),
                                         ((deviceInfo, aBoolean) -> session)
                                 ))
