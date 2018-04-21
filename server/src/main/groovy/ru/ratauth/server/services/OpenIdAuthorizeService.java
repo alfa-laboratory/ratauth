@@ -10,10 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import ru.ratauth.entities.*;
 import ru.ratauth.exception.AuthorizationException;
-import ru.ratauth.interaction.AuthzRequest;
-import ru.ratauth.interaction.AuthzResponse;
-import ru.ratauth.interaction.AuthzResponseType;
-import ru.ratauth.interaction.GrantType;
+import ru.ratauth.interaction.*;
 import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
@@ -154,16 +151,29 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .flatMap(rpAuth ->
                         createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
                                 .flatMap(session -> Observable.zip(
-                                        deviceService.resolveDeviceInfo(DeviceInfo.builder()
-                                                .userId(session.getUserId())
-                                                .deviceId(request.getDeviceId())
-                                                .build()),
+                                        deviceService.resolveDeviceInfo(createDeviceInfoFromRequest(session, request)),
                                         sessionService.updateAcrValues(session),
                                         ((deviceInfo, aBoolean) -> session)
                                 ))
                                 .flatMap(session -> createIdToken(rpAuth.left, session, rpAuth.right)
                                         .map(idToken -> buildResponse(rpAuth.left, session, rpAuth.middle, idToken, request))))
                 .doOnCompleted(() -> log.info("Authorization succeed"));
+    }
+
+    private DeviceInfo createDeviceInfoFromRequest(Session session, AuthzRequest request) {
+        return DeviceInfo.builder()
+                .userId(session.getUserId())
+                .deviceAppVersion(request.getDeviceAppVersion())
+                .deviceId(request.getDeviceId())
+                .deviceModel(request.getDeviceModel())
+                .deviceGeo(request.getDeviceGeo())
+                .deviceCountryCode(request.getDeviceCountryCode())
+                .deviceCity(request.getDeviceCity())
+                .deviceName(request.getDeviceName())
+                .deviceOSVersion(request.getDeviceOSVersion())
+                .deviceBootTime(request.getDeviceBootTime())
+                .deviceTimezone(request.getDeviceTimezone())
+                .build();
     }
 
     //TODO check token relation

@@ -21,8 +21,16 @@ public class AuthzRequest {
   private @Singular Set<String> scopes;
   private AcrValues acrValues;
 
+  private String deviceAppVersion;
   private String deviceId;
-  private String fingerprint;
+  private String deviceModel;
+  private String deviceGeo;
+  private String deviceCountryCode;
+  private String deviceCity;
+  private String deviceName;
+  private String deviceOSVersion;
+  private String deviceBootTime;
+  private String deviceTimezone;
 
   private String enroll;
   private String clientId;

@@ -13,5 +13,15 @@ public class DeviceInfo {
 
     private String id;
     private String userId;
+
+    private String deviceAppVersion;
     private String deviceId;
+    private String deviceModel;
+    private String deviceGeo;
+    private String deviceCountryCode;
+    private String deviceCity;
+    private String deviceName;
+    private String deviceOSVersion;
+    private String deviceBootTime;
+    private String deviceTimezone;
 }
