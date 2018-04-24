@@ -173,6 +173,8 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .deviceOSVersion(request.getDeviceOSVersion())
                 .deviceBootTime(request.getDeviceBootTime())
                 .deviceTimezone(request.getDeviceTimezone())
+                .deviceIp(request.getDeviceIp())
+                .deviceUserAgent(request.getDeviceUserAgent())
                 .build();
     }
 

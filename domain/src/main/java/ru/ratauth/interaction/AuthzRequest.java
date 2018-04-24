@@ -32,6 +32,9 @@ public class AuthzRequest {
   private String deviceBootTime;
   private String deviceTimezone;
 
+  private String deviceIp;
+  private String deviceUserAgent;
+
   private String enroll;
   private String clientId;
   private String clientSecret;

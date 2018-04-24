@@ -24,4 +24,8 @@ public class DeviceInfo {
     private String deviceOSVersion;
     private String deviceBootTime;
     private String deviceTimezone;
+
+    private String deviceIp;
+    private String deviceUserAgent;
+
 }
