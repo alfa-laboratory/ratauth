@@ -328,7 +328,7 @@ class PersistenceServiceStubConfiguration {
   DeviceInfoService deviceInfoService() {
     return new DeviceInfoService() {
       @Override
-      Observable<DeviceInfo> create(DeviceInfo deviceInfo) {
+      Observable<DeviceInfo> create(String clientId, DeviceInfo deviceInfo) {
         return Observable.just(deviceInfo)
       }
     }
