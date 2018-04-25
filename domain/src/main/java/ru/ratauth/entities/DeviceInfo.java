@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -28,4 +30,5 @@ public class DeviceInfo {
     private String deviceIp;
     private String deviceUserAgent;
 
+    private Date creationDate;
 }
