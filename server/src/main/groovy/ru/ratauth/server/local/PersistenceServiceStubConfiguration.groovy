@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import ru.ratauth.entities.*
 import ru.ratauth.exception.ExpiredException
+import ru.ratauth.server.services.DeviceInfoEventService
 import ru.ratauth.server.utils.DateUtils
 import ru.ratauth.server.utils.SecurityUtils
 import ru.ratauth.services.ClientService
@@ -330,6 +331,22 @@ class PersistenceServiceStubConfiguration {
       @Override
       Observable<DeviceInfo> create(String clientId, String enroll, DeviceInfo deviceInfo) {
         return Observable.just(deviceInfo)
+      }
+
+      @Override
+      Observable<List<DeviceInfo>> findByUserId(String userId) {
+        return []
+      }
+    }
+  }
+
+  @Bean
+  @Primary
+  DeviceInfoEventService deviceInfoEventService() {
+    return new DeviceInfoEventService() {
+      @Override
+      Observable<DeviceInfo> sendChangeDeviceInfoEvent(String clientId, String enroll, DeviceInfo oldDeviceInfo, DeviceInfo deviceInfo) {
+        return deviceInfo
       }
     }
   }
