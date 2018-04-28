@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import ru.ratauth.entities.*
 import ru.ratauth.exception.ExpiredException
-import ru.ratauth.server.services.DeviceInfoEventService
+import ru.ratauth.services.DeviceInfoEventService
 import ru.ratauth.server.utils.DateUtils
 import ru.ratauth.server.utils.SecurityUtils
 import ru.ratauth.services.ClientService

@@ -1,4 +1,4 @@
-package ru.ratauth.server.services;
+package ru.ratauth.services;
 
 import ru.ratauth.entities.DeviceInfo;
 import rx.Observable;

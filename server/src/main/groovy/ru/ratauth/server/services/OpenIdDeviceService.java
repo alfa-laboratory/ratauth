@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.ratauth.entities.DeviceInfo;
+import ru.ratauth.services.DeviceInfoEventService;
 import ru.ratauth.services.DeviceInfoService;
 import rx.Observable;
 
