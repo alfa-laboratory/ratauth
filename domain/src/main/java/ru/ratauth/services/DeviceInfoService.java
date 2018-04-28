@@ -5,6 +5,6 @@ import rx.Observable;
 
 public interface DeviceInfoService {
 
-    Observable<DeviceInfo> create(String clientId, DeviceInfo deviceInfo);
+    Observable<DeviceInfo> create(String clientId, String enroll, DeviceInfo deviceInfo);
 
 }

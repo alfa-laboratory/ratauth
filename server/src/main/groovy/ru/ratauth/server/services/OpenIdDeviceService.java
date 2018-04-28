@@ -16,7 +16,7 @@ public class OpenIdDeviceService implements DeviceService {
 
     @Override
     public Observable<DeviceInfo> resolveDeviceInfo(String clientId, String enroll, DeviceInfo deviceInfo) {
-        return deviceInfoService.create(clientId, deviceInfo);
+        return deviceInfoService.create(clientId, enroll, deviceInfo);
     }
 
 }
