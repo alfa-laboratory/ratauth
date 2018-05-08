@@ -27,31 +27,35 @@ public class OpenIdDeviceService implements DeviceService {
     @Override
     public Observable<DeviceInfo> resolveDeviceInfo(String clientId, String enroll, DeviceInfo deviceInfo) {
 
-        deviceInfoService.findByUserId(deviceInfo.getUserId())
-                .map(oldDevices -> {
+        return Observable.zip(
+                deviceInfoService.create(clientId, enroll, deviceInfo),
+                deviceInfoService
+                        .findByUserId(deviceInfo.getUserId())
+                        .map(oldDevices -> {
+                            sendChangeDeviceInfoEvent(oldDevices, clientId, enroll, deviceInfo);
+                            return oldDevices;
+                        }),
+                (create, change) -> create
+        );
 
-                    if (oldDevices.stream().noneMatch(filterDevices(deviceInfo))) {
-
-                        try {
-                            deviceInfoEventService.sendChangeDeviceInfoEvent(
-                                    clientId,
-                                    enroll,
-                                    getLastDevice(oldDevices).orElseGet(DeviceInfo::new),
-                                    deviceInfo
-                            );
-                        } catch (Exception e) {
-                            log.error("Can't send event message", e);
-                        }
-                    }
-                    return deviceInfo;
-                });
-
-        return deviceInfoService.create(clientId, enroll, deviceInfo);
     }
 
     private Optional<DeviceInfo> getLastDevice(List<DeviceInfo> oldDevices) {
         return oldDevices.stream()
                 .max(Comparator.comparing(DeviceInfo::getCreationDate));
+    }
+
+    private void sendChangeDeviceInfoEvent(List<DeviceInfo> devices, String clientId, String enroll, DeviceInfo deviceInfo) {
+        try {
+            deviceInfoEventService.sendChangeDeviceInfoEvent(
+                    clientId,
+                    enroll,
+                    getLastDevice(devices).orElseGet(DeviceInfo::new),
+                    deviceInfo
+            ).toBlocking().single();
+        } catch (Exception e) {
+            log.error("Can't send event message", e);
+        }
     }
 
     private Predicate<? super DeviceInfo> filterDevices(DeviceInfo newDevice) {

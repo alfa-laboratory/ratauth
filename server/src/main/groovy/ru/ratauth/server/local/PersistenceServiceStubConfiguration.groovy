@@ -1,5 +1,6 @@
 package ru.ratauth.server.local
 
+import groovy.transform.CompileStatic
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import ru.ratauth.entities.*
@@ -18,6 +19,7 @@ import java.time.LocalDateTime
  * @author mgorelikov
  * @since 25/02/16
  */
+@CompileStatic
 class PersistenceServiceStubConfiguration {
   public static final String CLIENT_SECRET = 'HdC4t2Wpjn/obYj9JHLVwmGzSqQ5SlatYqMF6zuAL0s='
   public static final String SESSION_TOKEN = 'session_token'
@@ -335,7 +337,7 @@ class PersistenceServiceStubConfiguration {
 
       @Override
       Observable<List<DeviceInfo>> findByUserId(String userId) {
-        return []
+        return Observable.just([])
       }
     }
   }
@@ -346,7 +348,7 @@ class PersistenceServiceStubConfiguration {
     return new DeviceInfoEventService() {
       @Override
       Observable<DeviceInfo> sendChangeDeviceInfoEvent(String clientId, String enroll, DeviceInfo oldDeviceInfo, DeviceInfo deviceInfo) {
-        return deviceInfo
+        return Observable.just(deviceInfo)
       }
     }
   }
