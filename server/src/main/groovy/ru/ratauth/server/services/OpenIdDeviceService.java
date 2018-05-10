@@ -10,10 +10,7 @@ import ru.ratauth.services.DeviceInfoEventService;
 import ru.ratauth.services.DeviceInfoService;
 import rx.Observable;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 
 @Slf4j
@@ -25,14 +22,14 @@ public class OpenIdDeviceService implements DeviceService {
     private final DeviceInfoEventService deviceInfoEventService;
 
     @Override
-    public Observable<DeviceInfo> resolveDeviceInfo(String clientId, String enroll, DeviceInfo deviceInfo) {
+    public Observable<DeviceInfo> resolveDeviceInfo(String clientId, String enroll, DeviceInfo deviceInfo, Map<String, Object> userInfo) {
 
         return Observable.zip(
                 deviceInfoService.create(clientId, enroll, deviceInfo),
                 deviceInfoService
                         .findByUserId(deviceInfo.getUserId())
                         .map(oldDevices -> {
-                            sendChangeDeviceInfoEvent(oldDevices, clientId, enroll, deviceInfo);
+                            sendChangeDeviceInfoEvent(oldDevices, clientId, enroll, deviceInfo, userInfo);
                             return oldDevices;
                         }),
                 (create, change) -> create
@@ -45,13 +42,14 @@ public class OpenIdDeviceService implements DeviceService {
                 .max(Comparator.comparing(DeviceInfo::getCreationDate));
     }
 
-    private void sendChangeDeviceInfoEvent(List<DeviceInfo> devices, String clientId, String enroll, DeviceInfo deviceInfo) {
+    private void sendChangeDeviceInfoEvent(List<DeviceInfo> devices, String clientId, String enroll, DeviceInfo deviceInfo, Map<String, Object> userInfo) {
         try {
             deviceInfoEventService.sendChangeDeviceInfoEvent(
                     clientId,
                     enroll,
                     getLastDevice(devices).orElseGet(DeviceInfo::new),
-                    deviceInfo
+                    deviceInfo,
+                    userInfo
             ).toBlocking().single();
         } catch (Exception e) {
             log.error("Can't send event message", e);

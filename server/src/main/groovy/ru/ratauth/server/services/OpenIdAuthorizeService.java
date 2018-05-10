@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static ru.ratauth.providers.auth.dto.VerifyResult.Status.NEED_APPROVAL;
 import static ru.ratauth.server.utils.RedirectUtils.createRedirectURI;
@@ -151,7 +152,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .flatMap(rpAuth ->
                         createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
                                 .flatMap(session -> Observable.zip(
-                                        deviceService.resolveDeviceInfo(request.getClientId(), request.getEnroll(), createDeviceInfoFromRequest(session, request)),
+                                        deviceService.resolveDeviceInfo(request.getClientId(), request.getEnroll(), createDeviceInfoFromRequest(session, request), extractUserInfo(session)),
                                         sessionService.updateAcrValues(session),
                                         ((deviceInfo, aBoolean) -> session)
                                 ))
@@ -159,6 +160,14 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                                         .map(idToken -> buildResponse(rpAuth.left, session, rpAuth.middle, idToken, request))))
                 .doOnCompleted(() -> log.info("Authorization succeed"));
     }
+
+    private Map<String, Object> extractUserInfo(Session session) {
+        return ofNullable(session)
+                .map(Session::getUserInfo)
+                .map(tokenCacheService::extractUserInfo)
+                .orElseThrow(IllegalArgumentException::new);
+    }
+
 
     private DeviceInfo createDeviceInfoFromRequest(Session session, AuthzRequest request) {
         return DeviceInfo.builder()

@@ -347,7 +347,7 @@ class PersistenceServiceStubConfiguration {
   DeviceInfoEventService deviceInfoEventService() {
     return new DeviceInfoEventService() {
       @Override
-      Observable<DeviceInfo> sendChangeDeviceInfoEvent(String clientId, String enroll, DeviceInfo oldDeviceInfo, DeviceInfo deviceInfo) {
+      Observable<DeviceInfo> sendChangeDeviceInfoEvent(String clientId, String enroll, DeviceInfo oldDeviceInfo, DeviceInfo deviceInfo, Map<String, Object> userInfo) {
         return Observable.just(deviceInfo)
       }
     }
