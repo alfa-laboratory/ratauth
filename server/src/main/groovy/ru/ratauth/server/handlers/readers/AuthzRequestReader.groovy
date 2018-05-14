@@ -50,7 +50,7 @@ class AuthzRequestReader {
                 .deviceId(extractField(params, "device_id", false))
                 .deviceModel(extractField(params, "device_model", false))
                 .deviceGeo(extractField(params, "device_geo", false))
-                .deviceCountryCode(extractField(params, "device_country_code", false))
+                .deviceLocale(extractField(params, "device_locale", false))
                 .deviceCity(extractField(params, "device_city", false))
                 .deviceName(extractField(params, "device_name", false))
                 .deviceOSVersion(extractField(params, "device_os_version", false))
