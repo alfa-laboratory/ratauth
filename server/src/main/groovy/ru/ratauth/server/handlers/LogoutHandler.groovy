@@ -9,15 +9,12 @@ import ratpack.form.Form
 import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
-import ru.ratauth.entities.AuthClient
 import ru.ratauth.server.handlers.readers.RequestUtil
 import ru.ratauth.server.services.AuthClientService
 import ru.ratauth.services.SessionService
 import rx.functions.Func1
-import rx.functions.Func2
 
 import static ratpack.rx.RxRatpack.observe
-import static rx.Observable.zip
 
 @Slf4j
 @Component
@@ -29,7 +26,7 @@ class LogoutHandler implements Action<Chain> {
     @Override
     void execute(Chain chain) throws Exception {
         chain.post('logout') { Context ctx ->
-            def auth = RequestUtil.extractAuth(ctx.request.headers)
+            RequestUtil.extractAuth(ctx.request.headers)
             observe(ctx.parse(Form))
                 .flatMap( { Form request ->
                     return sessionService.invalidateByRefreshToken(request.refresh_token as String)
