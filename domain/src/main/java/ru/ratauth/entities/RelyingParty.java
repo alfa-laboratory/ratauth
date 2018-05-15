@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -32,6 +33,7 @@ public class RelyingParty extends AuthClient {
      */
     private Set<String> grants;
     private AcrValues defaultAcrValues;
+    private Map<String, String> acrUriPaths;
 
     // URIs
     // array of redirects uris, will be checked in case of custom redirect_uri param in request
