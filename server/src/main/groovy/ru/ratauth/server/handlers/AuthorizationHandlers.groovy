@@ -44,7 +44,7 @@ class AuthorizationHandlers implements Action<Chain> {
 
     @Override
     void execute(Chain chain) throws Exception {
-        chain.path('authorize') {ctx ->
+        chain.path('authorize') { ctx ->
             ctx.byMethod { meth ->
                 meth.get { // GET
                     ctx.byContent { cont ->
@@ -67,14 +67,15 @@ class AuthorizationHandlers implements Action<Chain> {
 
     private void redirectToWeb(Context context) {
 
-        String acr = resolveAcr(context)
-
         def clientId = readClientId(context.request.queryParams)
+
+        String acr = resolveAcr(context)
+        String acrUriPath = resolveAcrPath(clientId, acr)
 
         def pageURIObs = authClientService.getAuthorizationPageURI(clientId, context.request.query)
 
         pageURIObs.map({ url -> new URL(url) })
-                .map({ url -> url.path = "$url.path/$acr"; url })
+                .map({ url -> url.path = "$url.path/$acrUriPath"; url })
                 .map({ url -> appendAcrValues(url, clientId) })
                 .map({ url -> url.toString() })
                 .bindExec()
@@ -93,6 +94,15 @@ class AuthorizationHandlers implements Action<Chain> {
             return new URL(appendQuery(url.toString(), "acr_values=" + defaultAcrValues.toString()))
         }
         return url
+    }
+
+    private String resolveAcrPath(String clientId, String acr) {
+        authClientService.loadRelyingParty(clientId)
+                .map { relyingParty -> relyingParty.acrUriPaths?.get(acr) }
+                .filter { path -> path != null }
+                .defaultIfEmpty(acr)
+                .toBlocking()
+                .single()
     }
 
     private String resolveAcr(Context context) {
