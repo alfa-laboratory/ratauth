@@ -20,6 +20,21 @@ public class AuthzRequest {
   private AuthzResponseType responseType;
   private @Singular Set<String> scopes;
   private AcrValues acrValues;
+
+  private String deviceAppVersion;
+  private String deviceId;
+  private String deviceModel;
+  private String deviceGeo;
+  private String deviceLocale;
+  private String deviceCity;
+  private String deviceName;
+  private String deviceOSVersion;
+  private String deviceBootTime;
+  private String deviceTimezone;
+
+  private String deviceIp;
+  private String deviceUserAgent;
+
   private String enroll;
   private String clientId;
   private String clientSecret;

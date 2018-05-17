@@ -8,20 +8,9 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import ru.ratauth.entities.AcrValues;
-import ru.ratauth.entities.AuthClient;
-import ru.ratauth.entities.AuthEntry;
-import ru.ratauth.entities.IdentityProvider;
-import ru.ratauth.entities.RelyingParty;
-import ru.ratauth.entities.Session;
-import ru.ratauth.entities.Token;
-import ru.ratauth.entities.TokenCache;
-import ru.ratauth.entities.UserInfo;
+import ru.ratauth.entities.*;
 import ru.ratauth.exception.AuthorizationException;
-import ru.ratauth.interaction.AuthzRequest;
-import ru.ratauth.interaction.AuthzResponse;
-import ru.ratauth.interaction.AuthzResponseType;
-import ru.ratauth.interaction.GrantType;
+import ru.ratauth.interaction.*;
 import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
@@ -37,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static ru.ratauth.providers.auth.dto.VerifyResult.Status.NEED_APPROVAL;
 import static ru.ratauth.server.utils.RedirectUtils.createRedirectURI;
@@ -52,6 +42,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     private final AuthClientService clientService;
     private final TokenCacheService tokenCacheService;
     private final AuthSessionService sessionService;
+    private final DeviceService deviceService;
     private final IdentityProviderResolver identityProviderResolver;
 
     @SneakyThrows
@@ -159,13 +150,41 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                                 .map(authRes -> new ImmutableTriple<>(rp, authRes, request.getAcrValues())))
                 .flatMap(rpAuth ->
                         createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
-                                .map(session -> {
-                                    sessionService.updateAcrValues(session).toBlocking().single();
-                                    return session;
-                                })
+                                .flatMap(session -> Observable.zip(
+                                        deviceService.resolveDeviceInfo(request.getClientId(), request.getEnroll(), createDeviceInfoFromRequest(session, request), extractUserInfo(session)),
+                                        sessionService.updateAcrValues(session),
+                                        ((deviceInfo, aBoolean) -> session)
+                                ))
                                 .flatMap(session -> createIdToken(rpAuth.left, session, rpAuth.right)
                                         .map(idToken -> buildResponse(rpAuth.left, session, rpAuth.middle, idToken, request))))
                 .doOnCompleted(() -> log.info("Authorization succeed"));
+    }
+
+    private Map<String, Object> extractUserInfo(Session session) {
+        return ofNullable(session)
+                .map(Session::getUserInfo)
+                .map(tokenCacheService::extractUserInfo)
+                .orElseThrow(IllegalArgumentException::new);
+    }
+
+
+    private DeviceInfo createDeviceInfoFromRequest(Session session, AuthzRequest request) {
+        return DeviceInfo.builder()
+                .userId(session.getUserId())
+                .deviceAppVersion(request.getDeviceAppVersion())
+                .deviceId(request.getDeviceId())
+                .deviceModel(request.getDeviceModel())
+                .deviceGeo(request.getDeviceGeo())
+                .deviceLocale(request.getDeviceLocale())
+                .deviceCity(request.getDeviceCity())
+                .deviceName(request.getDeviceName())
+                .deviceOSVersion(request.getDeviceOSVersion())
+                .deviceBootTime(request.getDeviceBootTime())
+                .deviceTimezone(request.getDeviceTimezone())
+                .deviceIp(request.getDeviceIp())
+                .deviceUserAgent(request.getDeviceUserAgent())
+                .creationDate(new Date())
+                .build();
     }
 
     //TODO check token relation

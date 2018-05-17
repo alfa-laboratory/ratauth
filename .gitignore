@@ -23,7 +23,7 @@ gradle-app.setting
 *.iws
 *.iml
 .idea/
-/out/
+out/
 .idea_modules/
 
 # JIRA plugin

@@ -1,12 +1,15 @@
 package ru.ratauth.server.local
 
+import groovy.transform.CompileStatic
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import ru.ratauth.entities.*
 import ru.ratauth.exception.ExpiredException
+import ru.ratauth.services.DeviceInfoEventService
 import ru.ratauth.server.utils.DateUtils
 import ru.ratauth.server.utils.SecurityUtils
 import ru.ratauth.services.ClientService
+import ru.ratauth.services.DeviceInfoService
 import ru.ratauth.services.SessionService
 import ru.ratauth.services.TokenCacheService
 import rx.Observable
@@ -16,6 +19,7 @@ import java.time.LocalDateTime
  * @author mgorelikov
  * @since 25/02/16
  */
+@CompileStatic
 class PersistenceServiceStubConfiguration {
   public static final String CLIENT_SECRET = 'HdC4t2Wpjn/obYj9JHLVwmGzSqQ5SlatYqMF6zuAL0s='
   public static final String SESSION_TOKEN = 'session_token'
@@ -318,6 +322,33 @@ class PersistenceServiceStubConfiguration {
       @Override
       Observable<Boolean> updateUserInfo(String sessionId, String userInfo) {
         return Observable.just(true)
+      }
+    }
+  }
+
+  @Bean
+  @Primary
+  DeviceInfoService deviceInfoService() {
+    return new DeviceInfoService() {
+      @Override
+      Observable<DeviceInfo> create(String clientId, String enroll, DeviceInfo deviceInfo) {
+        return Observable.just(deviceInfo)
+      }
+
+      @Override
+      Observable<List<DeviceInfo>> findByUserId(String userId) {
+        return Observable.just([])
+      }
+    }
+  }
+
+  @Bean
+  @Primary
+  DeviceInfoEventService deviceInfoEventService() {
+    return new DeviceInfoEventService() {
+      @Override
+      Observable<DeviceInfo> sendChangeDeviceInfoEvent(String clientId, String enroll, DeviceInfo oldDeviceInfo, DeviceInfo deviceInfo, Map<String, Object> userInfo) {
+        return Observable.just(deviceInfo)
       }
     }
   }

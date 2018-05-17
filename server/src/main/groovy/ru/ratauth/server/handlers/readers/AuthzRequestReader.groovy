@@ -46,6 +46,18 @@ class AuthzRequestReader {
         def builder = AuthzRequest.builder()
                 .responseType(responseType)
                 .redirectURI(extractField(params, REDIRECT_URI, false))
+                .deviceAppVersion(extractField(params, "device_app_version", false))
+                .deviceId(extractField(params, "device_id", false))
+                .deviceModel(extractField(params, "device_model", false))
+                .deviceGeo(extractField(params, "device_geo", false))
+                .deviceLocale(extractField(params, "device_locale", false))
+                .deviceCity(extractField(params, "device_city", false))
+                .deviceName(extractField(params, "device_name", false))
+                .deviceOSVersion(extractField(params, "device_os_version", false))
+                .deviceBootTime(extractField(params, "device_boot_time", false))
+                .deviceTimezone(extractField(params, "device_timezone", false))
+                .deviceIp(extractField(params, "device_ip", false))
+                .deviceUserAgent(extractField(params, "device_user_agent", false))
 
         if (GrantType.AUTHENTICATION_TOKEN == grantType || GrantType.SESSION_TOKEN == grantType) {
             if (responseType == AuthzResponseType.TOKEN) {
