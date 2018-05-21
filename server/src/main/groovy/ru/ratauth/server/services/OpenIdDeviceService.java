@@ -30,7 +30,6 @@ public class OpenIdDeviceService implements DeviceService {
                             return oldDevices;
                         })
                 .flatMap(it -> deviceInfoService.create(clientId, enroll, deviceInfo));
-        )
     }
 
     private Optional<DeviceInfo> getLastDevice(List<DeviceInfo> oldDevices) {
