@@ -30,5 +30,5 @@ public class DeviceInfo {
     private String deviceIp;
     private String deviceUserAgent;
 
-    private Date creationDate;
+    private Date creationDate = new Date();
 }
