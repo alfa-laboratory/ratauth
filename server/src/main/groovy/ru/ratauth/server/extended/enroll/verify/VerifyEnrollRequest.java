@@ -16,5 +16,19 @@ public class VerifyEnrollRequest {
     private String redirectURI;
     private String state;
 
+    private String deviceAppVersion;
+    private String deviceId;
+    private String deviceModel;
+    private String deviceGeo;
+    private String deviceLocale;
+    private String deviceCity;
+    private String deviceName;
+    private String deviceOSVersion;
+    private String deviceBootTime;
+    private String deviceTimezone;
+
+    private String deviceIp;
+    private String deviceUserAgent;
+
     private Map<String, String> data;
 }

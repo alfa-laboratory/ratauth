@@ -47,6 +47,18 @@ class VerifyEnrollHandler implements Action<Chain> {
                 scope:params.removeField("scope", true).split(' ').toList(),
                 authContext:params.removeField("acr_values", true).split(ACR_SPLITTER).toList(),
                 enroll:params.removeField("enroll", true).split(ACR_SPLITTER).toList(),
+                deviceAppVersion:params.removeField("device_app_version", false),
+                deviceId:params.removeField("device_id", false),
+                deviceModel:params.removeField("device_model", false),
+                deviceGeo:params.removeField("device_geo", false),
+                deviceLocale:params.removeField("device_locale", false),
+                deviceCity:params.removeField("device_city", false),
+                deviceName:params.removeField("device_name", false),
+                deviceOSVersion:params.removeField("device_os_version", false),
+                deviceBootTime:params.removeField("device_boot_time", false),
+                deviceTimezone:params.removeField("device_timezone", false),
+                deviceIp:params.removeField("device_ip", false),
+                deviceUserAgent:params.removeField("device_user_agent", false),
                 data:params.toMap()
         )
     }

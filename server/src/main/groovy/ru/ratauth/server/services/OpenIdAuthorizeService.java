@@ -20,10 +20,7 @@ import rx.Observable;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 import static java.util.Optional.ofNullable;
@@ -151,13 +148,24 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                                 .map(authRes -> new ImmutableTriple<>(rp, authRes, request.getAcrValues())))
                 .flatMap(rpAuth ->
                         createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
-                                .flatMap(session -> Observable.zip(
-                                        deviceService.resolveDeviceInfo(request.getClientId(), request.getEnroll(), createDeviceInfoFromRequest(session, request), extractUserInfo(session)),
-                                        sessionService.updateAcrValues(session),
-                                        ((deviceInfo, aBoolean) -> session)
-                                ))
+                                .flatMap(session -> sessionService.updateAcrValues(session)
+                                        .map(it -> session))
                                 .flatMap(session -> createIdToken(rpAuth.left, session, rpAuth.right)
-                                        .map(idToken -> buildResponse(rpAuth.left, session, rpAuth.middle, idToken, request))))
+                                        .map(idToken -> buildResponse(rpAuth.left, session, rpAuth.middle, idToken, request))
+                                        .flatMap(authzResponse -> {
+                                            if(authzResponse.getCode() != null) {
+                                                return deviceService
+                                                        .resolveDeviceInfo(
+                                                                request.getClientId(),
+                                                                Objects.toString(request.getAcrValues()),
+                                                                createDeviceInfoFromRequest(session, request),
+                                                                extractUserInfo(session)
+                                                        )
+                                                        .map(it -> authzResponse);
+                                            }
+                                            return Observable.just(authzResponse);
+                                        })
+                                ))
                 .doOnCompleted(() -> log.info("Authorization succeed"));
     }
 
@@ -184,6 +192,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .deviceTimezone(request.getDeviceTimezone())
                 .deviceIp(request.getDeviceIp())
                 .deviceUserAgent(request.getDeviceUserAgent())
+                .creationDate(new Date())
                 .build();
     }
 

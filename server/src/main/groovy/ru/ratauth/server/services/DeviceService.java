@@ -7,6 +7,6 @@ import java.util.Map;
 
 public interface DeviceService {
 
-    Observable<DeviceInfo> resolveDeviceInfo(String clientId, String enroll, DeviceInfo deviceInfo, Map<String, Object> userInfo);
+    Observable<DeviceInfo> resolveDeviceInfo(String clientId, String authContext, DeviceInfo deviceInfo, Map<String, Object> userInfo);
 
 }

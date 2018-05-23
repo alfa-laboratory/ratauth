@@ -13,6 +13,7 @@ import ru.ratauth.server.providers.IdentityProviderResolver;
 import ru.ratauth.server.secutiry.TokenProcessor;
 import ru.ratauth.server.services.AuthClientService;
 import ru.ratauth.server.services.AuthSessionService;
+import ru.ratauth.server.services.DeviceService;
 import ru.ratauth.server.services.TokenCacheService;
 import ru.ratauth.server.utils.DateUtils;
 import ru.ratauth.server.utils.RedirectUtils;
@@ -23,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import static java.util.Optional.ofNullable;
@@ -38,9 +40,10 @@ public class VerifyEnrollService {
     private final TokenCacheService tokenCacheService;
     private final TokenProcessor tokenProcessor;
     private final IdentityProviderResolver identityProviderResolver;
+    private final DeviceService deviceService;
 
     @SneakyThrows
-    private static RedirectResponse createResponse(Session session, RelyingParty relyingParty, VerifyEnrollRequest request, VerifyResult verifyResult) {
+    private RedirectResponse createResponse(Session session, RelyingParty relyingParty, VerifyEnrollRequest request, VerifyResult verifyResult) {
         AcrValues difference = request.getAuthContext().difference(session.getReceivedAcrValues());
         if (difference.getValues().isEmpty()) {
             AuthEntry authEntry = session
@@ -77,8 +80,43 @@ public class VerifyEnrollService {
                             RedirectResponse response = createResponse(session, p.left, request, result);
                             response.putRedirectParameters("session_token", session.getSessionToken());
                             return response;
-                        }));
+                        })
+                        .flatMap(response -> {
+                            if(response instanceof SuccessResponse) {
+                                Session session = p.right;
+                                return deviceService
+                                        .resolveDeviceInfo(
+                                                request.getClientId(),
+                                                Objects.toString(request.getAuthContext()),
+                                                createDeviceInfoFromRequest(session, request),
+                                                extractUserInfo(session)
+                                        )
+                                        .map(it -> response);
+                            }
+                            return Observable.just(response);
+                        })
+                );
     }
+
+    private DeviceInfo createDeviceInfoFromRequest(Session session, VerifyEnrollRequest request) {
+        return DeviceInfo.builder()
+                .userId(session.getUserId())
+                .deviceAppVersion(request.getDeviceAppVersion())
+                .deviceId(request.getDeviceId())
+                .deviceModel(request.getDeviceModel())
+                .deviceGeo(request.getDeviceGeo())
+                .deviceLocale(request.getDeviceLocale())
+                .deviceCity(request.getDeviceCity())
+                .deviceName(request.getDeviceName())
+                .deviceOSVersion(request.getDeviceOSVersion())
+                .deviceBootTime(request.getDeviceBootTime())
+                .deviceTimezone(request.getDeviceTimezone())
+                .deviceIp(request.getDeviceIp())
+                .deviceUserAgent(request.getDeviceUserAgent())
+                .creationDate(new Date())
+                .build();
+    }
+
 
     private Observable<VerifyResult> verifyAndUpdateUserInfo(Session session, VerifyEnrollRequest request, RelyingParty relyingParty) {
         Map<String, Object> tokenInfo = extractUserInfo(session);
