@@ -69,6 +69,11 @@ class WellKnownHandlerSpec extends BaseDocumentationSpec {
                 .description('RECOMMENDED. JSON array containing a list of the Claim Names of the Claims that the OpenID Provider MAY be able to supply values for. Note that for privacy or other reasons, this might not be an exhaustive list.')
                 .optional()
                 .type(JsonFieldType.ARRAY),
+            fieldWithPath('afp_endpoint')
+                .description('String containing URL for non-clients.')
+                .optional()
+                .type(JsonFieldType.STRING),
+
         )
     ))
     when:
