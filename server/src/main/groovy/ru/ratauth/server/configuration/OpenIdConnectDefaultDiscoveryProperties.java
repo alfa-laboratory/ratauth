@@ -23,6 +23,7 @@ public class OpenIdConnectDefaultDiscoveryProperties implements OpenIdConnectDis
   // Optional
   private String authorizationEndpoint;
   private String tokenEndpoint;
+  private String checkTokenEndpoint;
   private String checkSessionIframe;
   private String endSessionEndpoint;
 

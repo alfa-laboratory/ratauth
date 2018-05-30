@@ -20,6 +20,8 @@ public interface OpenIdConnectDiscoveryProperties {
 
     String getTokenEndpoint();
 
+    String getCheckTokenEndpoint();
+
     String getCheckSessionIframe();
 
     String getEndSessionEndpoint();

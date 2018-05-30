@@ -34,6 +34,10 @@ class WellKnownHandlerSpec extends BaseDocumentationSpec {
                 .description('URL of the OP\'s OAuth 2.0 Token Endpoint ')
                 .optional()
                 .type(JsonFieldType.STRING),
+            fieldWithPath('check_token_endpoint')
+                    .description('URL of the OP\'s OAuth 2.0 Check Token Endpoint ')
+                    .optional()
+                    .type(JsonFieldType.STRING),
             fieldWithPath('token_endpoint_auth_signing_alg_values_supported')
                 .description('JSON array containing a list of the JWS signing algorithms (alg values) supported by the Token Endpoint for the private_key_jwt and client_secret_jwt methods to encode the JWT [JWT]. Servers SHOULD support RS256.')
                 .optional()

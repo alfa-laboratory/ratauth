@@ -38,6 +38,7 @@ class WellKnownHandler implements Action<Chain> {
                             issuer                                          : it.issuer,
                             authorization_endpoint                          : it.authorizationEndpoint,
                             token_endpoint                                  : it.tokenEndpoint,
+                            check_token_endpoint                            : it.checkTokenEndpoint,
                             token_endpoint_auth_signing_alg_values_supported: it.tokenEndpointAuthSigningAlgValuesSupported,
                             registration_endpoint                           : it.registrationEndpoint,
                             userinfo_endpoint                               : it.userInfoEndpoint,
