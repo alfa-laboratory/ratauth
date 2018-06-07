@@ -49,6 +49,7 @@ class WellKnownHandler implements Action<Chain> {
                             jwks_uri                                        : it.jwksUri,
                             scopes_supported                                : it.scopesSupported,
                             claims_supported                                : it.claimsSupported,
+                            afp_endpoint                                    : it.afpEndpoint,
                         ])
             })
             .doOnNext(responseLogger.&logResponse)
