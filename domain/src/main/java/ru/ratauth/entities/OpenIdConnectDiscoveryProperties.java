@@ -30,7 +30,7 @@ public interface OpenIdConnectDiscoveryProperties {
 
     String getAfpEndpoint();
 
-    String getCrossauth();
+    String getMasterRelyingPartyCrossauthEndpoint();
 
     String getRegistrationEndpoint();
 

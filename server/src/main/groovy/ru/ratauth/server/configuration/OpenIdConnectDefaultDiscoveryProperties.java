@@ -27,7 +27,7 @@ public class OpenIdConnectDefaultDiscoveryProperties implements OpenIdConnectDis
   private String checkSessionIframe;
   private String endSessionEndpoint;
   private String afpEndpoint;
-  private String crossauth;
+  private String masterRelyingPartyCrossauthEndpoint;
 
   // Recommended
   private String userInfoEndpoint;

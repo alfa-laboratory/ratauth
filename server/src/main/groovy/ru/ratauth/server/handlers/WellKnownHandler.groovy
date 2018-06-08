@@ -51,7 +51,7 @@ class WellKnownHandler implements Action<Chain> {
                             scopes_supported                                : it.scopesSupported,
                             claims_supported                                : it.claimsSupported,
                             afp_endpoint                                    : it.afpEndpoint,
-                            crossauth                                       : it.crossauth,
+                            master_relying_party_crossauth_endpoint         : it.masterRelyingPartyCrossauthEndpoint,
                         ])
             })
             .doOnNext(responseLogger.&logResponse)
