@@ -71,7 +71,7 @@ class ProvidersStubConfiguration {
     }
   }
 
-  @Bean(name = 'STUB')
+  @Bean(name = 'STUB-provider')
   @Primary
   AbstractAuthProvider authProvider() {
     return new AbstractAuthProvider() {

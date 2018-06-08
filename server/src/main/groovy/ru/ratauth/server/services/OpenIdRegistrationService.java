@@ -34,7 +34,6 @@ public class OpenIdRegistrationService implements RegistrationService {
 
     @Override
     public Observable<RegistrationResponse> register(RegistrationRequest request) {
-        log.info(registerProviders.toString());
         return authClientService.loadRelyingParty(request.getClientId())
                 .flatMap(rp -> registerProviders.get(rp.getIdentityProvider() + "-provider")
                         .register(RegInput.builder().relyingParty(rp.getName()).data(request.getData()).build())
@@ -46,7 +45,7 @@ public class OpenIdRegistrationService implements RegistrationService {
     @Override
     public Observable<TokenResponse> finishRegister(RegistrationRequest request) {
         return authClientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), true)
-                .flatMap(rp -> registerProviders.get(rp.getIdentityProvider())
+                .flatMap(rp -> registerProviders.get(rp.getIdentityProvider() + "-provider")
                         .register(RegInput.builder().relyingParty(rp.getName()).data(request.getData()).build())
                         .map(regResult -> new ImmutablePair<>(rp, regResult)))
                 //TODO@ruslan разделить смс и авторизацию
