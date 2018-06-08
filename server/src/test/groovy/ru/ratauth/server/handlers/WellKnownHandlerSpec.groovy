@@ -77,6 +77,10 @@ class WellKnownHandlerSpec extends BaseDocumentationSpec {
                 .description('String containing URL for non-clients.')
                 .optional()
                 .type(JsonFieldType.STRING),
+            fieldWithPath('crossauth')
+                        .description('String containing URL of Authorization Server')
+                        .optional()
+                        .type(JsonFieldType.STRING),
 
         )
     ))
