@@ -26,6 +26,7 @@ public class OpenIdConnectDefaultDiscoveryProperties implements OpenIdConnectDis
   private String checkTokenEndpoint;
   private String checkSessionIframe;
   private String endSessionEndpoint;
+  private String afpEndpoint;
 
   // Recommended
   private String userInfoEndpoint;

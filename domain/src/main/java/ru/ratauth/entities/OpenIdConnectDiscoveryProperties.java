@@ -28,6 +28,8 @@ public interface OpenIdConnectDiscoveryProperties {
 
     String getUserInfoEndpoint();
 
+    String getAfpEndpoint();
+
     String getRegistrationEndpoint();
 
     List<String> getScopesSupported();
