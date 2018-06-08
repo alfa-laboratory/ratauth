@@ -24,6 +24,7 @@ class WellKnownHandler implements Action<Chain> {
 
     @Autowired
     private OpenIdConnectDiscoveryService discoveryService
+
     @Autowired
     private ResponseLogger responseLogger
 
