@@ -9,7 +9,4 @@ public interface Activator {
     String name();
 
     Observable<ActivateResult> activate(ActivateInput input);
-
-    String version();
-
 }
