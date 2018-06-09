@@ -1,6 +1,5 @@
 package ru.ratauth.server.handlers
 
-import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -14,22 +13,21 @@ import static ratpack.jackson.Jackson.json
 
 @Slf4j
 @Component
-@CompileStatic
 class ActivatorsVerifiersVersionHandler implements Action<Chain> {
 
     @Autowired
-    ActivatorResolver activatorResolver;
+    ActivatorResolver activatorResolver
 
     @Autowired
-    VerifierResolver verifierResolver;
+    VerifierResolver verifierResolver
 
     @Override
     void execute(Chain chain) {
         chain
                 .get('providers/:clientId/activator/version') { Context ctx ->
-            ctx.render(json(version: activatorResolver.find(ctx.pathTokens["clientId"]).version()))
-        }       .get('providers/:clientId/verifier/version') { Context ctx ->
-            ctx.render(json(version: verifierResolver.find(ctx.pathTokens["clientId"]).version()))
+            ctx.render(json(version:activatorResolver.find(ctx.pathTokens.clientId).version()))
+        }.get('providers/:clientId/verifier/version') { Context ctx ->
+            ctx.render(json(version:verifierResolver.find(ctx.pathTokens.clientId).version()))
         }
     }
 
