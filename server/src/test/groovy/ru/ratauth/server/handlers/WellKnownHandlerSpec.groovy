@@ -78,7 +78,7 @@ class WellKnownHandlerSpec extends BaseDocumentationSpec {
                 .optional()
                 .type(JsonFieldType.STRING),
             fieldWithPath('master_relying_party_crossauth_endpoint')
-                        .description('String containing URL of Mobile gateway')
+                        .description('String containing URL of Mobile Gateway')
                         .optional()
                         .type(JsonFieldType.STRING),
 
