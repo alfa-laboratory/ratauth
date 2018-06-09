@@ -58,6 +58,9 @@ class ProvidersStubConfiguration {
       }
 
       @Override
+      String version() { "-1" }
+
+      @Override
       Observable<VerifyResult> verify(VerifyInput input) {
         if(input.data.password == "password") {
           return Observable.just(new VerifyResult(status: SUCCESS).with {
@@ -71,7 +74,7 @@ class ProvidersStubConfiguration {
     }
   }
 
-  @Bean(name = 'STUB')
+  @Bean(name = 'STUB-provider')
   @Primary
   AbstractAuthProvider authProvider() {
     return new AbstractAuthProvider() {
