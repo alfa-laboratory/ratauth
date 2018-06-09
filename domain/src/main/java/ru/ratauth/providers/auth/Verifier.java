@@ -10,4 +10,6 @@ public interface Verifier {
 
     Observable<VerifyResult> verify(VerifyInput input);
 
+    String version();
+
 }

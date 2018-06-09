@@ -58,6 +58,9 @@ class ProvidersStubConfiguration {
       }
 
       @Override
+      String version() { "-1" }
+
+      @Override
       Observable<VerifyResult> verify(VerifyInput input) {
         if(input.data.password == "password") {
           return Observable.just(new VerifyResult(status: SUCCESS).with {
