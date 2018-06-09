@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component
 import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
+import ru.ratauth.server.extended.enroll.MissingProviderException
 import ru.ratauth.server.providers.ActivatorResolver
 import ru.ratauth.server.providers.VerifierResolver
 
@@ -25,9 +26,22 @@ class ActivatorsVerifiersVersionHandler implements Action<Chain> {
     void execute(Chain chain) {
         chain
                 .get('providers/:clientId/activator/version') { Context ctx ->
-            ctx.render(json(version:activatorResolver.find(ctx.pathTokens.clientId).version()))
+            handleIfMissing ctx, {
+                ctx.render(json(version:activatorResolver.find(ctx.pathTokens.clientId).version()))
+            }
         }.get('providers/:clientId/verifier/version') { Context ctx ->
-            ctx.render(json(version:verifierResolver.find(ctx.pathTokens.clientId).version()))
+            handleIfMissing ctx, {
+                ctx.render(json(version:verifierResolver.find(ctx.pathTokens.clientId).version()))
+            }
+        }
+    }
+
+    static handleIfMissing(Context ctx, Closure closure) {
+        try {
+            closure()
+        } catch (MissingProviderException e) {
+            ctx.response.status 404
+            ctx.response.send e.message ?: null
         }
     }
 
