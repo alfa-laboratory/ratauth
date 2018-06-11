@@ -85,6 +85,48 @@ class EnrollAPISpec extends BaseDocumentationSpec {
                 .body("mfa_token", equalTo("mfa-token-test"))
     }
 
+    def 'activate enroll no session'() {
+        given:
+        def setup = given(this.documentationSpec)
+                .accept(ContentType.URLENC)
+                .filter(document('mfa_activate_succeed',
+                preprocessResponse(prettyPrint()),
+                requestParameters(
+                        parameterWithName('client_id')
+                                .description('Relying party identifier'),
+                        parameterWithName('scope')
+                                .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+                        parameterWithName('acr_values')
+                                .description('Authentication Context Class Reference'),
+                        parameterWithName('enroll')
+                                .description('Required Authentication Context Class Reference'),
+                        parameterWithName('username')
+                                .description("User data"),
+                ),
+                responseFields(
+                        fieldWithPath('data')
+                                .description('Activation result from provider')
+                                .type(JsonFieldType.OBJECT)
+                )
+        ))
+                .given()
+                .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
+                .formParam('username', "user")
+                .formParam('scope', 'rs.read')
+                .formParam('acr_values', 'username:sms')
+                .formParam('enroll', 'username')
+        when:
+        def result = setup
+                .when()
+                .post("activate")
+        then:
+        result
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .body("data.user_id", equalTo("resu"))
+    }
+
+
 
     def 'activate enroll with data'() {
         given:

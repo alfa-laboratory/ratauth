@@ -39,7 +39,7 @@ class ActivateEnrollHandler implements Action<Chain> {
     static ActivateEnrollRequest readActivateEnrollRequest(RequestReader params) {
         return new ActivateEnrollRequest(
                 clientId:params.removeField("client_id", true),
-                mfaToken:params.removeField("mfa_token", true),
+                mfaToken:params.removeField("mfa_token", false),
                 scope:params.removeField("scope", true).split(' ').toList(),
                 authContext:AcrValues.valueOf(params.removeField("acr_values", true)),
                 enroll:AcrValues.valueOf(params.removeField("enroll", true)),

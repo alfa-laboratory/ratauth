@@ -38,9 +38,10 @@ public class ActivateEnrollService {
     private final IdentityProviderResolver identityProviderResolver;
 
     public Observable<ActivateEnrollResponse> incAuthLevel(ActivateEnrollRequest request) {
+        String mfa = request.getMfaToken();
         return Observable.zip(
                 clientService.loadAndAuthRelyingParty(request.getClientId(), null, false),
-                sessionService.getByValidMFAToken(request.getMfaToken(), new Date()),
+                mfa != null ? sessionService.getByValidMFAToken(request.getMfaToken(), new Date()) : Observable.just(null),
                 ImmutablePair::new
         )
                 .flatMap(p -> activateAndUpdateUserInfo(p.right, request, p.left))
@@ -52,12 +53,15 @@ public class ActivateEnrollService {
     }
 
     private Observable<ActivateResult> activateAndUpdateUserInfo(Session session, ActivateEnrollRequest request, RelyingParty relyingParty) {
-        Map<String, Object> tokenInfo = extractUserInfo(session);
-        UserInfo userInfo = new UserInfo(tokenProcessor.filterUserInfo(tokenInfo));
-        Set<String> authContext = tokenProcessor.extractAuthContext(tokenInfo);
-
-        return activate(request, userInfo, relyingParty)
-                .flatMap(result -> updateUserInfo(session, userInfo.putAll(result.getData()), request.getScope(), authContext).map(b -> result));
+        if(session != null) {
+            Map<String, Object> tokenInfo = extractUserInfo(session);
+            UserInfo userInfo = new UserInfo(tokenProcessor.filterUserInfo(tokenInfo));
+            Set<String> authContext = tokenProcessor.extractAuthContext(tokenInfo);
+            return activate(request, userInfo, relyingParty)
+                    .flatMap(result -> updateUserInfo(session, userInfo.putAll(result.getData()), request.getScope(), authContext)
+                            .map(b -> result));
+        }
+        return activate(request, null, relyingParty);
     }
 
     @SuppressWarnings("unchecked")
