@@ -23,6 +23,7 @@ public class AuthzRequest {
 
   private String deviceAppVersion;
   private String deviceId;
+  private String deviceUUID;
   private String deviceModel;
   private String deviceGeo;
   private String deviceLocale;
