@@ -48,7 +48,7 @@ class AuthzRequestReader {
                 .redirectURI(extractField(params, REDIRECT_URI, false))
                 .deviceAppVersion(extractField(params, "device_app_version", false))
                 .deviceId(extractField(params, "device_id", false))
-                .deviceId(extractField(params, "device_uuid", false))
+                .deviceUUID(extractField(params, "device_uuid", false))
                 .deviceModel(extractField(params, "device_model", false))
                 .deviceGeo(extractField(params, "device_geo", false))
                 .deviceLocale(extractField(params, "device_locale", false))
