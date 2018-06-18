@@ -103,6 +103,7 @@ public class VerifyEnrollService {
                 .userId(session.getUserId())
                 .deviceAppVersion(request.getDeviceAppVersion())
                 .deviceId(request.getDeviceId())
+                .deviceUUID(request.getDeviceUUID())
                 .deviceModel(request.getDeviceModel())
                 .deviceGeo(request.getDeviceGeo())
                 .deviceLocale(request.getDeviceLocale())
