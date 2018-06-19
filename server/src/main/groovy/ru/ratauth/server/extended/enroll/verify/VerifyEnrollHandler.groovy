@@ -49,6 +49,7 @@ class VerifyEnrollHandler implements Action<Chain> {
                 enroll:params.removeField("enroll", true).split(ACR_SPLITTER).toList(),
                 deviceAppVersion:params.removeField("device_app_version", false),
                 deviceId:params.removeField("device_id", false),
+                deviceUUID:params.removeField("device_uuid", false),
                 deviceModel:params.removeField("device_model", false),
                 deviceGeo:params.removeField("device_geo", false),
                 deviceLocale:params.removeField("device_locale", false),
