@@ -83,7 +83,12 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         AcrValues acrValues = authzRequest.getAcrValues();
 
         if (isDefaultFlow(acrValues)) {
-            defaultFlow(targetRedirectURI, entry, resp);
+            log.debug("idp {}", relyingParty.getIdentityProvider());
+            if (isDummyIdentityProvider(relyingParty)) {
+                resp.setRedirectURI(targetRedirectURI);
+                log.debug("targetRedirectURI = {}", targetRedirectURI);
+            }
+            defaultFlow(entry, resp);
             return;
         }
 
@@ -98,14 +103,17 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         onNextAuthMethod(relyingParty, session, targetRedirectURI, resp, difference.getFirst());
     }
 
+    private static boolean isDummyIdentityProvider(RelyingParty relyingParty) {
+        return "DummyIdentityProvider".equals(relyingParty.getIdentityProvider());
+    }
+
     private static boolean isDefaultFlow(AcrValues acrValues) {
         return acrValues == null;
     }
 
-    private static void defaultFlow(String targetRedirectURI, AuthEntry entry, AuthzResponse resp) {
+    private static void defaultFlow(AuthEntry entry, AuthzResponse resp) {
         resp.setCode(entry.getAuthCode());
         resp.setExpiresIn(entry.getCodeExpiresIn().getTime());
-        resp.setRedirectURI(targetRedirectURI);
     }
 
     private static boolean isReceivedRequiredAcrs(AcrValues difference) {
