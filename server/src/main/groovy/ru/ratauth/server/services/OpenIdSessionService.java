@@ -176,6 +176,7 @@ public class OpenIdSessionService implements AuthSessionService {
         final String jwtInfo = tokenProcessor.createToken(RATAUTH, masterSecret, null,
                 DateUtils.fromLocal(LocalDateTime.now()), session.getExpiresIn(),
                 tokenCacheService.extractAudience(scopes), scopes, authContext, session.getUserId(), userInfo.toMap());
+        session.setUserInfo(jwtInfo);
         return sessionService.updateUserInfo(session.getId(), jwtInfo);
     }
 
