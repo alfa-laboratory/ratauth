@@ -190,6 +190,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .userId(session.getUserId())
                 .deviceAppVersion(request.getDeviceAppVersion())
                 .deviceId(request.getDeviceId())
+                .deviceUUID(request.getDeviceUUID())
                 .deviceModel(request.getDeviceModel())
                 .deviceGeo(request.getDeviceGeo())
                 .deviceLocale(request.getDeviceLocale())
