@@ -52,6 +52,11 @@ openid.properties.discovery:
     - profile
   jwks_uri: http://example.com/oauth2/certs
 
+ratauth.idp.username.verify:
+  url: http://localhost:8089/verify
+  auth-login: llogin
+  auth-password: ppassword
+
 ru.ratauth.auth.code:
   expires_in_second: 120
 
