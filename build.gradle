@@ -69,6 +69,7 @@ allprojects {
       dependency "io.ratpack:ratpack-rx:${ratpackVersion}"
       dependency "io.ratpack:ratpack-spring-boot:${ratpackVersion}"
       dependency "io.ratpack:ratpack-groovy:${ratpackVersion}"
+      dependency "io.ratpack:ratpack-hystrix:${ratpackVersion}"
 
       //crypto
       dependency 'com.nimbusds:nimbus-jose-jwt:4.20'

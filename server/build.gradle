@@ -35,7 +35,10 @@ dependencies {
   //web/reactive
   compile 'org.springframework.boot:spring-boot-starter-actuator'
   compile 'org.springframework.boot:spring-boot-starter-web'
+
   compile 'io.ratpack:ratpack-rx'
+  compile 'io.ratpack:ratpack-hystrix'
+
   compile 'io.ratpack:ratpack-spring-boot'
   compile 'io.ratpack:ratpack-groovy'
   compile 'com.google.inject:guice'
@@ -48,6 +51,7 @@ dependencies {
 
   //docs/test
   testCompile 'org.springframework.restdocs:spring-restdocs-restassured:1.1.0.RELEASE'
+  testCompile 'com.github.tomakehurst:wiremock:2.5.1'
   testCompile 'org.springframework.boot:spring-boot-starter-test'
   testCompile 'org.skyscreamer:jsonassert'
   testCompile 'io.rest-assured:rest-assured'
