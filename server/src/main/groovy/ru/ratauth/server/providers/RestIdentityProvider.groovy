@@ -36,7 +36,7 @@ class RestIdentityProvider implements IdentityProvider {
     @Override
     Observable<ActivateResult> activate(ActivateInput input) {
         String enroll = input.enroll.first
-        DestinationConfiguration config = identityProvidersConfiguration.idp?.get(enroll)?.verify
+        DestinationConfiguration config = identityProvidersConfiguration.idp?.get(enroll)?.activate
 
         log.info("Sending request to ${enroll}")
         return new HystrixIdentityProviderCommand(
