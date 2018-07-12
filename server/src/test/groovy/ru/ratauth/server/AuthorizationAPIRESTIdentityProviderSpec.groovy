@@ -175,7 +175,7 @@ identifier received by REST-based identity provider''')
                 aResponse()
                         .withStatus(HttpResponseStatus.OK.code())
                         .withHeader(HttpHeader.CONTENT_TYPE.asString(), MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(JsonOutput.toJson(mockResponse))
+                        .withBody(JsonOutput.toJson([mockResponse]))
         ))
     }
 

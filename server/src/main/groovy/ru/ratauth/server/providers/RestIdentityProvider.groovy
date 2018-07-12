@@ -83,7 +83,7 @@ class RestIdentityProvider implements IdentityProvider {
     }
 
     private static VerifyResult makeVerifyResultFromResponse(ReceivedResponse receivedResponse) {
-        def response = new JsonSlurper().parseText(receivedResponse.body.text) as Map
+        def response = (new JsonSlurper().parseText(receivedResponse.body.text) as List)[0] as Map
         assert response.data[Fields.USER_ID.val()]
         new VerifyResult(
                 data:response.data as Map,
