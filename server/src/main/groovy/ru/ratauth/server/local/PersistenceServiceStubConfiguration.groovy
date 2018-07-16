@@ -316,6 +316,11 @@ class PersistenceServiceStubConfiguration {
       }
 
       @Override
+      Observable<Boolean> updateAuthCodeExpired(String code, Date now) {
+        return Observable.just(true)
+      }
+
+      @Override
       Observable<Session> create(Session session) {
         return Observable.just(session)
       }
