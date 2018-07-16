@@ -1,5 +1,7 @@
 package ru.ratauth.server.services;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +17,7 @@ import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
 import ru.ratauth.server.providers.IdentityProviderResolver;
+import ru.ratauth.server.utils.DateUtils;
 import ru.ratauth.server.utils.RedirectUtils;
 import rx.Observable;
 
@@ -26,6 +29,7 @@ import java.util.function.Function;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static ru.ratauth.providers.auth.dto.VerifyResult.Status.NEED_APPROVAL;
+import static ru.ratauth.server.utils.DateUtils.*;
 import static ru.ratauth.server.utils.RedirectUtils.createRedirectURI;
 
 /**
@@ -43,7 +47,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     private final IdentityProviderResolver identityProviderResolver;
 
     @SneakyThrows
-    private static AuthzResponse buildResponse(RelyingParty relyingParty, Session session, VerifyResult verifyResult, TokenCache tokenCache, AuthzRequest authzRequest) {
+    private AuthzResponse buildResponse(RelyingParty relyingParty, Session session, VerifyResult verifyResult, TokenCache tokenCache, AuthzRequest authzRequest) {
         String redirectUri = authzRequest.getRedirectURI();
         final String targetRedirectURI = createRedirectURI(relyingParty, redirectUri);
         //in case of autCode sent by authProvider
@@ -79,7 +83,8 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         return resp;
     }
 
-    private static void generateAuthCode(RelyingParty relyingParty, Session session, AuthzRequest authzRequest, String targetRedirectURI, AuthEntry entry, AuthzResponse resp) throws MalformedURLException {
+    private void generateAuthCode(RelyingParty relyingParty, Session session,
+        AuthzRequest authzRequest, String targetRedirectURI, AuthEntry entry, AuthzResponse resp) throws MalformedURLException {
         AcrValues acrValues = authzRequest.getAcrValues();
 
         if (isDefaultFlow(acrValues)) {
@@ -96,7 +101,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         AcrValues difference = acrValues.difference(receivedAcrValues);
 
         if (isReceivedRequiredAcrs(difference)) {
-            onFinishAuthorization(targetRedirectURI, entry, resp);
+            onFinishAuthorization(targetRedirectURI, entry, resp, relyingParty);
             return;
         }
 
@@ -120,7 +125,10 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         return difference.getFirst() == null;
     }
 
-    private static void onFinishAuthorization(String targetRedirectURI, AuthEntry entry, AuthzResponse resp) {
+    private void onFinishAuthorization(String targetRedirectURI, AuthEntry entry, AuthzResponse resp, RelyingParty relyingParty) {
+        LocalDateTime now = LocalDateTime.now();
+        sessionService.updateAuthCodeExpired(entry.getAuthCode(), fromLocal(now.minus(relyingParty.getCodeTTL(), ChronoUnit.SECONDS))).toBlocking().single();
+
         resp.setCode(entry.getAuthCode());
         resp.setExpiresIn(entry.getCodeExpiresIn().getTime());
         resp.setLocation(targetRedirectURI);
