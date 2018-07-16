@@ -143,4 +143,6 @@ public interface SessionService {
     Observable<Session> getByValidMFAToken(String token, Date now);
 
     Observable<Boolean> updateAcrValues(Session session);
+
+    Observable<Boolean> updateAuthCodeExpired(String code, Date now);
 }
