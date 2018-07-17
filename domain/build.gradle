@@ -2,3 +2,7 @@ apply plugin: 'java'
 apply plugin: 'maven-publish'
 apply plugin: 'nebula.source-jar'
 apply plugin: 'nebula.maven-publish'
+
+dependencies{
+    compile 'org.springframework.boot:spring-boot-starter-web'
+}

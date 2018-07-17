@@ -1,10 +1,9 @@
-package ru.ratauth.server.providers;
+package ru.ratauth.providers.auth;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.ratauth.providers.auth.Verifier;
-import ru.ratauth.server.extended.enroll.MissingProviderException;
+import ru.ratauth.exception.MissingProviderException;
 
 import java.util.List;
 import java.util.Map;

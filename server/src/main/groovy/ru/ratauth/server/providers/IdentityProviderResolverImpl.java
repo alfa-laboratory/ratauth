@@ -3,7 +3,7 @@ package ru.ratauth.server.providers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.ratauth.entities.IdentityProvider;
-import ru.ratauth.server.extended.enroll.MissingProviderException;
+import ru.ratauth.exception.MissingProviderException;
 
 import java.util.List;
 import java.util.Map;

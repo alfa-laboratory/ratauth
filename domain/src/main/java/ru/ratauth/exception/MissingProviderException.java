@@ -1,4 +1,4 @@
-package ru.ratauth.server.extended.enroll;
+package ru.ratauth.exception;
 
 public class MissingProviderException extends RuntimeException {
 
