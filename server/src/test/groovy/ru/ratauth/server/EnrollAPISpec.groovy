@@ -306,6 +306,6 @@ class EnrollAPISpec extends BaseDocumentationSpec {
                 .when()
                 .post("verify")
         then:
-            result.then().extract().jsonPath().get("id") == AuthorizationException.ID.AUTH_CODE_NOT_FOUND.name()
+            result.then().extract().jsonPath().get("id") == AuthorizationException.ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED.name()
     }
 }

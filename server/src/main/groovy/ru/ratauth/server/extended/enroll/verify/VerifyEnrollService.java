@@ -63,7 +63,7 @@ public class VerifyEnrollService {
 
             sessionService.updateAuthCodeExpired(authCode, fromLocal(authCodeExpiresIn))
                 .filter(Boolean::booleanValue)
-                .switchIfEmpty(Observable.error(new AuthorizationException(ID.AUTH_CODE_NOT_FOUND)))
+                .switchIfEmpty(Observable.error(new AuthorizationException(ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED)))
                 .subscribe();
 
             long expiresIn = ChronoUnit.SECONDS.between(now, authCodeExpiresIn);
