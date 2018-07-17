@@ -51,7 +51,7 @@ public class AuthorizationException extends BaseAuthServerException implements I
     SESSION_CLOSED("Session is closed"),
     REDIRECT_NOT_CORRECT("Redirect url is not correct"),
     INVALID_GRANT_TYPE("Invalid grant type"),
-    AUTH_CODE_NOT_FOUND("code not found");
+    AUTH_CODE_NOT_FOUND("Auth code not found");
 
     private final String baseText;
 
