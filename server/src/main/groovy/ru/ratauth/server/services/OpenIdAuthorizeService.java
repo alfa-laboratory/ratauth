@@ -58,7 +58,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     private final IdentityProviderResolver identityProviderResolver;
 
     @SneakyThrows
-    private AuthzResponse buildResponse(RelyingParty relyingParty, Session session, VerifyResult verifyResult, TokenCache tokenCache, AuthzRequest authzRequest) {
+    private static AuthzResponse buildResponse(RelyingParty relyingParty, Session session, VerifyResult verifyResult, TokenCache tokenCache, AuthzRequest authzRequest) {
         String redirectUri = authzRequest.getRedirectURI();
         final String targetRedirectURI = createRedirectURI(relyingParty, redirectUri);
         //in case of autCode sent by authProvider
@@ -94,8 +94,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         return resp;
     }
 
-    private void generateAuthCode(RelyingParty relyingParty, Session session,
-        AuthzRequest authzRequest, String targetRedirectURI, AuthEntry entry, AuthzResponse resp) throws MalformedURLException {
+    private static void generateAuthCode(RelyingParty relyingParty, Session session, AuthzRequest authzRequest, String targetRedirectURI, AuthEntry entry, AuthzResponse resp) throws MalformedURLException {
         AcrValues acrValues = authzRequest.getAcrValues();
 
         if (isDefaultFlow(acrValues)) {
@@ -136,7 +135,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         return difference.getFirst() == null;
     }
 
-    private void onFinishAuthorization(String targetRedirectURI, AuthEntry entry, AuthzResponse resp) {
+    private static void onFinishAuthorization(String targetRedirectURI, AuthEntry entry, AuthzResponse resp) {
         resp.setCode(entry.getAuthCode());
         resp.setExpiresIn(entry.getCodeExpiresIn().getTime());
         resp.setLocation(targetRedirectURI);
