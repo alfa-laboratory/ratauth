@@ -120,8 +120,6 @@ class EnrollAPISpec extends BaseDocumentationSpec {
                 .body("data.user_id", equalTo("resu"))
     }
 
-
-
     def 'activate enroll with data'() {
         given:
         def setup = given(this.documentationSpec)
@@ -220,7 +218,6 @@ class EnrollAPISpec extends BaseDocumentationSpec {
                 .header(HttpHeaders.LOCATION, StringContains.containsString('http://localhost:8080/domain.mine/oidc/web/authorize/username?is_webview=true&session_token=session_token&scope=rs.read&acr_values=username%3Asms&mfa_token=mfa-token-test&state=relyingpartystate&client_id=mine'))
     }
 
-
     def 'verify enroll final step'() {
         given:
         def setup = given(this.documentationSpec)
@@ -244,7 +241,6 @@ class EnrollAPISpec extends BaseDocumentationSpec {
                                 .description('Authentication Context Class Reference'),
                         parameterWithName('enroll')
                                 .description('Required Authentication Context Class Reference'),
-
                 )
         ))
                 .given()

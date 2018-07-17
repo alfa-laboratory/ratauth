@@ -332,9 +332,7 @@ class PersistenceServiceStubConfiguration {
                                                   expiresIn: DateUtils.fromLocal(TOMORROW),
                                                   created: new Date())] as Set
                                   )] as Set)
-          )
-
-        }
+          )}
       }
 
       @Override
