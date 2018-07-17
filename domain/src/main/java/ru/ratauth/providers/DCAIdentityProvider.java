@@ -1,4 +1,4 @@
-package ru.ratauth.server.providers;
+package ru.ratauth.providers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
