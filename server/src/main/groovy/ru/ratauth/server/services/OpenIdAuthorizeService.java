@@ -43,7 +43,7 @@ import rx.Observable;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
-import static ru.ratauth.exception.AuthCodeUpdateException.ID.AUTH_CODE_EXPIRED;
+import static ru.ratauth.exception.AuthCodeUpdateException.ID.AUTH_CODE_EXPIRES_IN_UPDATE;
 import static ru.ratauth.providers.auth.dto.VerifyResult.Status.NEED_APPROVAL;
 import static ru.ratauth.server.utils.DateUtils.fromLocal;
 import static ru.ratauth.server.utils.RedirectUtils.createRedirectURI;
@@ -145,7 +145,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         LocalDateTime now = LocalDateTime.now();
         sessionService.updateAuthCodeExpired(entry.getAuthCode(), fromLocal(now.plus(relyingParty.getCodeTTL(), ChronoUnit.SECONDS)))
             .filter(Boolean::booleanValue)
-            .switchIfEmpty(Observable.error(new AuthCodeUpdateException(AUTH_CODE_EXPIRED)))
+            .switchIfEmpty(Observable.error(new AuthCodeUpdateException(AUTH_CODE_EXPIRES_IN_UPDATE)))
             .doOnNext(r -> {
                 resp.setCode(entry.getAuthCode());
                 resp.setExpiresIn(entry.getCodeExpiresIn().getTime());

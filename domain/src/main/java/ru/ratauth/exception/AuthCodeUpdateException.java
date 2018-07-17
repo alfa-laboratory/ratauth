@@ -33,7 +33,7 @@ public class AuthCodeUpdateException extends BaseAuthServerException {
     }
 
     public enum ID {
-        AUTH_CODE_EXPIRED("AuthCode expiresIn hasn't been updated");
+        AUTH_CODE_EXPIRES_IN_UPDATE("AuthCode expiresIn hasn't been updated");
 
         private final String baseText;
 
