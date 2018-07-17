@@ -1,5 +1,13 @@
 package ru.ratauth.server.services;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -8,20 +16,27 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import ru.ratauth.entities.*;
+import ru.ratauth.entities.AcrValues;
+import ru.ratauth.entities.AuthClient;
+import ru.ratauth.entities.AuthEntry;
+import ru.ratauth.entities.DeviceInfo;
+import ru.ratauth.entities.IdentityProvider;
+import ru.ratauth.entities.RelyingParty;
+import ru.ratauth.entities.Session;
+import ru.ratauth.entities.Token;
+import ru.ratauth.entities.TokenCache;
+import ru.ratauth.entities.UserInfo;
 import ru.ratauth.exception.AuthorizationException;
-import ru.ratauth.interaction.*;
+import ru.ratauth.interaction.AuthzRequest;
+import ru.ratauth.interaction.AuthzResponse;
+import ru.ratauth.interaction.AuthzResponseType;
+import ru.ratauth.interaction.GrantType;
 import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
 import ru.ratauth.server.providers.IdentityProviderResolver;
 import ru.ratauth.server.utils.RedirectUtils;
 import rx.Observable;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
-import java.util.function.Function;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;

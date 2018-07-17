@@ -50,7 +50,8 @@ public class AuthorizationException extends BaseAuthServerException implements I
     SESSION_BLOCKED("Session is blocked"),
     SESSION_CLOSED("Session is closed"),
     REDIRECT_NOT_CORRECT("Redirect url is not correct"),
-    INVALID_GRANT_TYPE("Invalid grant type");
+    INVALID_GRANT_TYPE("Invalid grant type"),
+    AUTH_CODE_EXPIRES_IN_UPDATE_FAILED("Auth code expires in update failed");
 
     private final String baseText;
 

@@ -108,4 +108,6 @@ public interface AuthSessionService {
     Observable<Boolean> updateIdToken(Session session, UserInfo userInfo, Set<String> scopes, Set<String> authContext);
 
     Observable<Boolean> updateAcrValues(Session session);
+
+    Observable<Boolean> updateAuthCodeExpired(String code, Date now);
 }

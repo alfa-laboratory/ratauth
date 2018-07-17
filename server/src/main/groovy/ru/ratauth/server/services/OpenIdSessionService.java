@@ -184,4 +184,9 @@ public class OpenIdSessionService implements AuthSessionService {
     public Observable<Boolean> updateAcrValues(Session session) {
         return sessionService.updateAcrValues(session);
     }
+
+    @Override
+    public Observable<Boolean> updateAuthCodeExpired(String code, Date now) {
+        return sessionService.updateAuthCodeExpired(code, now);
+    }
 }

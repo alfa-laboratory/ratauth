@@ -30,6 +30,7 @@ class PersistenceServiceStubConfiguration {
   public static final String SALT = 'JBn7SnEzMy0MXdNsh5GVvktSGuRs0+BNVZ47kmm3TDM='
   public static final String TOKEN = '1234'
   public static final String MFA_TOKEN = 'mfa-token-test'
+  public static final String MFA_TOKEN_2 = 'mfa-token-test-2'
   public static final String REFRESH_TOKEN_OLD_SCHEME = '12345'
   public static final String REFRESH_TOKEN = '123456'
   public static final String CODE = '123'
@@ -307,7 +308,31 @@ class PersistenceServiceStubConfiguration {
                                                   created: new Date())] as Set
                                   )] as Set)
           )
-        }
+        } else if (token == MFA_TOKEN_2) {
+          return Observable.just(
+                  new Session(
+                          id: 'id-6',
+                          identityProvider: 'STUB',
+                          sessionToken: SESSION_TOKEN,
+                          userInfo: ID_TOKEN,
+                          status: Status.ACTIVE,
+                          mfaToken: MFA_TOKEN,
+                          receivedAcrValues: AcrValues.valueOf("none"),
+                          expiresIn: DateUtils.fromLocal(LocalDateTime.now().plusDays(1)),
+                          entries: [
+                                  new AuthEntry(
+                                          codeExpiresIn: DateUtils.fromLocal(LocalDateTime.now().plusDays(1)),
+                                          authCode: '0b876286-56d6-33a0-85c6-72768c23c21f',
+                                          relyingParty: CLIENT_NAME,
+                                          scopes: ['rs.read'] as Set,
+                                          refreshToken: REFRESH_TOKEN_OLD_SCHEME,
+                                          tokens: [new Token(token: TOKEN,
+                                                  refreshToken: REFRESH_TOKEN,
+                                                  refreshTokenExpiresIn: DateUtils.fromLocal(TOMORROW),
+                                                  expiresIn: DateUtils.fromLocal(TOMORROW),
+                                                  created: new Date())] as Set
+                                  )] as Set)
+          )}
       }
 
       @Override
@@ -317,7 +342,10 @@ class PersistenceServiceStubConfiguration {
 
       @Override
       Observable<Boolean> updateAuthCodeExpired(String code, Date now) {
-        return Observable.just(true)
+        if ('code' == code) {
+          return Observable.just(true)
+        }
+        return Observable.just(false)
       }
 
       @Override
