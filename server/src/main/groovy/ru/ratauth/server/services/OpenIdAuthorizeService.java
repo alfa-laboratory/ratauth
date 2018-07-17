@@ -2,8 +2,6 @@ package ru.ratauth.server.services;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
@@ -28,7 +26,6 @@ import ru.ratauth.entities.Session;
 import ru.ratauth.entities.Token;
 import ru.ratauth.entities.TokenCache;
 import ru.ratauth.entities.UserInfo;
-import ru.ratauth.exception.AuthCodeUpdateException;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.interaction.AuthzRequest;
 import ru.ratauth.interaction.AuthzResponse;
@@ -43,9 +40,7 @@ import rx.Observable;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
-import static ru.ratauth.exception.AuthCodeUpdateException.ID.AUTH_CODE_EXPIRES_IN_UPDATE;
 import static ru.ratauth.providers.auth.dto.VerifyResult.Status.NEED_APPROVAL;
-import static ru.ratauth.server.utils.DateUtils.fromLocal;
 import static ru.ratauth.server.utils.RedirectUtils.createRedirectURI;
 
 /**
@@ -117,7 +112,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         AcrValues difference = acrValues.difference(receivedAcrValues);
 
         if (isReceivedRequiredAcrs(difference)) {
-            onFinishAuthorization(targetRedirectURI, entry, resp, relyingParty);
+            onFinishAuthorization(targetRedirectURI, entry, resp);
             return;
         }
 
@@ -141,17 +136,10 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         return difference.getFirst() == null;
     }
 
-    private void onFinishAuthorization(String targetRedirectURI, AuthEntry entry, AuthzResponse resp, RelyingParty relyingParty) {
-        LocalDateTime now = LocalDateTime.now();
-        sessionService.updateAuthCodeExpired(entry.getAuthCode(), fromLocal(now.plus(relyingParty.getCodeTTL(), ChronoUnit.SECONDS)))
-            .filter(Boolean::booleanValue)
-            .switchIfEmpty(Observable.error(new AuthCodeUpdateException(AUTH_CODE_EXPIRES_IN_UPDATE)))
-            .doOnNext(r -> {
-                resp.setCode(entry.getAuthCode());
-                resp.setExpiresIn(entry.getCodeExpiresIn().getTime());
-                resp.setLocation(targetRedirectURI);
-            })
-            .subscribe();
+    private void onFinishAuthorization(String targetRedirectURI, AuthEntry entry, AuthzResponse resp) {
+        resp.setCode(entry.getAuthCode());
+        resp.setExpiresIn(entry.getCodeExpiresIn().getTime());
+        resp.setLocation(targetRedirectURI);
     }
 
     private static void onNextAuthMethod(RelyingParty relyingParty, Session session, String targetRedirectURI, AuthzResponse resp, String firstAcr) throws MalformedURLException {

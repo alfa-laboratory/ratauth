@@ -1,12 +1,27 @@
 package ru.ratauth.server.extended.enroll.verify;
 
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.ratauth.entities.*;
+import ru.ratauth.entities.AcrValues;
+import ru.ratauth.entities.AuthEntry;
+import ru.ratauth.entities.DeviceInfo;
+import ru.ratauth.entities.IdentityProvider;
+import ru.ratauth.entities.RelyingParty;
+import ru.ratauth.entities.Session;
+import ru.ratauth.entities.UserInfo;
+import ru.ratauth.exception.AuthorizationException;
+import ru.ratauth.exception.AuthorizationException.ID;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
 import ru.ratauth.server.providers.IdentityProviderResolver;
@@ -15,19 +30,11 @@ import ru.ratauth.server.services.AuthClientService;
 import ru.ratauth.server.services.AuthSessionService;
 import ru.ratauth.server.services.DeviceService;
 import ru.ratauth.server.services.TokenCacheService;
-import ru.ratauth.server.utils.DateUtils;
 import ru.ratauth.server.utils.RedirectUtils;
 import rx.Observable;
 
-import java.net.URL;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
 import static java.util.Optional.ofNullable;
+import static ru.ratauth.server.utils.DateUtils.fromLocal;
 import static ru.ratauth.server.utils.RedirectUtils.createRedirectURI;
 
 @Slf4j
@@ -51,8 +58,15 @@ public class VerifyEnrollService {
                     .orElseThrow(() -> new IllegalStateException("sessionID = " + session.getId() + ", relyingParty = " + relyingParty));
 
             String authCode = authEntry.getAuthCode();
-            long expiresIn = ChronoUnit.SECONDS.between(LocalDateTime.now(), DateUtils.toLocal(authEntry.getCodeExpiresIn()));
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime authCodeExpiresIn = now.plus(relyingParty.getCodeTTL(), ChronoUnit.SECONDS);
 
+            sessionService.updateAuthCodeExpired(authCode, fromLocal(authCodeExpiresIn))
+                .filter(Boolean::booleanValue)
+                .switchIfEmpty(Observable.error(new AuthorizationException(ID.AUTH_CODE_NOT_FOUND)))
+                .subscribe();
+
+            long expiresIn = ChronoUnit.SECONDS.between(now, authCodeExpiresIn);
             return new SuccessResponse(createRedirectURI(relyingParty, request.getRedirectURI()), authCode, expiresIn);
         } else {
 
