@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component
 import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
-import ru.ratauth.server.extended.enroll.MissingProviderException
-import ru.ratauth.server.providers.ActivatorResolver
-import ru.ratauth.server.providers.VerifierResolver
+import ru.ratauth.exception.MissingProviderException
+import ru.ratauth.providers.auth.ActivatorResolver
+import ru.ratauth.providers.auth.VerifierResolver
 
 import static ratpack.jackson.Jackson.json
 
