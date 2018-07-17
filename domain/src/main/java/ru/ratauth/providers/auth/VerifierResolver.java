@@ -1,9 +1,8 @@
 package ru.ratauth.providers.auth;
 
-import lombok.extern.slf4j.Slf4j;
 import ru.ratauth.exception.MissingProviderException;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +14,7 @@ public class VerifierResolver {
     private final Map<String, Verifier> verifiers;
 
     public VerifierResolver() {
-        this.verifiers = new HashMap<>();
+        this.verifiers = Collections.emptyMap();
     }
 
     public VerifierResolver(List<Verifier> verifiers) {
