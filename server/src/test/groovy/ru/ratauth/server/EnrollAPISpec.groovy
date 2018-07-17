@@ -273,7 +273,6 @@ class EnrollAPISpec extends BaseDocumentationSpec {
                 .header(HttpHeaders.LOCATION, startsWith("https://domain.mine/login?"))
                 .header(HttpHeaders.LOCATION, StringContains.containsString("code=code"))
                 .header(HttpHeaders.LOCATION, StringContains.containsString("session_token=session_token"))
-                .header(HttpHeaders.LOCATION, StringContains.containsString('https://domain.mine/login?session_token=session_token&code=code&expires_in=86399'))
+                .header(HttpHeaders.LOCATION, StringContains.containsString('https://domain.mine/login?session_token=session_token&code=code&expires_in=36000'))
     }
-
 }
