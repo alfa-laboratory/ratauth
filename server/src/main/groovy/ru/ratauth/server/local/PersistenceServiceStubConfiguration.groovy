@@ -240,7 +240,6 @@ class PersistenceServiceStubConfiguration {
               expiresIn: DateUtils.fromLocal(LocalDateTime.now().plusDays(1)),
               entries: [
                 new AuthEntry(authCode: 'code',
-                  codeExpiresIn: DateUtils.fromLocal(LocalDateTime.now().plusMinutes(3)),
                   relyingParty: CLIENT_NAME,
                   scopes: ['rs.read'] as Set,
                   refreshToken: REFRESH_TOKEN_OLD_SCHEME
