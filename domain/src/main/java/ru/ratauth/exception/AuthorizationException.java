@@ -8,6 +8,7 @@ public class AuthorizationException extends BaseAuthServerException implements I
   private final String id;
 
   public AuthorizationException(String id) {
+    super(id);
     this.id = id;
   }
 
