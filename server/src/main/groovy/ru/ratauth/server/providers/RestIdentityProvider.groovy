@@ -58,6 +58,7 @@ class RestIdentityProvider implements IdentityProvider {
     Observable<VerifyResult> verify(VerifyInput input) {
         String enroll = input.enroll.first
         DestinationConfiguration config = identityProvidersConfiguration.idp?.get(enroll)?.verify
+
         log.info("Sending request to ${enroll}")
         return new HystrixIdentityProviderCommand(
                 HttpClientHolder.instance,
