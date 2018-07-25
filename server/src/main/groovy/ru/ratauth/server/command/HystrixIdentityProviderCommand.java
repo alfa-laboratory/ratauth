@@ -68,7 +68,7 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
     private Map<String, Object> performData(Map<String, String> data, UserInfo userInfo, String relyingParty, String enroll) {
         Map<String, Object> result = createKeyPrefix("data", data);
         result.putAll(createKeyPrefix("userinfo", userInfo.toMap()));
-        result.put("relyingparty", relyingParty);
+        result.put("relyingParty", relyingParty);
         result.put("enroll", enroll);
         return result;
     }
