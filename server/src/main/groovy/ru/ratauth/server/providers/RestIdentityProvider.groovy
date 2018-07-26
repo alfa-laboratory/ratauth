@@ -10,7 +10,6 @@ import ru.ratauth.entities.AcrValues
 import ru.ratauth.entities.IdentityProvider
 import ru.ratauth.exception.AuthorizationException
 import ru.ratauth.exception.ProviderException
-import ru.ratauth.providers.Fields
 import ru.ratauth.providers.auth.dto.ActivateInput
 import ru.ratauth.providers.auth.dto.ActivateResult
 import ru.ratauth.providers.auth.dto.VerifyInput
