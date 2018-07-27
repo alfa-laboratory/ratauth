@@ -1,7 +1,10 @@
 package ru.ratauth.server.command;
 
+import static java.util.Optional.ofNullable;
+
 import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.HystrixObservableCommand;
+import java.util.Collections;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +45,7 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
 
     public HystrixIdentityProviderCommand(@NonNull HttpClient httpClient,
                                    @NonNull Map<String, String> data,
-                                   @NonNull UserInfo userInfo,
+                                   UserInfo userInfo,
                                    @NonNull String relyingParty,
                                    @NonNull String enroll,
                                    @NonNull String url,
@@ -55,7 +58,7 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
 
     private HystrixIdentityProviderCommand(@NonNull HttpClient httpClient,
                                            @NonNull Map<String, String> data,
-                                           @NonNull UserInfo userInfo,
+                                           UserInfo userInfo,
                                            @NonNull String relyingParty,
                                            @NonNull String enroll,
                                            @NonNull String url) throws MalformedURLException, URISyntaxException {
@@ -67,10 +70,16 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
 
     private Map<String, Object> performData(Map<String, String> data, UserInfo userInfo, String relyingParty, String enroll) {
         Map<String, Object> result = createKeyPrefix("data", data);
-        result.putAll(createKeyPrefix("userinfo", userInfo.toMap()));
+        result.putAll(createKeyPrefix("userinfo", toMap(userInfo)));
         result.put("relying_party", relyingParty);
         result.put("enroll", enroll);
         return result;
+    }
+
+    private Map<String, Object> toMap(UserInfo userInfo) {
+        return ofNullable(userInfo)
+                .map(UserInfo::toMap)
+                .orElse(Collections.emptyMap());
     }
 
     private static Map<String, Object> createKeyPrefix(String prefix, Map<String, ?> map) {
