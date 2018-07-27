@@ -1,10 +1,15 @@
 package ru.ratauth.server.extended.enroll.activate;
 
+import static java.util.Optional.ofNullable;
+
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.ratauth.entities.IdentityProvider;
 import ru.ratauth.entities.RelyingParty;

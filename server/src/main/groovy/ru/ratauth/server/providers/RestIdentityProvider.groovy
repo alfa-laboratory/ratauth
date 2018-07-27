@@ -101,7 +101,6 @@ class RestIdentityProvider implements IdentityProvider {
 
     private static ActivateResult makeActivateResultFromResponse(ReceivedResponse receivedResponse) {
         def response = new JsonSlurper().parseText(receivedResponse.body.text) as Map
-        assert response.data[Fields.USER_ID.val()]
         return new ActivateResult(response.data as Map)
     }
 }
