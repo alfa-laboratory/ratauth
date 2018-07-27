@@ -1,9 +1,17 @@
 package ru.ratauth.server.extended.enroll.activate;
 
+import static java.util.Optional.ofNullable;
+
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.ratauth.entities.IdentityProvider;
 import ru.ratauth.entities.RelyingParty;
@@ -11,20 +19,12 @@ import ru.ratauth.entities.Session;
 import ru.ratauth.entities.UserInfo;
 import ru.ratauth.providers.auth.dto.ActivateInput;
 import ru.ratauth.providers.auth.dto.ActivateResult;
-import ru.ratauth.providers.auth.ActivatorResolver;
 import ru.ratauth.server.providers.IdentityProviderResolver;
 import ru.ratauth.server.secutiry.TokenProcessor;
 import ru.ratauth.server.services.AuthClientService;
 import ru.ratauth.server.services.AuthSessionService;
 import ru.ratauth.server.services.TokenCacheService;
 import rx.Observable;
-
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
-
-import static java.util.Optional.ofNullable;
 
 @Slf4j
 @Service
@@ -36,6 +36,9 @@ public class ActivateEnrollService {
     private final TokenCacheService tokenCacheService;
     private final TokenProcessor tokenProcessor;
     private final IdentityProviderResolver identityProviderResolver;
+    @Value("ratauth.nomfa.acr.allowed")
+    private List<String> acrAllowed;
+
 
     public Observable<ActivateEnrollResponse> incAuthLevel(ActivateEnrollRequest request) {
         String mfa = request.getMfaToken();
@@ -83,8 +86,11 @@ public class ActivateEnrollService {
 
     private Observable<ActivateResult> activate(ActivateEnrollRequest request, UserInfo userInfo, RelyingParty relyingParty) {
         IdentityProvider identityProvider = identityProviderResolver.getProvider(relyingParty.getIdentityProvider());
-        ActivateInput activateInput = new ActivateInput(request.getData(), request.getEnroll(), userInfo, relyingParty.getName());
+        ActivateInput activateInput = new ActivateInput(request.getData(), request.getEnroll(), getUserInfo(request, userInfo), relyingParty.getName());
         return identityProvider.activate(activateInput);
     }
 
+    private UserInfo getUserInfo(ActivateEnrollRequest activateEnrollRequest, UserInfo userInfo) {
+        return acrAllowed.contains(activateEnrollRequest.getEnroll().getFirst()) ? new UserInfo() : userInfo;
+    }
 }
