@@ -10,7 +10,6 @@ import ru.ratauth.entities.AcrValues
 import ru.ratauth.entities.IdentityProvider
 import ru.ratauth.exception.AuthorizationException
 import ru.ratauth.exception.ProviderException
-import ru.ratauth.providers.Fields
 import ru.ratauth.providers.auth.dto.ActivateInput
 import ru.ratauth.providers.auth.dto.ActivateResult
 import ru.ratauth.providers.auth.dto.VerifyInput
@@ -83,8 +82,7 @@ class RestIdentityProvider implements IdentityProvider {
     }
 
     private static VerifyResult makeVerifyResultFromResponse(ReceivedResponse receivedResponse) {
-        def response = new JsonSlurper().parseText(receivedResponse.body.text) as Map
-        assert response.data[Fields.USER_ID.val()]
+        def response = (new JsonSlurper().parseText(receivedResponse.body.text) as List)[0] as Map
         new VerifyResult(
             data:response.data as Map,
             status:VerifyResult.Status.valueOf(response.status as String),
@@ -100,7 +98,7 @@ class RestIdentityProvider implements IdentityProvider {
     }
 
     private static ActivateResult makeActivateResultFromResponse(ReceivedResponse receivedResponse) {
-        def response = new JsonSlurper().parseText(receivedResponse.body.text) as Map
+        def response = (new JsonSlurper().parseText(receivedResponse.body.text) as List)[0] as Map
         return new ActivateResult(response.data as Map)
     }
 }
