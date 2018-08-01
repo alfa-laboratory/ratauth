@@ -14,6 +14,9 @@ import ru.ratauth.providers.auth.dto.ActivateInput
 import ru.ratauth.providers.auth.dto.ActivateResult
 import ru.ratauth.providers.auth.dto.VerifyInput
 import ru.ratauth.providers.auth.dto.VerifyResult
+import ru.ratauth.providers.registrations.RegistrationProvider
+import ru.ratauth.providers.registrations.dto.RegInput
+import ru.ratauth.providers.registrations.dto.RegResult
 import ru.ratauth.server.command.HystrixIdentityProviderCommand
 import ru.ratauth.server.configuration.DestinationConfiguration
 import ru.ratauth.server.configuration.IdentityProvidersConfiguration
@@ -36,7 +39,7 @@ class RestIdentityProvider implements IdentityProvider {
     Observable<ActivateResult> activate(ActivateInput input) {
         String enroll = input.enroll.first
         DestinationConfiguration config = identityProvidersConfiguration.idp?.get(enroll)?.activate
-
+        int timeout = identityProvidersConfiguration.timeout
         log.info("Sending request to ${enroll}")
         return new HystrixIdentityProviderCommand(
                 HttpClientHolder.instance,
@@ -46,7 +49,8 @@ class RestIdentityProvider implements IdentityProvider {
                 enroll,
                 config?.url,
                 config?.authLogin,
-                config?.authPassword
+                config?.authPassword,
+                timeout
         )
                 .toObservable()
                 .map({ ReceivedResponse res -> makeActivateResultFromResponse(res)
