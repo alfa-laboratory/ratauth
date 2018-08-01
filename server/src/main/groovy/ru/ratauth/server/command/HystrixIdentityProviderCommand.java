@@ -3,6 +3,7 @@ package ru.ratauth.server.command;
 import static com.netflix.hystrix.HystrixCommandGroupKey.Factory.asKey;
 import static java.util.Optional.ofNullable;
 
+import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.HystrixCommandProperties;
 import com.netflix.hystrix.HystrixObservableCommand;
 import java.io.UnsupportedEncodingException;
@@ -64,13 +65,16 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
                                            @NonNull String relyingParty,
                                            @NonNull String enroll,
                                            @NonNull String url) throws MalformedURLException, URISyntaxException {
-        super(setter);
+        super(        HystrixCommandGroupKey.Factory.asKey(String.format("identity-provider-%s", enroll))
+        );
         this.httpClient = httpClient;
         this.uri = new URL(url).toURI();
         this.data = performData(data, userInfo, relyingParty, enroll);
     }
 
     private static Setter createSetter(@NonNull String enroll, Integer timeout) {
+        HystrixCommandGroupKey.Factory.asKey(String.format("identity-provider-%s", enroll));
+
         Setter setter = Setter.withGroupKey(asKey(String.format("identity-provider-%s", enroll)));
         if (timeout != null) {
             setter.andCommandPropertiesDefaults(HystrixCommandProperties.Setter()
