@@ -52,24 +52,33 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
                                    String login,
                                    String password,
                                    int timeout) throws MalformedURLException, URISyntaxException {
-        this(httpClient, data, userInfo, relyingParty, enroll, url, timeout);
+        this(createSetter(enroll, timeout), httpClient, data, userInfo, relyingParty, enroll, url);
         this.login = login;
         this.password = password;
     }
 
-    private HystrixIdentityProviderCommand(@NonNull HttpClient httpClient,
+    private HystrixIdentityProviderCommand(Setter setter,
+                                           @NonNull HttpClient httpClient,
                                            @NonNull Map<String, String> data,
                                            UserInfo userInfo,
                                            @NonNull String relyingParty,
                                            @NonNull String enroll,
-                                           @NonNull String url,
-                                           int timeout) throws MalformedURLException, URISyntaxException {
-        super(Setter.withGroupKey(asKey(String.format("identity-provider-%s", enroll)))
-                .andCommandPropertiesDefaults(HystrixCommandProperties.Setter()
-                        .withExecutionTimeoutInMilliseconds(timeout)));
+                                           @NonNull String url) throws MalformedURLException, URISyntaxException {
+        super(setter);
         this.httpClient = httpClient;
         this.uri = new URL(url).toURI();
         this.data = performData(data, userInfo, relyingParty, enroll);
+    }
+
+    private static Setter createSetter(@NonNull String enroll, Integer timeout) {
+        Setter setter = Setter.withGroupKey(asKey(String.format("identity-provider-%s", enroll)));
+        if (timeout != null) {
+            setter.andCommandPropertiesDefaults(HystrixCommandProperties.Setter()
+                    .withExecutionTimeoutInMilliseconds(timeout));
+        } else {
+            setter.andCommandPropertiesDefaults(HystrixCommandProperties.defaultSetter());
+        }
+        return setter;
     }
 
     private Map<String, Object> performData(Map<String, String> data, UserInfo userInfo, String relyingParty, String enroll) {
