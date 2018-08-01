@@ -51,7 +51,7 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
                                    @NonNull String url,
                                    String login,
                                    String password,
-                                   int timeout) throws MalformedURLException, URISyntaxException {
+                                   Integer timeout) throws MalformedURLException, URISyntaxException {
         this(createSetter(enroll, timeout), httpClient, data, userInfo, relyingParty, enroll, url);
         this.login = login;
         this.password = password;
