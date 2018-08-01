@@ -14,9 +14,6 @@ import ru.ratauth.providers.auth.dto.ActivateInput
 import ru.ratauth.providers.auth.dto.ActivateResult
 import ru.ratauth.providers.auth.dto.VerifyInput
 import ru.ratauth.providers.auth.dto.VerifyResult
-import ru.ratauth.providers.registrations.RegistrationProvider
-import ru.ratauth.providers.registrations.dto.RegInput
-import ru.ratauth.providers.registrations.dto.RegResult
 import ru.ratauth.server.command.HystrixIdentityProviderCommand
 import ru.ratauth.server.configuration.DestinationConfiguration
 import ru.ratauth.server.configuration.IdentityProvidersConfiguration
