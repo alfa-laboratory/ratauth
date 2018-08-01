@@ -80,7 +80,7 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
             setter.andCommandPropertiesDefaults(HystrixCommandProperties.Setter()
                     .withExecutionTimeoutInMilliseconds(timeout));
         } else {
-            setter.andCommandPropertiesDefaults(HystrixCommandProperties.defaultSetter());
+            setter.andCommandPropertiesDefaults(HystrixCommandProperties.Setter());
         }
         return setter;
     }
