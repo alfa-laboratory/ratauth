@@ -65,16 +65,13 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
                                            @NonNull String relyingParty,
                                            @NonNull String enroll,
                                            @NonNull String url) throws MalformedURLException, URISyntaxException {
-        super(        HystrixCommandGroupKey.Factory.asKey(String.format("identity-provider-%s", enroll))
-        );
+        super(setter);
         this.httpClient = httpClient;
         this.uri = new URL(url).toURI();
         this.data = performData(data, userInfo, relyingParty, enroll);
     }
 
     private static Setter createSetter(@NonNull String enroll, Integer timeout) {
-        HystrixCommandGroupKey.Factory.asKey(String.format("identity-provider-%s", enroll));
-
         Setter setter = Setter.withGroupKey(asKey(String.format("identity-provider-%s", enroll)));
         if (timeout != null) {
             setter.andCommandPropertiesDefaults(HystrixCommandProperties.Setter()
