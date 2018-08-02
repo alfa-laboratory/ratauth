@@ -1,10 +1,27 @@
 package ru.ratauth.server.command;
 
+import static com.netflix.hystrix.HystrixCommandGroupKey.Factory.asKey;
 import static java.util.Optional.ofNullable;
 
 import com.netflix.hystrix.HystrixCommandGroupKey;
+import com.netflix.hystrix.HystrixCommandProperties;
 import com.netflix.hystrix.HystrixObservableCommand;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
+import java.util.Base64;
 import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -16,22 +33,6 @@ import ratpack.http.client.ReceivedResponse;
 import ratpack.rx.RxRatpack;
 import ru.ratauth.entities.UserInfo;
 import rx.Observable;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
-import java.util.Base64;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class HystrixIdentityProviderCommand extends HystrixObservableCommand<ReceivedResponse> {
@@ -50,22 +51,35 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
                                    @NonNull String enroll,
                                    @NonNull String url,
                                    String login,
-                                   String password) throws MalformedURLException, URISyntaxException {
-        this(httpClient, data, userInfo, relyingParty, enroll, url);
+                                   String password,
+                                   Integer timeout) throws MalformedURLException, URISyntaxException {
+        this(createSetter(enroll, timeout), httpClient, data, userInfo, relyingParty, enroll, url);
         this.login = login;
         this.password = password;
     }
 
-    private HystrixIdentityProviderCommand(@NonNull HttpClient httpClient,
+    private HystrixIdentityProviderCommand(Setter setter,
+                                           @NonNull HttpClient httpClient,
                                            @NonNull Map<String, String> data,
                                            UserInfo userInfo,
                                            @NonNull String relyingParty,
                                            @NonNull String enroll,
                                            @NonNull String url) throws MalformedURLException, URISyntaxException {
-        super(HystrixCommandGroupKey.Factory.asKey(String.format("identity-provider-%s", enroll)));
+        super(setter);
         this.httpClient = httpClient;
         this.uri = new URL(url).toURI();
         this.data = performData(data, userInfo, relyingParty, enroll);
+    }
+
+    private static Setter createSetter(@NonNull String enroll, Integer timeout) {
+        Setter setter = Setter.withGroupKey(asKey(String.format("identity-provider-%s", enroll)));
+        if (timeout != null) {
+            setter.andCommandPropertiesDefaults(HystrixCommandProperties.Setter()
+                    .withExecutionTimeoutInMilliseconds(timeout));
+        } else {
+            setter.andCommandPropertiesDefaults(HystrixCommandProperties.Setter());
+        }
+        return setter;
     }
 
     private Map<String, Object> performData(Map<String, String> data, UserInfo userInfo, String relyingParty, String enroll) {

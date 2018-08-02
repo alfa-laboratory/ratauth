@@ -36,7 +36,7 @@ class RestIdentityProvider implements IdentityProvider {
     Observable<ActivateResult> activate(ActivateInput input) {
         String enroll = input.enroll.first
         DestinationConfiguration config = identityProvidersConfiguration.idp?.get(enroll)?.activate
-
+        Integer timeout = identityProvidersConfiguration.timeout
         log.info("Sending request to ${enroll}")
         return new HystrixIdentityProviderCommand(
                 HttpClientHolder.instance,
@@ -46,7 +46,8 @@ class RestIdentityProvider implements IdentityProvider {
                 enroll,
                 config?.url,
                 config?.authLogin,
-                config?.authPassword
+                config?.authPassword,
+                timeout
         )
                 .toObservable()
                 .map({ ReceivedResponse res -> makeActivateResultFromResponse(res)
@@ -57,6 +58,7 @@ class RestIdentityProvider implements IdentityProvider {
     Observable<VerifyResult> verify(VerifyInput input) {
         String enroll = input.enroll.first
         DestinationConfiguration config = identityProvidersConfiguration.idp?.get(enroll)?.verify
+        int timeout = identityProvidersConfiguration.timeout
 
         log.info("Sending request to ${enroll}")
         return new HystrixIdentityProviderCommand(
@@ -67,7 +69,8 @@ class RestIdentityProvider implements IdentityProvider {
                 enroll,
                 config?.url,
                 config?.authLogin,
-                config?.authPassword
+                config?.authPassword,
+                timeout
         )
                 .toObservable()
                 .map({ ReceivedResponse res ->
