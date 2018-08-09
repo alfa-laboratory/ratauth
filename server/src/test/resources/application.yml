@@ -68,3 +68,4 @@ ru.ratauth.scope:
   default_scope: "mobile.read"
 
 ru.ratauth.idp.default: "STUB"
+ratauth.timeout: 4000

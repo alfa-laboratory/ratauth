@@ -10,7 +10,6 @@ import ru.ratauth.entities.AcrValues
 import ru.ratauth.entities.IdentityProvider
 import ru.ratauth.exception.AuthorizationException
 import ru.ratauth.exception.ProviderException
-import ru.ratauth.providers.Fields
 import ru.ratauth.providers.auth.dto.ActivateInput
 import ru.ratauth.providers.auth.dto.ActivateResult
 import ru.ratauth.providers.auth.dto.VerifyInput
@@ -37,7 +36,7 @@ class RestIdentityProvider implements IdentityProvider {
     Observable<ActivateResult> activate(ActivateInput input) {
         String enroll = input.enroll.first
         DestinationConfiguration config = identityProvidersConfiguration.idp?.get(enroll)?.activate
-
+        Integer timeout = identityProvidersConfiguration.timeout
         log.info("Sending request to ${enroll}")
         return new HystrixIdentityProviderCommand(
                 HttpClientHolder.instance,
@@ -47,7 +46,8 @@ class RestIdentityProvider implements IdentityProvider {
                 enroll,
                 config?.url,
                 config?.authLogin,
-                config?.authPassword
+                config?.authPassword,
+                timeout
         )
                 .toObservable()
                 .map({ ReceivedResponse res -> makeActivateResultFromResponse(res)
@@ -58,6 +58,7 @@ class RestIdentityProvider implements IdentityProvider {
     Observable<VerifyResult> verify(VerifyInput input) {
         String enroll = input.enroll.first
         DestinationConfiguration config = identityProvidersConfiguration.idp?.get(enroll)?.verify
+        int timeout = identityProvidersConfiguration.timeout
 
         log.info("Sending request to ${enroll}")
         return new HystrixIdentityProviderCommand(
@@ -68,7 +69,8 @@ class RestIdentityProvider implements IdentityProvider {
                 enroll,
                 config?.url,
                 config?.authLogin,
-                config?.authPassword
+                config?.authPassword,
+                timeout
         )
                 .toObservable()
                 .map({ ReceivedResponse res ->
@@ -84,11 +86,10 @@ class RestIdentityProvider implements IdentityProvider {
 
     private static VerifyResult makeVerifyResultFromResponse(ReceivedResponse receivedResponse) {
         def response = (new JsonSlurper().parseText(receivedResponse.body.text) as List)[0] as Map
-        assert response.data[Fields.USER_ID.val()]
         new VerifyResult(
-                data:response.data as Map,
-                status:VerifyResult.Status.valueOf(response.status as String),
-                acrValues:parseAcrValues(response.acrValues as String)
+            data:response.data as Map,
+            status:VerifyResult.Status.valueOf(response.status as String),
+            acrValues:parseAcrValues(response.acrValues as String)
         )
     }
 
@@ -100,8 +101,7 @@ class RestIdentityProvider implements IdentityProvider {
     }
 
     private static ActivateResult makeActivateResultFromResponse(ReceivedResponse receivedResponse) {
-        def response = new JsonSlurper().parseText(receivedResponse.body.text) as Map
-        assert response.data[Fields.USER_ID.val()]
+        def response = (new JsonSlurper().parseText(receivedResponse.body.text) as List)[0] as Map
         return new ActivateResult(response.data as Map)
     }
 }
