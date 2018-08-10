@@ -121,6 +121,7 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
                         r.headers(headers -> headers.add(HttpHeaders.AUTHORIZATION, createAuthHeader(login, password)));
                     }
                     r.body(body -> {
+                        body.type(MediaType.APPLICATION_FORM);
                         body.text(data.entrySet().stream()
                                 .filter(e -> e.getKey() != null && e.getValue() != null)
                                 .map(e -> e.getKey() + "=" + e.getValue())
