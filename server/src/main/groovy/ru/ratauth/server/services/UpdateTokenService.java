@@ -8,5 +8,5 @@ public interface UpdateTokenService {
 
     void invalidateToken(String token);
 
-    UpdateEntry getNewEntry();
+    UpdateEntry createEntry(String sessionId);
 }
