@@ -14,6 +14,7 @@ public class UpdateEntry {
 
     private String sessionId;
     private String token;
+    private LocalDateTime created;
     private LocalDateTime expiresAt;
     private LocalDateTime used;
 }
