@@ -19,6 +19,7 @@ public class VerifyResult {
 
     public enum Status {
         SUCCESS,
-        NEED_APPROVAL
+        NEED_APPROVAL,
+        NEED_UPDATE
     }
 }
