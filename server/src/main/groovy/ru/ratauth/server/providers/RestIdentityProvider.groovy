@@ -50,7 +50,14 @@ class RestIdentityProvider implements IdentityProvider {
                 timeout
         )
                 .toObservable()
-                .map({ ReceivedResponse res -> makeActivateResultFromResponse(res)
+                .map({ ReceivedResponse res ->
+            if (res.status.'4xx') {
+                throw new AuthorizationException(res.body.text)
+            }
+            if (res.status.'5xx') {
+                throw new ProviderException(res.body.text)
+            }
+            makeActivateResultFromResponse(res)
         })
     }
 
