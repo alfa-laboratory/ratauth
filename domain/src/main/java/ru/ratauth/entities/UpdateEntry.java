@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class UpdateEntry {
 
     private String sessionId;
-    private String token;
+    private String code;
     private LocalDateTime created;
     private LocalDateTime expiresAt;
     private LocalDateTime used;
