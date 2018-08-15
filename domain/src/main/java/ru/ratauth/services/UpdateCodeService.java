@@ -26,5 +26,5 @@ public interface UpdateCodeService {
      * @param code update_token parameter
      * @return "true" if request complete
      */
-    Observable<Boolean> invalidateToken(String code);
+    Observable<Boolean> invalidate(String code);
 }
