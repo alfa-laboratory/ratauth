@@ -32,7 +32,6 @@ import ru.ratauth.server.services.AuthSessionService;
 import ru.ratauth.server.services.DeviceService;
 import ru.ratauth.server.services.TokenCacheService;
 import ru.ratauth.server.utils.RedirectUtils;
-import ru.ratauth.services.UpdateCodeService;
 import rx.Observable;
 
 import static java.util.Optional.ofNullable;
@@ -46,7 +45,7 @@ public class VerifyEnrollService {
 
     private final AuthClientService clientService;
     private final AuthSessionService sessionService;
-    private final UpdateCodeService updateCodeService;
+//    private final UpdateCodeService updateCodeService;
     private final TokenCacheService tokenCacheService;
     private final TokenProcessor tokenProcessor;
     private final IdentityProviderResolver identityProviderResolver;
