@@ -1,15 +1,14 @@
 package ru.ratauth.server.utils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.utils.StringUtils;
 import ru.ratauth.utils.URIUtils;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class RedirectUtils {
 
@@ -24,6 +23,9 @@ public class RedirectUtils {
         }
     }
 
+    public static String createRedirectURIWithPath(RelyingParty relyingParty, String path) {
+            return relyingParty.getAuthorizationRedirectURI() + path;
+    }
 
     public static String createRedirectURI(String url, String parameter) {
         if (parameter == null || parameter.isEmpty()) {

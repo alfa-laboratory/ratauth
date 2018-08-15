@@ -1,14 +1,12 @@
-package ru.ratauth.server.extended.enroll.verify;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.SneakyThrows;
-import ru.ratauth.server.utils.RedirectUtils;
+package ru.ratauth.server.extended.common;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
-import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.SneakyThrows;
+import ru.ratauth.server.utils.RedirectUtils;
 
 @Data
 @AllArgsConstructor
@@ -16,9 +14,9 @@ abstract public class RedirectResponse {
 
     final private String location;
 
-    abstract String putRedirectParameters(String key, String value);
+    public abstract String putRedirectParameters(String key, String value);
 
-    abstract Map<String, String> getRedirectParameters();
+    public abstract Map<String, String> getRedirectParameters();
 
     public String getRedirectURL() {
         return RedirectUtils.createRedirectURI(getLocation(), getRedirectParameters());

@@ -19,11 +19,14 @@ import ru.ratauth.entities.DeviceInfo;
 import ru.ratauth.entities.IdentityProvider;
 import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.entities.Session;
+import ru.ratauth.entities.UpdateEntry;
 import ru.ratauth.entities.UserInfo;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.exception.AuthorizationException.ID;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
+import ru.ratauth.server.extended.common.RedirectResponse;
+import ru.ratauth.server.extended.update.UpdateResponse;
 import ru.ratauth.server.providers.IdentityProviderResolver;
 import ru.ratauth.server.secutiry.TokenProcessor;
 import ru.ratauth.server.services.AuthClientService;
@@ -31,11 +34,14 @@ import ru.ratauth.server.services.AuthSessionService;
 import ru.ratauth.server.services.DeviceService;
 import ru.ratauth.server.services.TokenCacheService;
 import ru.ratauth.server.utils.RedirectUtils;
+import ru.ratauth.services.UpdateTokenService;
 import rx.Observable;
 
 import static java.util.Optional.ofNullable;
+import static ru.ratauth.providers.auth.dto.VerifyResult.Status.NEED_UPDATE;
 import static ru.ratauth.server.utils.DateUtils.fromLocal;
 import static ru.ratauth.server.utils.RedirectUtils.createRedirectURI;
+import static ru.ratauth.server.utils.RedirectUtils.createRedirectURIWithPath;
 
 @Slf4j
 @Service
@@ -44,6 +50,7 @@ public class VerifyEnrollService {
 
     private final AuthClientService clientService;
     private final AuthSessionService sessionService;
+    private final UpdateTokenService updateTokenService;
     private final TokenCacheService tokenCacheService;
     private final TokenProcessor tokenProcessor;
     private final IdentityProviderResolver identityProviderResolver;
@@ -51,6 +58,14 @@ public class VerifyEnrollService {
 
     @SneakyThrows
     private RedirectResponse createResponse(Session session, RelyingParty relyingParty, VerifyEnrollRequest request, VerifyResult verifyResult) {
+
+        if (NEED_UPDATE.equals(verifyResult.getStatus())) {
+            String reason = (String) verifyResult.getData().get("reason");
+            String redirectUri = createRedirectURIWithPath(relyingParty, (String) verifyResult.getData().get("redirect_uri"));
+            UpdateEntry updateTokenEntry = updateTokenService.createEntry(session.getId(), LocalDateTime.now().plusMinutes(5L)).toBlocking().single();
+            return new UpdateResponse(reason, updateTokenEntry.getToken(), redirectUri);
+        }
+
         AcrValues difference = request.getAuthContext().difference(session.getReceivedAcrValues());
         if (difference.getValues().isEmpty()) {
             AuthEntry authEntry = session
