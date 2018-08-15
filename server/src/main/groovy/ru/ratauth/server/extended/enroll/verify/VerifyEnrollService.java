@@ -34,7 +34,7 @@ import ru.ratauth.server.services.AuthSessionService;
 import ru.ratauth.server.services.DeviceService;
 import ru.ratauth.server.services.TokenCacheService;
 import ru.ratauth.server.utils.RedirectUtils;
-import ru.ratauth.services.UpdateTokenService;
+import ru.ratauth.services.UpdateCodeService;
 import rx.Observable;
 
 import static java.util.Optional.ofNullable;
@@ -50,7 +50,7 @@ public class VerifyEnrollService {
 
     private final AuthClientService clientService;
     private final AuthSessionService sessionService;
-    private final UpdateTokenService updateTokenService;
+    private final UpdateCodeService updateCodeService;
     private final TokenCacheService tokenCacheService;
     private final TokenProcessor tokenProcessor;
     private final IdentityProviderResolver identityProviderResolver;
@@ -62,7 +62,7 @@ public class VerifyEnrollService {
         if (NEED_UPDATE.equals(verifyResult.getStatus())) {
             String reason = (String) verifyResult.getData().get("reason");
             String redirectUri = createRedirectURIWithPath(relyingParty, (String) verifyResult.getData().get("redirect_uri"));
-            UpdateEntry updateTokenEntry = updateTokenService.createEntry(session.getId(), LocalDateTime.now().plusMinutes(5L)).toBlocking().single();
+            UpdateEntry updateTokenEntry = updateCodeService.create(session.getId(), LocalDateTime.now().plusMinutes(5L)).toBlocking().single();
             return new UpdateResponse(reason, updateTokenEntry.getToken(), redirectUri);
         }
 
