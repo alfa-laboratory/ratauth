@@ -45,7 +45,6 @@ public class VerifyEnrollService {
 
     private final AuthClientService clientService;
     private final AuthSessionService sessionService;
-//    private final UpdateCodeService updateCodeService;
     private final TokenCacheService tokenCacheService;
     private final TokenProcessor tokenProcessor;
     private final IdentityProviderResolver identityProviderResolver;
@@ -53,13 +52,6 @@ public class VerifyEnrollService {
 
     @SneakyThrows
     private RedirectResponse createResponse(Session session, RelyingParty relyingParty, VerifyEnrollRequest request, VerifyResult verifyResult) {
-
-//        if (NEED_UPDATE.equals(verifyResult.getStatus())) {
-//            String reason = (String) verifyResult.getData().get("reason");
-//            String redirectUri = createRedirectURIWithPath(relyingParty, (String) verifyResult.getData().get("redirect_uri"));
-//            UpdateEntry updateTokenEntry = updateCodeService.create(session.getId(), LocalDateTime.now().plusMinutes(5L)).toBlocking().single();
-//            return new UpdateResponse(reason, updateTokenEntry.getToken(), redirectUri);
-//        }
 
         AcrValues difference = request.getAuthContext().difference(session.getReceivedAcrValues());
         if (difference.getValues().isEmpty()) {
