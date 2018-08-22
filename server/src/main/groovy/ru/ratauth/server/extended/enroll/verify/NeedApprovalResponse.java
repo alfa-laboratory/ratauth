@@ -1,10 +1,10 @@
 package ru.ratauth.server.extended.enroll.verify;
 
-import ru.ratauth.entities.AcrValues;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import ru.ratauth.entities.AcrValues;
+import ru.ratauth.server.extended.common.RedirectResponse;
 
 import static java.util.stream.Collectors.joining;
 
@@ -33,12 +33,12 @@ public class NeedApprovalResponse extends RedirectResponse {
     }
 
     @Override
-    String putRedirectParameters(String key, String value) {
+    public String putRedirectParameters(String key, String value) {
         return result.put(key, value);
     }
 
     @Override
-    Map<String, String> getRedirectParameters() {
+    public Map<String, String> getRedirectParameters() {
         return result;
     }
 
