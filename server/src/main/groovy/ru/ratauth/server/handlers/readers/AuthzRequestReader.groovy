@@ -4,6 +4,7 @@ import groovy.transform.CompileStatic
 import ratpack.http.Headers
 import ratpack.util.MultiValueMap
 import ru.ratauth.entities.AcrValues
+import ru.ratauth.exception.ReadRequestException
 import ru.ratauth.interaction.AuthzRequest
 import ru.ratauth.interaction.AuthzResponseType
 import ru.ratauth.interaction.GrantType

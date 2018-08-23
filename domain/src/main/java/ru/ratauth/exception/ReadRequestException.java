@@ -1,4 +1,4 @@
-package ru.ratauth.server.handlers.readers;
+package ru.ratauth.exception;
 
 import ru.ratauth.exception.BaseAuthServerException;
 import ru.ratauth.exception.IdentifiedException;

@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import ratpack.handling.Context;
 import ratpack.http.Request;
-import ru.ratauth.server.handlers.readers.ReadRequestException;
+import ru.ratauth.exception.ReadRequestException;
 
 @Component
 public class AuthorizeHandlerValidator {

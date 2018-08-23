@@ -2,6 +2,7 @@ package ru.ratauth.server.handlers.readers
 
 import groovy.transform.CompileStatic
 import ratpack.http.Headers
+import ru.ratauth.exception.ReadRequestException
 import ru.ratauth.utils.StringUtils
 
 import java.nio.charset.Charset
