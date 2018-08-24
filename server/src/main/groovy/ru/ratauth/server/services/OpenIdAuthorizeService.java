@@ -25,6 +25,7 @@ import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.entities.Session;
 import ru.ratauth.entities.Token;
 import ru.ratauth.entities.TokenCache;
+import ru.ratauth.entities.UpdateEntry;
 import ru.ratauth.entities.UserInfo;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.interaction.AuthzRequest;
@@ -36,11 +37,15 @@ import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
 import ru.ratauth.server.providers.IdentityProviderResolver;
 import ru.ratauth.server.utils.RedirectUtils;
+import ru.ratauth.services.UpdateCodeService;
 import rx.Observable;
 
+import static java.time.LocalDateTime.now;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static ru.ratauth.providers.auth.dto.VerifyResult.Status.NEED_APPROVAL;
+import static ru.ratauth.providers.auth.dto.VerifyResult.Status.NEED_UPDATE;
+import static ru.ratauth.providers.auth.dto.VerifyResult.Status.SUCCESS;
 import static ru.ratauth.server.utils.RedirectUtils.createRedirectURI;
 
 /**
@@ -53,12 +58,13 @@ import static ru.ratauth.server.utils.RedirectUtils.createRedirectURI;
 public class OpenIdAuthorizeService implements AuthorizeService {
     private final AuthClientService clientService;
     private final TokenCacheService tokenCacheService;
+    private final UpdateCodeService updateCodeService;
     private final AuthSessionService sessionService;
     private final DeviceService deviceService;
     private final IdentityProviderResolver identityProviderResolver;
 
     @SneakyThrows
-    private static AuthzResponse buildResponse(RelyingParty relyingParty, Session session, VerifyResult verifyResult, TokenCache tokenCache, AuthzRequest authzRequest) {
+    private AuthzResponse buildResponse(RelyingParty relyingParty, Session session, VerifyResult verifyResult, TokenCache tokenCache, AuthzRequest authzRequest) {
         String redirectUri = authzRequest.getRedirectURI();
         final String targetRedirectURI = createRedirectURI(relyingParty, redirectUri);
         //in case of autCode sent by authProvider
@@ -69,6 +75,20 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                     .redirectURI(targetRedirectURI)
                     .build();
             return resp;
+        }
+
+        if (NEED_UPDATE.equals(verifyResult.getStatus())) {
+            String reason = (String) verifyResult.getData().get("reason");
+            String updateService = (String) verifyResult.getData().get("update_service");
+            String location = relyingParty.getAuthorizationPageURI() + verifyResult.getData().get("redirect_uri");
+            UpdateEntry updateCodeEntry = updateCodeService.create(session.getId(), now().plusMinutes(5L)).toBlocking().single();
+
+            return AuthzResponse.builder()
+                .location(location)
+                .updateCode(updateCodeEntry.getCode())
+                .updateService(updateService)
+                .reason(reason)
+                .build();
         }
 
         AuthEntry entry = session.getEntry(relyingParty.getName()).get();
@@ -163,10 +183,8 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     @Override
     @SneakyThrows
     public Observable<AuthzResponse> authenticate(AuthzRequest request) {
-        return clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(),
-                request.getResponseType() != AuthzResponseType.CODE)
-                .flatMap(rp ->
-                        authenticateUser(request.getAuthData(), request.getAcrValues(), rp.getIdentityProvider(), rp.getName())
+        return clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), isAuthRequired(request))
+                .flatMap(rp -> authenticateUser(request.getAuthData(), request.getAcrValues(), rp.getIdentityProvider(), rp.getName())
                                 .map(request::addVerifyResultAcrToRequest)
                                 .map(authRes -> new ImmutableTriple<>(rp, authRes, request.getAcrValues())))
                 .flatMap(rpAuth ->
@@ -190,6 +208,10 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                                         })
                                 ))
                 .doOnCompleted(() -> log.info("Authorization succeed"));
+    }
+
+    private boolean isAuthRequired(AuthzRequest request) {
+        return request.getResponseType() != AuthzResponseType.CODE;
     }
 
     private Map<String, Object> extractUserInfo(Session session) {
@@ -264,7 +286,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     }
 
     private Observable<Session> createSession(AuthzRequest oauthRequest, VerifyResult verifyResult, AcrValues acrValues, RelyingParty relyingParty) {
-        if (VerifyResult.Status.SUCCESS == verifyResult.getStatus()) {
+        if (SUCCESS == verifyResult.getStatus() || NEED_UPDATE == verifyResult.getStatus()) {
             if (AuthzResponseType.TOKEN == oauthRequest.getResponseType()) {//implicit auth
                 return sessionService.createSession(relyingParty, verifyResult.getData(), oauthRequest.getScopes(), acrValues, oauthRequest.getRedirectURI());
             } else {//auth code auth

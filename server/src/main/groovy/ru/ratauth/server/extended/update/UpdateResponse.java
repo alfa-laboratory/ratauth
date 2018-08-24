@@ -8,14 +8,17 @@ public class UpdateResponse extends RedirectResponse {
 
     private final String reason;
     private final String updateCode;
+    private final String updateService;
     private final Map<String, String> redirectParameters;
 
-    public UpdateResponse(String reason, String updateCode, String location) {
+    public UpdateResponse(String reason, String updateCode, String updateService, String location) {
         super(location);
         this.reason = reason;
         this.updateCode = updateCode;
+        this.updateService = updateService;
         redirectParameters = new HashMap<>();
         redirectParameters.put("update_code", updateCode);
+        redirectParameters.put("update_service", updateService);
         redirectParameters.put("reason", reason);
     }
 
