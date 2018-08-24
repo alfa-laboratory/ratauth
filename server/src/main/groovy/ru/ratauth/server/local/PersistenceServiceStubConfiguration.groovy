@@ -12,6 +12,7 @@ import ru.ratauth.services.ClientService
 import ru.ratauth.services.DeviceInfoService
 import ru.ratauth.services.SessionService
 import ru.ratauth.services.TokenCacheService
+import ru.ratauth.services.UpdateCodeService
 import rx.Observable
 
 import java.time.LocalDateTime
@@ -407,6 +408,40 @@ class PersistenceServiceStubConfiguration {
       @Override
       Observable<List<DeviceInfo>> findByUserId(String userId) {
         return Observable.just([])
+      }
+    }
+  }
+
+  @Bean
+  UpdateCodeService UpdateCodeService() {
+    return new UpdateCodeService() {
+      @Override
+      Observable<UpdateEntry> create(String sessionId, LocalDateTime expiresAt) {
+        def now = LocalDateTime.now()
+        return Observable.just(UpdateEntry.builder()
+                .code("1111-2222-3333-4444")
+                .used(null)
+                .created(now)
+                .expiresAt(now.plusMinutes(5L))
+                .sessionId("9999-8888-7777-6666")
+                .build())
+      }
+
+      @Override
+      Observable<UpdateEntry> getValidEntry(String code) {
+        def now = LocalDateTime.now()
+        return Observable.just(UpdateEntry.builder()
+                .code("1111-2222-3333-4444")
+                .used(null)
+                .created(now)
+                .expiresAt(now.plusMinutes(5L))
+                .sessionId("9999-8888-7777-6666")
+                .build())
+      }
+
+      @Override
+      Observable<Boolean> invalidate(String code) {
+        return Observable.just(Boolean.TRUE)
       }
     }
   }

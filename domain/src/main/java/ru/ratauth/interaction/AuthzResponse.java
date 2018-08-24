@@ -1,16 +1,15 @@
 package ru.ratauth.interaction;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.StringJoiner;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.ratauth.entities.AcrValues;
 import ru.ratauth.utils.StringUtils;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Map;
-import java.util.StringJoiner;
 
 /**
  * @author djassan
@@ -34,6 +33,10 @@ public class AuthzResponse {
     private String idToken;
     private String redirectURI;
     private AcrValues acrValues;
+    //update properties
+    private String reason;
+    private String updateCode;
+    private String updateService;
 
     private String getEncodedRedirectURI() {
         try {
@@ -78,6 +81,11 @@ public class AuthzResponse {
             data.entrySet().stream()
                     .filter(entry -> entry.getValue() != null)
                     .map(entry -> joiner.add(entry.getKey() + "=" + entry.getValue().toString()));
+        }
+        if (!StringUtils.isBlank(reason) && !StringUtils.isBlank(updateCode) && !StringUtils.isBlank(updateService)) {
+            joiner.add("reason=" + reason)
+                .add("update_code=" + updateCode)
+                .add("update_service=" + updateService);
         }
         return createRedirectURI(location, joiner.toString());
     }
