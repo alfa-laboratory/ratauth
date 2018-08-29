@@ -68,8 +68,9 @@ public class VerifyEnrollService {
                 String reason = (String) verifyResult.getData().get("reason");
                 String updateService = (String) verifyResult.getData().get("update_service");
                 String redirectUri = createRedirectURIWithPath(relyingParty, (String) verifyResult.getData().get("redirect_uri"));
+                boolean required = (Boolean) verifyResult.getData().get("required");
 
-                return updateDataService.create(session.getId(), reason, updateService, redirectUri)
+                return updateDataService.create(session.getId(), reason, updateService, redirectUri, required)
                     .map(updateDataEntry -> new UpdateResponse(reason, updateDataEntry.getCode(), updateDataEntry.getService(), updateDataEntry.getRedirectUri())).toBlocking().single();
             }
 

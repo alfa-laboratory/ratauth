@@ -459,6 +459,7 @@ class PersistenceServiceStubConfiguration {
                 .reason("need_update_password")
                 .service("corp-update-password")
                 .redirectUri("http://test/update")
+                .required(false)
                 .created(now)
                 .expiresAt(now.plusMinutes(5L))
                 .used(null)
@@ -466,7 +467,7 @@ class PersistenceServiceStubConfiguration {
       }
 
       @Override
-      Observable<UpdateDataEntry> create(String sessionToken, String reason, String service, String uri) {
+      Observable<UpdateDataEntry> create(String sessionToken, String reason, String service, String uri, boolean required) {
         def now = LocalDateTime.now()
         return Observable.just(UpdateDataEntry.builder()
                 .sessionToken("9999-8888-7777-6666")
@@ -474,6 +475,7 @@ class PersistenceServiceStubConfiguration {
                 .reason("need_update_password")
                 .service("corp-update-password")
                 .redirectUri("http://test/update")
+                .required(required)
                 .created(now)
                 .expiresAt(null)
                 .used(null)
@@ -494,6 +496,7 @@ class PersistenceServiceStubConfiguration {
                 .reason("need_update_password")
                 .service("corp-update-password")
                 .redirectUri("http://test/update")
+                .required(false)
                 .created(now)
                 .expiresAt(now.plusMinutes(5L))
                 .used(null)
