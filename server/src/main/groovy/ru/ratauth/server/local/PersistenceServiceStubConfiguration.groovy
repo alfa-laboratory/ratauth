@@ -3,19 +3,33 @@ package ru.ratauth.server.local
 import groovy.transform.CompileStatic
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
-import ru.ratauth.entities.*
+import ru.ratauth.entities.AcrValues
+import ru.ratauth.entities.AuthClient
+import ru.ratauth.entities.AuthEntry
+import ru.ratauth.entities.DeviceInfo
+import ru.ratauth.entities.RelyingParty
+import ru.ratauth.entities.Session
+import ru.ratauth.entities.SessionClient
+import ru.ratauth.entities.Status
+import ru.ratauth.entities.Token
+import ru.ratauth.entities.TokenCache
+import ru.ratauth.entities.UpdateDataEntry
 import ru.ratauth.exception.ExpiredException
-import ru.ratauth.services.DeviceInfoEventService
 import ru.ratauth.server.utils.DateUtils
 import ru.ratauth.server.utils.SecurityUtils
 import ru.ratauth.services.ClientService
+import ru.ratauth.services.DeviceInfoEventService
 import ru.ratauth.services.DeviceInfoService
 import ru.ratauth.services.SessionService
 import ru.ratauth.services.TokenCacheService
-import ru.ratauth.services.UpdateCodeService
+import ru.ratauth.services.UpdateDataService
+import ru.ratauth.updateServices.UpdateService
+import ru.ratauth.updateServices.dto.UpdateServiceInput
+import ru.ratauth.updateServices.dto.UpdateServiceOutput
 import rx.Observable
 
 import java.time.LocalDateTime
+
 /**
  * @author mgorelikov
  * @since 25/02/16
@@ -154,6 +168,26 @@ class PersistenceServiceStubConfiguration {
             secret: CLIENT_SECRET,
             password: PASSWORD
           ))
+      }
+    }
+  }
+
+  @Bean
+  UpdateService updateService() {
+    return new UpdateService() {
+      @Override
+      String name() {
+        return "mock"
+      }
+
+      @Override
+      boolean isRequired() {
+        return false
+      }
+
+      @Override
+      Observable<UpdateServiceOutput> update(UpdateServiceInput input) {
+        return null
       }
     }
   }
@@ -413,29 +447,56 @@ class PersistenceServiceStubConfiguration {
   }
 
   @Bean
-  UpdateCodeService UpdateCodeService() {
-    return new UpdateCodeService() {
+  UpdateDataService updateDataService() {
+    return new UpdateDataService() {
+
       @Override
-      Observable<UpdateEntry> create(String sessionId, LocalDateTime expiresAt) {
+      Observable<UpdateDataEntry> getUpdateData(String sessionToken) {
         def now = LocalDateTime.now()
-        return Observable.just(UpdateEntry.builder()
+        return Observable.just(UpdateDataEntry.builder()
+                .sessionToken("9999-8888-7777-6666")
                 .code("1111-2222-3333-4444")
-                .used(null)
+                .reason("need_update_password")
+                .service("corp-update-password")
+                .uri("http://test/update")
                 .created(now)
                 .expiresAt(now.plusMinutes(5L))
-                .sessionId("9999-8888-7777-6666")
+                .used(null)
                 .build())
       }
 
       @Override
-      Observable<UpdateEntry> getValidEntry(String code) {
+      Observable<UpdateDataEntry> create(String sessionToken, String reason, String service, String uri) {
         def now = LocalDateTime.now()
-        return Observable.just(UpdateEntry.builder()
-                .code("1111-2222-3333-4444")
+        return Observable.just(UpdateDataEntry.builder()
+                .sessionToken("9999-8888-7777-6666")
+                .code(null)
+                .reason("need_update_password")
+                .service("corp-update-password")
+                .uri("http://test/update")
+                .created(now)
+                .expiresAt(null)
                 .used(null)
+                .build())
+      }
+
+      @Override
+      Observable<String> getCode(String sessionToken, LocalDateTime expiresAt) {
+        return Observable.just("1111-2222-3333-4444")
+      }
+
+      @Override
+      Observable<UpdateDataEntry> getValidEntry(String code) {
+        def now = LocalDateTime.now()
+        return Observable.just(UpdateDataEntry.builder()
+                .sessionToken("9999-8888-7777-6666")
+                .code("1111-2222-3333-4444")
+                .reason("need_update_password")
+                .service("corp-update-password")
+                .uri("http://test/update")
                 .created(now)
                 .expiresAt(now.plusMinutes(5L))
-                .sessionId("9999-8888-7777-6666")
+                .used(null)
                 .build())
       }
 

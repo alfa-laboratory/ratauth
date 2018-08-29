@@ -15,6 +15,7 @@ import static ratpack.rx.RxRatpack.observe
 import static ru.ratauth.server.handlers.readers.UpdateServiceRequestReader.readUpdateServiceRequest
 
 @Component
+@SuppressWarnings(['UnusedPrivateField', 'UnusedVariable'])
 class UpdateHandler implements Action<Chain> {
 
     @Autowired
@@ -51,7 +52,8 @@ class UpdateHandler implements Action<Chain> {
 //                    .build())
 //                    .filter { response -> (response.status == SUCCESS) }
 //                    .map { r -> {
-//                        def session = sessionService.getByValidSessionToken(updateDataService.getValidEntry(request.code).toBlocking().single().sessionId).toBlocking().single()
+//                        def session = sessionService.getByValidSessionToken(updateDataService.getValidEntry(request.code)
+//                          .toBlocking().single().sessionToken).toBlocking().single()
 //                        def authCode = session.getEntry(request.clientId).get()
 //                        sessionService.updateAuthCodeExpired(authCode, fromLocal(authCodeExpiresIn))
 //                    }}

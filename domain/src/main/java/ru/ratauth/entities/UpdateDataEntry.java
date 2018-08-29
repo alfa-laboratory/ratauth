@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UpdateDataEntry {
 
-    private String sessionId;
+    private String sessionToken;
     private String code;
     private String reason;
     private String service;
