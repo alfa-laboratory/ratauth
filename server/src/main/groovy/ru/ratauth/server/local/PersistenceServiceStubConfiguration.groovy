@@ -481,7 +481,7 @@ class PersistenceServiceStubConfiguration {
       }
 
       @Override
-      Observable<String> getCode(String sessionToken, LocalDateTime expiresAt) {
+      Observable<String> getCode(String sessionToken) {
         return Observable.just("1111-2222-3333-4444")
       }
 
