@@ -70,7 +70,7 @@ public class VerifyEnrollService {
                 String redirectUri = createRedirectURIWithPath(relyingParty, (String) verifyResult.getData().get("redirect_uri"));
 
                 return updateDataService.create(session.getId(), reason, updateService, redirectUri)
-                    .map(updateDataEntry -> new UpdateResponse(reason, updateDataEntry.getCode(), updateDataEntry.getService(), updateDataEntry.getUri())).toBlocking().single();
+                    .map(updateDataEntry -> new UpdateResponse(reason, updateDataEntry.getCode(), updateDataEntry.getService(), updateDataEntry.getRedirectUri())).toBlocking().single();
             }
 
             String authCode = authEntry.getAuthCode();

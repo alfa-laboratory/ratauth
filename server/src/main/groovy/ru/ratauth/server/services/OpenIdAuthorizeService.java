@@ -160,7 +160,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
 
     private static void onNeedUpdateData(AuthzResponse resp, UpdateDataEntry updateDataEntry) {
         resp.setReason(updateDataEntry.getReason());
-        resp.setLocation(updateDataEntry.getUri());
+        resp.setLocation(updateDataEntry.getRedirectUri());
         resp.setUpdateCode(updateDataEntry.getCode());
         resp.setUpdateService(updateDataEntry.getService());
     }
