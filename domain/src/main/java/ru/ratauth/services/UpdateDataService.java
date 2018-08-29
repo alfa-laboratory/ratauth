@@ -1,6 +1,5 @@
 package ru.ratauth.services;
 
-import java.time.LocalDateTime;
 import ru.ratauth.entities.UpdateDataEntry;
 import rx.Observable;
 
