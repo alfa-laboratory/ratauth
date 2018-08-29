@@ -16,10 +16,10 @@ public interface UpdateDataService {
      * @param sessionToken - id
      * @param reason
      * @param service - service id
-     * @param uri - redirect uri for the service
+     * @param redirectUri - redirect uri for the service
      * @return
      */
-    Observable<UpdateDataEntry> create(String sessionToken, String reason, String service, String uri);
+    Observable<UpdateDataEntry> create(String sessionToken, String reason, String service, String redirectUri, boolean required);
 
     /**
      * Create code and put to mongo
