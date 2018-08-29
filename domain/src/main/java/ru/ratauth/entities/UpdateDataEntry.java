@@ -15,8 +15,9 @@ public class UpdateDataEntry {
     private String sessionToken;
     private String code;
     private String reason;
+    private boolean required;
     private String service;
-    private String uri;
+    private String redirectUri;
     private LocalDateTime created;
     private LocalDateTime expiresAt;
     private LocalDateTime used;
