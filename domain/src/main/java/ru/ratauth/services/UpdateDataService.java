@@ -27,7 +27,7 @@ public interface UpdateDataService {
      * @param sessionToken
      * @return
      */
-    Observable<String> getCode(String sessionToken, LocalDateTime expiresAt);
+    Observable<String> getCode(String sessionToken);
 
     /**
      * Method return entry if token exists and is not expired
