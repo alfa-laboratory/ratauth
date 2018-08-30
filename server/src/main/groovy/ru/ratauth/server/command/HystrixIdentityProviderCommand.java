@@ -25,6 +25,7 @@ import javax.net.ssl.X509TrustManager;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import ratpack.exec.Promise;
 import ratpack.http.MediaType;
@@ -69,6 +70,7 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
         this.httpClient = httpClient;
         this.uri = new URL(url).toURI();
         this.data = performData(data, userInfo, relyingParty, enroll);
+
     }
 
     private static Setter createSetter(@NonNull String enroll, Integer timeout) {
@@ -119,6 +121,9 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
                     r.sslContext(createSSLContext());
                     if (login != null && password != null) {
                         r.headers(headers -> headers.add(HttpHeaders.AUTHORIZATION, createAuthHeader(login, password)));
+                        for(Map.Entry<String, String> mdcheader: MDC.getCopyOfContextMap().entrySet()){
+                            r.headers(headers -> headers.add(mdcheader.getKey(), mdcheader.getValue()));
+                        }
                     }
                     r.body(body -> {
                         body.type(MediaType.APPLICATION_JSON);
