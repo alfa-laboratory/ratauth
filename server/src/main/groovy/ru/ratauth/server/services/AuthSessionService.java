@@ -85,7 +85,7 @@ public interface AuthSessionService {
      * @param now   current date
      * @return Observable of single AuthEntry or Observable.empty if refresh token not found or Observable.error if session token has expired
      */
-    Observable<Session> getByValidSessionToken(String token, Date now);
+    Observable<Session> getByValidSessionToken(String token, Date now, boolean checkValidRefreshToken);
 
     /**
      * Loads Session by refreshToken with expiration date check. Session must be loaded with only one entry and token entity

@@ -263,7 +263,7 @@ class PersistenceServiceStubConfiguration {
       }
 
       @Override
-      Observable<Session> getByValidSessionToken(String token, Date now) {
+      Observable<Session> getByValidSessionToken(String token, Date now, boolean checkValidRefreshToken) {
         if (token == SESSION_TOKEN)
           return Observable.just(
             new Session(

@@ -154,8 +154,8 @@ public class OpenIdSessionService implements AuthSessionService {
     }
 
     @Override
-    public Observable<Session> getByValidSessionToken(String token, Date now) {
-        return sessionService.getByValidSessionToken(token, now)
+    public Observable<Session> getByValidSessionToken(String token, Date now, boolean checkValidRefreshToken) {
+        return sessionService.getByValidSessionToken(token, now, checkValidRefreshToken)
                 .doOnNext(actionLogger::addSessionInfo);
     }
 

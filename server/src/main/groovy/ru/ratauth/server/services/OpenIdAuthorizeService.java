@@ -248,7 +248,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
             sessionObs = sessionService.getByValidRefreshToken(request.getRefreshToken(), new Date());
             authClientObs = clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), true);
         } else {
-            sessionObs = sessionService.getByValidSessionToken(request.getSessionToken(), new Date());
+            sessionObs = sessionService.getByValidSessionToken(request.getSessionToken(), new Date(), true);
             authClientObs = clientService.loadAndAuthSessionClient(request.getClientId(), request.getClientSecret(), true);
         }
 
