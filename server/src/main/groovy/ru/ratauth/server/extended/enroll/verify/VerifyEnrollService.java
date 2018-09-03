@@ -26,7 +26,7 @@ import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
 import ru.ratauth.providers.auth.dto.VerifyResult.Status;
 import ru.ratauth.server.extended.common.RedirectResponse;
-import ru.ratauth.server.extended.update.UpdateResponse;
+import ru.ratauth.server.extended.update.UpdateProcessResponse;
 import ru.ratauth.server.providers.IdentityProviderResolver;
 import ru.ratauth.server.secutiry.TokenProcessor;
 import ru.ratauth.server.services.AuthClientService;
@@ -71,7 +71,7 @@ public class VerifyEnrollService {
                 boolean required = (Boolean) verifyResult.getData().get("required");
 
                 return updateDataService.create(session.getId(), reason, updateService, redirectUri, required)
-                    .map(updateDataEntry -> new UpdateResponse(reason, updateDataEntry.getCode(), updateDataEntry.getService(), updateDataEntry.getRedirectUri())).toBlocking().single();
+                    .map(updateDataEntry -> new UpdateProcessResponse(reason, updateDataEntry.getCode(), updateDataEntry.getService(), updateDataEntry.getRedirectUri())).toBlocking().single();
             }
 
             String authCode = authEntry.getAuthCode();

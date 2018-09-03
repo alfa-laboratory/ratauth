@@ -15,6 +15,7 @@ public class UpdateServiceRequest {
     private String code;
     private boolean skip;
     private String clientId;
+    private String reason;
     private String updateService;
     private Map<String,String> data;
 }

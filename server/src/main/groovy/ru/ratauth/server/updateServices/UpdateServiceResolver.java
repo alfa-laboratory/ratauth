@@ -4,5 +4,5 @@ import ru.ratauth.updateServices.UpdateService;
 
 public interface UpdateServiceResolver {
 
-    UpdateService getUpdateProvider(String updateProviderName);
+    UpdateService getUpdateService(String updateProviderName);
 }

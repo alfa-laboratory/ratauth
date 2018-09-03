@@ -17,7 +17,7 @@ public class UpdateServiceResolverImpl implements UpdateServiceResolver {
     }
 
     @Override
-    public UpdateService getUpdateProvider(String updateProviderName) {
+    public UpdateService getUpdateService(String updateProviderName) {
         return this.updateServices.get(updateProviderName);
     }
 }
