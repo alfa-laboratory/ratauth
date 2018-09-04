@@ -121,8 +121,8 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
                     r.sslContext(createSSLContext());
                     if (login != null && password != null) {
                         r.headers(headers -> headers.add(HttpHeaders.AUTHORIZATION, createAuthHeader(login, password)));
-                        for(Map.Entry<String, String> mdcheader: MDC.getCopyOfContextMap().entrySet()){
-                            r.headers(headers -> headers.add(mdcheader.getKey(), mdcheader.getValue()));
+                        for(Map.Entry<String, String> mdcHeader: MDC.getCopyOfContextMap().entrySet()){
+                            r.headers(headers -> headers.add(mdcHeader.getKey(), mdcHeader.getValue()));
                         }
                     }
                     r.body(body -> {
