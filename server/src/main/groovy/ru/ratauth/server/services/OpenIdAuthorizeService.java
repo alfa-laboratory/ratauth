@@ -36,6 +36,7 @@ import ru.ratauth.interaction.GrantType;
 import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
+import ru.ratauth.providers.auth.dto.VerifyResult.Status;
 import ru.ratauth.server.providers.IdentityProviderResolver;
 import ru.ratauth.server.utils.RedirectUtils;
 import ru.ratauth.services.UpdateDataService;
@@ -195,15 +196,8 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                                 .map(request::addVerifyResultAcrToRequest)
                                 .map(authRes -> new ImmutableTriple<>(rp, authRes, request.getAcrValues())))
                 .flatMap(rpAuth -> createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
-                                .flatMap(session -> sessionService.updateAcrValues(session)
-                                        .map(it -> {
-                                            updateDataService.create(session.getSessionToken(),
-                                                (String) rpAuth.middle.getData().get("reason"),
-                                                (String) rpAuth.middle.getData().get("update_service"),
-                                                (String) rpAuth.middle.getData().get("redirect_uri"),
-                                                (Boolean) rpAuth.middle.getData().get("required")).subscribe();
-                                            return  session;
-                                        }))
+                                .doOnNext(session -> createUpdateToken(rpAuth.middle, session))
+                                .doOnNext(session -> sessionService.updateAcrValues(session))
                                 .flatMap(session -> createIdToken(rpAuth.left, session, rpAuth.right)
                                         .map(idToken -> buildResponse(rpAuth.left, session, rpAuth.middle, idToken, request))
                                         .flatMap(authzResponse -> {
@@ -221,6 +215,16 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                                         })
                                 ))
                 .doOnCompleted(() -> log.info("Authorization succeed"));
+    }
+
+    private void createUpdateToken(VerifyResult verifyResult, Session session) {
+        if (Status.NEED_UPDATE.equals(verifyResult.getStatus())) {
+            updateDataService.create(session.getSessionToken(),
+                    (String) verifyResult.getData().get("reason"),
+                    (String) verifyResult.getData().get("update_service"),
+                    (String) verifyResult.getData().get("redirect_uri"),
+                    (Boolean) verifyResult.getData().get("required")).subscribe();
+        }
     }
 
     private boolean isAuthRequired(AuthzRequest request) {
