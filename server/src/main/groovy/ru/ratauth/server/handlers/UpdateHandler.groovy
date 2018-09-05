@@ -1,6 +1,5 @@
 package ru.ratauth.server.handlers
 
-
 import io.netty.handler.codec.http.HttpResponseStatus
 import org.apache.commons.lang3.tuple.ImmutableTriple
 import org.springframework.beans.factory.annotation.Autowired
