@@ -27,13 +27,14 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 import static ratpack.rx.RxRatpack.observe
+import static ru.ratauth.exception.AuthorizationException.ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED
 import static ru.ratauth.server.handlers.readers.UpdateServiceRequestReader.readUpdateServiceRequest
 import static ru.ratauth.server.utils.DateUtils.fromLocal
 import static ru.ratauth.updateServices.dto.UpdateServiceOutput.Status.SKIPPED
 import static ru.ratauth.updateServices.dto.UpdateServiceOutput.Status.SUCCESS
 
 @Component
-@SuppressWarnings(['UnusedPrivateField', 'UnusedVariable'])
+@SuppressWarnings(['AbcMetric'])
 class UpdateHandler implements Action<Chain> {
 
     @Autowired
@@ -90,17 +91,17 @@ class UpdateHandler implements Action<Chain> {
                         .toBlocking().single().get()
 
                 String authCode = authEntry.authCode
-                LocalDateTime authCodeExpiresIn = now.plus(relyingParty.getCodeTTL(), ChronoUnit.SECONDS);
+                LocalDateTime authCodeExpiresIn = now.plus(relyingParty.codeTTL, ChronoUnit.SECONDS)
 
                 sessionService.updateAuthCodeExpired(authCode, fromLocal(authCodeExpiresIn))
                         .filter { it.booleanValue() }
-                        .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED)))
+                        .switchIfEmpty(Observable.error(new AuthorizationException(AUTH_CODE_EXPIRES_IN_UPDATE_FAILED)))
                         .subscribe()
 
                 long expiresIn = ChronoUnit.SECONDS.between(now, authCodeExpiresIn)
                 //send redirect with code --resp.buildURL()
                 def finishResponse = new UpdateFinishResponse(relyingParty.authorizationRedirectURI, sessionToken, authCode, expiresIn)
-                ctx.redirect(HttpResponseStatus.FOUND.code(), finishResponse.getRedirectURL())
+                ctx.redirect(HttpResponseStatus.FOUND.code(), finishResponse.redirectURL)
         } {
             throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable)
         }
