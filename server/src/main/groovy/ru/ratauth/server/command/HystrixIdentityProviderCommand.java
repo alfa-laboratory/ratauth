@@ -123,22 +123,22 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
                         r.headers(headers -> {
                             headers.add(HttpHeaders.AUTHORIZATION, createAuthHeader(login, password));
                             if (MDC.get("session_id") != null) {
-                                headers.add("Session-ID", MDC.get("session_id"));
+                                headers.add("Session-Id", MDC.get("session_id"));
                             }
                             if (MDC.get("user_id") != null) {
-                                headers.add("User-ID", MDC.get("user_id"));
+                                headers.add("User-Id", MDC.get("user_id"));
                             }
                             if (MDC.get("client_id") != null) {
-                                headers.add("Client-ID", MDC.get("client_id"));
+                                headers.add("Client-Id", MDC.get("client_id"));
                             }
                             if (MDC.get("device_id") != null) {
-                                headers.add("Device-ID", MDC.get("device_id"));
+                                headers.add("Device-Id", MDC.get("device_id"));
                             }
                             if (MDC.get("client_ip") != null) {
-                                headers.add("Client-IP", MDC.get("client_ip"));
+                                headers.add("Client-Ip", MDC.get("client_ip"));
                             }
                             if (MDC.get("trace_id") != null) {
-                                headers.add("Trace-ID", MDC.get("trace_id"));
+                                headers.add("Trace-Id", MDC.get("trace_id"));
                             }
                         });
                     }
