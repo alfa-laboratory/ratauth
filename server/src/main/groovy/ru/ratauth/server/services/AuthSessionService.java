@@ -1,15 +1,14 @@
 package ru.ratauth.server.services;
 
+import java.util.Date;
+import java.util.Map;
+import java.util.Set;
 import ru.ratauth.entities.AcrValues;
 import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.entities.Session;
 import ru.ratauth.entities.UserInfo;
 import ru.ratauth.interaction.TokenRequest;
 import rx.Observable;
-
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author mgorelikov

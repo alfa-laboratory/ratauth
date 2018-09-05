@@ -3,26 +3,11 @@ package ru.ratauth.server.local
 import groovy.transform.CompileStatic
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
-import ru.ratauth.entities.AcrValues
-import ru.ratauth.entities.AuthClient
-import ru.ratauth.entities.AuthEntry
-import ru.ratauth.entities.DeviceInfo
-import ru.ratauth.entities.RelyingParty
-import ru.ratauth.entities.Session
-import ru.ratauth.entities.SessionClient
-import ru.ratauth.entities.Status
-import ru.ratauth.entities.Token
-import ru.ratauth.entities.TokenCache
-import ru.ratauth.entities.UpdateDataEntry
+import ru.ratauth.entities.*
 import ru.ratauth.exception.ExpiredException
 import ru.ratauth.server.utils.DateUtils
 import ru.ratauth.server.utils.SecurityUtils
-import ru.ratauth.services.ClientService
-import ru.ratauth.services.DeviceInfoEventService
-import ru.ratauth.services.DeviceInfoService
-import ru.ratauth.services.SessionService
-import ru.ratauth.services.TokenCacheService
-import ru.ratauth.services.UpdateDataService
+import ru.ratauth.services.*
 import ru.ratauth.updateServices.UpdateService
 import ru.ratauth.updateServices.dto.UpdateServiceInput
 import ru.ratauth.updateServices.dto.UpdateServiceOutput
@@ -178,11 +163,6 @@ class PersistenceServiceStubConfiguration {
       @Override
       String name() {
         return "mock"
-      }
-
-      @Override
-      boolean isRequired() {
-        return false
       }
 
       @Override

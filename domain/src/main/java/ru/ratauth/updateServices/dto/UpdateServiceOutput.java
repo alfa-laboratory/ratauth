@@ -16,6 +16,7 @@ public class UpdateServiceOutput {
 
     public enum Status {
         SUCCESS,
+        SKIPPED,
         ERROR
     }
 }

@@ -1,11 +1,10 @@
 package ru.ratauth.services;
 
+import java.util.Date;
 import ru.ratauth.entities.AuthEntry;
 import ru.ratauth.entities.Session;
 import ru.ratauth.entities.Token;
 import rx.Observable;
-
-import java.util.Date;
 
 /**
  * @author mgorelikov

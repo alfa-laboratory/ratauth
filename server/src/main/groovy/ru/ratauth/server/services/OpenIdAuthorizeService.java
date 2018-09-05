@@ -28,6 +28,7 @@ import ru.ratauth.entities.TokenCache;
 import ru.ratauth.entities.UpdateDataEntry;
 import ru.ratauth.entities.UserInfo;
 import ru.ratauth.exception.AuthorizationException;
+import ru.ratauth.exception.UpdateFlowException;
 import ru.ratauth.interaction.AuthzRequest;
 import ru.ratauth.interaction.AuthzResponse;
 import ru.ratauth.interaction.AuthzResponseType;
@@ -116,9 +117,17 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         AcrValues difference = acrValues.difference(receivedAcrValues);
 
         if (isReceivedRequiredAcrs(difference)) {
-            UpdateDataEntry updateDataEntry = updateDataService.getUpdateData(session.getId()).toBlocking().single();
+            UpdateDataEntry updateDataEntry = null;
+
+            try {
+                updateDataEntry = updateDataService.getUpdateData(session.getSessionToken()).toBlocking().single();
+            } catch (UpdateFlowException e) {
+                log.info("not need update");
+            }
+
             if (updateDataEntry != null) {
-                onNeedUpdateData(resp, updateDataEntry);
+                updateDataEntry.setCode(updateDataService.getCode(session.getSessionToken()).toBlocking().single());
+                onNeedUpdateData(resp, relyingParty, updateDataEntry);
             } else {
                 onFinishAuthorization(targetRedirectURI, entry, resp);
             }
@@ -158,9 +167,10 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         resp.setMfaToken(session.getMfaToken());
     }
 
-    private static void onNeedUpdateData(AuthzResponse resp, UpdateDataEntry updateDataEntry) {
+    @SneakyThrows
+    private static void onNeedUpdateData(AuthzResponse resp, RelyingParty relyingParty, UpdateDataEntry updateDataEntry) {
         resp.setReason(updateDataEntry.getReason());
-        resp.setLocation(updateDataEntry.getRedirectUri());
+        resp.setLocation(createRedirectUrl(relyingParty, updateDataEntry.getRedirectUri()));
         resp.setUpdateCode(updateDataEntry.getCode());
         resp.setUpdateService(updateDataEntry.getService());
     }
@@ -184,14 +194,20 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .flatMap(rp -> authenticateUser(request.getAuthData(), request.getAcrValues(), rp.getIdentityProvider(), rp.getName())
                                 .map(request::addVerifyResultAcrToRequest)
                                 .map(authRes -> new ImmutableTriple<>(rp, authRes, request.getAcrValues())))
-                .flatMap(rpAuth ->
-                        createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
+                .flatMap(rpAuth -> createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
                                 .flatMap(session -> sessionService.updateAcrValues(session)
-                                        .map(it -> session))
+                                        .map(it -> {
+                                            updateDataService.create(session.getSessionToken(),
+                                                (String) rpAuth.middle.getData().get("reason"),
+                                                (String) rpAuth.middle.getData().get("update_service"),
+                                                (String) rpAuth.middle.getData().get("redirect_uri"),
+                                                (Boolean) rpAuth.middle.getData().get("required")).subscribe();
+                                            return  session;
+                                        }))
                                 .flatMap(session -> createIdToken(rpAuth.left, session, rpAuth.right)
                                         .map(idToken -> buildResponse(rpAuth.left, session, rpAuth.middle, idToken, request))
                                         .flatMap(authzResponse -> {
-                                            if(authzResponse.getCode() != null) {
+                                            if(authzResponse.getCode() != null || authzResponse.getUpdateCode() != null) {
                                                 return deviceService
                                                         .resolveDeviceInfo(
                                                                 request.getClientId(),

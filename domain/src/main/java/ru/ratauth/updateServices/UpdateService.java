@@ -8,7 +8,5 @@ public interface UpdateService {
 
     String name();
 
-    boolean isRequired();
-
     Observable<UpdateServiceOutput> update(UpdateServiceInput input);
 }
