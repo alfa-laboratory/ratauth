@@ -2,7 +2,6 @@ package ru.ratauth.server.command;
 
 import com.netflix.hystrix.HystrixCommandProperties;
 import com.netflix.hystrix.HystrixObservableCommand;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -104,7 +103,6 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
             );
     }
 
-    @SneakyThrows(UnsupportedEncodingException.class)
     private static String createAuthHeader(String login, String password) {
         String auth = login + ":" + password;
         byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(UTF_8));

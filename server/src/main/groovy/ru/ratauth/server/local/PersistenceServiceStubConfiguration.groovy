@@ -161,11 +161,6 @@ class PersistenceServiceStubConfiguration {
   UpdateService updateService() {
     return new UpdateService() {
       @Override
-      String name() {
-        return "mock"
-      }
-
-      @Override
       Observable<UpdateServiceResult> update(UpdateServiceInput input) {
         return null
       }
