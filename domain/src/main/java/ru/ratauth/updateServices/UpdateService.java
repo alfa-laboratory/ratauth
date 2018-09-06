@@ -6,7 +6,5 @@ import rx.Observable;
 
 public interface UpdateService {
 
-    String name();
-
     Observable<UpdateServiceOutput> update(UpdateServiceInput input);
 }

@@ -16,7 +16,7 @@ import ru.ratauth.interaction.UpdateServiceRequest
 import ru.ratauth.server.extended.update.UpdateFinishResponse
 import ru.ratauth.server.handlers.readers.RequestReader
 import ru.ratauth.server.services.AuthClientService
-import ru.ratauth.server.updateServices.UpdateServiceResolver
+import ru.ratauth.server.updateServices.UpdateServiceExecutor
 import ru.ratauth.services.SessionService
 import ru.ratauth.services.UpdateDataService
 import ru.ratauth.updateServices.dto.UpdateServiceInput
@@ -38,7 +38,7 @@ import static ru.ratauth.updateServices.dto.UpdateServiceOutput.Status.SUCCESS
 class UpdateHandler implements Action<Chain> {
 
     @Autowired
-    private UpdateServiceResolver updateServiceResolver
+    private UpdateServiceExecutor updateServiceResolver
     @Autowired
     private UpdateDataService updateDataService
     @Autowired

@@ -10,8 +10,8 @@ import lombok.Data;
 @AllArgsConstructor
 public class UpdateServiceInput {
 
+    private String updateService;
     private Map<String, String> data;
     private String relyingParty;
     private String code;
-
 }

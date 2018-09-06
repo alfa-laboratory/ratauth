@@ -1,9 +1,5 @@
 package ru.ratauth.server.command;
 
-import static com.netflix.hystrix.HystrixCommandGroupKey.Factory.asKey;
-import static java.util.Optional.ofNullable;
-
-import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.HystrixCommandProperties;
 import com.netflix.hystrix.HystrixObservableCommand;
 import java.io.UnsupportedEncodingException;
@@ -11,7 +7,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
@@ -33,6 +28,10 @@ import ratpack.http.client.ReceivedResponse;
 import ratpack.rx.RxRatpack;
 import ru.ratauth.entities.UserInfo;
 import rx.Observable;
+
+import static com.netflix.hystrix.HystrixCommandGroupKey.Factory.asKey;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Optional.ofNullable;
 
 @Slf4j
 public class HystrixIdentityProviderCommand extends HystrixObservableCommand<ReceivedResponse> {
@@ -108,8 +107,8 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
     @SneakyThrows(UnsupportedEncodingException.class)
     private static String createAuthHeader(String login, String password) {
         String auth = login + ":" + password;
-        byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(Charset.forName("UTF-8")));
-        return "Basic " + new String(encodedAuth, "UTF-8");
+        byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(UTF_8));
+        return "Basic " + new String(encodedAuth, UTF_8);
     }
 
     protected Observable<ReceivedResponse> construct() {
