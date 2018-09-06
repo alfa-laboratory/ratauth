@@ -16,11 +16,10 @@ import ru.ratauth.interaction.UpdateServiceRequest
 import ru.ratauth.server.extended.update.UpdateFinishResponse
 import ru.ratauth.server.handlers.readers.RequestReader
 import ru.ratauth.server.services.AuthClientService
-import ru.ratauth.server.updateServices.UpdateServiceExecutor
 import ru.ratauth.services.SessionService
 import ru.ratauth.services.UpdateDataService
 import ru.ratauth.updateServices.dto.UpdateServiceInput
-import ru.ratauth.updateServices.dto.UpdateServiceOutput
+import ru.ratauth.updateServices.dto.UpdateServiceResult
 import rx.Observable
 
 import java.time.LocalDateTime
@@ -30,8 +29,8 @@ import static ratpack.rx.RxRatpack.observe
 import static ru.ratauth.exception.AuthorizationException.ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED
 import static ru.ratauth.server.handlers.readers.UpdateServiceRequestReader.readUpdateServiceRequest
 import static ru.ratauth.server.utils.DateUtils.fromLocal
-import static ru.ratauth.updateServices.dto.UpdateServiceOutput.Status.SKIPPED
-import static ru.ratauth.updateServices.dto.UpdateServiceOutput.Status.SUCCESS
+import static ru.ratauth.updateServices.dto.UpdateServiceResult.Status.SKIPPED
+import static ru.ratauth.updateServices.dto.UpdateServiceResult.Status.SUCCESS
 
 @Component
 @SuppressWarnings(['AbcMetric'])
@@ -66,7 +65,7 @@ class UpdateHandler implements Action<Chain> {
                                 //update data
                                 def response
                                 if (!data.isRequired() && request.skip) {
-                                    response = UpdateServiceOutput.builder().status(SKIPPED).build()
+                                    response = UpdateServiceResult.builder().status(SKIPPED).build()
                                 } else {
                                     response = updateServiceResolver.getUpdateService(request.updateService)
                                             .update(UpdateServiceInput.builder()
@@ -75,7 +74,7 @@ class UpdateHandler implements Action<Chain> {
                                                 .data(request.data)
                                                 .build()).toBlocking().single()
                                 }
-                                new ImmutableTriple<UpdateServiceRequest, UpdateServiceOutput, UpdateDataEntry>(request, response, data)
+                                new ImmutableTriple<UpdateServiceRequest, UpdateServiceResult, UpdateDataEntry>(request, response, data)
                         }
         } filter {
             triple -> triple.middle.status == SUCCESS || triple.middle.status == SKIPPED

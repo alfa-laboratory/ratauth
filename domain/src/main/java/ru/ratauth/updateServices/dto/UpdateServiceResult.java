@@ -8,7 +8,7 @@ import lombok.Singular;
 
 @Data
 @Builder
-public class UpdateServiceOutput {
+public class UpdateServiceResult {
 
     private Status status;
     @Singular("field")

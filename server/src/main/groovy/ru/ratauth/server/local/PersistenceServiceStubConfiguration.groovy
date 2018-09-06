@@ -10,7 +10,7 @@ import ru.ratauth.server.utils.SecurityUtils
 import ru.ratauth.services.*
 import ru.ratauth.updateServices.UpdateService
 import ru.ratauth.updateServices.dto.UpdateServiceInput
-import ru.ratauth.updateServices.dto.UpdateServiceOutput
+import ru.ratauth.updateServices.dto.UpdateServiceResult
 import rx.Observable
 
 import java.time.LocalDateTime
@@ -166,7 +166,7 @@ class PersistenceServiceStubConfiguration {
       }
 
       @Override
-      Observable<UpdateServiceOutput> update(UpdateServiceInput input) {
+      Observable<UpdateServiceResult> update(UpdateServiceInput input) {
         return null
       }
     }
