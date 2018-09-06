@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import ratpack.spring.config.EnableRatpack
 import ru.ratauth.server.configuration.IdentityProvidersConfiguration
 import ru.ratauth.server.configuration.OpenIdConnectDefaultDiscoveryProperties
+import ru.ratauth.server.configuration.UpdateServicesConfiguration
 
 @Slf4j
 @CompileStatic
@@ -15,7 +16,8 @@ import ru.ratauth.server.configuration.OpenIdConnectDefaultDiscoveryProperties
 @EnableRatpack
 @EnableConfigurationProperties([
         OpenIdConnectDefaultDiscoveryProperties,
-        IdentityProvidersConfiguration
+        IdentityProvidersConfiguration,
+        UpdateServicesConfiguration
 ])
 class RatAuthApplication {
     public static final int DEFAULT_PADDING = 50
