@@ -1,11 +1,10 @@
 package ru.ratauth.services;
 
+import java.util.Date;
 import ru.ratauth.entities.AuthEntry;
 import ru.ratauth.entities.Session;
 import ru.ratauth.entities.Token;
 import rx.Observable;
-
-import java.util.Date;
 
 /**
  * @author mgorelikov
@@ -42,13 +41,13 @@ public interface SessionService {
     Observable<Session> getByValidRefreshToken(String token, Date now);
 
     /**
-     * Loads AuthEntry by sessionToken with expiration date check. Session must be loaded with only one entry
+     * Loads AuthEntry by sessionToken with expiration date check and check valid refresh tokens if it need. Session must be loaded with only one entry
      *
      * @param token sessionToken value
      * @param now   current date
      * @return Observable of single AuthEntry or Observable.empty if session token not found or Observable.error if session token has expired
      */
-    Observable<Session> getByValidSessionToken(String token, Date now);
+    Observable<Session> getByValidSessionToken(String token, Date now, boolean checkValidRefreshToken);
 
     /**
      * Loads Session by refreshToken with expiration date check. Session must be loaded with only one entry and token entity

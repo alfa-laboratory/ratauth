@@ -1,11 +1,25 @@
 package ru.ratauth.server.services;
 
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ru.ratauth.entities.*;
+import ru.ratauth.entities.AcrValues;
+import ru.ratauth.entities.AuthEntry;
+import ru.ratauth.entities.AuthType;
+import ru.ratauth.entities.RelyingParty;
+import ru.ratauth.entities.Session;
+import ru.ratauth.entities.Status;
+import ru.ratauth.entities.Token;
+import ru.ratauth.entities.UserInfo;
 import ru.ratauth.interaction.TokenRequest;
 import ru.ratauth.providers.Fields;
 import ru.ratauth.providers.auth.dto.BaseAuthFields;
@@ -15,10 +29,6 @@ import ru.ratauth.server.services.log.ActionLogger;
 import ru.ratauth.server.utils.DateUtils;
 import ru.ratauth.services.SessionService;
 import rx.Observable;
-
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
 
 /**
  * @author djassan
@@ -154,8 +164,8 @@ public class OpenIdSessionService implements AuthSessionService {
     }
 
     @Override
-    public Observable<Session> getByValidSessionToken(String token, Date now) {
-        return sessionService.getByValidSessionToken(token, now)
+    public Observable<Session> getByValidSessionToken(String token, Date now, boolean checkValidRefreshToken) {
+        return sessionService.getByValidSessionToken(token, now, checkValidRefreshToken)
                 .doOnNext(actionLogger::addSessionInfo);
     }
 

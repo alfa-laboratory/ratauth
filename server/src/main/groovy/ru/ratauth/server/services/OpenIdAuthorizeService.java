@@ -25,9 +25,10 @@ import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.entities.Session;
 import ru.ratauth.entities.Token;
 import ru.ratauth.entities.TokenCache;
-import ru.ratauth.entities.UpdateEntry;
+import ru.ratauth.entities.UpdateDataEntry;
 import ru.ratauth.entities.UserInfo;
 import ru.ratauth.exception.AuthorizationException;
+import ru.ratauth.exception.UpdateFlowException;
 import ru.ratauth.interaction.AuthzRequest;
 import ru.ratauth.interaction.AuthzResponse;
 import ru.ratauth.interaction.AuthzResponseType;
@@ -35,12 +36,12 @@ import ru.ratauth.interaction.GrantType;
 import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
+import ru.ratauth.providers.auth.dto.VerifyResult.Status;
 import ru.ratauth.server.providers.IdentityProviderResolver;
 import ru.ratauth.server.utils.RedirectUtils;
-import ru.ratauth.services.UpdateCodeService;
+import ru.ratauth.services.UpdateDataService;
 import rx.Observable;
 
-import static java.time.LocalDateTime.now;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static ru.ratauth.providers.auth.dto.VerifyResult.Status.NEED_APPROVAL;
@@ -58,10 +59,10 @@ import static ru.ratauth.server.utils.RedirectUtils.createRedirectURI;
 public class OpenIdAuthorizeService implements AuthorizeService {
     private final AuthClientService clientService;
     private final TokenCacheService tokenCacheService;
-    private final UpdateCodeService updateCodeService;
     private final AuthSessionService sessionService;
     private final DeviceService deviceService;
     private final IdentityProviderResolver identityProviderResolver;
+    private final UpdateDataService updateDataService;
 
     @SneakyThrows
     private AuthzResponse buildResponse(RelyingParty relyingParty, Session session, VerifyResult verifyResult, TokenCache tokenCache, AuthzRequest authzRequest) {
@@ -75,20 +76,6 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                     .redirectURI(targetRedirectURI)
                     .build();
             return resp;
-        }
-
-        if (NEED_UPDATE.equals(verifyResult.getStatus())) {
-            String reason = (String) verifyResult.getData().get("reason");
-            String updateService = (String) verifyResult.getData().get("update_service");
-            String location = relyingParty.getAuthorizationPageURI() + verifyResult.getData().get("redirect_uri");
-            UpdateEntry updateCodeEntry = updateCodeService.create(session.getId(), now().plusMinutes(5L)).toBlocking().single();
-
-            return AuthzResponse.builder()
-                .location(location)
-                .updateCode(updateCodeEntry.getCode())
-                .updateService(updateService)
-                .reason(reason)
-                .build();
         }
 
         AuthEntry entry = session.getEntry(relyingParty.getName()).get();
@@ -114,7 +101,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         return resp;
     }
 
-    private static void generateAuthCode(RelyingParty relyingParty, Session session, AuthzRequest authzRequest, String targetRedirectURI, AuthEntry entry, AuthzResponse resp) throws MalformedURLException {
+    private void generateAuthCode(RelyingParty relyingParty, Session session, AuthzRequest authzRequest, String targetRedirectURI, AuthEntry entry, AuthzResponse resp) throws MalformedURLException {
         AcrValues acrValues = authzRequest.getAcrValues();
 
         if (isDefaultFlow(acrValues)) {
@@ -131,7 +118,20 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         AcrValues difference = acrValues.difference(receivedAcrValues);
 
         if (isReceivedRequiredAcrs(difference)) {
-            onFinishAuthorization(targetRedirectURI, entry, resp);
+            UpdateDataEntry updateDataEntry = null;
+
+            try {
+                updateDataEntry = updateDataService.getUpdateData(session.getSessionToken()).toBlocking().single();
+            } catch (UpdateFlowException e) {
+                log.info("not need update");
+            }
+
+            if (updateDataEntry != null) {
+                updateDataEntry.setCode(updateDataService.getCode(session.getSessionToken()).toBlocking().single());
+                onNeedUpdateData(resp, relyingParty, updateDataEntry);
+            } else {
+                onFinishAuthorization(targetRedirectURI, entry, resp);
+            }
             return;
         }
 
@@ -168,6 +168,14 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         resp.setMfaToken(session.getMfaToken());
     }
 
+    @SneakyThrows
+    private static void onNeedUpdateData(AuthzResponse resp, RelyingParty relyingParty, UpdateDataEntry updateDataEntry) {
+        resp.setReason(updateDataEntry.getReason());
+        resp.setLocation(createRedirectUrl(relyingParty, updateDataEntry.getRedirectUri()));
+        resp.setUpdateCode(updateDataEntry.getCode());
+        resp.setUpdateService(updateDataEntry.getService());
+    }
+
     private static String createRedirectUrl(RelyingParty relyingParty, String firstAcr) throws MalformedURLException {
         URL url = new URL(relyingParty.getAuthorizationPageURI());
         return RedirectUtils.createRedirectURI(
@@ -187,14 +195,13 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .flatMap(rp -> authenticateUser(request.getAuthData(), request.getAcrValues(), rp.getIdentityProvider(), rp.getName())
                                 .map(request::addVerifyResultAcrToRequest)
                                 .map(authRes -> new ImmutableTriple<>(rp, authRes, request.getAcrValues())))
-                .flatMap(rpAuth ->
-                        createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
-                                .flatMap(session -> sessionService.updateAcrValues(session)
-                                        .map(it -> session))
+                .flatMap(rpAuth -> createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
+                                .doOnNext(session -> createUpdateToken(rpAuth.middle, session))
+                                .doOnNext(sessionService::updateAcrValues)
                                 .flatMap(session -> createIdToken(rpAuth.left, session, rpAuth.right)
                                         .map(idToken -> buildResponse(rpAuth.left, session, rpAuth.middle, idToken, request))
                                         .flatMap(authzResponse -> {
-                                            if(authzResponse.getCode() != null) {
+                                            if(authzResponse.getCode() != null || authzResponse.getUpdateCode() != null) {
                                                 return deviceService
                                                         .resolveDeviceInfo(
                                                                 request.getClientId(),
@@ -208,6 +215,16 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                                         })
                                 ))
                 .doOnCompleted(() -> log.info("Authorization succeed"));
+    }
+
+    private void createUpdateToken(VerifyResult verifyResult, Session session) {
+        if (Status.NEED_UPDATE.equals(verifyResult.getStatus())) {
+            updateDataService.create(session.getSessionToken(),
+                    (String) verifyResult.getData().get("reason"),
+                    (String) verifyResult.getData().get("update_service"),
+                    (String) verifyResult.getData().get("redirect_uri"),
+                    (Boolean) verifyResult.getData().get("required")).subscribe();
+        }
     }
 
     private boolean isAuthRequired(AuthzRequest request) {
@@ -251,7 +268,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
             sessionObs = sessionService.getByValidRefreshToken(request.getRefreshToken(), new Date());
             authClientObs = clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), true);
         } else {
-            sessionObs = sessionService.getByValidSessionToken(request.getSessionToken(), new Date());
+            sessionObs = sessionService.getByValidSessionToken(request.getSessionToken(), new Date(), true);
             authClientObs = clientService.loadAndAuthSessionClient(request.getClientId(), request.getClientSecret(), true);
         }
 
@@ -286,7 +303,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     }
 
     private Observable<Session> createSession(AuthzRequest oauthRequest, VerifyResult verifyResult, AcrValues acrValues, RelyingParty relyingParty) {
-        if (SUCCESS == verifyResult.getStatus() || NEED_UPDATE == verifyResult.getStatus()) {
+        if (isVerifyStatusPositive(verifyResult)) {
             if (AuthzResponseType.TOKEN == oauthRequest.getResponseType()) {//implicit auth
                 return sessionService.createSession(relyingParty, verifyResult.getData(), oauthRequest.getScopes(), acrValues, oauthRequest.getRedirectURI());
             } else {//auth code auth
@@ -295,6 +312,10 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         } else {
             return Observable.just(new Session());//authCode provided by external Auth provider
         }
+    }
+
+    private boolean isVerifyStatusPositive(VerifyResult verifyResult) {
+        return SUCCESS == verifyResult.getStatus() || NEED_UPDATE == verifyResult.getStatus();
     }
 
     private Observable<VerifyResult> authenticateUser(Map<String, String> authData, AcrValues enroll, String identityProviderName, String relyingPartyName) {

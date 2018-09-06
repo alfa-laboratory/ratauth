@@ -10,10 +10,14 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateEntry {
+public class UpdateDataEntry {
 
-    private String sessionId;
+    private String sessionToken;
     private String code;
+    private String reason;
+    private boolean required;
+    private String service;
+    private String redirectUri;
     private LocalDateTime created;
     private LocalDateTime expiresAt;
     private LocalDateTime used;
