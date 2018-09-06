@@ -18,6 +18,7 @@ import ru.ratauth.server.handlers.readers.RequestReader
 import ru.ratauth.server.services.AuthClientService
 import ru.ratauth.services.SessionService
 import ru.ratauth.services.UpdateDataService
+import ru.ratauth.updateServices.UpdateService
 import ru.ratauth.updateServices.dto.UpdateServiceInput
 import ru.ratauth.updateServices.dto.UpdateServiceResult
 import rx.Observable
@@ -37,7 +38,7 @@ import static ru.ratauth.updateServices.dto.UpdateServiceResult.Status.SUCCESS
 class UpdateHandler implements Action<Chain> {
 
     @Autowired
-    private UpdateServiceExecutor updateServiceResolver
+    private UpdateService updateService
     @Autowired
     private UpdateDataService updateDataService
     @Autowired
@@ -67,8 +68,7 @@ class UpdateHandler implements Action<Chain> {
                                 if (!data.isRequired() && request.skip) {
                                     response = UpdateServiceResult.builder().status(SKIPPED).build()
                                 } else {
-                                    response = updateServiceResolver.getUpdateService(request.updateService)
-                                            .update(UpdateServiceInput.builder()
+                                    response = updateService.update(UpdateServiceInput.builder()
                                                 .code(request.code)
                                                 .relyingParty(request.clientId)
                                                 .data(request.data)
