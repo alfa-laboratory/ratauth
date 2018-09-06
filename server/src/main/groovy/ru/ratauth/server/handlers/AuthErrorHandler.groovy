@@ -16,7 +16,7 @@ import ru.ratauth.exception.BaseAuthServerException
 import ru.ratauth.exception.ExpiredException
 import ru.ratauth.exception.IdentifiedException
 import ru.ratauth.exception.RegistrationException
-import ru.ratauth.server.handlers.readers.ReadRequestException
+import ru.ratauth.exception.ReadRequestException
 import ru.ratauth.utils.ExceptionUtils
 
 import static ru.ratauth.server.services.log.LogFields.ERROR_MESSAGE

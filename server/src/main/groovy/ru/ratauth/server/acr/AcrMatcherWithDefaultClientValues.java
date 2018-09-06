@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ratpack.http.Request;
 import ru.ratauth.entities.AcrValues;
 import ru.ratauth.entities.RelyingParty;
-import ru.ratauth.server.handlers.readers.ReadRequestException;
+import ru.ratauth.exception.ReadRequestException;
 import ru.ratauth.services.ClientService;
 import rx.Observable;
 
