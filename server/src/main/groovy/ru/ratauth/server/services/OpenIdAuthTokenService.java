@@ -9,14 +9,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import ru.ratauth.entities.*;
+import ru.ratauth.entities.AuthClient;
+import ru.ratauth.entities.AuthEntry;
+import ru.ratauth.entities.RelyingParty;
+import ru.ratauth.entities.Session;
 import ru.ratauth.entities.Status;
+import ru.ratauth.entities.Token;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.exception.ExpiredException;
-import ru.ratauth.interaction.*;
+import ru.ratauth.interaction.CheckTokenRequest;
+import ru.ratauth.interaction.CheckTokenResponse;
+import ru.ratauth.interaction.TokenRequest;
+import ru.ratauth.interaction.TokenResponse;
 import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.AuthProvider;
-import ru.ratauth.server.configuration.SessionConfiguration;
+import ru.ratauth.providers.auth.dto.AuthInput;
 import ru.ratauth.server.secutiry.OAuthSystemException;
 import rx.Observable;
 
@@ -24,7 +31,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
-import static ru.ratauth.interaction.GrantType.*;
+import static java.util.Collections.singleton;
+import static ru.ratauth.interaction.GrantType.AUTHENTICATION_TOKEN;
+import static ru.ratauth.interaction.GrantType.AUTHORIZATION_CODE;
+import static ru.ratauth.interaction.GrantType.REFRESH_TOKEN;
 
 /**
  * @author mgorelikov
@@ -39,7 +49,6 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     private final TokenCacheService tokenCacheService;
     private final AuthClientService clientService;
     private final SessionStatusChecker sessionStatusChecker;
-    private final SessionConfiguration sessionConfiguration;
 
     @Override
     @SneakyThrows
@@ -110,9 +119,9 @@ public class OpenIdAuthTokenService implements AuthTokenService {
             log.error("Invalid acr values: " + session.getReceivedAcrValues());
             throw new AuthorizationException(AuthorizationException.ID.INVALID_ACR_VALUES);
         }
-        if (sessionConfiguration.isNeedToCheckSession() && (Status.BLOCKED == session.getStatus() || Status.LOGGED_OUT == session.getStatus()))
+        if (Status.BLOCKED == session.getStatus() || Status.LOGGED_OUT == session.getStatus())
             throw new AuthorizationException(AuthorizationException.ID.SESSION_BLOCKED);
-        if (sessionConfiguration.isNeedToCheckSession() && session.getExpiresIn().before(new Date()))
+        if (session.getExpiresIn().before(new Date()))
             throw new ExpiredException(ExpiredException.ID.SESSION_EXPIRED);
     }
 
