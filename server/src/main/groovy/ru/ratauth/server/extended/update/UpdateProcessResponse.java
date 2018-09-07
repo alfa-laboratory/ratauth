@@ -4,14 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 import ru.ratauth.server.extended.common.RedirectResponse;
 
-public class UpdateResponse extends RedirectResponse {
+public class UpdateProcessResponse extends RedirectResponse {
 
     private final String reason;
     private final String updateCode;
     private final String updateService;
     private final Map<String, String> redirectParameters;
 
-    public UpdateResponse(String reason, String updateCode, String updateService, String location) {
+    public UpdateProcessResponse(String reason, String updateCode, String updateService, String location) {
         super(location);
         this.reason = reason;
         this.updateCode = updateCode;

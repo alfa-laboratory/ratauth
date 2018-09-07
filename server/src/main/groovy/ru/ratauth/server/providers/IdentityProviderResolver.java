@@ -4,6 +4,6 @@ import ru.ratauth.entities.IdentityProvider;
 
 public interface IdentityProviderResolver {
 
-    IdentityProvider getProvider(String clientId);
+    IdentityProvider getProvider(String identityProviderName);
 
 }

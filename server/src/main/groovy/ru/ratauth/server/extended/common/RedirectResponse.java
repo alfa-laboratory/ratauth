@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.SneakyThrows;
 import ru.ratauth.server.utils.RedirectUtils;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 @Data
 @AllArgsConstructor
 abstract public class RedirectResponse {
@@ -24,6 +26,6 @@ abstract public class RedirectResponse {
 
     @SneakyThrows(UnsupportedEncodingException.class)
     private static String encoded(String source) {
-        return URLEncoder.encode(source, "UTF-8");
+        return URLEncoder.encode(source, UTF_8.name());
     }
 }
