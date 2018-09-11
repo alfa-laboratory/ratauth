@@ -7,13 +7,14 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.restdocs.payload.JsonFieldType
+import ru.ratauth.exception.AuthorizationException
 import ru.ratauth.interaction.AuthzResponseType
 import ru.ratauth.interaction.GrantType
 import ru.ratauth.server.local.PersistenceServiceStubConfiguration
+import ru.ratauth.server.services.log.AuthAction
 
 import static com.jayway.restassured.RestAssured.given
-import static org.hamcrest.Matchers.equalToIgnoringCase
-import static org.hamcrest.Matchers.notNullValue
+import static org.hamcrest.Matchers.*
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse
@@ -246,4 +247,49 @@ class TokenAPISpec extends BaseDocumentationSpec {
       .body("client_id", equalToIgnoringCase(PersistenceServiceStubConfiguration.CLIENT_NAME))
   }
 
+  def 'should basic auth failed with good token'() {
+    given:
+    def setup = given(this.documentationSpec)
+            .accept(ContentType.URLENC)
+            .given()
+            .formParam('token', PersistenceServiceStubConfiguration.TOKEN)
+            .header(IntegrationSpecUtil.createAuthHeaders(PersistenceServiceStubConfiguration.NONEXISTENT_CLIENT_NAME, 'bad_password'))
+
+    when:
+    def result = setup
+            .when()
+            .post("check_token")
+
+    then:
+    result
+            .then()
+            .statusCode(HttpStatus.FORBIDDEN.value())
+            .body('id', equalTo(AuthorizationException.ID.CLIENT_NOT_FOUND.name()))
+            .body('message.en', equalTo(AuthorizationException.ID.CLIENT_NOT_FOUND.baseText))
+            .body('type_id', equalTo(AuthAction.AUTHORIZATION.name()))
+            .body('class', equalTo('class ' + AuthorizationException.class.name))
+  }
+
+  def 'should basic auth failed with bad token'() {
+    given:
+    def setup = given(this.documentationSpec)
+            .accept(ContentType.URLENC)
+            .given()
+            .formParam('token', "bad_token")
+            .header(IntegrationSpecUtil.createAuthHeaders(PersistenceServiceStubConfiguration.NONEXISTENT_CLIENT_NAME, 'bad_password_1'))
+
+    when:
+    def result = setup
+            .when()
+            .post("check_token")
+
+    then:
+    result
+            .then()
+            .statusCode(HttpStatus.FORBIDDEN.value())
+            .body('id', equalTo(AuthorizationException.ID.CLIENT_NOT_FOUND.name()))
+            .body('message.en', equalTo(AuthorizationException.ID.CLIENT_NOT_FOUND.baseText))
+            .body('type_id', equalTo(AuthAction.AUTHORIZATION.name()))
+            .body('class', equalTo('class ' + AuthorizationException.class.name))
+  }
 }

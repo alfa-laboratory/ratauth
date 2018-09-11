@@ -26,6 +26,7 @@ class PersistenceServiceStubConfiguration {
   public static final String CLIENT_NAME = 'mine'
   public static final String CLIENT_NAME_DUMMY = 'DummyIdentityProvider'
   public static final String CLIENT_NAME_REST = 'RestIdentityProvider'
+  public static final String NONEXISTENT_CLIENT_NAME = 'bad_name'
   public static final String PASSWORD = 'password'
   public static final String SALT = 'JBn7SnEzMy0MXdNsh5GVvktSGuRs0+BNVZ47kmm3TDM='
   public static final String TOKEN = '1234'
@@ -127,6 +128,8 @@ class PersistenceServiceStubConfiguration {
               salt: SALT,
               password: SecurityUtils.hashPassword(PASSWORD, SALT),
           ))
+        else if (name == NONEXISTENT_CLIENT_NAME)
+          return Observable.empty()
         else
           return Observable.just(new AuthClient(
               id: 'id',

@@ -9,32 +9,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import ru.ratauth.entities.AuthClient;
-import ru.ratauth.entities.AuthEntry;
-import ru.ratauth.entities.RelyingParty;
-import ru.ratauth.entities.Session;
+import ru.ratauth.entities.*;
 import ru.ratauth.entities.Status;
-import ru.ratauth.entities.Token;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.exception.ExpiredException;
-import ru.ratauth.interaction.CheckTokenRequest;
-import ru.ratauth.interaction.CheckTokenResponse;
-import ru.ratauth.interaction.TokenRequest;
-import ru.ratauth.interaction.TokenResponse;
+import ru.ratauth.interaction.*;
 import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.AuthProvider;
-import ru.ratauth.providers.auth.dto.AuthInput;
 import ru.ratauth.server.secutiry.OAuthSystemException;
 import rx.Observable;
+import rx.functions.Action1;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
-import static java.util.Collections.singleton;
-import static ru.ratauth.interaction.GrantType.AUTHENTICATION_TOKEN;
-import static ru.ratauth.interaction.GrantType.AUTHORIZATION_CODE;
-import static ru.ratauth.interaction.GrantType.REFRESH_TOKEN;
+import static ru.ratauth.interaction.GrantType.*;
 
 /**
  * @author mgorelikov
@@ -81,10 +71,12 @@ public class OpenIdAuthTokenService implements AuthTokenService {
 
     @Override
     public Observable<CheckTokenResponse> checkToken(CheckTokenRequest oauthRequest) {
+        // check basic auth first
+        Observable<AuthClient> authClient = loadRelyingParty(oauthRequest);
+        authClient.subscribe();
         return authSessionService.getByValidToken(oauthRequest.getToken(), new Date())
-                .doOnNext(session -> sessionStatusChecker.checkAndUpdateSession(session))
-                .zipWith(loadRelyingParty(oauthRequest),
-                        (session, client) -> new ImmutablePair<>(session, client))
+                .doOnNext(sessionStatusChecker::checkAndUpdateSession)
+                .zipWith(authClient, ImmutablePair::new)
                 .doOnNext(sessionClient -> checkSession(sessionClient.getLeft(), sessionClient.getRight()))
                 .flatMap(sessionClient -> {
                     //load idToken(jwt) from cache or create new
