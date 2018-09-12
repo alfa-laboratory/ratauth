@@ -11,8 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateServiceConfiguration {
 
-    private boolean enabled;
-    private String url;
+    private String uri;
     private int readTimeout;
     private String authLogin;
     private String authPassword;
