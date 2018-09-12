@@ -72,10 +72,12 @@ public class OpenIdAuthTokenService implements AuthTokenService {
 
     @Override
     public Observable<CheckTokenResponse> checkToken(CheckTokenRequest oauthRequest) {
+        // check basic auth first
+        Observable<AuthClient> authClient = loadRelyingParty(oauthRequest);
+        authClient.subscribe();
         return authSessionService.getByValidToken(oauthRequest.getToken(), new Date())
-                .doOnNext(session -> sessionStatusChecker.checkAndUpdateSession(session))
-                .zipWith(loadRelyingParty(oauthRequest),
-                        (session, client) -> new ImmutablePair<>(session, client))
+                .doOnNext(sessionStatusChecker::checkAndUpdateSession)
+                .zipWith(authClient, ImmutablePair::new)
                 .doOnNext(sessionClient -> checkSession(sessionClient.getLeft(), sessionClient.getRight()))
                 .flatMap(sessionClient -> {
                     //load idToken(jwt) from cache or create new
