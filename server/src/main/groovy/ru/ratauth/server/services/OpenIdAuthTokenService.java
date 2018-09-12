@@ -16,9 +16,9 @@ import ru.ratauth.exception.ExpiredException;
 import ru.ratauth.interaction.*;
 import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.AuthProvider;
+import ru.ratauth.server.configuration.SessionConfiguration;
 import ru.ratauth.server.secutiry.OAuthSystemException;
 import rx.Observable;
-import rx.functions.Action1;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -39,6 +39,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     private final TokenCacheService tokenCacheService;
     private final AuthClientService clientService;
     private final SessionStatusChecker sessionStatusChecker;
+    private final SessionConfiguration sessionConfiguration;
 
     @Override
     @SneakyThrows
@@ -111,9 +112,9 @@ public class OpenIdAuthTokenService implements AuthTokenService {
             log.error("Invalid acr values: " + session.getReceivedAcrValues());
             throw new AuthorizationException(AuthorizationException.ID.INVALID_ACR_VALUES);
         }
-        if (Status.BLOCKED == session.getStatus() || Status.LOGGED_OUT == session.getStatus())
+        if (sessionConfiguration.isNeedToCheckSession() && (Status.BLOCKED == session.getStatus() || Status.LOGGED_OUT == session.getStatus()))
             throw new AuthorizationException(AuthorizationException.ID.SESSION_BLOCKED);
-        if (session.getExpiresIn().before(new Date()))
+        if (sessionConfiguration.isNeedToCheckSession() && session.getExpiresIn().before(new Date()))
             throw new ExpiredException(ExpiredException.ID.SESSION_EXPIRED);
     }
 
