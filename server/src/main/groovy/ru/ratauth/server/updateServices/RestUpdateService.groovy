@@ -43,7 +43,7 @@ class RestUpdateService implements UpdateService {
         ).toObservable()
                 .map({ ReceivedResponse res ->
             if (res.status.'4xx') {
-                throw new AuthorizationException(res.getBody().getText());
+                throw new AuthorizationException(res.getBody().getText())
             } else if (res.status.'5xx') {
                 throw new UpdateFlowException(ID.UPDATE_CALL_SERVICE.name(), res.getBody().getText())
             }
@@ -51,7 +51,7 @@ class RestUpdateService implements UpdateService {
         })
     }
 
-    private UpdateServiceResult makeUpdateResultFromResponse(ReceivedResponse receivedResponse) {
+    private static UpdateServiceResult makeUpdateResultFromResponse(ReceivedResponse receivedResponse) {
         Map responseMap = (Map) (((List) (new JsonSlurper().parseText(receivedResponse.getBody().getText()))).get(0))
         return UpdateServiceResult.builder().status(Status.valueOf((String) responseMap.get("status")))
                 .data(responseMap)
