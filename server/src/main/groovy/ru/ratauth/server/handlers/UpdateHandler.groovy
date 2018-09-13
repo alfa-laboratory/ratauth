@@ -97,10 +97,10 @@ class UpdateHandler implements Action<Chain> {
                 String authCode = authEntry.authCode
                 LocalDateTime authCodeExpiresIn = now.plus(relyingParty.codeTTL, ChronoUnit.SECONDS)
 
-                AcrValue receivedAcrValues = sessionService.getByValidSessionToken(sessionToken, fromLocal(now), false)
-                        .map { session -> session.getReceivedAcrValues() }.toBlocking().single()
+                AcrValue acrValues = sessionService.getByValidSessionToken(sessionToken, fromLocal(now), false)
+                        .map { session -> session.receivedAcrValues }.toBlocking().single()
 
-                if (!parseAcrValues().contains(receivedAcrValues.toString()) && validAcrValues != null) {
+                if (!parseAcrValues().contains(acrValues.toString()) && validAcrValues != null) {
                     throw new AuthorizationException("Not valid acr_values")
                 }
 
