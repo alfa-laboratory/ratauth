@@ -13,11 +13,21 @@ public interface ActionLogger {
     MDC.put(LogFields.USER_ID.val(), session.getUserId());
   }
 
-  static void addBaseRequestInfo(String clientId, AuthAction authAction) {
+  static void addBaseRequestInfo(String clientId, AuthAction authAction, String externalClientId) {
       MDC.put(LogFields.ACTION.val(), authAction.name());
       MDC.put(LogFields.CLIENT_ID.val(), clientId);
+      MDC.put(LogFields.EXTERNAL_CLIENT_ID.val(), externalClientId);
       if(authAction.isLongTerm()) {
         MDC.put(LogFields.LONG_TERM.val(), Boolean.TRUE.toString());
       }
   }
+
+    static void addBaseRequestInfo(String clientId, AuthAction authAction) {
+        MDC.put(LogFields.ACTION.val(), authAction.name());
+        MDC.put(LogFields.CLIENT_ID.val(), clientId);
+        if(authAction.isLongTerm()) {
+            MDC.put(LogFields.LONG_TERM.val(), Boolean.TRUE.toString());
+        }
+    }
+
 }

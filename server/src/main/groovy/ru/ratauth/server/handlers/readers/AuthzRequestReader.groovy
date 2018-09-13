@@ -100,7 +100,8 @@ class AuthzRequestReader {
         }
         builder.authData(extractRest(params, BASE_FIELDS))
         def request = builder.build()
-        ActionLogger.addBaseRequestInfo(request.clientId, authAction)
+
+        ActionLogger.addBaseRequestInfo(request.clientId, authAction, request.externalClientId)
         request
     }
 
