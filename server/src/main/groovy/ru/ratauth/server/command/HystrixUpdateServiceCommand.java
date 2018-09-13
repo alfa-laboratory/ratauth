@@ -2,16 +2,12 @@ package ru.ratauth.server.command;
 
 import com.netflix.hystrix.HystrixCommandProperties;
 import com.netflix.hystrix.HystrixObservableCommand;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -26,18 +22,16 @@ import ratpack.http.MediaType;
 import ratpack.http.client.HttpClient;
 import ratpack.http.client.ReceivedResponse;
 import ratpack.rx.RxRatpack;
-import ru.ratauth.entities.UserInfo;
 import rx.Observable;
 
 import static com.netflix.hystrix.HystrixCommandGroupKey.Factory.asKey;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Optional.ofNullable;
 
 @Slf4j
 public class HystrixUpdateServiceCommand extends HystrixObservableCommand<ReceivedResponse> {
 
     private final HttpClient httpClient;
-    private final Map<String, Object> data;
+    private final Map<String, String> data;
     private final URI uri;
 
     private String login;
@@ -51,7 +45,7 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
         @NonNull String uri,
         String login,
         String password,
-        Integer timeout) throws MalformedURLException, URISyntaxException {
+        Integer timeout) throws URISyntaxException {
 
         this(createSetter(updateService, timeout), httpClient, data, relyingParty, uri);
         this.login = login;
@@ -63,44 +57,27 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
         @NonNull HttpClient httpClient,
         @NonNull Map<String, String> data,
         @NonNull String relyingParty,
-        @NonNull String url) throws MalformedURLException, URISyntaxException {
+        @NonNull String uri) throws URISyntaxException {
 
         super(setter);
         this.httpClient = httpClient;
-        this.uri = new URL(url).toURI();
+        this.uri = new URI(uri);
         this.data = performData(data, relyingParty);
     }
 
     private static Setter createSetter(@NonNull String updateService, Integer timeout) {
         Setter setter = Setter.withGroupKey(asKey(String.format("update-service-%s", updateService)));
         if (timeout != null) {
-            setter.andCommandPropertiesDefaults(HystrixCommandProperties.Setter()
-                .withExecutionTimeoutInMilliseconds(timeout));
+            setter.andCommandPropertiesDefaults(HystrixCommandProperties.Setter().withExecutionTimeoutInMilliseconds(timeout));
         } else {
             setter.andCommandPropertiesDefaults(HystrixCommandProperties.Setter());
         }
         return setter;
     }
 
-    private Map<String, Object> performData(Map<String, String> data, String relyingParty) {
-        Map<String, Object> result = createKeyPrefix("data", data);
-        result.put("relying_party", relyingParty);
-        return result;
-    }
-
-    private Map<String, Object> toMap(UserInfo userInfo) {
-        return ofNullable(userInfo)
-            .map(UserInfo::toMap)
-            .orElse(Collections.emptyMap());
-    }
-
-    private static Map<String, Object> createKeyPrefix(String prefix, Map<String, ?> map) {
-        return map.entrySet().stream()
-            .filter(e -> e.getKey() != null)
-            .collect(Collectors.toMap(
-                e -> prefix + "." + e.getKey(),
-                e -> Objects.toString(e.getValue()))
-            );
+    private Map<String, String> performData(Map<String, String> data, String relyingParty) {
+        data.put("relying_party", relyingParty);
+        return data;
     }
 
     private static String createAuthHeader(String login, String password) {
@@ -110,12 +87,7 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
     }
 
     protected Observable<ReceivedResponse> construct() {
-        Promise<ReceivedResponse> promise = makePostRequest();
-        return RxRatpack.observe(promise);
-    }
-
-    private Promise<ReceivedResponse> makePostRequest() {
-        return httpClient.post(
+        Promise<ReceivedResponse> promise = httpClient.post(
             uri,
             r -> {
                 r.sslContext(createSSLContext());
@@ -131,6 +103,7 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
                 });
             }
         );
+        return RxRatpack.observe(promise);
     }
 
     @SneakyThrows
