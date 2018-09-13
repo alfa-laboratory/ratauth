@@ -1,6 +1,5 @@
 package ru.ratauth.server.handlers
 
-import io.netty.handler.codec.http.HttpResponseStatus
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import ratpack.error.ServerErrorHandler
@@ -20,12 +19,12 @@ import ru.ratauth.services.UpdateDataService
 import ru.ratauth.updateServices.UpdateService
 import ru.ratauth.updateServices.dto.UpdateServiceInput
 import rx.Observable
-import rx.functions.Action1
 
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 
+import static io.netty.handler.codec.http.HttpResponseStatus.FOUND
 import static java.time.LocalDateTime.now
+import static java.time.temporal.ChronoUnit.SECONDS
 import static ratpack.rx.RxRatpack.observe
 import static ru.ratauth.exception.AuthorizationException.ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED
 import static ru.ratauth.server.handlers.readers.UpdateServiceRequestReader.readUpdateServiceRequest
@@ -60,23 +59,20 @@ class UpdateHandler implements Action<Chain> {
     private void updateUserData(UpdateServiceRequest request, Context ctx) {
         updateDataService.getValidEntry(request.code)
             .subscribe {
-            data ->
-                updateDataService.invalidate(request.code).subscribe()
-                updateService.update(UpdateServiceInput.builder()
-                        .code(request.code)
-                        .updateService(request.updateService)
-                        .relyingParty(request.clientId)
-                        .data(request.data)
-                        .build())
-                        .flatMap { r ->
-                    def clientId = request.clientId
-                    def sessionToken = data.sessionToken
-                    //update code expired
-                    makeFinishResponse(ctx, clientId, sessionToken)
-                }.doOnError { errorHandler(ctx) }.subscribe()
-        } {
-            errorHandler(ctx)
-        }
+                data ->
+                    updateDataService.invalidate(request.code).subscribe()
+                    updateService.update(UpdateServiceInput.builder()
+                            .code(request.code)
+                            .updateService(request.updateService)
+                            .relyingParty(request.clientId)
+                            .data(request.data).build())
+                            .flatMap { r ->
+                                def clientId = request.clientId
+                                def sessionToken = data.sessionToken
+                                makeFinishResponse(ctx, clientId, sessionToken) }
+                            .doOnError { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) }
+                            .subscribe()
+        } { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) }
     }
 
     private void makeFinishResponse(Context ctx, String clientId, String sessionToken) {
@@ -84,14 +80,14 @@ class UpdateHandler implements Action<Chain> {
         authClientService.loadRelyingParty(clientId)
             .zipWith(getSession(sessionToken, clientId), { relyingParty, authEntry ->
                 String authCode = authEntry.authCode
-                LocalDateTime authCodeExpiresIn = now.plus(relyingParty.codeTTL, ChronoUnit.SECONDS)
+                LocalDateTime authCodeExpiresIn = now.plus(relyingParty.codeTTL, SECONDS)
 
                 updateAuthCodeExpired(authCode, authCodeExpiresIn)
 
-                long expiresIn = ChronoUnit.SECONDS.between(now, authCodeExpiresIn)
+                long expiresIn = SECONDS.between(now, authCodeExpiresIn)
 
                 def finishResponse = new UpdateFinishResponse(relyingParty.authorizationRedirectURI, sessionToken, authCode, expiresIn)
-                ctx.redirect(HttpResponseStatus.FOUND.code(), finishResponse.redirectURL)
+                ctx.redirect(FOUND.code(), finishResponse.redirectURL)
         }).subscribe()
     }
 
@@ -105,9 +101,5 @@ class UpdateHandler implements Action<Chain> {
     private Observable<AuthEntry> getSession(String sessionToken, String clientId) {
         sessionService.getByValidSessionToken(sessionToken, fromLocal(now), false)
                 .map { session -> session.getEntry(clientId).get() }
-    }
-
-    static Action1<Throwable> errorHandler(Context ctx) {
-        return { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) } as Action1<Throwable>
     }
 }

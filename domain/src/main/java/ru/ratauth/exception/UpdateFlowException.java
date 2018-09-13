@@ -1,6 +1,6 @@
 package ru.ratauth.exception;
 
-public class UpdateFlowException extends BaseAuthServerException {
+public class UpdateFlowException extends BaseAuthServerException implements IdentifiedException {
 
     private final String id;
 
@@ -25,6 +25,14 @@ public class UpdateFlowException extends BaseAuthServerException {
         this.id = id;
     }
 
+    @Override
+    public String getTypeId() {
+        return "UPDATE_FLOW_EXCEPTION";
+    }
+
+    public String getId() {
+        return id;
+    }
 
     public enum ID {
         UPDATE_DATA_ENTRY_NOT_FOUND("Entry not found, you have used wrong code or session token"),
