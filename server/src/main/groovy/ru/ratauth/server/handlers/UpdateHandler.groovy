@@ -104,9 +104,8 @@ class UpdateHandler implements Action<Chain> {
 
     private Observable<AuthEntry> getSession(String sessionToken, String clientId) {
         sessionService.getByValidSessionToken(sessionToken, fromLocal(now()), false)
-                .map {
-            session -> compareAcr(session)
-            session.getEntry(clientId).get() }
+                .map { session -> compareAcr(session)
+                       session.getEntry(clientId).get() }
     }
 
     private Observable<Session> compareAcr(Session session) {
