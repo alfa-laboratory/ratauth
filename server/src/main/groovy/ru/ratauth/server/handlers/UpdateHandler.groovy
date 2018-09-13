@@ -119,6 +119,6 @@ class UpdateHandler implements Action<Chain> {
     }
 
     private List<String> parseAcrValues() {
-        return Arrays.asList(validAcrValues.split(","));
+        return Arrays.asList(validAcrValues.split(","))
     }
 }
