@@ -1,6 +1,7 @@
 package ru.ratauth.server.handlers.readers
 
 import groovy.transform.CompileStatic
+import org.slf4j.MDC
 import ratpack.http.Headers
 import ratpack.util.MultiValueMap
 import ru.ratauth.entities.AcrValues
@@ -72,6 +73,7 @@ class AuthzRequestReader {
                     .externalClientId(extractField(params, CLIENT_ID, true))
                     .grantType(grantType)
                     .scopes(extractField(params, SCOPE, true).split(SPACE).toList())
+            MDC.put("external_client_id", builder.externalClientId)
             if (GrantType.AUTHENTICATION_TOKEN == grantType) {
                 builder.refreshToken(extractField(params, REFRESH_TOKEN, true))
             } else {
