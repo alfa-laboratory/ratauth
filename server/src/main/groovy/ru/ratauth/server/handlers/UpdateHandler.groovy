@@ -1,6 +1,7 @@
 package ru.ratauth.server.handlers
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import ratpack.error.ServerErrorHandler
 import ratpack.exec.Promise
@@ -9,6 +10,7 @@ import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
 import ru.ratauth.entities.AuthEntry
+import ru.ratauth.entities.Session
 import ru.ratauth.exception.AuthorizationException
 import ru.ratauth.interaction.UpdateServiceRequest
 import ru.ratauth.server.extended.update.UpdateFinishResponse
@@ -42,6 +44,8 @@ class UpdateHandler implements Action<Chain> {
     @Autowired
     private SessionService sessionService
 
+    @Value('{valid.acr_values:#{null}}')
+    private String validAcrValues
     @Override
     void execute(Chain chain) throws Exception {
         chain.post('update') { ctx -> update(ctx) }
@@ -100,6 +104,16 @@ class UpdateHandler implements Action<Chain> {
 
     private Observable<AuthEntry> getSession(String sessionToken, String clientId) {
         sessionService.getByValidSessionToken(sessionToken, fromLocal(now()), false)
-                .map { session -> session.getEntry(clientId).get() }
+                .map {
+            session -> compareAcr(session)
+            session.getEntry(clientId).get() }
+    }
+
+    private Observable<Session> compareAcr(Session session) {
+        return parseAcrValues().contains(session.receivedAcrValues) || validAcrValues == null  ? session : new AuthorizationException("Not valid acr_values")
+    }
+
+    private List<String> parseAcrValues() {
+        return Arrays.asList(validAcrValues.split(","))
     }
 }
