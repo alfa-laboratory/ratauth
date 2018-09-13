@@ -2,21 +2,6 @@ package ru.ratauth.server.command;
 
 import com.netflix.hystrix.HystrixCommandProperties;
 import com.netflix.hystrix.HystrixObservableCommand;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import javax.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +13,22 @@ import ratpack.http.client.ReceivedResponse;
 import ratpack.rx.RxRatpack;
 import ru.ratauth.entities.UserInfo;
 import rx.Observable;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import javax.validation.constraints.NotNull;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.netflix.hystrix.HystrixCommandGroupKey.Factory.asKey;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -44,26 +45,25 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
     private String password;
 
     public HystrixUpdateServiceCommand(
-        @NonNull HttpClient httpClient,
-        @NonNull Map<String, String> data,
-        @NonNull String relyingParty,
-        @NotNull String updateService,
-        @NonNull String uri,
-        String login,
-        String password,
-        Integer timeout) throws MalformedURLException, URISyntaxException {
-
+            @NonNull HttpClient httpClient,
+            @NonNull Map<String, String> data,
+            @NonNull String relyingParty,
+            @NotNull String updateService,
+            @NonNull String uri,
+            String login,
+            String password,
+            Integer timeout) throws MalformedURLException, URISyntaxException {
         this(createSetter(updateService, timeout), httpClient, data, relyingParty, uri);
         this.login = login;
         this.password = password;
     }
 
     private HystrixUpdateServiceCommand(
-        Setter setter,
-        @NonNull HttpClient httpClient,
-        @NonNull Map<String, String> data,
-        @NonNull String relyingParty,
-        @NonNull String url) throws MalformedURLException, URISyntaxException {
+            Setter setter,
+            @NonNull HttpClient httpClient,
+            @NonNull Map<String, String> data,
+            @NonNull String relyingParty,
+            @NonNull String url) throws MalformedURLException, URISyntaxException {
 
         super(setter);
         this.httpClient = httpClient;
@@ -75,7 +75,7 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
         Setter setter = Setter.withGroupKey(asKey(String.format("update-service-%s", updateService)));
         if (timeout != null) {
             setter.andCommandPropertiesDefaults(HystrixCommandProperties.Setter()
-                .withExecutionTimeoutInMilliseconds(timeout));
+                    .withExecutionTimeoutInMilliseconds(timeout));
         } else {
             setter.andCommandPropertiesDefaults(HystrixCommandProperties.Setter());
         }
@@ -90,17 +90,17 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
 
     private Map<String, Object> toMap(UserInfo userInfo) {
         return ofNullable(userInfo)
-            .map(UserInfo::toMap)
-            .orElse(Collections.emptyMap());
+                .map(UserInfo::toMap)
+                .orElse(Collections.emptyMap());
     }
 
     private static Map<String, Object> createKeyPrefix(String prefix, Map<String, ?> map) {
         return map.entrySet().stream()
-            .filter(e -> e.getKey() != null)
-            .collect(Collectors.toMap(
-                e -> prefix + "." + e.getKey(),
-                e -> Objects.toString(e.getValue()))
-            );
+                .filter(e -> e.getKey() != null)
+                .collect(Collectors.toMap(
+                        e -> prefix + "." + e.getKey(),
+                        e -> Objects.toString(e.getValue()))
+                );
     }
 
     private static String createAuthHeader(String login, String password) {
@@ -116,20 +116,20 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
 
     private Promise<ReceivedResponse> makePostRequest() {
         return httpClient.post(
-            uri,
-            r -> {
-                r.sslContext(createSSLContext());
-                if (login != null && password != null) {
-                    r.headers(headers -> headers.add(HttpHeaders.AUTHORIZATION, createAuthHeader(login, password)));
+                uri,
+                r -> {
+                    r.sslContext(createSSLContext());
+                    if (login != null && password != null) {
+                        r.headers(headers -> headers.add(HttpHeaders.AUTHORIZATION, createAuthHeader(login, password)));
+                    }
+                    r.body(body -> {
+                        body.type(MediaType.APPLICATION_JSON);
+                        body.text(data.entrySet().stream()
+                                .filter(e -> e.getKey() != null && e.getValue() != null)
+                                .map(e -> e.getKey() + "=" + e.getValue())
+                                .collect(Collectors.joining("&")));
+                    });
                 }
-                r.body(body -> {
-                    body.type(MediaType.APPLICATION_JSON);
-                    body.text(data.entrySet().stream()
-                        .filter(e -> e.getKey() != null && e.getValue() != null)
-                        .map(e -> e.getKey() + "=" + e.getValue())
-                        .collect(Collectors.joining("&")));
-                });
-            }
         );
     }
 
@@ -143,11 +143,11 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
             }
 
             public void checkClientTrusted(X509Certificate[] certs,
-                String authType) {
+                                           String authType) {
             }
 
             public void checkServerTrusted(X509Certificate[] certs,
-                String authType) {
+                                           String authType) {
             }
 
         }}, new SecureRandom());

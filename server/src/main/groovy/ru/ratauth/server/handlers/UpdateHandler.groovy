@@ -3,6 +3,7 @@ package ru.ratauth.server.handlers
 import io.netty.handler.codec.http.HttpResponseStatus
 import org.apache.commons.lang3.tuple.ImmutableTriple
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import ratpack.error.ServerErrorHandler
 import ratpack.exec.Promise
@@ -10,6 +11,7 @@ import ratpack.form.Form
 import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
+import ru.ratauth.entities.AcrValue
 import ru.ratauth.entities.UpdateDataEntry
 import ru.ratauth.exception.AuthorizationException
 import ru.ratauth.interaction.UpdateServiceRequest
@@ -46,6 +48,9 @@ class UpdateHandler implements Action<Chain> {
     @Autowired
     private SessionService sessionService
 
+    @Value('${acr_values.list::#{null}}')
+    private String validAcrValues
+
     @Override
     void execute(Chain chain) throws Exception {
         chain.post('update') { ctx -> update(ctx) }
@@ -54,28 +59,28 @@ class UpdateHandler implements Action<Chain> {
     private void update(Context ctx) {
         Promise<Form> formPromise = ctx.parse(Form)
         observe(formPromise)
-        .map { params -> new RequestReader(params) }
-        .map { params -> readUpdateServiceRequest(params)
+                .map { params -> new RequestReader(params) }
+                .map { params -> readUpdateServiceRequest(params)
         } flatMap {
                 //check code
             request ->
                 updateDataService.getValidEntry(request.code)
                         .map { data ->
-                                //invalidate code
-                                updateDataService.invalidate(request.code).subscribe()
-                                //update data
-                                def response
-                                if (!data.isRequired() && request.skip) {
-                                    response = UpdateServiceResult.builder().status(SKIPPED).build()
-                                } else {
-                                    response = updateService.update(UpdateServiceInput.builder()
-                                                .code(request.code)
-                                                .relyingParty(request.clientId)
-                                                .data(request.data)
-                                                .build()).toBlocking().single()
-                                }
-                                new ImmutableTriple<UpdateServiceRequest, UpdateServiceResult, UpdateDataEntry>(request, response, data)
-                        }
+                    //invalidate code
+                    updateDataService.invalidate(request.code).subscribe()
+                    //update data
+                    def response
+                    if (!data.isRequired() && request.skip) {
+                        response = UpdateServiceResult.builder().status(SKIPPED).build()
+                    } else {
+                        response = updateService.update(UpdateServiceInput.builder()
+                                .code(request.code)
+                                .relyingParty(request.clientId)
+                                .data(request.data)
+                                .build()).toBlocking().single()
+                    }
+                    new ImmutableTriple<UpdateServiceRequest, UpdateServiceResult, UpdateDataEntry>(request, response, data)
+                }
         } filter {
             triple -> triple.middle.status == SUCCESS || triple.middle.status == SKIPPED
         } subscribe {
@@ -92,6 +97,13 @@ class UpdateHandler implements Action<Chain> {
                 String authCode = authEntry.authCode
                 LocalDateTime authCodeExpiresIn = now.plus(relyingParty.codeTTL, ChronoUnit.SECONDS)
 
+                AcrValue receivedAcrValues = sessionService.getByValidSessionToken(sessionToken, fromLocal(now), false)
+                        .map { session -> session.getReceivedAcrValues() }.toBlocking().single()
+
+                if (!parseAcrValues().contains(receivedAcrValues.toString()) && validAcrValues != null) {
+                    throw new AuthorizationException("Not valid acr_values")
+                }
+
                 sessionService.updateAuthCodeExpired(authCode, fromLocal(authCodeExpiresIn))
                         .filter { it.booleanValue() }
                         .switchIfEmpty(Observable.error(new AuthorizationException(AUTH_CODE_EXPIRES_IN_UPDATE_FAILED)))
@@ -104,5 +116,9 @@ class UpdateHandler implements Action<Chain> {
         } {
             throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable)
         }
+    }
+
+    private List<String> parseAcrValues() {
+        return Arrays.asList(validAcrValues.split(","));
     }
 }
