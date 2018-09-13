@@ -69,13 +69,13 @@ class UpdateHandler implements Action<Chain> {
                             .flatMap { r ->
                                 def clientId = request.clientId
                                 def sessionToken = data.sessionToken
-                                makeFinishResponse(ctx, clientId, sessionToken) }
+                                finishResponse(ctx, clientId, sessionToken) }
                             .doOnError { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) }
                             .subscribe()
         } { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) }
     }
 
-    private void makeFinishResponse(Context ctx, String clientId, String sessionToken) {
+    private void finishResponse(Context ctx, String clientId, String sessionToken) {
         LocalDateTime now = now()
         authClientService.loadRelyingParty(clientId)
             .zipWith(getSession(sessionToken, clientId), { relyingParty, authEntry ->
