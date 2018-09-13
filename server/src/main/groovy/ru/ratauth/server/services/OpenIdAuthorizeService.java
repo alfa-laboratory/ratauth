@@ -13,7 +13,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -272,7 +271,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
             sessionObs = sessionService.getByValidSessionToken(request.getSessionToken(), new Date(), true);
             authClientObs = clientService.loadAndAuthSessionClient(request.getClientId(), request.getClientSecret(), true);
         }
-        MDC.put("external_client_id", request.getExternalClientId());
+
         return Observable.zip(
                 authClientObs
                         .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CREDENTIALS_WRONG))),
