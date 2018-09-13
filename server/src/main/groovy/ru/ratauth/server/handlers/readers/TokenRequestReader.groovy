@@ -1,7 +1,6 @@
 package ru.ratauth.server.handlers.readers
 
 import groovy.transform.CompileStatic
-import org.slf4j.MDC
 import ratpack.form.Form
 import ratpack.http.Headers
 import ru.ratauth.exception.AuthorizationException
@@ -76,7 +75,6 @@ class TokenRequestReader {
     def auth = extractAuth(headers)
     builder.clientId(auth[0]).clientSecret(auth[1])
     builder.externalClientId(extractField(form, CLIENT_ID, false))
-    MDC.put("external_client_id", builder.externalClientId)
     def request = builder.build()
     ActionLogger.addBaseRequestInfo(request.clientId, AuthAction.CHECK_TOKEN)
     request
