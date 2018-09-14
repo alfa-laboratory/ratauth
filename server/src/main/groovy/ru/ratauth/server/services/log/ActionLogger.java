@@ -16,7 +16,9 @@ public interface ActionLogger {
     static void addBaseRequestInfo(String clientId, AuthAction authAction, String externalClientId) {
         MDC.put(LogFields.ACTION.val(), authAction.name());
         MDC.put(LogFields.CLIENT_ID.val(), clientId);
-        MDC.put(LogFields.EXTERNAL_CLIENT_ID.val(), externalClientId);
+        if (externalClientId != null) {
+            MDC.put(LogFields.EXTERNAL_CLIENT_ID.val(), externalClientId);
+        }
         if (authAction.isLongTerm()) {
             MDC.put(LogFields.LONG_TERM.val(), Boolean.TRUE.toString());
         }
