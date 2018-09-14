@@ -16,6 +16,8 @@ public class VerifyResult {
     private Map<String, Object> data = new HashMap<>();
     private Status status;
     private AcrValues acrValues;
+    private Boolean required;
+    private String reason;
 
     public enum Status {
         SUCCESS,
