@@ -16,8 +16,8 @@ import ru.ratauth.server.handlers.readers.RequestReader
 import ru.ratauth.server.services.AuthClientService
 import ru.ratauth.services.SessionService
 import ru.ratauth.services.UpdateDataService
-import ru.ratauth.updateServices.UpdateService
-import ru.ratauth.updateServices.dto.UpdateServiceInput
+import ru.ratauth.update.services.UpdateService
+import ru.ratauth.update.services.dto.UpdateServiceInput
 import rx.Observable
 
 import java.time.LocalDateTime
