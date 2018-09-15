@@ -1,4 +1,4 @@
-package ru.ratauth.updateServices.dto;
+package ru.ratauth.update.services.dto;
 
 import java.util.HashMap;
 import java.util.Map;

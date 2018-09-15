@@ -1,4 +1,4 @@
-package ru.ratauth.server.update.services
+package ru.ratauth.server.services
 
 import groovy.json.JsonSlurper
 import lombok.SneakyThrows
@@ -10,9 +10,9 @@ import ru.ratauth.exception.UpdateFlowException
 import ru.ratauth.server.command.HystrixUpdateServiceCommand
 import ru.ratauth.server.configuration.UpdateServicesConfiguration
 import ru.ratauth.server.handlers.HttpClientHolder
-import ru.ratauth.updateServices.UpdateService
-import ru.ratauth.updateServices.dto.UpdateServiceInput
-import ru.ratauth.updateServices.dto.UpdateServiceResult
+import ru.ratauth.update.services.UpdateService
+import ru.ratauth.update.services.dto.UpdateServiceInput
+import ru.ratauth.update.services.dto.UpdateServiceResult
 import rx.Observable
 
 import static ru.ratauth.exception.UpdateFlowException.ID.UPDATE_CALL_SERVICE
