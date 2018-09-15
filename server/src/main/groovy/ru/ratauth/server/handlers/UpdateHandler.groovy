@@ -19,6 +19,7 @@ import ru.ratauth.services.SessionService
 import ru.ratauth.services.UpdateDataService
 import ru.ratauth.update.services.UpdateService
 import ru.ratauth.update.services.dto.UpdateServiceInput
+import ru.ratauth.update.services.dto.UpdateServiceResult
 import rx.Observable
 
 import java.time.LocalDateTime
@@ -30,6 +31,9 @@ import static ratpack.rx.RxRatpack.observe
 import static ru.ratauth.exception.AuthorizationException.ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED
 import static ru.ratauth.server.handlers.readers.UpdateServiceRequestReader.readUpdateServiceRequest
 import static ru.ratauth.server.utils.DateUtils.fromLocal
+import static ru.ratauth.update.services.dto.UpdateServiceResult.Status.SKIPPED
+import static ru.ratauth.update.services.dto.UpdateServiceResult.Status.SUCCESS
+import static rx.Observable.just
 
 @Component
 class UpdateHandler implements Action<Chain> {
@@ -54,27 +58,28 @@ class UpdateHandler implements Action<Chain> {
                 .map { params -> new RequestReader(params) }
                 .map { params -> readUpdateServiceRequest(params) }
                 .map { request -> updateUserData(request, ctx) }
-                .subscribe()
     }
 
     private void updateUserData(UpdateServiceRequest request, Context ctx) {
         updateDataService.getValidEntry(request.code)
                 .subscribe { data ->
                     updateDataService.invalidate(request.code).subscribe()
-                    callExternalServiceForUpdateUserData(data, ctx)
-                    doFinishResponse(ctx, request, data)
+                    callExternalServiceForUpdateUserData(request, data, ctx)
+                            .filter { r -> r.status == SUCCESS || r.status == SKIPPED }
+                            .subscribe { r -> doFinishResponse(ctx, request, data) }
                 } { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) }
     }
 
-    private void callExternalServiceForUpdateUserData(UpdateServiceRequest request, UpdateDataEntry data, Context ctx) {
-        if (!request.skip && !data.required) {
-            updateService.update(UpdateServiceInput.builder()
+    private Observable<UpdateServiceResult> callExternalServiceForUpdateUserData(UpdateServiceRequest request, UpdateDataEntry data, Context ctx) {
+        if (request.skip && !data.required) {
+            return just(UpdateServiceResult.builder().status(SKIPPED))
+        } else {
+            return updateService.update(UpdateServiceInput.builder()
                     .code(request.code)
                     .updateService(request.updateService)
                     .relyingParty(request.clientId)
                     .data(request.data).build())
                     .doOnError { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) }
-                    .subscribe()
         }
     }
 
