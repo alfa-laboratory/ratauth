@@ -6,7 +6,9 @@ import ru.ratauth.providers.auth.Activator;
 import ru.ratauth.providers.auth.ActivatorResolver;
 import ru.ratauth.providers.auth.Verifier;
 import ru.ratauth.providers.auth.VerifierResolver;
+import ru.ratauth.server.services.ActivatorResolverWithValidationService;
 
+import java.util.Collections;
 import java.util.List;
 
 @Configuration
@@ -19,7 +21,7 @@ public class ResolversConfiguration {
 
     @Bean
     ActivatorResolver activatorResolver(List<Activator> activators) {
-        return new ActivatorResolver(activators);
+        return new ActivatorResolverWithValidationService(activators, Collections.emptyList());
     }
 
 }

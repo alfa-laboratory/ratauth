@@ -34,8 +34,7 @@ public class DCAIdentityProvider implements IdentityProvider {
     @Override
     public Observable<ActivateResult> activate(ActivateInput input) {
         Enroll enroll = input.getEnroll();
-        Activator activator = activatorResolver.find(enroll.getFirst());
-        return activator.activate(input);
+        return activatorResolver.activate(enroll.getFirst(), input);
     }
 
     @Override
