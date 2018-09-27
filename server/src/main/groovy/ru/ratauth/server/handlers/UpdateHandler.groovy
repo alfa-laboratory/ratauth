@@ -44,7 +44,7 @@ class UpdateHandler implements Action<Chain> {
     @Autowired
     private SessionService sessionService
 
-    @Value('{valid.acr_values:#{null}}')
+    @Value('{external-services.acr_values:#{null}}')
     private String validAcrValues
     @Override
     void execute(Chain chain) throws Exception {
