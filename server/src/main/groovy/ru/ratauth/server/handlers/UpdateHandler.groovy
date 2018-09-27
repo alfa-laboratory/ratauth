@@ -44,7 +44,7 @@ class UpdateHandler implements Action<Chain> {
     @Autowired
     private SessionService sessionService
 
-    @Value('{external-services.acr_values:#{null}}')
+    @Value('{external-services.valid_acr_values:#{null}}')
     private String validAcrValues
     @Override
     void execute(Chain chain) throws Exception {
@@ -82,7 +82,8 @@ class UpdateHandler implements Action<Chain> {
     private void doFinishResponse(Context ctx, String clientId, String sessionToken) {
         LocalDateTime now = now()
         authClientService.loadRelyingParty(clientId)
-            .zipWith(getSession(sessionToken, clientId), { relyingParty, authEntry ->
+            .zipWith(getValidAuthEntry(sessionToken, clientId),
+                { relyingParty, authEntry ->
                 String authCode = authEntry.authCode
                 LocalDateTime authCodeExpiresIn = now.plus(relyingParty.codeTTL, SECONDS)
 
@@ -102,16 +103,19 @@ class UpdateHandler implements Action<Chain> {
                 .subscribe()
     }
 
-    private Observable<AuthEntry> getSession(String sessionToken, String clientId) {
-        sessionService.getByValidSessionToken(sessionToken, fromLocal(now()), false)
-                .map { session ->  compareAcr(session); session.getEntry(clientId).get() }
+    private Observable<AuthEntry> getValidAuthEntry(String sessionToken, String clientId) {
+        getSession(sessionToken).map { session ->  compareAcr(session); session.getEntry(clientId).get() }
     }
 
-    private Session compareAcr(Session session) {
+    private Observable<Session> getSession(String sessionToken){
+        sessionService.getByValidSessionToken(sessionToken, fromLocal(now()), false)
+    }
+
+    private Observable<Session> compareAcr(Session session) {
         if (!parseAcrValues().contains(session.receivedAcrValues) && validAcrValues != null) {
             throw new AuthorizationException("Not valid acr_values")
         }
-        return session
+        return Observable.just(session)
     }
 
     private List<String> parseAcrValues() {
