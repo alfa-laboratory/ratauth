@@ -45,7 +45,8 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
         @NonNull String uri,
         String login,
         String password,
-        Integer timeout, String allowedAcrValues) throws URISyntaxException {
+        Integer timeout,
+        String allowedAcrValues) throws URISyntaxException {
 
         this(createSetter(updateService, timeout), httpClient, data, relyingParty, uri, allowedAcrValues);
         this.login = login;
@@ -57,7 +58,8 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
         @NonNull HttpClient httpClient,
         @NonNull Map<String, String> data,
         @NonNull String relyingParty,
-        @NonNull String uri, String allowedAcrValues) throws URISyntaxException {
+        @NonNull String uri,
+        String allowedAcrValues) throws URISyntaxException {
 
         super(setter);
         this.httpClient = httpClient;
