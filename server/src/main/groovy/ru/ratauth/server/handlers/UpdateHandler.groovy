@@ -111,11 +111,10 @@ class UpdateHandler implements Action<Chain> {
         sessionService.getByValidSessionToken(sessionToken, fromLocal(now()), false)
     }
 
-    private Observable<Session> compareAcr(Session session) {
+    private void compareAcr(Session session) {
         if (!parseAcrValues().contains(session.receivedAcrValues) && validAcrValues != null) {
             throw new AuthorizationException("Not valid acr_values")
         }
-        return Observable.just(session)
     }
 
     private List<String> parseAcrValues() {
