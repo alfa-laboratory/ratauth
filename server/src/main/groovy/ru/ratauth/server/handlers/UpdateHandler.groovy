@@ -44,7 +44,7 @@ class UpdateHandler implements Action<Chain> {
     @Autowired
     private SessionService sessionService
 
-    @Value('{external-services.valid_acr_values:#{null}}')
+    @Value('{update-services.valid_acr_values:#{null}}')
     private String validAcrValues
     @Override
     void execute(Chain chain) throws Exception {
@@ -82,8 +82,10 @@ class UpdateHandler implements Action<Chain> {
     private void doFinishResponse(Context ctx, String clientId, String sessionToken) {
         LocalDateTime now = now()
         authClientService.loadRelyingParty(clientId)
-            .zipWith(getValidAuthEntry(sessionToken, clientId),
-                { relyingParty, authEntry ->
+            .zipWith(getSession(sessionToken),
+                { relyingParty, session ->
+                    checkAcr(session)
+                    AuthEntry authEntry = getValidAuthEntry(session, clientId)
                 String authCode = authEntry.authCode
                 LocalDateTime authCodeExpiresIn = now.plus(relyingParty.codeTTL, SECONDS)
 
@@ -103,15 +105,15 @@ class UpdateHandler implements Action<Chain> {
                 .subscribe()
     }
 
-    private Observable<AuthEntry> getValidAuthEntry(String sessionToken, String clientId) {
-        getSession(sessionToken).map { session ->  compareAcr(session); session.getEntry(clientId).get() }
+    private AuthEntry getValidAuthEntry(Session session, String clientId) {
+        session.getEntry(clientId).get()
     }
 
     private Observable<Session> getSession(String sessionToken) {
         sessionService.getByValidSessionToken(sessionToken, fromLocal(now()), false)
     }
 
-    private void compareAcr(Session session) {
+    private void checkAcr(Session session) {
         if (!parseAcrValues().contains(session.receivedAcrValues) && validAcrValues != null) {
             throw new AuthorizationException("Not valid acr_values")
         }
