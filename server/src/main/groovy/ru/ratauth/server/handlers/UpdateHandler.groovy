@@ -82,20 +82,20 @@ class UpdateHandler implements Action<Chain> {
     private void doFinishResponse(Context ctx, String clientId, String sessionToken) {
         LocalDateTime now = now()
         authClientService.loadRelyingParty(clientId)
-            .zipWith(getSession(sessionToken),
+                .zipWith(getSession(sessionToken),
                 { relyingParty, session ->
                     checkAcr(session)
                     AuthEntry authEntry = getValidAuthEntry(session, clientId)
-                String authCode = authEntry.authCode
-                LocalDateTime authCodeExpiresIn = now.plus(relyingParty.codeTTL, SECONDS)
+                    String authCode = authEntry.authCode
+                    LocalDateTime authCodeExpiresIn = now.plus(relyingParty.codeTTL, SECONDS)
 
-                updateAuthCodeExpired(authCode, authCodeExpiresIn)
+                    updateAuthCodeExpired(authCode, authCodeExpiresIn)
 
-                long expiresIn = SECONDS.between(now, authCodeExpiresIn)
+                    long expiresIn = SECONDS.between(now, authCodeExpiresIn)
 
-                def finishResponse = new UpdateFinishResponse(relyingParty.authorizationRedirectURI, sessionToken, authCode, expiresIn)
-                ctx.redirect(FOUND.code(), finishResponse.redirectURL)
-        }).subscribe()
+                    def finishResponse = new UpdateFinishResponse(relyingParty.authorizationRedirectURI, sessionToken, authCode, expiresIn)
+                    ctx.redirect(FOUND.code(), finishResponse.redirectURL)
+                }).subscribe()
     }
 
     private void updateAuthCodeExpired(String authCode, LocalDateTime authCodeExpiresIn) {
