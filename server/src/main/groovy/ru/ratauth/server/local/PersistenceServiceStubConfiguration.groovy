@@ -8,9 +8,9 @@ import ru.ratauth.exception.ExpiredException
 import ru.ratauth.server.utils.DateUtils
 import ru.ratauth.server.utils.SecurityUtils
 import ru.ratauth.services.*
-import ru.ratauth.updateServices.UpdateService
-import ru.ratauth.updateServices.dto.UpdateServiceInput
-import ru.ratauth.updateServices.dto.UpdateServiceResult
+import ru.ratauth.update.services.UpdateService
+import ru.ratauth.update.services.dto.UpdateServiceInput
+import ru.ratauth.update.services.dto.UpdateServiceResult
 import rx.Observable
 
 import java.time.LocalDateTime

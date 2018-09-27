@@ -7,6 +7,7 @@ package ru.ratauth.server.services.log;
 public enum LogFields {
   APPLICATION,
   CLIENT_ID,
+  EXTERNAL_CLIENT_ID,
   USER_ID,
   ACTION,
   REQUEST_ID,

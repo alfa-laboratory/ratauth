@@ -137,7 +137,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
             authObs = authSessionService
                     .getByValidCode(oauthRequest.getAuthzCode(), new Date())
                     .filter(session -> session.getEntry(relyingParty.getName())
-                            .map(entry -> CollectionUtils.isEmpty(entry.getTokens()))
+                            .map(entry -> !sessionConfiguration.isNeedToCheckSession() || CollectionUtils.isEmpty(entry.getTokens()))
                             .orElse(false));
         } else if (oauthRequest.getGrantType() == REFRESH_TOKEN || oauthRequest.getGrantType() == AUTHENTICATION_TOKEN) {
             authObs = authSessionService.getByValidRefreshToken(oauthRequest.getRefreshToken(), new Date());
