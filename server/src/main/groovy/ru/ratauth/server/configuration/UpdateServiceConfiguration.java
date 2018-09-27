@@ -15,4 +15,5 @@ public class UpdateServiceConfiguration {
     private int readTimeout;
     private String authLogin;
     private String authPassword;
+    private String allowedAcrValues;
 }

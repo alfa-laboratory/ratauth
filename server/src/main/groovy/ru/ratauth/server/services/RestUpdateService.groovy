@@ -37,7 +37,8 @@ class RestUpdateService implements UpdateService {
                 serviceConfiguration.uri,
                 serviceConfiguration.authLogin,
                 serviceConfiguration.authPassword,
-                serviceConfiguration.readTimeout
+                serviceConfiguration.readTimeout,
+                serviceConfiguration.allowedAcrValues
         ).toObservable()
                 .map({ ReceivedResponse res ->
             if (res.status.'4xx') {

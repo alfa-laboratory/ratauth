@@ -45,9 +45,9 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
         @NonNull String uri,
         String login,
         String password,
-        Integer timeout) throws URISyntaxException {
+        Integer timeout, String allowedAcrValues) throws URISyntaxException {
 
-        this(createSetter(updateService, timeout), httpClient, data, relyingParty, uri);
+        this(createSetter(updateService, timeout), httpClient, data, relyingParty, uri, allowedAcrValues);
         this.login = login;
         this.password = password;
     }
@@ -57,12 +57,12 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
         @NonNull HttpClient httpClient,
         @NonNull Map<String, String> data,
         @NonNull String relyingParty,
-        @NonNull String uri) throws URISyntaxException {
+        @NonNull String uri, String allowedAcrValues) throws URISyntaxException {
 
         super(setter);
         this.httpClient = httpClient;
         this.uri = new URI(uri);
-        this.data = performData(data, relyingParty);
+        this.data = performData(data, relyingParty, allowedAcrValues);
     }
 
     private static Setter createSetter(@NonNull String updateService, Integer timeout) {
@@ -75,7 +75,7 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
         return setter;
     }
 
-    private Map<String, String> performData(Map<String, String> data, String relyingParty) {
+    private Map<String, String> performData(Map<String, String> data, String relyingParty, String allowedAcrValues) {
         data.put("relying_party", relyingParty);
         return data;
     }

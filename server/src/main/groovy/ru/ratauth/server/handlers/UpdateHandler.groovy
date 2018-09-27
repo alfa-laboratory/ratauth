@@ -1,7 +1,6 @@
 package ru.ratauth.server.handlers
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import ratpack.error.ServerErrorHandler
 import ratpack.exec.Promise
@@ -13,6 +12,7 @@ import ru.ratauth.entities.AuthEntry
 import ru.ratauth.entities.Session
 import ru.ratauth.exception.AuthorizationException
 import ru.ratauth.interaction.UpdateServiceRequest
+import ru.ratauth.server.configuration.UpdateServicesConfiguration
 import ru.ratauth.server.extended.update.UpdateFinishResponse
 import ru.ratauth.server.handlers.readers.RequestReader
 import ru.ratauth.server.services.AuthClientService
@@ -43,9 +43,11 @@ class UpdateHandler implements Action<Chain> {
     private AuthClientService authClientService
     @Autowired
     private SessionService sessionService
+    @Autowired
+    UpdateServicesConfiguration updateServiceConfiguration
 
-    @Value('{update-services.valid_acr_values:#{null}}')
-    private String validAcrValues
+    private String allowedAcrValues
+
     @Override
     void execute(Chain chain) throws Exception {
         chain.post('update') { ctx -> update(ctx) }
@@ -61,21 +63,23 @@ class UpdateHandler implements Action<Chain> {
     }
 
     private void updateUserData(UpdateServiceRequest request, Context ctx) {
+        allowedAcrValues = updateServiceConfiguration.updateServices[request.updateService].allowedAcrValues
         updateDataService.getValidEntry(request.code)
-            .subscribe {
-                data ->
-                    updateDataService.invalidate(request.code).subscribe()
-                    updateService.update(UpdateServiceInput.builder()
-                            .code(request.code)
-                            .updateService(request.updateService)
-                            .relyingParty(request.clientId)
-                            .data(request.data).build())
-                            .flatMap { r ->
-                                def clientId = request.clientId
-                                def sessionToken = data.sessionToken
-                                doFinishResponse(ctx, clientId, sessionToken) }
-                            .doOnError { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) }
-                            .subscribe()
+                .subscribe {
+            data ->
+                updateDataService.invalidate(request.code).subscribe()
+                updateService.update(UpdateServiceInput.builder()
+                        .code(request.code)
+                        .updateService(request.updateService)
+                        .relyingParty(request.clientId)
+                        .data(request.data).build())
+                        .flatMap { r ->
+                    def clientId = request.clientId
+                    def sessionToken = data.sessionToken
+                    doFinishResponse(ctx, clientId, sessionToken)
+                }
+                .doOnError { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) }
+                        .subscribe()
         } { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) }
     }
 
@@ -114,12 +118,12 @@ class UpdateHandler implements Action<Chain> {
     }
 
     private void checkAcr(Session session) {
-        if (!parseAcrValues().contains(session.receivedAcrValues) && validAcrValues != null) {
+        if (!parseAcrValues().contains(session.receivedAcrValues) && allowedAcrValues != null) {
             throw new AuthorizationException("Not valid acr_values")
         }
     }
 
     private List<String> parseAcrValues() {
-        return Arrays.asList(validAcrValues.split(","))
+        return Arrays.asList(allowedAcrValues.split(","))
     }
 }
