@@ -22,6 +22,7 @@ import ratpack.http.MediaType;
 import ratpack.http.client.HttpClient;
 import ratpack.http.client.ReceivedResponse;
 import ratpack.rx.RxRatpack;
+import ru.ratauth.entities.AcrValues;
 import rx.Observable;
 
 import static com.netflix.hystrix.HystrixCommandGroupKey.Factory.asKey;
@@ -46,7 +47,7 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
         String login,
         String password,
         Integer timeout,
-        String allowedAcrValues) throws URISyntaxException {
+        AcrValues allowedAcrValues) throws URISyntaxException {
 
         this(createSetter(updateService, timeout), httpClient, data, relyingParty, uri, allowedAcrValues);
         this.login = login;
@@ -59,7 +60,7 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
         @NonNull Map<String, String> data,
         @NonNull String relyingParty,
         @NonNull String uri,
-        String allowedAcrValues) throws URISyntaxException {
+        AcrValues allowedAcrValues) throws URISyntaxException {
 
         super(setter);
         this.httpClient = httpClient;
@@ -77,7 +78,7 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
         return setter;
     }
 
-    private Map<String, String> performData(Map<String, String> data, String relyingParty, String allowedAcrValues) {
+    private Map<String, String> performData(Map<String, String> data, String relyingParty, AcrValues allowedAcrValues) {
         data.put("relying_party", relyingParty);
         return data;
     }

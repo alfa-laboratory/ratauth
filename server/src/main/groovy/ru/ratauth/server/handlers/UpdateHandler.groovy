@@ -8,6 +8,7 @@ import ratpack.form.Form
 import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
+import ru.ratauth.entities.AcrValues
 import ru.ratauth.entities.AuthEntry
 import ru.ratauth.entities.Session
 import ru.ratauth.exception.AuthorizationException
@@ -46,7 +47,7 @@ class UpdateHandler implements Action<Chain> {
     @Autowired
     UpdateServicesConfiguration updateServiceConfiguration
 
-    private String allowedAcrValues
+    private AcrValues allowedAcrValues
 
     @Override
     void execute(Chain chain) throws Exception {
@@ -118,12 +119,9 @@ class UpdateHandler implements Action<Chain> {
     }
 
     private void checkAcr(Session session) {
-        if (!parseAcrValues().contains(session.receivedAcrValues) && allowedAcrValues != null) {
+        if (!allowedAcrValues.contains(session.receivedAcrValues) && allowedAcrValues != null) {
             throw new AuthorizationException("Not valid acr_values")
         }
     }
 
-    private List<String> parseAcrValues() {
-        return Arrays.asList(allowedAcrValues.split(","))
-    }
 }
