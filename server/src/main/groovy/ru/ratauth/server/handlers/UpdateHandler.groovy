@@ -24,6 +24,7 @@ import ru.ratauth.update.services.dto.UpdateServiceInput
 import rx.Observable
 
 import java.time.LocalDateTime
+import java.util.stream.Collectors
 
 import static io.netty.handler.codec.http.HttpResponseStatus.FOUND
 import static java.time.LocalDateTime.now
@@ -47,7 +48,7 @@ class UpdateHandler implements Action<Chain> {
     @Autowired
     UpdateServicesConfiguration updateServiceConfiguration
 
-    private AcrValues allowedAcrValues
+    private List<AcrValues> allowedAcrValues
 
     @Override
     void execute(Chain chain) throws Exception {
@@ -64,7 +65,8 @@ class UpdateHandler implements Action<Chain> {
     }
 
     private void updateUserData(UpdateServiceRequest request, Context ctx) {
-        allowedAcrValues = updateServiceConfiguration.updateServices[request.updateService].allowedAcrValues
+        parseRequestAcrValues(updateServiceConfiguration.updateServices[request.updateService].allowedAcrValues)
+
         updateDataService.getValidEntry(request.code)
                 .subscribe {
             data ->
@@ -119,9 +121,18 @@ class UpdateHandler implements Action<Chain> {
     }
 
     private void checkAcr(Session session) {
-        if (!allowedAcrValues.contains(session.receivedAcrValues) && allowedAcrValues != null) {
+        if (!allowedAcrValues.stream().collect(Collectors.toList()).containsAll(session.receivedAcrValues.toList())) {
             throw new AuthorizationException("Not valid acr_values")
         }
     }
 
+    private void parseRequestAcrValues(String requestAcrValues) {
+        if (requestAcrValues.contains("_")) {
+            for (String acrValue : requestAcrValues.split("_")) {
+                allowedAcrValues.add(AcrValues.valueOf(acrValue))
+            }
+        } else {
+            allowedAcrValues.add(AcrValues.valueOf(requestAcrValues))
+        }
+    }
 }

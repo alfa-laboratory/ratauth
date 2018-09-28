@@ -2,17 +2,6 @@ package ru.ratauth.server.command;
 
 import com.netflix.hystrix.HystrixCommandProperties;
 import com.netflix.hystrix.HystrixObservableCommand;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
-import java.util.Base64;
-import java.util.Map;
-import java.util.stream.Collectors;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import javax.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +11,19 @@ import ratpack.http.MediaType;
 import ratpack.http.client.HttpClient;
 import ratpack.http.client.ReceivedResponse;
 import ratpack.rx.RxRatpack;
-import ru.ratauth.entities.AcrValues;
 import rx.Observable;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import javax.validation.constraints.NotNull;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
+import java.util.Base64;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.netflix.hystrix.HystrixCommandGroupKey.Factory.asKey;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -39,15 +39,15 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
     private String password;
 
     public HystrixUpdateServiceCommand(
-        @NonNull HttpClient httpClient,
-        @NonNull Map<String, String> data,
-        @NonNull String relyingParty,
-        @NotNull String updateService,
-        @NonNull String uri,
-        String login,
-        String password,
-        Integer timeout,
-        AcrValues allowedAcrValues) throws URISyntaxException {
+            @NonNull HttpClient httpClient,
+            @NonNull Map<String, String> data,
+            @NonNull String relyingParty,
+            @NotNull String updateService,
+            @NonNull String uri,
+            String login,
+            String password,
+            Integer timeout,
+            String allowedAcrValues) throws URISyntaxException {
 
         this(createSetter(updateService, timeout), httpClient, data, relyingParty, uri, allowedAcrValues);
         this.login = login;
@@ -55,12 +55,12 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
     }
 
     private HystrixUpdateServiceCommand(
-        Setter setter,
-        @NonNull HttpClient httpClient,
-        @NonNull Map<String, String> data,
-        @NonNull String relyingParty,
-        @NonNull String uri,
-        AcrValues allowedAcrValues) throws URISyntaxException {
+            Setter setter,
+            @NonNull HttpClient httpClient,
+            @NonNull Map<String, String> data,
+            @NonNull String relyingParty,
+            @NonNull String uri,
+            String allowedAcrValues) throws URISyntaxException {
 
         super(setter);
         this.httpClient = httpClient;
@@ -78,7 +78,7 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
         return setter;
     }
 
-    private Map<String, String> performData(Map<String, String> data, String relyingParty, AcrValues allowedAcrValues) {
+    private Map<String, String> performData(Map<String, String> data, String relyingParty, String allowedAcrValues) {
         data.put("relying_party", relyingParty);
         return data;
     }
@@ -91,20 +91,20 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
 
     protected Observable<ReceivedResponse> construct() {
         Promise<ReceivedResponse> promise = httpClient.post(
-            uri,
-            r -> {
-                r.sslContext(createSSLContext());
-                if (login != null && password != null) {
-                    r.headers(headers -> headers.add(HttpHeaders.AUTHORIZATION, createAuthHeader(login, password)));
+                uri,
+                r -> {
+                    r.sslContext(createSSLContext());
+                    if (login != null && password != null) {
+                        r.headers(headers -> headers.add(HttpHeaders.AUTHORIZATION, createAuthHeader(login, password)));
+                    }
+                    r.body(body -> {
+                        body.type(MediaType.APPLICATION_JSON);
+                        body.text(data.entrySet().stream()
+                                .filter(e -> e.getKey() != null && e.getValue() != null)
+                                .map(e -> e.getKey() + "=" + e.getValue())
+                                .collect(Collectors.joining("&")));
+                    });
                 }
-                r.body(body -> {
-                    body.type(MediaType.APPLICATION_JSON);
-                    body.text(data.entrySet().stream()
-                        .filter(e -> e.getKey() != null && e.getValue() != null)
-                        .map(e -> e.getKey() + "=" + e.getValue())
-                        .collect(Collectors.joining("&")));
-                });
-            }
         );
         return RxRatpack.observe(promise);
     }
@@ -119,11 +119,11 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
             }
 
             public void checkClientTrusted(X509Certificate[] certs,
-                String authType) {
+                                           String authType) {
             }
 
             public void checkServerTrusted(X509Certificate[] certs,
-                String authType) {
+                                           String authType) {
             }
 
         }}, new SecureRandom());
