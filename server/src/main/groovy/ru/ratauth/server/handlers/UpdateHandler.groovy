@@ -127,13 +127,8 @@ class UpdateHandler implements Action<Chain> {
     }
 
     private void parseRequestAcrValues(String requestAcrValues) {
-        String splitLiteral = "_"
-        if (requestAcrValues.contains(splitLiteral)) {
-            for (String acrValue : requestAcrValues.split(splitLiteral)) {
-                allowedAcrValues.add(AcrValues.valueOf(acrValue))
-            }
-        } else {
-            allowedAcrValues.add(AcrValues.valueOf(requestAcrValues))
+        for (String acrValue : requestAcrValues.split("_")) {
+            allowedAcrValues.add(AcrValues.valueOf(acrValue))
         }
     }
 }
