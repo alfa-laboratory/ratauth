@@ -73,6 +73,7 @@ public interface SessionService {
      * @param relyingParty relying party unique name to find corresponding entry within session
      * @param token        new token
      * @deprecated         need to provide whole session in order not to load session again
+     * @see #addToken(Session session, String relyingParty, Token token)
      */
     @Deprecated
     Observable<Boolean> addToken(String sessionId, String relyingParty, Token token);
