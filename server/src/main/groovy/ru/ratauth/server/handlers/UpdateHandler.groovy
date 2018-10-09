@@ -1,5 +1,8 @@
 package ru.ratauth.server.handlers
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import groovy.transform.builder.Builder
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import ratpack.error.ServerErrorHandler
@@ -9,6 +12,7 @@ import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
 import ru.ratauth.entities.AuthEntry
+import ru.ratauth.entities.UpdateDataEntry
 import ru.ratauth.exception.AuthorizationException
 import ru.ratauth.interaction.UpdateServiceRequest
 import ru.ratauth.server.extended.update.UpdateFinishResponse
@@ -18,18 +22,22 @@ import ru.ratauth.services.SessionService
 import ru.ratauth.services.UpdateDataService
 import ru.ratauth.update.services.UpdateService
 import ru.ratauth.update.services.dto.UpdateServiceInput
+import ru.ratauth.update.services.dto.UpdateServiceResult
 import rx.Observable
 
 import java.time.LocalDateTime
 
 import static io.netty.handler.codec.http.HttpResponseStatus.FOUND
+import static io.netty.handler.codec.http.HttpResponseStatus.UNPROCESSABLE_ENTITY
 import static java.time.LocalDateTime.now
 import static java.time.temporal.ChronoUnit.SECONDS
 import static ratpack.rx.RxRatpack.observe
 import static ru.ratauth.exception.AuthorizationException.ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED
 import static ru.ratauth.server.handlers.readers.UpdateServiceRequestReader.readUpdateServiceRequest
 import static ru.ratauth.server.utils.DateUtils.fromLocal
+import static ru.ratauth.update.services.dto.UpdateServiceResult.Status.ERROR
 
+@Slf4j
 @Component
 class UpdateHandler implements Action<Chain> {
 
@@ -52,27 +60,51 @@ class UpdateHandler implements Action<Chain> {
         observe(formPromise)
                 .map { params -> new RequestReader(params) }
                 .map { params -> readUpdateServiceRequest(params) }
-                .map { request -> updateUserData(request, ctx) }
-                .subscribe()
+                .subscribe { request -> updateUserData(request, ctx) }
     }
 
     private void updateUserData(UpdateServiceRequest request, Context ctx) {
         updateDataService.getValidEntry(request.code)
             .subscribe {
-                data ->
+                updateDataEntry ->
                     updateDataService.invalidate(request.code).subscribe()
                     updateService.update(UpdateServiceInput.builder()
                             .code(request.code)
                             .updateService(request.updateService)
                             .relyingParty(request.clientId)
                             .data(request.data).build())
-                            .flatMap { r ->
+                            .flatMap { updateServiceResult ->
                                 def clientId = request.clientId
-                                def sessionToken = data.sessionToken
-                                doFinishResponse(ctx, clientId, sessionToken) }
+                                def sessionToken = updateDataEntry.sessionToken
+
+                                if (updateServiceResult.status == ERROR) {
+                                    doResponseWithError(ctx, sessionToken, updateServiceResult, updateDataEntry)
+                                } else {
+                                    doFinishResponse(ctx, clientId, sessionToken) }
+                                }
                             .doOnError { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) }
                             .subscribe()
         } { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) }
+    }
+
+    private Observable<UpdateDataEntry> createUpdateEntryWithCode(String sessionToken, UpdateServiceResult updateServiceResult, UpdateDataEntry updateDataEntry) {
+        return updateDataService.create(sessionToken,
+                updateServiceResult.data.get("message"), updateDataEntry.service, updateDataEntry.redirectUri, updateDataEntry.required)
+    }
+
+    private void doResponseWithError(Context ctx, String sessionToken, UpdateServiceResult updateServiceResult, UpdateDataEntry updateDataEntry) {
+        createUpdateEntryWithCode(sessionToken, updateServiceResult, updateDataEntry)
+                .flatMap() { data -> updateDataService.getCode(sessionToken)
+                .subscribe {
+            code -> ctx.response.status(UNPROCESSABLE_ENTITY.code())
+                    .send(new ObjectMapper().writeValueAsString(UpdateResponse.builder()
+                    .updateCode(code)
+                    .reason(updateServiceResult.data.get("message"))
+                    .build()))
+                log.debug("new update code recieved = {}, sesson token is {}", code, sessionToken)
+        }
+            log.info("update handle validation error, new update code sent")
+        }.subscribe()
     }
 
     private void doFinishResponse(Context ctx, String clientId, String sessionToken) {
@@ -88,6 +120,7 @@ class UpdateHandler implements Action<Chain> {
 
                 def finishResponse = new UpdateFinishResponse(relyingParty.authorizationRedirectURI, sessionToken, authCode, expiresIn)
                 ctx.redirect(FOUND.code(), finishResponse.redirectURL)
+                log.info("update succeed")
         }).subscribe()
     }
 
@@ -101,5 +134,11 @@ class UpdateHandler implements Action<Chain> {
     private Observable<AuthEntry> getSession(String sessionToken, String clientId) {
         sessionService.getByValidSessionToken(sessionToken, fromLocal(now()), false)
                 .map { session -> session.getEntry(clientId).get() }
+    }
+
+    @Builder
+    private class UpdateResponse {
+        String reason;
+        String updateCode;
     }
 }
