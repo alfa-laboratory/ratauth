@@ -377,6 +377,11 @@ class PersistenceServiceStubConfiguration {
       }
 
       @Override
+      Observable<Boolean> addToken(Session session, String relyingParty, Token token) {
+        return Observable.just(true)
+      }
+
+      @Override
       Observable<Boolean> invalidateSession(String sessionId, Date blocked) {
         return null
       }

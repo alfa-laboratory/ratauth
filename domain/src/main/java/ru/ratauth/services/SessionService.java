@@ -72,8 +72,19 @@ public interface SessionService {
      * @param sessionId    session identifier
      * @param relyingParty relying party unique name to find corresponding entry within session
      * @param token        new token
+     * @deprecated         need to provide whole session in order not to load session again
      */
+    @Deprecated
     Observable<Boolean> addToken(String sessionId, String relyingParty, Token token);
+
+    /**
+     * Adds new token related to session
+     *
+     * @param session      session
+     * @param relyingParty relying party unique name to find corresponding entry within session
+     * @param token        new token
+     */
+    Observable<Boolean> addToken(Session session, String relyingParty, Token token);
 
     /**
      * Invalidates session and all token database cache(if supported)
