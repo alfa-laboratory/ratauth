@@ -39,7 +39,7 @@ class UpdateHandlerSpec extends BaseDocumentationSpec {
                         parameterWithName('new_password')
                                 .description(''),
                         parameterWithName('reason')
-                                .description('what happends'),
+                                .description('what happens'),
                         parameterWithName('update_code')
                                 .description('code for update data'),
                         parameterWithName('update_service')
@@ -67,7 +67,7 @@ class UpdateHandlerSpec extends BaseDocumentationSpec {
                 .header(LOCATION, StringContains.containsString("code="))
     }
 
-    def 'validation exception we will recieve new update code and try again'() {
+    def 'validation exception we will receive new update code and try again'() {
         given:
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
@@ -111,7 +111,7 @@ class UpdateHandlerSpec extends BaseDocumentationSpec {
         assert resp.updateService == 'corp-update-password'
     }
 
-    def 'happends some unprocessable exception'() {
+    def 'happens some unprocessable exception'() {
         given:
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
