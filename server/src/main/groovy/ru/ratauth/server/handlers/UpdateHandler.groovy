@@ -120,7 +120,8 @@ class UpdateHandler implements Action<Chain> {
     private void doFinishResponse(Context ctx, String clientId, String sessionToken) {
         LocalDateTime now = now()
         authClientService.loadRelyingParty(clientId)
-                .zipWith(getSession(sessionToken, clientId), { relyingParty, authEntry ->
+                .zipWith(getSession(sessionToken, clientId),
+                { relyingParty, authEntry ->
             String authCode = authEntry.authCode
             LocalDateTime authCodeExpiresIn = now.plus(relyingParty.codeTTL, SECONDS)
 
@@ -130,6 +131,7 @@ class UpdateHandler implements Action<Chain> {
 
             def finishResponse = new UpdateFinishResponse(relyingParty.authorizationRedirectURI, sessionToken, authCode, expiresIn)
             ctx.redirect(FOUND.code(), finishResponse.redirectURL)
+            log.debug("send redirect uri after update code {}", finishResponse.redirectURL)
             log.info("update succeed")
         }).subscribe()
     }
