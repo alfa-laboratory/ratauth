@@ -87,22 +87,17 @@ class UpdateHandler implements Action<Chain> {
         } { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) }
     }
 
-    private Observable<UpdateDataEntry> createUpdateEntry(String sessionToken, UpdateServiceResult updateServiceResult, UpdateDataEntry updateDataEntry) {
-        return updateDataService.create(sessionToken,
-                updateServiceResult.data['message'],
-                updateDataEntry.service,
-                updateDataEntry.redirectUri,
-                updateDataEntry.required)
-    }
-
-    private void doResponseWithError(Context ctx, String sessionToken, UpdateServiceResult updateServiceResult, UpdateDataEntry updateDataEntry) {
-        createUpdateEntry(sessionToken, updateServiceResult, updateDataEntry).subscribe {
+    private void doResponseWithError(Context ctx, String sessionToken,
+                                     UpdateServiceResult updateServiceResult,
+                                     UpdateDataEntry updateDataEntry) {
+        String reason = updateServiceResult.data['message'] as String
+        getNewUpdateEntry(sessionToken, reason, updateDataEntry).subscribe {
             data ->
                 updateDataService.getCode(sessionToken).subscribe {
                     code ->
                         ctx.response
                                 .status(UNPROCESSABLE_ENTITY.code())
-                                .send(makeJsonResponse(data.service, code, updateServiceResult.data['message']))
+                                .send(makeJsonResponse(data.service, code, reason))
 
                         log.debug("new update code recieved = {}, sesson token is {}", code, sessionToken)
                 }
@@ -110,7 +105,17 @@ class UpdateHandler implements Action<Chain> {
         }
     }
 
-    private String makeJsonResponse(String updateService, String updateCode, String reason) {
+    private Observable<UpdateDataEntry> getNewUpdateEntry(String sessionToken,
+                                                          String reason,
+                                                          UpdateDataEntry updateDataEntry) {
+        return updateDataService.create(sessionToken,
+                reason,
+                updateDataEntry.service,
+                updateDataEntry.redirectUri,
+                updateDataEntry.required)
+    }
+
+    private static String makeJsonResponse(String updateService, String updateCode, String reason) {
         return new ObjectMapper().writeValueAsString(UpdateErrorResponse.builder()
                 .updateCode(updateCode)
                 .updateService(updateService)
@@ -118,22 +123,23 @@ class UpdateHandler implements Action<Chain> {
     }
 
     private void doFinishResponse(Context ctx, String clientId, String sessionToken) {
-        LocalDateTime now = now()
         authClientService.loadRelyingParty(clientId)
                 .zipWith(getSession(sessionToken, clientId),
                 { relyingParty, authEntry ->
-            String authCode = authEntry.authCode
-            LocalDateTime authCodeExpiresIn = now.plus(relyingParty.codeTTL, SECONDS)
 
-            updateAuthCodeExpired(authCode, authCodeExpiresIn)
+                    String authCode = authEntry.authCode
+                    LocalDateTime now = now()
+                    LocalDateTime authCodeExpiresIn = now.plus(relyingParty.codeTTL, SECONDS)
 
-            long expiresIn = SECONDS.between(now, authCodeExpiresIn)
+                    updateAuthCodeExpired(authCode, authCodeExpiresIn)
 
-            def finishResponse = new UpdateFinishResponse(relyingParty.authorizationRedirectURI, sessionToken, authCode, expiresIn)
-            ctx.redirect(FOUND.code(), finishResponse.redirectURL)
-            log.debug("send redirect uri after update code {}", finishResponse.redirectURL)
-            log.info("update succeed")
-        }).subscribe()
+                    long expiresIn = SECONDS.between(now, authCodeExpiresIn)
+
+                    def finishResponse = new UpdateFinishResponse(relyingParty.authorizationRedirectURI, sessionToken, authCode, expiresIn)
+                    ctx.redirect(FOUND.code(), finishResponse.redirectURL)
+                    log.debug("send redirect uri after update code {}", finishResponse.redirectURL)
+                    log.info("update succeed")
+                }).subscribe()
     }
 
     private void updateAuthCodeExpired(String authCode, LocalDateTime authCodeExpiresIn) {
