@@ -43,6 +43,7 @@ public class RelyingParty extends AuthClient {
     // it will be user to redirect end-user in case of redirect_uri was not defined in initial authorization request
     private String authorizationRedirectURI;
     private String authorizationPageURI;
+    private String updateRedirectURI;
     private String registrationPageURI;
     private String incAuthLevelPageURI; // page for increase NIST auth level of end-user
 }
