@@ -113,7 +113,7 @@ class UpdateHandler implements Action<Chain> {
                 .flatMap { newData ->
             return updateDataService.getCode(sessionToken)
                     .map { code ->
-                log.info("Update wasn't finished, one more attempt")
+                log.debug("got new update code: {}", code)
                 UpdateDataEntry.builder()
                         .service(newData.service)
                         .reason(newData.reason)
