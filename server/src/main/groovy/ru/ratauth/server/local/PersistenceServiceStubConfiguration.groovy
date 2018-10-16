@@ -480,7 +480,7 @@ class PersistenceServiceStubConfiguration {
         return Observable.just(UpdateDataEntry.builder()
                 .sessionToken("9999-8888-7777-6666")
                 .code(null)
-                .reason("need_update_password")
+                .reason("Some validation error as example")
                 .service("corp-update-password")
                 .redirectUri("http://test/update")
                 .required(required)
