@@ -72,13 +72,12 @@ class UpdateHandler implements Action<Chain> {
                         log.debug("New update attempt with response: {}", jsonResponse)
 
                 }
-            } else {
-                return doSuccessResponse(updateDataEntry, updateServiceRequest)
-                        .map { finishResponse ->
-                    ctx.redirect(FOUND.value(), finishResponse.redirectURL)
-                    log.info("Update succeed")
-                    log.debug("Update succeed, send redirect uri after update code {}", finishResponse.redirectURL)
-                }
+            }
+            return doSuccessResponse(updateDataEntry, updateServiceRequest)
+                    .map { finishResponse ->
+                ctx.redirect(FOUND.value(), finishResponse.redirectURL)
+                log.info("Update succeed")
+                log.debug("Update succeed, send redirect uri after update code {}", finishResponse.redirectURL)
             }
         }
         .subscribe({ log.info("Update call finished") },
@@ -91,13 +90,13 @@ class UpdateHandler implements Action<Chain> {
             updateDataService.invalidate(updateServiceRequest.code)
                     .filter { response -> response.booleanValue() }
                     .flatMap { response ->
-            return updateService.update(UpdateServiceInput.builder()
-                    .code(updateServiceRequest.code)
-                    .updateService(updateServiceRequest.updateService)
-                    .relyingParty(updateServiceRequest.clientId)
-                    .data(updateServiceRequest.data).build())
-                    .map { updateServiceResult -> [updateDataEntry, updateServiceRequest, updateServiceResult] }
-        }
+                return updateService.update(UpdateServiceInput.builder()
+                        .code(updateServiceRequest.code)
+                        .updateService(updateServiceRequest.updateService)
+                        .relyingParty(updateServiceRequest.clientId)
+                        .data(updateServiceRequest.data).build())
+                        .map { updateServiceResult -> [updateDataEntry, updateServiceRequest, updateServiceResult] }
+            }
         }
     }
 
