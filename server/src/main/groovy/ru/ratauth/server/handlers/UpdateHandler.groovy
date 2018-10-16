@@ -27,13 +27,13 @@ import rx.Observable
 
 import java.time.LocalDateTime
 
-import static io.netty.handler.codec.http.HttpResponseStatus.FOUND
 import static io.netty.handler.codec.http.HttpResponseStatus.UNPROCESSABLE_ENTITY
 import static java.time.LocalDateTime.now
 import static java.time.temporal.ChronoUnit.SECONDS
+import static org.springframework.http.HttpStatus.FOUND
 import static ratpack.rx.RxRatpack.observe
 import static ru.ratauth.exception.AuthorizationException.ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED
-import static ru.ratauth.server.handlers.readers.UpdateServiceRequestReader.readUpdateServiceRequest
+import static ru.ratauth.server.handlers.readers.UpdateServiceRequestReader.toUpdateServiceRequest
 import static ru.ratauth.server.utils.DateUtils.fromLocal
 import static ru.ratauth.update.services.dto.UpdateServiceResult.Status.ERROR
 
@@ -59,70 +59,72 @@ class UpdateHandler implements Action<Chain> {
         Promise<Form> formPromise = ctx.parse(Form)
         observe(formPromise)
                 .map { params -> new RequestReader(params) }
-                .map { params -> readUpdateServiceRequest(params) }
-                .subscribe { request -> updateUserData(request, ctx) }
+                .map { params -> toUpdateServiceRequest(params) }
+                .flatMap { request -> callRemoteUpdateService(request) }
+                .flatMap { updateDataEntry, updateServiceRequest, updateServiceResult ->
+            if (updateServiceResult.status == ERROR) {
+                return tryRepeatUpdate(updateDataEntry, updateServiceResult)
+                        .map {
+                    newUpdateDataEntry ->
+                        def jsonResponse = makeJsonResponse(newUpdateDataEntry.service, newUpdateDataEntry.code, newUpdateDataEntry.reason)
+                        log.info("Update wasn't finished, one more attempt")
+                        log.debug("New update attempt with response: {}", jsonResponse)
+                        ctx.response.status(UNPROCESSABLE_ENTITY.code()).send(jsonResponse)
+                }
+            } else {
+                return doSuccessResponse(updateDataEntry, updateServiceRequest)
+                        .map { finishResponse ->
+                    log.info("Update succeed")
+                    log.debug("Update succeed, send redirect uri after update code {}", finishResponse.redirectURL)
+                    ctx.redirect(FOUND.value(), finishResponse.redirectURL)
+                }
+            }
+        }
+        .subscribe({ log.info("Update step called") },
+                { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) })
     }
 
-    private void updateUserData(UpdateServiceRequest request, Context ctx) {
-        updateDataService.getValidEntry(request.code).subscribe {
-            updateDataEntry ->
-                updateDataService.invalidate(request.code).subscribe()
-                updateService.update(UpdateServiceInput.builder()
-                        .code(request.code)
-                        .updateService(request.updateService)
-                        .relyingParty(request.clientId)
-                        .data(request.data).build())
-                        .flatMap { updateServiceResult ->
-
-                    String clientId = request.clientId
-                    String sessionToken = updateDataEntry.sessionToken
-
-                    if (updateServiceResult.status == ERROR) {
-                        doResponseWithError(ctx, sessionToken, updateServiceResult, updateDataEntry)
-                    } else {
-                        doFinishResponse(ctx, clientId, sessionToken)
-                    }
-                }
-                .doOnError { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) }.subscribe()
-        } { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) }
-    }
-
-    private void doResponseWithError(Context ctx, String sessionToken,
-                                     UpdateServiceResult updateServiceResult,
-                                     UpdateDataEntry updateDataEntry) {
-        String reason = updateServiceResult.data['message'] as String
-        getNewUpdateEntry(sessionToken, reason, updateDataEntry).subscribe {
-            data ->
-                updateDataService.getCode(sessionToken).subscribe {
-                    code ->
-                        ctx.response
-                                .status(UNPROCESSABLE_ENTITY.code())
-                                .send(makeJsonResponse(data.service, code, reason))
-
-                        log.debug("new update code recieved = {}, sesson token is {}", code, sessionToken)
-                }
-                log.info("update handle validation error, new update code sent")
+    private callRemoteUpdateService(UpdateServiceRequest updateServiceRequest) {
+        updateDataService.getValidEntry(updateServiceRequest.code)
+                .flatMap { updateDataEntry ->
+            updateDataService.invalidate(updateServiceRequest.code)
+                    .filter { response -> response.booleanValue() }
+                    .flatMap { response ->
+                return updateService.update(UpdateServiceInput.builder()
+                        .code(updateServiceRequest.code)
+                        .updateService(updateServiceRequest.updateService)
+                        .relyingParty(updateServiceRequest.clientId)
+                        .data(updateServiceRequest.data).build())
+                        .map { updateServiceResult -> [updateDataEntry, updateServiceRequest, updateServiceResult] }
+            }
         }
     }
 
-    private Observable<UpdateDataEntry> getNewUpdateEntry(String sessionToken,
-                                                          String reason,
-                                                          UpdateDataEntry updateDataEntry) {
-        return updateDataService.create(sessionToken,
+    private Observable<UpdateDataEntry> tryRepeatUpdate(UpdateDataEntry updateDataEntry, UpdateServiceResult updateServiceResult) {
+        String sessionToken = updateDataEntry.sessionToken
+        String reason = updateServiceResult.data['message']
+        updateDataService.create(
+                updateDataEntry.sessionToken,
                 reason,
                 updateDataEntry.service,
                 updateDataEntry.redirectUri,
                 updateDataEntry.required)
+                .flatMap { newData ->
+            return updateDataService.getCode(sessionToken)
+                    .map { code ->
+                log.info("Update wasn't finished, one more attempt")
+                UpdateDataEntry.builder()
+                        .service(newData.service)
+                        .reason(newData.reason)
+                        .code(code)
+                        .build()
+            }
+        }
     }
 
-    private static String makeJsonResponse(String updateService, String updateCode, String reason) {
-        return new ObjectMapper().writeValueAsString(UpdateErrorResponse.builder()
-                .updateCode(updateCode)
-                .updateService(updateService)
-                .reason(reason).build())
-    }
-
-    private void doFinishResponse(Context ctx, String clientId, String sessionToken) {
+    private Observable<UpdateFinishResponse> doSuccessResponse(UpdateDataEntry updateDataEntry, UpdateServiceRequest updateServiceRequest) {
+        String sessionToken = updateDataEntry.sessionToken
+        String clientId = updateServiceRequest.clientId
         authClientService.loadRelyingParty(clientId)
                 .zipWith(getSession(sessionToken, clientId),
                 { relyingParty, authEntry ->
@@ -131,22 +133,26 @@ class UpdateHandler implements Action<Chain> {
                     LocalDateTime now = now()
                     LocalDateTime authCodeExpiresIn = now.plus(relyingParty.codeTTL, SECONDS)
 
-                    updateAuthCodeExpired(authCode, authCodeExpiresIn)
-
-                    long expiresIn = SECONDS.between(now, authCodeExpiresIn)
-
-                    def finishResponse = new UpdateFinishResponse(relyingParty.authorizationRedirectURI, sessionToken, authCode, expiresIn)
-                    ctx.redirect(FOUND.code(), finishResponse.redirectURL)
-                    log.debug("send redirect uri after update code {}", finishResponse.redirectURL)
-                    log.info("update succeed")
-                }).subscribe()
+                    return updateAuthCodeExpired(authCode, authCodeExpiresIn)
+                            .map { result ->
+                        long expiresIn = SECONDS.between(now, authCodeExpiresIn)
+                        new UpdateFinishResponse(relyingParty.authorizationRedirectURI, sessionToken, authCode, expiresIn)
+                    }
+                })
     }
 
-    private void updateAuthCodeExpired(String authCode, LocalDateTime authCodeExpiresIn) {
+    private static String makeJsonResponse(String updateService, String updateCode, String reason) {
+        return new ObjectMapper().writeValueAsString(UpdateErrorResponse.builder()
+                .updateCode(updateCode)
+                .updateService(updateService)
+                .reason(reason)
+                .build())
+    }
+
+    private Observable<Boolean> updateAuthCodeExpired(String authCode, LocalDateTime authCodeExpiresIn) {
         sessionService.updateAuthCodeExpired(authCode, fromLocal(authCodeExpiresIn))
                 .filter { it.booleanValue() }
                 .switchIfEmpty(Observable.error(new AuthorizationException(AUTH_CODE_EXPIRES_IN_UPDATE_FAILED)))
-                .subscribe()
     }
 
     private Observable<AuthEntry> getSession(String sessionToken, String clientId) {
