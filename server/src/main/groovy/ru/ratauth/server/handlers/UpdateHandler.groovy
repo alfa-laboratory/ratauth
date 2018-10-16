@@ -35,7 +35,7 @@ import static ratpack.rx.RxRatpack.observe
 import static ru.ratauth.exception.AuthorizationException.ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED
 import static ru.ratauth.server.handlers.readers.UpdateServiceRequestReader.toUpdateServiceRequest
 import static ru.ratauth.server.utils.DateUtils.fromLocal
-import static ru.ratauth.update.services.dto.UpdateServiceResult.Status.ERROR
+import static ru.ratauth.update.services.dto.UpdateServiceResult.Status.SUCCESS
 
 @Slf4j
 @Component
@@ -62,25 +62,26 @@ class UpdateHandler implements Action<Chain> {
                 .map { params -> toUpdateServiceRequest(params) }
                 .flatMap { request -> callRemoteUpdateService(request) }
                 .flatMap { updateDataEntry, updateServiceRequest, updateServiceResult ->
-            if (updateServiceResult.status == ERROR) {
+            if (updateServiceResult.status == SUCCESS) {
                 return tryRepeatUpdate(updateDataEntry, updateServiceResult)
                         .map {
                     newUpdateDataEntry ->
                         def jsonResponse = makeJsonResponse(newUpdateDataEntry.service, newUpdateDataEntry.code, newUpdateDataEntry.reason)
+                        ctx.response.status(UNPROCESSABLE_ENTITY.code()).send(jsonResponse)
                         log.info("Update wasn't finished, one more attempt")
                         log.debug("New update attempt with response: {}", jsonResponse)
-                        ctx.response.status(UNPROCESSABLE_ENTITY.code()).send(jsonResponse)
+
                 }
             } else {
                 return doSuccessResponse(updateDataEntry, updateServiceRequest)
                         .map { finishResponse ->
+                    ctx.redirect(FOUND.value(), finishResponse.redirectURL)
                     log.info("Update succeed")
                     log.debug("Update succeed, send redirect uri after update code {}", finishResponse.redirectURL)
-                    ctx.redirect(FOUND.value(), finishResponse.redirectURL)
                 }
             }
         }
-        .subscribe({ log.info("Update step called") },
+        .subscribe({ log.info("Update call finished") },
                 { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) })
     }
 
@@ -90,13 +91,13 @@ class UpdateHandler implements Action<Chain> {
             updateDataService.invalidate(updateServiceRequest.code)
                     .filter { response -> response.booleanValue() }
                     .flatMap { response ->
-                return updateService.update(UpdateServiceInput.builder()
-                        .code(updateServiceRequest.code)
-                        .updateService(updateServiceRequest.updateService)
-                        .relyingParty(updateServiceRequest.clientId)
-                        .data(updateServiceRequest.data).build())
-                        .map { updateServiceResult -> [updateDataEntry, updateServiceRequest, updateServiceResult] }
-            }
+            return updateService.update(UpdateServiceInput.builder()
+                    .code(updateServiceRequest.code)
+                    .updateService(updateServiceRequest.updateService)
+                    .relyingParty(updateServiceRequest.clientId)
+                    .data(updateServiceRequest.data).build())
+                    .map { updateServiceResult -> [updateDataEntry, updateServiceRequest, updateServiceResult] }
+        }
         }
     }
 
@@ -125,20 +126,18 @@ class UpdateHandler implements Action<Chain> {
     private Observable<UpdateFinishResponse> doSuccessResponse(UpdateDataEntry updateDataEntry, UpdateServiceRequest updateServiceRequest) {
         String sessionToken = updateDataEntry.sessionToken
         String clientId = updateServiceRequest.clientId
-        authClientService.loadRelyingParty(clientId)
-                .zipWith(getSession(sessionToken, clientId),
-                { relyingParty, authEntry ->
-
-                    String authCode = authEntry.authCode
-                    LocalDateTime now = now()
-                    LocalDateTime authCodeExpiresIn = now.plus(relyingParty.codeTTL, SECONDS)
-
-                    return updateAuthCodeExpired(authCode, authCodeExpiresIn)
-                            .map { result ->
-                        long expiresIn = SECONDS.between(now, authCodeExpiresIn)
-                        new UpdateFinishResponse(relyingParty.authorizationRedirectURI, sessionToken, authCode, expiresIn)
-                    }
-                })
+        return authClientService.loadRelyingParty(clientId)
+                .zipWith(getSession(sessionToken, clientId), { relyingParty, authEntry -> [authEntry, relyingParty] })
+                .flatMap { authEntry, relyingParty ->
+            String authCode = authEntry.authCode
+            LocalDateTime now = now()
+            LocalDateTime authCodeExpiresIn = now.plus(relyingParty.codeTTL, SECONDS)
+            updateAuthCodeExpired(authCode, authCodeExpiresIn)
+                    .map { response ->
+                long expiresIn = SECONDS.between(now, authCodeExpiresIn)
+                return new UpdateFinishResponse(relyingParty.authorizationRedirectURI, sessionToken, authCode, expiresIn)
+            }
+        }
     }
 
     private static String makeJsonResponse(String updateService, String updateCode, String reason) {
