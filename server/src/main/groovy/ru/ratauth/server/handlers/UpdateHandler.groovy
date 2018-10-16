@@ -35,7 +35,7 @@ import static ratpack.rx.RxRatpack.observe
 import static ru.ratauth.exception.AuthorizationException.ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED
 import static ru.ratauth.server.handlers.readers.UpdateServiceRequestReader.toUpdateServiceRequest
 import static ru.ratauth.server.utils.DateUtils.fromLocal
-import static ru.ratauth.update.services.dto.UpdateServiceResult.Status.SUCCESS
+import static ru.ratauth.update.services.dto.UpdateServiceResult.Status.ERROR
 
 @Slf4j
 @Component
@@ -62,7 +62,7 @@ class UpdateHandler implements Action<Chain> {
                 .map { params -> toUpdateServiceRequest(params) }
                 .flatMap { request -> callRemoteUpdateService(request) }
                 .flatMap { updateDataEntry, updateServiceRequest, updateServiceResult ->
-            if (updateServiceResult.status == SUCCESS) {
+            if (updateServiceResult.status == ERROR) {
                 return tryRepeatUpdate(updateDataEntry, updateServiceResult)
                         .map {
                     newUpdateDataEntry ->
