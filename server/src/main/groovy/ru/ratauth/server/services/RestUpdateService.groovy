@@ -15,7 +15,9 @@ import ru.ratauth.update.services.dto.UpdateServiceInput
 import ru.ratauth.update.services.dto.UpdateServiceResult
 import rx.Observable
 
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY
 import static ru.ratauth.exception.UpdateFlowException.ID.UPDATE_CALL_SERVICE
+import static ru.ratauth.update.services.dto.UpdateServiceResult.Status.ERROR
 
 @Component
 class RestUpdateService implements UpdateService {
@@ -40,13 +42,22 @@ class RestUpdateService implements UpdateService {
                 serviceConfiguration.readTimeout
         ).toObservable()
                 .map({ ReceivedResponse res ->
-            if (res.status.'4xx') {
+            if (res.status.code == UNPROCESSABLE_ENTITY.value()) {
+                return makeUpdateResponseFromValidationError(res)
+            } else if (res.status.'4xx') {
                 throw new AuthorizationException(res.body.text)
             } else if (res.status.'5xx') {
                 throw new UpdateFlowException(UPDATE_CALL_SERVICE.name(), res.body.text)
             }
             return makeUpdateResultFromResponse(res)
         })
+    }
+
+    private static UpdateServiceResult makeUpdateResponseFromValidationError(ReceivedResponse res) {
+        return UpdateServiceResult.builder()
+                .status(ERROR)
+                .field("message", res.body.text)
+                .build()
     }
 
     private static UpdateServiceResult makeUpdateResultFromResponse(ReceivedResponse receivedResponse) {

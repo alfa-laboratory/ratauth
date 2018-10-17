@@ -14,7 +14,11 @@ import org.springframework.http.MediaType
 import ru.ratauth.interaction.AuthzResponseType
 import ru.ratauth.server.local.PersistenceServiceStubConfiguration
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo
+import static com.github.tomakehurst.wiremock.client.WireMock.post
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import static com.jayway.restassured.RestAssured.given
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName
 import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders
@@ -203,6 +207,4 @@ identifier received by REST-based identity provider''')
                         .withStatus(HttpResponseStatus.FORBIDDEN.code())
         ))
     }
-
-
 }
