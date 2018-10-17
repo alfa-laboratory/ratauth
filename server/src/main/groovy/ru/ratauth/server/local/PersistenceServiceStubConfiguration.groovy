@@ -3,17 +3,35 @@ package ru.ratauth.server.local
 import groovy.transform.CompileStatic
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
-import ru.ratauth.entities.*
+import ru.ratauth.entities.AcrValues
+import ru.ratauth.entities.AuthClient
+import ru.ratauth.entities.AuthEntry
+import ru.ratauth.entities.DeviceInfo
+import ru.ratauth.entities.RelyingParty
+import ru.ratauth.entities.Session
+import ru.ratauth.entities.SessionClient
+import ru.ratauth.entities.Status
+import ru.ratauth.entities.Token
+import ru.ratauth.entities.TokenCache
+import ru.ratauth.entities.UpdateDataEntry
 import ru.ratauth.exception.ExpiredException
 import ru.ratauth.server.utils.DateUtils
 import ru.ratauth.server.utils.SecurityUtils
-import ru.ratauth.services.*
+import ru.ratauth.services.ClientService
+import ru.ratauth.services.DeviceInfoEventService
+import ru.ratauth.services.DeviceInfoService
+import ru.ratauth.services.SessionService
+import ru.ratauth.services.TokenCacheService
+import ru.ratauth.services.UpdateDataService
 import ru.ratauth.update.services.UpdateService
 import ru.ratauth.update.services.dto.UpdateServiceInput
 import ru.ratauth.update.services.dto.UpdateServiceResult
 import rx.Observable
 
 import java.time.LocalDateTime
+
+import static ru.ratauth.update.services.dto.UpdateServiceResult.Status.ERROR
+import static ru.ratauth.update.services.dto.UpdateServiceResult.Status.SUCCESS
 
 /**
  * @author mgorelikov
@@ -37,6 +55,9 @@ class PersistenceServiceStubConfiguration {
   public static final String CODE = '123'
   public static final String CODE_EXPIRED = '1111'
   public static final String ID_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vcmF0YXV0aC5ydSIsImlhdCI6MTQ1Nzg1NzAzOCwiZXhwIjoxNDg5MzkyODcxLCJhdWQiOiJzb21lLWFwcCIsInN1YiI6InVzZXJfaWQiLCJqdGkiOiJiZDYzNjkyOC03MTk2LTM5YTctODlmNi03OGY5NDY3NjU0ZWIiLCJycF9iYXNlX2FkZHJlc3MiOlsiaHR0cDovL3JhdGF1dGgucnUiLCJodHRwOi8vcmF0YXV0aC5ydSJdLCJ1c2VyX2lkIjoidXNlcl9pZCJ9.rqxqXV9X0kdjmyWxuVJkYU8sNC5sW9dC9NUqT-CodEM'
+  public static final String UPDATE_CODE_SUCCESS_CASE = 'c26c8472-8488-420b-96de-49b432f35418'
+  public static final String UPDATE_CODE_VALIDATION_EXCEPTION_CASE = 'bbbbbb-8488-420b-96de-49b432f3541'
+  public static final String UPDATE_CODE_UNPROСESSABLE_EXCEPTION_CASE = 'cccccc-8488-420b-96de-49b432f3541'
 
   private static final LocalDateTime NOW = LocalDateTime.now()
   private static final LocalDateTime TOMORROW = NOW.plusDays(1)
@@ -165,7 +186,16 @@ class PersistenceServiceStubConfiguration {
     return new UpdateService() {
       @Override
       Observable<UpdateServiceResult> update(UpdateServiceInput input) {
-        return null
+          if (input.code == UPDATE_CODE_SUCCESS_CASE)
+              return Observable.just(UpdateServiceResult.builder()
+                .status(SUCCESS)
+                .build())
+          else if (input.code == UPDATE_CODE_VALIDATION_EXCEPTION_CASE)
+              return Observable.just(UpdateServiceResult.builder()
+                      .status(ERROR).field("message", "Some validation error as example")
+                      .build())
+          else (input.code == UPDATE_CODE_UNPROСESSABLE_EXCEPTION_CASE)
+                  return Observable.error(new Throwable("Error"))
       }
     }
   }
@@ -437,7 +467,7 @@ class PersistenceServiceStubConfiguration {
       Observable<UpdateDataEntry> getUpdateData(String sessionToken) {
         def now = LocalDateTime.now()
         return Observable.just(UpdateDataEntry.builder()
-                .sessionToken("9999-8888-7777-6666")
+                .sessionToken("session_token")
                 .code("1111-2222-3333-4444")
                 .reason("need_update_password")
                 .service("corp-update-password")
@@ -455,7 +485,7 @@ class PersistenceServiceStubConfiguration {
         return Observable.just(UpdateDataEntry.builder()
                 .sessionToken("9999-8888-7777-6666")
                 .code(null)
-                .reason("need_update_password")
+                .reason("Some validation error as example")
                 .service("corp-update-password")
                 .redirectUri("http://test/update")
                 .required(required)
@@ -474,7 +504,7 @@ class PersistenceServiceStubConfiguration {
       Observable<UpdateDataEntry> getValidEntry(String code) {
         def now = LocalDateTime.now()
         return Observable.just(UpdateDataEntry.builder()
-                .sessionToken("9999-8888-7777-6666")
+                .sessionToken("session_token")
                 .code("1111-2222-3333-4444")
                 .reason("need_update_password")
                 .service("corp-update-password")
