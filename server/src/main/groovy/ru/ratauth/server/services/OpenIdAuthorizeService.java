@@ -196,7 +196,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                                 .map(request::addVerifyResultAcrToRequest)
                                 .map(authRes -> new ImmutableTriple<>(rp, authRes, request.getAcrValues())))
                 .flatMap(rpAuth -> createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
-                                .doOnNext(session -> createUpdateToken(rpAuth.middle, session))
+                                .doOnNext(session -> createUpdateToken(rpAuth.middle, session, rpAuth.left))
                                 .doOnNext(sessionService::updateAcrValues)
                                 .flatMap(session -> createIdToken(rpAuth.left, session, rpAuth.right)
                                         .map(idToken -> buildResponse(rpAuth.left, session, rpAuth.middle, idToken, request))
@@ -217,12 +217,12 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .doOnCompleted(() -> log.info("Authorization succeed"));
     }
 
-    private void createUpdateToken(VerifyResult verifyResult, Session session) {
+    private void createUpdateToken(VerifyResult verifyResult, Session session, RelyingParty relyingParty) {
         if (Status.NEED_UPDATE.equals(verifyResult.getStatus())) {
             updateDataService.create(session.getSessionToken(),
                     (String) verifyResult.getData().get("reason"),
                     (String) verifyResult.getData().get("update_service"),
-                    (String) verifyResult.getData().get("redirect_uri"),
+                    relyingParty.getUpdateRedirectURI(),
                     (Boolean) verifyResult.getData().get("required")).subscribe();
         }
     }
