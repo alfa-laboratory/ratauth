@@ -68,7 +68,7 @@ public class VerifyEnrollService {
                 String reason = (String) verifyResult.getData().get("reason");
                 String updateService = (String) verifyResult.getData().get("update_service");
                 if(relyingParty.getUpdateRedirectURI() == null){
-                    throw new UnsupportedOperationException("Please fill updateRedirectURI in MongoDB collection for client_id " + relyingParty.getName());
+                    throw new UnsupportedOperationException("Please add updateRedirectURI for client_id " + relyingParty.getName());
                 }
                 String redirectUri = createRedirectURIWithPath(relyingParty, relyingParty.getUpdateRedirectURI());
                 boolean required = (Boolean) verifyResult.getData().get("required");
