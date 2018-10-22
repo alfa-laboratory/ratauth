@@ -22,6 +22,7 @@ import ru.ratauth.entities.Session;
 import ru.ratauth.entities.UserInfo;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.exception.AuthorizationException.ID;
+import ru.ratauth.exception.UpdateFlowException;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
 import ru.ratauth.providers.auth.dto.VerifyResult.Status;
@@ -68,7 +69,7 @@ public class VerifyEnrollService {
                 String reason = (String) verifyResult.getData().get("reason");
                 String updateService = (String) verifyResult.getData().get("update_service");
                 if(relyingParty.getUpdateRedirectURI() == null){
-                    throw new UnsupportedOperationException("Please add updateRedirectURI for client_id " + relyingParty.getName());
+                    throw new UpdateFlowException(UpdateFlowException.ID.UPDATE_URI_MISSING);
                 }
                 String redirectUri = createRedirectURIWithPath(relyingParty, relyingParty.getUpdateRedirectURI());
                 boolean required = (Boolean) verifyResult.getData().get("required");
