@@ -31,6 +31,7 @@ import static io.netty.handler.codec.http.HttpResponseStatus.UNPROCESSABLE_ENTIT
 import static java.time.LocalDateTime.now
 import static java.time.temporal.ChronoUnit.SECONDS
 import static org.springframework.http.HttpStatus.FOUND
+import static ratpack.http.MediaType.APPLICATION_JSON
 import static ratpack.rx.RxRatpack.observe
 import static ru.ratauth.exception.AuthorizationException.ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED
 import static ru.ratauth.server.handlers.readers.UpdateServiceRequestReader.toUpdateServiceRequest
@@ -67,7 +68,7 @@ class UpdateHandler implements Action<Chain> {
                         .map {
                     newUpdateDataEntry ->
                         def jsonResponse = makeJsonResponse(newUpdateDataEntry.service, newUpdateDataEntry.code, newUpdateDataEntry.reason)
-                        ctx.response.status(UNPROCESSABLE_ENTITY.code()).send(jsonResponse)
+                        ctx.response.status(UNPROCESSABLE_ENTITY.code()).send(APPLICATION_JSON, jsonResponse)
                         log.info("Update wasn't finished, one more attempt")
                         log.debug("New update attempt with response: {}", jsonResponse)
 
