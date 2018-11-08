@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import ru.ratauth.entities.AcrValues;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author mgorelikov
@@ -18,13 +17,13 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegResult {
-  private Status status;
-  private String redirectUrl;
-  private Map<String, Object> data;//login
-  private AcrValues acrValues;
+    private Status status;
+    private String redirectUrl;
+    private Map<String, Object> data;//login
+    private AcrValues acrValues;
 
-  public enum Status {
-    SUCCESS,
-    NEED_APPROVAL
-  }
+    public enum Status {
+        SUCCESS,
+        NEED_APPROVAL
+    }
 }

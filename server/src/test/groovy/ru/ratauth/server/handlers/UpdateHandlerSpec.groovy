@@ -17,10 +17,7 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.pr
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document
-import static ru.ratauth.server.local.PersistenceServiceStubConfiguration.CLIENT_NAME
-import static ru.ratauth.server.local.PersistenceServiceStubConfiguration.UPDATE_CODE_SUCCESS_CASE
-import static ru.ratauth.server.local.PersistenceServiceStubConfiguration.UPDATE_CODE_UNPROСESSABLE_EXCEPTION_CASE
-import static ru.ratauth.server.local.PersistenceServiceStubConfiguration.UPDATE_CODE_VALIDATION_EXCEPTION_CASE
+import static ru.ratauth.server.local.PersistenceServiceStubConfiguration.*
 
 class UpdateHandlerSpec extends BaseDocumentationSpec {
 

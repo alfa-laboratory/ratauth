@@ -94,9 +94,9 @@ class RestIdentityProvider implements IdentityProvider {
     private static VerifyResult makeVerifyResultFromResponse(ReceivedResponse receivedResponse) {
         def response = (new JsonSlurper().parseText(receivedResponse.body.text) as List)[0] as Map
         new VerifyResult(
-            data:response.data as Map,
-            status:VerifyResult.Status.valueOf(response.status as String),
-            acrValues:parseAcrValues(response.acrValues as String)
+                data: response.data as Map,
+                status: VerifyResult.Status.valueOf(response.status as String),
+                acrValues: parseAcrValues(response.acrValues as String)
         )
     }
 

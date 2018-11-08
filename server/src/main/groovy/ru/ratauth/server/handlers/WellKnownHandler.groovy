@@ -33,29 +33,29 @@ class WellKnownHandler implements Action<Chain> {
         chain.path('.well-known/openid-configuration/:client_id?') { Context ctx ->
             def clientId = ctx.pathTokens["client_id"]
             discoveryService.getWellKnown(clientId)
-                .map({
-                    json(
+                    .map({
+                json(
                         [
-                            issuer                                          : it.issuer,
-                            authorization_endpoint                          : it.authorizationEndpoint,
-                            token_endpoint                                  : it.tokenEndpoint,
-                            check_token_endpoint                            : it.checkTokenEndpoint,
-                            token_endpoint_auth_signing_alg_values_supported: it.tokenEndpointAuthSigningAlgValuesSupported,
-                            registration_endpoint                           : it.registrationEndpoint,
-                            userinfo_endpoint                               : it.userInfoEndpoint,
-                            check_session_iframe                            : it.checkSessionIframe,
-                            end_session_endpoint                            : it.endSessionEndpoint,
-                            subject_types_supported                         : it.subjectTypesSupported,
-                            response_types_supported                        : it.responseTypesSupported,
-                            jwks_uri                                        : it.jwksUri,
-                            scopes_supported                                : it.scopesSupported,
-                            claims_supported                                : it.claimsSupported,
-                            afp_endpoint                                    : it.afpEndpoint,
-                            master_relying_party_crossauth_endpoint         : it.masterRelyingPartyCrossauthEndpoint,
+                                issuer                                          : it.issuer,
+                                authorization_endpoint                          : it.authorizationEndpoint,
+                                token_endpoint                                  : it.tokenEndpoint,
+                                check_token_endpoint                            : it.checkTokenEndpoint,
+                                token_endpoint_auth_signing_alg_values_supported: it.tokenEndpointAuthSigningAlgValuesSupported,
+                                registration_endpoint                           : it.registrationEndpoint,
+                                userinfo_endpoint                               : it.userInfoEndpoint,
+                                check_session_iframe                            : it.checkSessionIframe,
+                                end_session_endpoint                            : it.endSessionEndpoint,
+                                subject_types_supported                         : it.subjectTypesSupported,
+                                response_types_supported                        : it.responseTypesSupported,
+                                jwks_uri                                        : it.jwksUri,
+                                scopes_supported                                : it.scopesSupported,
+                                claims_supported                                : it.claimsSupported,
+                                afp_endpoint                                    : it.afpEndpoint,
+                                master_relying_party_crossauth_endpoint         : it.masterRelyingPartyCrossauthEndpoint,
                         ])
             })
-            .doOnNext(responseLogger.&logResponse)
-            .subscribe(ctx.&render, errorHandler(ctx))
+                    .doOnNext(responseLogger.&logResponse)
+                    .subscribe(ctx.&render, errorHandler(ctx))
         }
     }
 

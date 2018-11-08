@@ -1,12 +1,13 @@
 package ru.ratauth.server.extended.common;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.SneakyThrows;
 import ru.ratauth.server.utils.RedirectUtils;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 

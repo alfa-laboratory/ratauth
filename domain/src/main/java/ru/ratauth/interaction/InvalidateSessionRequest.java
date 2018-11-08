@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class InvalidateSessionRequest {
 
-  private String refreshToken;
-  private String clientId;
+    private String refreshToken;
+    private String clientId;
 }

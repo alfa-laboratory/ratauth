@@ -5,7 +5,9 @@ package ru.ratauth.exception;
  * @since 15/03/16
  */
 public interface IdentifiedException extends BaseIdentifiedException {
-  String getTypeId();
-  String getId();
-  String getMessage();
+    String getTypeId();
+
+    String getId();
+
+    String getMessage();
 }

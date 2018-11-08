@@ -1,25 +1,12 @@
 package ru.ratauth.server.extended.enroll.verify;
 
-import java.net.URL;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.ratauth.entities.AcrValues;
-import ru.ratauth.entities.AuthEntry;
-import ru.ratauth.entities.DeviceInfo;
-import ru.ratauth.entities.IdentityProvider;
-import ru.ratauth.entities.RelyingParty;
-import ru.ratauth.entities.Session;
-import ru.ratauth.entities.UserInfo;
+import ru.ratauth.entities.*;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.exception.AuthorizationException.ID;
 import ru.ratauth.exception.UpdateFlowException;
@@ -38,10 +25,17 @@ import ru.ratauth.server.utils.RedirectUtils;
 import ru.ratauth.services.UpdateDataService;
 import rx.Observable;
 
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 import static java.util.Optional.ofNullable;
 import static ru.ratauth.server.utils.DateUtils.fromLocal;
 import static ru.ratauth.server.utils.RedirectUtils.createRedirectURI;
-import static ru.ratauth.server.utils.RedirectUtils.createRedirectURIWithPath;
 
 @Slf4j
 @Service
@@ -68,14 +62,14 @@ public class VerifyEnrollService {
             if (verifyResult.getStatus().equals(Status.NEED_UPDATE)) {
                 String reason = (String) verifyResult.getData().get("reason");
                 String updateService = (String) verifyResult.getData().get("update_service");
-                if(relyingParty.getUpdateRedirectURI() == null){
+                if (relyingParty.getUpdateRedirectURI() == null) {
                     throw new UpdateFlowException(UpdateFlowException.ID.UPDATE_URI_MISSING);
                 }
                 String redirectUri = relyingParty.getUpdateRedirectURI();
                 boolean required = (Boolean) verifyResult.getData().get("required");
 
                 return updateDataService.create(session.getId(), reason, updateService, redirectUri, required)
-                    .map(updateDataEntry -> new UpdateProcessResponse(reason, updateDataEntry.getCode(), updateDataEntry.getService(), updateDataEntry.getRedirectUri()));
+                        .map(updateDataEntry -> new UpdateProcessResponse(reason, updateDataEntry.getCode(), updateDataEntry.getService(), updateDataEntry.getRedirectUri()));
             }
 
             String authCode = authEntry.getAuthCode();
@@ -84,9 +78,9 @@ public class VerifyEnrollService {
 
             long expiresIn = ChronoUnit.SECONDS.between(now, authCodeExpiresIn);
             return sessionService.updateAuthCodeExpired(authCode, fromLocal(authCodeExpiresIn))
-                .filter(Boolean::booleanValue)
-                .switchIfEmpty(Observable.error(new AuthorizationException(ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED)))
-                .map(r -> new SuccessResponse(createRedirectURI(relyingParty, request.getRedirectURI()), authCode, expiresIn));
+                    .filter(Boolean::booleanValue)
+                    .switchIfEmpty(Observable.error(new AuthorizationException(ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED)))
+                    .map(r -> new SuccessResponse(createRedirectURI(relyingParty, request.getRedirectURI()), authCode, expiresIn));
 
         } else {
 
@@ -118,7 +112,7 @@ public class VerifyEnrollService {
                                     });
                         })
                         .flatMap(response -> {
-                            if(response instanceof SuccessResponse) {
+                            if (response instanceof SuccessResponse) {
                                 Session session = p.right;
                                 return deviceService
                                         .resolveDeviceInfo(

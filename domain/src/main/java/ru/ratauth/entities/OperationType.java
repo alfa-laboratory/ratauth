@@ -5,6 +5,6 @@ package ru.ratauth.entities;
  * @since 16/02/16
  */
 public enum OperationType {
-  PRODUCE,
-  READ
+    PRODUCE,
+    READ
 }

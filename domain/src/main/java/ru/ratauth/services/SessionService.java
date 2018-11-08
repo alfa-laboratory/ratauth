@@ -1,15 +1,16 @@
 package ru.ratauth.services;
 
-import java.util.Date;
 import ru.ratauth.entities.AuthEntry;
 import ru.ratauth.entities.Session;
 import ru.ratauth.entities.Token;
 import rx.Observable;
 
+import java.util.Date;
+
 /**
  * @author mgorelikov
  * @since 02/11/15
- *
+ * <p>
  * Persistence layer
  * Async token service
  */
@@ -72,8 +73,8 @@ public interface SessionService {
      * @param sessionId    session identifier
      * @param relyingParty relying party unique name to find corresponding entry within session
      * @param token        new token
-     * @deprecated         need to provide whole session in order not to load session again
      * @see #addToken(Session session, String relyingParty, Token token)
+     * @deprecated need to provide whole session in order not to load session again
      */
     @Deprecated
     Observable<Boolean> addToken(String sessionId, String relyingParty, Token token);

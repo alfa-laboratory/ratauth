@@ -5,7 +5,7 @@ package ru.ratauth.entities;
  * @since 02/11/15
  */
 public enum ApplicationType {
-  WEB,
-  MOBILE,
-  NATIVE
+    WEB,
+    MOBILE,
+    NATIVE
 }

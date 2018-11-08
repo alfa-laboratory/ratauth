@@ -7,22 +7,25 @@ public interface UpdateDataService {
 
     /**
      * Check is session need update some data
+     *
      * @param sessionToken
      */
     Observable<UpdateDataEntry> getUpdateData(String sessionToken);
 
     /**
      * Create entry with auto generated update_code = random.uuid
+     *
      * @param sessionToken - id
      * @param reason
-     * @param service - service id
-     * @param redirectUri - redirect uri for the service
+     * @param service      - service id
+     * @param redirectUri  - redirect uri for the service
      * @return
      */
     Observable<UpdateDataEntry> create(String sessionToken, String reason, String service, String redirectUri, boolean required);
 
     /**
      * Create code and put to mongo
+     *
      * @param sessionToken
      * @return
      */
@@ -30,6 +33,7 @@ public interface UpdateDataService {
 
     /**
      * Method return entry if token exists and is not expired
+     *
      * @param code
      * @return
      */
@@ -37,6 +41,7 @@ public interface UpdateDataService {
 
     /**
      * Invalidate update token
+     *
      * @param code update_token parameter
      * @return "true" if request complete
      */

@@ -1,9 +1,10 @@
 package ru.ratauth.server.configuration;
 
-import java.util.Map;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.util.Map;
 
 @Data
 @NoArgsConstructor

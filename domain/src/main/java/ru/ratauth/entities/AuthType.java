@@ -5,9 +5,9 @@ package ru.ratauth.entities;
  * @since 16/02/16
  */
 public enum AuthType {
-  /**
-   * standard authorization
-   */
-  COMMON,
-  CROSS
+    /**
+     * standard authorization
+     */
+    COMMON,
+    CROSS
 }

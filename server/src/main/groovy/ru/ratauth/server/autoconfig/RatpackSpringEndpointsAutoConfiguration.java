@@ -38,50 +38,49 @@ import java.util.List;
  * thanks Dave
  */
 @Configuration
-@ConditionalOnClass({ EndpointAutoConfiguration.class})
-@AutoConfigureAfter({ EndpointAutoConfiguration.class })
+@ConditionalOnClass({EndpointAutoConfiguration.class})
+@AutoConfigureAfter({EndpointAutoConfiguration.class})
 @EnableConfigurationProperties
 public class RatpackSpringEndpointsAutoConfiguration {
 
-	@Bean
-	@ConditionalOnMissingBean
-	public ManagementServerProperties managementServerProperties() {
-		return new ManagementServerProperties();
-	}
+    @Bean
+    @ConditionalOnMissingBean
+    public ManagementServerProperties managementServerProperties() {
+        return new ManagementServerProperties();
+    }
 
-	@Bean
-	protected EndpointInitializer ratpackEndpointInitializer() {
-		return new EndpointInitializer();
-	}
+    @Bean
+    protected EndpointInitializer ratpackEndpointInitializer() {
+        return new EndpointInitializer();
+    }
 
-	private static class EndpointInitializer implements Action<Chain> {
-		@Autowired
-		private ObjectMapper jacksonObjectMapper;
+    private static class EndpointInitializer implements Action<Chain> {
+        @Autowired
+        private ObjectMapper jacksonObjectMapper;
 
-		@Autowired
-		private List<Endpoint<?>> endpoints = Collections.emptyList();
+        @Autowired
+        private List<Endpoint<?>> endpoints = Collections.emptyList();
 
-		@Autowired
-		private ManagementServerProperties management;
+        @Autowired
+        private ManagementServerProperties management;
 
-		@Override
-		public void execute(Chain chain) throws Exception {
-			String prefix = management.getContextPath();
-			if (StringUtils.hasText(prefix)) {
-				prefix = prefix.endsWith("/") ? prefix : prefix + "/";
-			}
-			else {
-				prefix = "";
-			}
-			for (Endpoint<?> endpoint : endpoints) {
-				if (endpoint.isEnabled()) {
-					chain.get(prefix + endpoint.getId(), context ->
-							context.render(jacksonObjectMapper.writeValueAsString(endpoint.invoke()))
-					);
-				}
-			}
-		}
+        @Override
+        public void execute(Chain chain) throws Exception {
+            String prefix = management.getContextPath();
+            if (StringUtils.hasText(prefix)) {
+                prefix = prefix.endsWith("/") ? prefix : prefix + "/";
+            } else {
+                prefix = "";
+            }
+            for (Endpoint<?> endpoint : endpoints) {
+                if (endpoint.isEnabled()) {
+                    chain.get(prefix + endpoint.getId(), context ->
+                            context.render(jacksonObjectMapper.writeValueAsString(endpoint.invoke()))
+                    );
+                }
+            }
+        }
 
-	}
+    }
 
 }

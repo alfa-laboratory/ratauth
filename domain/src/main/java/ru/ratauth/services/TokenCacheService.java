@@ -8,6 +8,7 @@ import rx.Observable;
  * @since 16/02/16
  */
 public interface TokenCacheService {
-  Observable<TokenCache> create(TokenCache cache);
-  Observable<TokenCache> get(String token, String client);
+    Observable<TokenCache> create(TokenCache cache);
+
+    Observable<TokenCache> get(String token, String client);
 }

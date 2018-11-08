@@ -1,10 +1,11 @@
 package ru.ratauth.server.extended.enroll.verify;
 
+import ru.ratauth.entities.AcrValues;
+import ru.ratauth.server.extended.common.RedirectResponse;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import ru.ratauth.entities.AcrValues;
-import ru.ratauth.server.extended.common.RedirectResponse;
 
 import static java.util.stream.Collectors.joining;
 

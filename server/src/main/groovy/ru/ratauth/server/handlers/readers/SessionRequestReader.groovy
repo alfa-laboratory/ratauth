@@ -13,13 +13,13 @@ import static ru.ratauth.server.handlers.readers.RequestUtil.extractField
 @CompileStatic
 class SessionRequestReader {
 
-  static InvalidateSessionRequest readInvalidateByRefreshTokenRequest(Form form, Headers headers) {
-    InvalidateSessionRequest.InvalidateSessionRequestBuilder builder = InvalidateSessionRequest.builder()
-            .refreshToken(extractField(form, 'refresh_token', true))
-    def auth = extractAuth(headers)
-    builder.clientId(auth[0])
-    def request = builder.build()
-    ActionLogger.addBaseRequestInfo(request.clientId, AuthAction.INVALIDATE_SESSION)
-    request
-  }
+    static InvalidateSessionRequest readInvalidateByRefreshTokenRequest(Form form, Headers headers) {
+        InvalidateSessionRequest.InvalidateSessionRequestBuilder builder = InvalidateSessionRequest.builder()
+                .refreshToken(extractField(form, 'refresh_token', true))
+        def auth = extractAuth(headers)
+        builder.clientId(auth[0])
+        def request = builder.build()
+        ActionLogger.addBaseRequestInfo(request.clientId, AuthAction.INVALIDATE_SESSION)
+        request
+    }
 }

@@ -5,7 +5,7 @@ package ru.ratauth.entities;
  * @since 11/11/15
  */
 public enum TokenType {
-  ACCESS_TOKEN,
-  REFRESH_TOKEN,
-  ID_TOKEN
+    ACCESS_TOKEN,
+    REFRESH_TOKEN,
+    ID_TOKEN
 }

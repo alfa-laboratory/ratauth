@@ -13,9 +13,7 @@ import ru.ratauth.server.local.PersistenceServiceStubConfiguration
 
 import static com.jayway.restassured.RestAssured.given
 import static java.net.URLEncoder.encode
-import static org.hamcrest.Matchers.equalTo
-import static org.hamcrest.Matchers.notNullValue
-import static org.hamcrest.Matchers.startsWith
+import static org.hamcrest.Matchers.*
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
@@ -306,6 +304,6 @@ class EnrollAPISpec extends BaseDocumentationSpec {
                 .when()
                 .post("verify")
         then:
-            result.then().extract().jsonPath().get("id") == AuthorizationException.ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED.name()
+        result.then().extract().jsonPath().get("id") == AuthorizationException.ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED.name()
     }
 }

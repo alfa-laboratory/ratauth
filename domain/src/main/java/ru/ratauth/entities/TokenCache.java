@@ -16,23 +16,23 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TokenCache {
-  /**
-   * access token
-   */
-  private String token;
-  /**
-   * JWT token signed by client secret
-   */
-  private String idToken;
-  /**
-   * Session identifier
-   */
-  private String session;
+    /**
+     * access token
+     */
+    private String token;
+    /**
+     * JWT token signed by client secret
+     */
+    private String idToken;
+    /**
+     * Session identifier
+     */
+    private String session;
 
-  private Date created;
+    private Date created;
 
-  /**
-   * unique name
-   */
-  private String client;
+    /**
+     * unique name
+     */
+    private String client;
 }

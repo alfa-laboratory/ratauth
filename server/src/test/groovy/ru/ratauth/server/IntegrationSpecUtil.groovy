@@ -11,12 +11,12 @@ import java.nio.charset.Charset
  */
 class IntegrationSpecUtil {
 
-  static Header createAuthHeaders(String username, String password) {
-    def auth = username + ":" + password;
-    def encodedAuth =
-        Base64.getEncoder().encode(auth.getBytes(Charset.forName("UTF-8")))
-    def authHeader = "Basic " + new String(encodedAuth)
-    return new Header(HttpHeaders.AUTHORIZATION, authHeader)
-  }
+    static Header createAuthHeaders(String username, String password) {
+        def auth = username + ":" + password;
+        def encodedAuth =
+                Base64.getEncoder().encode(auth.getBytes(Charset.forName("UTF-8")))
+        def authHeader = "Basic " + new String(encodedAuth)
+        return new Header(HttpHeaders.AUTHORIZATION, authHeader)
+    }
 
 }
