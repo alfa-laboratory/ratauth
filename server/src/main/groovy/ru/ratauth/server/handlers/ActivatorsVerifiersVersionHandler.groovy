@@ -27,11 +27,11 @@ class ActivatorsVerifiersVersionHandler implements Action<Chain> {
         chain
                 .get('providers/:clientId/activator/version') { Context ctx ->
             handleIfMissing ctx, {
-                ctx.render(json(version:activatorResolver.find(ctx.pathTokens.clientId).version()))
+                ctx.render(json(version: activatorResolver.find(ctx.pathTokens.clientId).version()))
             }
         }.get('providers/:clientId/verifier/version') { Context ctx ->
             handleIfMissing ctx, {
-                ctx.render(json(version:verifierResolver.find(ctx.pathTokens.clientId).version()))
+                ctx.render(json(version: verifierResolver.find(ctx.pathTokens.clientId).version()))
             }
         }
     }

@@ -11,9 +11,9 @@ import org.springframework.test.context.TestPropertySource;
 @TestConfiguration
 @Import({TestProvidersStubConfiguration.class, TestPersistenceServiceStubConfiguration.class})
 @TestPropertySource(properties = {
-    "ratpack.port=8080",
-    "ratpack.base-dir=file:server/src/main/resources",
-    "ratpack.templates-path=templates"
+        "ratpack.port=8080",
+        "ratpack.base-dir=file:server/src/main/resources",
+        "ratpack.templates-path=templates"
 })
 public class TestBaseConfiguration {
 }

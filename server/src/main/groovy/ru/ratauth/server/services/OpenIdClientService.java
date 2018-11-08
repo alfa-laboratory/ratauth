@@ -19,35 +19,35 @@ import static ru.ratauth.utils.URIUtils.appendQuery;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OpenIdClientService implements AuthClientService {
-  private final ClientService clientService;
+    private final ClientService clientService;
 
-  @Override
-  public Observable<RelyingParty> loadRelyingParty(String name) {
-    return clientService.getRelyingParty(name)
-        .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)));
-  }
+    @Override
+    public Observable<RelyingParty> loadRelyingParty(String name) {
+        return clientService.getRelyingParty(name)
+                .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)));
+    }
 
-  @Override
-  public Observable<AuthClient> loadClient(String name) {
-    return clientService.getClient(name)
-        .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)));
-  }
+    @Override
+    public Observable<AuthClient> loadClient(String name) {
+        return clientService.getClient(name)
+                .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)));
+    }
 
-  @Override
-  public Observable<SessionClient> loadSessionClient(String name) {
-    return clientService.getSessionClient(name)
-      .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)));
-  }
+    @Override
+    public Observable<SessionClient> loadSessionClient(String name) {
+        return clientService.getSessionClient(name)
+                .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)));
+    }
 
-  @Override
-  public Observable<String> getAuthorizationPageURI(String name, String query) {
-    return loadRelyingParty(name)
-        .map(rp -> appendQuery(rp.getAuthorizationPageURI(), query));
-  }
+    @Override
+    public Observable<String> getAuthorizationPageURI(String name, String query) {
+        return loadRelyingParty(name)
+                .map(rp -> appendQuery(rp.getAuthorizationPageURI(), query));
+    }
 
-  @Override
-  public Observable<String> getRegistrationPageURI(String name, String query) {
-    return loadRelyingParty(name)
-        .map(rp -> appendQuery(rp.getRegistrationPageURI(), query));
-  }
+    @Override
+    public Observable<String> getRegistrationPageURI(String name, String query) {
+        return loadRelyingParty(name)
+                .map(rp -> appendQuery(rp.getRegistrationPageURI(), query));
+    }
 }

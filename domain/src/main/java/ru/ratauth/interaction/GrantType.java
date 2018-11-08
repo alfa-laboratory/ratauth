@@ -5,16 +5,16 @@ package ru.ratauth.interaction;
  * @since 11/11/15
  */
 public enum GrantType {
-  AUTHORIZATION_CODE,
-  REFRESH_TOKEN,
-  /**
-   * Mix of auth_code and refresh_token request.
-   * Could be used in case of client needs separate token to separate aud,
-   * but doesn't want to pass repeatedly through all authentication process.
-   * So refresh token can be used as authentication.
-   */
-  AUTHENTICATION_TOKEN,
-  INTERNAL_AUTH_CODE,
-  SESSION_TOKEN,
-  PASSWORD
+    AUTHORIZATION_CODE,
+    REFRESH_TOKEN,
+    /**
+     * Mix of auth_code and refresh_token request.
+     * Could be used in case of client needs separate token to separate aud,
+     * but doesn't want to pass repeatedly through all authentication process.
+     * So refresh token can be used as authentication.
+     */
+    AUTHENTICATION_TOKEN,
+    INTERNAL_AUTH_CODE,
+    SESSION_TOKEN,
+    PASSWORD
 }

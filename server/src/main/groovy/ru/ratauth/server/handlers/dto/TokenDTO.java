@@ -21,32 +21,32 @@ import java.util.Set;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TokenDTO {
-  @JsonProperty("access_token")
-  private String accessToken;
-  @JsonProperty("refresh_token")
-  private String refreshToken;
-  @JsonProperty("token_type")
-  private String tokenType;
-  @JsonProperty("id_token")
-  private String idToken;
-  @JsonProperty("expires_in")
-  private Long expiresIn;
-  @JsonProperty("client_id")
-  private String clientId;
-  @JsonProperty("session_token")
-  private String sessionToken;
+    @JsonProperty("access_token")
+    private String accessToken;
+    @JsonProperty("refresh_token")
+    private String refreshToken;
+    @JsonProperty("token_type")
+    private String tokenType;
+    @JsonProperty("id_token")
+    private String idToken;
+    @JsonProperty("expires_in")
+    private Long expiresIn;
+    @JsonProperty("client_id")
+    private String clientId;
+    @JsonProperty("session_token")
+    private String sessionToken;
 
-  public TokenDTO(TokenResponse response, Set<AuthzResponseType> authzResponseTypeSet) {
-    this.accessToken = response.getAccessToken();
-    this.refreshToken = response.getRefreshToken();
-    this.tokenType = response.getTokenType();
-    this.idToken = response.getIdToken();
-    this.expiresIn = response.getExpiresIn();
-    this.clientId = response.getClientId();
+    public TokenDTO(TokenResponse response, Set<AuthzResponseType> authzResponseTypeSet) {
+        this.accessToken = response.getAccessToken();
+        this.refreshToken = response.getRefreshToken();
+        this.tokenType = response.getTokenType();
+        this.idToken = response.getIdToken();
+        this.expiresIn = response.getExpiresIn();
+        this.clientId = response.getClientId();
 
-    if(authzResponseTypeSet.contains(AuthzResponseType.SESSION_TOKEN)) {
-      this.sessionToken = response.getSessionToken();
+        if (authzResponseTypeSet.contains(AuthzResponseType.SESSION_TOKEN)) {
+            this.sessionToken = response.getSessionToken();
+        }
     }
-  }
 
 }

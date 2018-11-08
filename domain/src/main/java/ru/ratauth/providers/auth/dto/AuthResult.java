@@ -4,7 +4,6 @@ import lombok.*;
 import ru.ratauth.entities.AcrValues;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author mgorelikov
@@ -16,15 +15,15 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthResult {
-  //some abstract data map that could contain any registration data(login, personal code etc.)
-  @Singular("field")
-  private Map<String, Object> data;
+    //some abstract data map that could contain any registration data(login, personal code etc.)
+    @Singular("field")
+    private Map<String, Object> data;
 
-  private Status status;
-  private AcrValues acrValues;
+    private Status status;
+    private AcrValues acrValues;
 
-  public enum Status {
-    SUCCESS,
-    NEED_APPROVAL
-  }
+    public enum Status {
+        SUCCESS,
+        NEED_APPROVAL
+    }
 }

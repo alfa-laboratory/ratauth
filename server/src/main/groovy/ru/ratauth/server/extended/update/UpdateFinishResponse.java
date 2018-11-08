@@ -1,8 +1,9 @@
 package ru.ratauth.server.extended.update;
 
+import ru.ratauth.server.extended.common.RedirectResponse;
+
 import java.util.HashMap;
 import java.util.Map;
-import ru.ratauth.server.extended.common.RedirectResponse;
 
 import static java.lang.String.valueOf;
 
@@ -13,7 +14,7 @@ public class UpdateFinishResponse extends RedirectResponse {
     private final String sessionToken;
     private final Map<String, String> redirectParameters;
 
-    public UpdateFinishResponse(String location, String sessionToken,  String code, long expiresIn) {
+    public UpdateFinishResponse(String location, String sessionToken, String code, long expiresIn) {
         super(location);
         this.code = code;
         this.expiresIn = expiresIn;

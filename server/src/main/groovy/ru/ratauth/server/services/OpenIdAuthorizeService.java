@@ -1,13 +1,5 @@
 package ru.ratauth.server.services;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -16,23 +8,10 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import ru.ratauth.entities.AcrValues;
-import ru.ratauth.entities.AuthClient;
-import ru.ratauth.entities.AuthEntry;
-import ru.ratauth.entities.DeviceInfo;
-import ru.ratauth.entities.IdentityProvider;
-import ru.ratauth.entities.RelyingParty;
-import ru.ratauth.entities.Session;
-import ru.ratauth.entities.Token;
-import ru.ratauth.entities.TokenCache;
-import ru.ratauth.entities.UpdateDataEntry;
-import ru.ratauth.entities.UserInfo;
+import ru.ratauth.entities.*;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.exception.UpdateFlowException;
-import ru.ratauth.interaction.AuthzRequest;
-import ru.ratauth.interaction.AuthzResponse;
-import ru.ratauth.interaction.AuthzResponseType;
-import ru.ratauth.interaction.GrantType;
+import ru.ratauth.interaction.*;
 import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
@@ -42,11 +21,14 @@ import ru.ratauth.server.utils.RedirectUtils;
 import ru.ratauth.services.UpdateDataService;
 import rx.Observable;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+import java.util.function.Function;
+
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
-import static ru.ratauth.providers.auth.dto.VerifyResult.Status.NEED_APPROVAL;
-import static ru.ratauth.providers.auth.dto.VerifyResult.Status.NEED_UPDATE;
-import static ru.ratauth.providers.auth.dto.VerifyResult.Status.SUCCESS;
+import static ru.ratauth.providers.auth.dto.VerifyResult.Status.*;
 import static ru.ratauth.server.utils.RedirectUtils.createRedirectURI;
 
 /**
@@ -193,30 +175,30 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     public Observable<AuthzResponse> authenticate(AuthzRequest request) {
         return clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), isAuthRequired(request))
                 .flatMap(rp -> authenticateUser(request.getAuthData(), request.getAcrValues(), rp.getIdentityProvider(), rp.getName())
-                                .map(request::addVerifyResultAcrToRequest)
-                                .map(authRes -> new ImmutableTriple<>(rp, authRes, request.getAcrValues())))
+                        .map(request::addVerifyResultAcrToRequest)
+                        .map(authRes -> new ImmutableTriple<>(rp, authRes, request.getAcrValues())))
                 .flatMap(rpAuth -> createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
-                                .flatMap(session ->
-                                        createUpdateToken(rpAuth.middle, session, rpAuth.left)
-                                            .map((entry) -> session)
-                                )
-                                .doOnNext(sessionService::updateAcrValues)
-                                .flatMap(session -> createIdToken(rpAuth.left, session, rpAuth.right)
-                                        .map(idToken -> buildResponse(rpAuth.left, session, rpAuth.middle, idToken, request))
-                                        .flatMap(authzResponse -> {
-                                            if(authzResponse.getCode() != null || authzResponse.getUpdateCode() != null) {
-                                                return deviceService
-                                                        .resolveDeviceInfo(
-                                                                request.getClientId(),
-                                                                Objects.toString(request.getAcrValues()),
-                                                                createDeviceInfoFromRequest(session, request),
-                                                                extractUserInfo(session)
-                                                        )
-                                                        .map(it -> authzResponse);
-                                            }
-                                            return Observable.just(authzResponse);
-                                        })
-                                ))
+                        .flatMap(session ->
+                                createUpdateToken(rpAuth.middle, session, rpAuth.left)
+                                        .map((entry) -> session)
+                        )
+                        .doOnNext(sessionService::updateAcrValues)
+                        .flatMap(session -> createIdToken(rpAuth.left, session, rpAuth.right)
+                                .map(idToken -> buildResponse(rpAuth.left, session, rpAuth.middle, idToken, request))
+                                .flatMap(authzResponse -> {
+                                    if (authzResponse.getCode() != null || authzResponse.getUpdateCode() != null) {
+                                        return deviceService
+                                                .resolveDeviceInfo(
+                                                        request.getClientId(),
+                                                        Objects.toString(request.getAcrValues()),
+                                                        createDeviceInfoFromRequest(session, request),
+                                                        extractUserInfo(session)
+                                                )
+                                                .map(it -> authzResponse);
+                                    }
+                                    return Observable.just(authzResponse);
+                                })
+                        ))
                 .doOnCompleted(() -> log.info("Authorization succeed"));
     }
 
@@ -227,7 +209,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                     (String) verifyResult.getData().get("update_service"),
                     relyingParty.getUpdateRedirectURI(),
                     (Boolean) verifyResult.getData().get("required"))
-                .map(entry -> Boolean.TRUE);
+                    .map(entry -> Boolean.TRUE);
         }
         return Observable.just(Boolean.FALSE);
     }

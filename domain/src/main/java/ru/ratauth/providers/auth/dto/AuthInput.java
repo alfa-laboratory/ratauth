@@ -1,7 +1,6 @@
 package ru.ratauth.providers.auth.dto;
 
 import lombok.*;
-import ru.ratauth.entities.RelyingParty;
 
 import java.util.Map;
 
@@ -16,7 +15,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuthInput {
-  @Singular("field")
-  private Map<String, String> data;
-  private String relyingParty;
+    @Singular("field")
+    private Map<String, String> data;
+    private String relyingParty;
 }

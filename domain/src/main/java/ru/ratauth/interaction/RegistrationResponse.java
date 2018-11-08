@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import ru.ratauth.utils.StringUtils;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.StringJoiner;
 
 import static ru.ratauth.utils.URIUtils.appendQuery;
@@ -22,18 +21,18 @@ import static ru.ratauth.utils.URIUtils.appendQuery;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegistrationResponse {
-  private String redirectUrl;
-  private Map<String, Object> data;
-  private String code;
+    private String redirectUrl;
+    private Map<String, Object> data;
+    private String code;
 
-  public String buildURL() {
-    StringJoiner joiner = new StringJoiner("&");
-    if(!StringUtils.isBlank(code)) {
-      joiner.add("code="+code);
+    public String buildURL() {
+        StringJoiner joiner = new StringJoiner("&");
+        if (!StringUtils.isBlank(code)) {
+            joiner.add("code=" + code);
+        }
+        if (data != null && !data.isEmpty()) {
+            data.entrySet().forEach(entry -> joiner.add(entry.getKey() + "=" + entry.getValue().toString()));
+        }
+        return appendQuery(redirectUrl, joiner.toString());
     }
-    if(data != null && !data.isEmpty()) {
-      data.entrySet().forEach(entry -> joiner.add(entry.getKey() + "=" + entry.getValue().toString()));
-    }
-    return appendQuery(redirectUrl, joiner.toString());
-  }
 }

@@ -1,11 +1,5 @@
 package ru.ratauth.server.extended.enroll.activate;
 
-import static java.util.Optional.ofNullable;
-
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -23,6 +17,13 @@ import ru.ratauth.server.services.AuthClientService;
 import ru.ratauth.server.services.AuthSessionService;
 import ru.ratauth.server.services.TokenCacheService;
 import rx.Observable;
+
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map;
+import java.util.Set;
+
+import static java.util.Optional.ofNullable;
 
 @Slf4j
 @Service
@@ -51,7 +52,7 @@ public class ActivateEnrollService {
     }
 
     private Observable<ActivateResult> activateAndUpdateUserInfo(Session session, ActivateEnrollRequest request, RelyingParty relyingParty) {
-        if(session != null) {
+        if (session != null) {
             Map<String, Object> tokenInfo = extractUserInfo(session);
             UserInfo userInfo = new UserInfo(tokenProcessor.filterUserInfo(tokenInfo));
             Set<String> authContext = tokenProcessor.extractAuthContext(tokenInfo);

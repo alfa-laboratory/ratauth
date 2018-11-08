@@ -14,16 +14,16 @@ import ratpack.render.RendererSupport;
 @Configuration
 public class RenderedConfiguration {
 
-  @Autowired
-  private ObjectMapper jacksonObjectMapper;
+    @Autowired
+    private ObjectMapper jacksonObjectMapper;
 
-  @Bean
-  public RendererSupport<JsonSerializable> jsonRenderer() {
-    return new RendererSupport<JsonSerializable>() {
-      @Override
-      public void render(Context context, JsonSerializable jsonSerializable) throws Exception {
-        context.render(jacksonObjectMapper.writeValueAsString(jsonSerializable));
-      }
-    };
-  }
+    @Bean
+    public RendererSupport<JsonSerializable> jsonRenderer() {
+        return new RendererSupport<JsonSerializable>() {
+            @Override
+            public void render(Context context, JsonSerializable jsonSerializable) throws Exception {
+                context.render(jacksonObjectMapper.writeValueAsString(jsonSerializable));
+            }
+        };
+    }
 }

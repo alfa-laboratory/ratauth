@@ -16,11 +16,11 @@ import lombok.experimental.Wither;
 @NoArgsConstructor
 @Wither
 public class TokenResponse {
-  private String accessToken;
-  private String refreshToken;
-  private String tokenType;
-  private String idToken;
-  private Long expiresIn;
-  private String clientId;
-  private String sessionToken;
+    private String accessToken;
+    private String refreshToken;
+    private String tokenType;
+    private String idToken;
+    private Long expiresIn;
+    private String clientId;
+    private String sessionToken;
 }

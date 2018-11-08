@@ -2,7 +2,6 @@ package ru.ratauth.server.date;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.ratauth.server.date.DateService;
 
 import java.time.Clock;
 import java.time.Instant;

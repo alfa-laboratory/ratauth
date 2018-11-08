@@ -1,9 +1,10 @@
 package ru.ratauth.update.services.dto;
 
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.Map;
 
 @Data
 @Builder

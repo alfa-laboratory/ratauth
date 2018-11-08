@@ -13,25 +13,25 @@ import java.util.List;
 @Data
 @ConfigurationProperties(prefix = "openid.properties.discovery")
 public class OpenIdConnectDefaultDiscoveryProperties implements OpenIdConnectDiscoveryProperties {
-  // Required
-  private String issuer;
-  private String jwksUri;
-  private List<String> responseTypesSupported;
-  private List<String> subjectTypesSupported;
-  private List<String> tokenEndpointAuthSigningAlgValuesSupported;
+    // Required
+    private String issuer;
+    private String jwksUri;
+    private List<String> responseTypesSupported;
+    private List<String> subjectTypesSupported;
+    private List<String> tokenEndpointAuthSigningAlgValuesSupported;
 
-  // Optional
-  private String authorizationEndpoint;
-  private String tokenEndpoint;
-  private String checkTokenEndpoint;
-  private String checkSessionIframe;
-  private String endSessionEndpoint;
-  private String afpEndpoint;
-  private String masterRelyingPartyCrossauthEndpoint;
+    // Optional
+    private String authorizationEndpoint;
+    private String tokenEndpoint;
+    private String checkTokenEndpoint;
+    private String checkSessionIframe;
+    private String endSessionEndpoint;
+    private String afpEndpoint;
+    private String masterRelyingPartyCrossauthEndpoint;
 
-  // Recommended
-  private String userInfoEndpoint;
-  private String registrationEndpoint;
-  private List<String> scopesSupported;
-  private List<String> claimsSupported;
+    // Recommended
+    private String userInfoEndpoint;
+    private String registrationEndpoint;
+    private List<String> scopesSupported;
+    private List<String> claimsSupported;
 }

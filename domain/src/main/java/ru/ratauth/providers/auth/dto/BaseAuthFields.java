@@ -6,12 +6,12 @@ package ru.ratauth.providers.auth.dto;
  * Just basic fields
  */
 public enum BaseAuthFields {
-  USERNAME,
-  USER_ID,//constants for standard user info
-  PASSWORD,
-  CODE;
+    USERNAME,
+    USER_ID,//constants for standard user info
+    PASSWORD,
+    CODE;
 
-  public String val() {
-    return super.name().toLowerCase();
-  }
+    public String val() {
+        return super.name().toLowerCase();
+    }
 }

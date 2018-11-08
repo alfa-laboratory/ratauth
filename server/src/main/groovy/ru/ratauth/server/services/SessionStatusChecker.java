@@ -7,9 +7,10 @@ import ru.ratauth.entities.Session;
  * @since 20/03/16
  */
 public interface SessionStatusChecker {
-  /**
-   * Check user status in authProvider attached to session
-   * @param session session for invalidation
-   */
-  void checkAndUpdateSession(Session session);
+    /**
+     * Check user status in authProvider attached to session
+     *
+     * @param session session for invalidation
+     */
+    void checkAndUpdateSession(Session session);
 }

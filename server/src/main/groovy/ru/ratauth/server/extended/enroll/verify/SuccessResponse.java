@@ -1,8 +1,9 @@
 package ru.ratauth.server.extended.enroll.verify;
 
+import ru.ratauth.server.extended.common.RedirectResponse;
+
 import java.util.HashMap;
 import java.util.Map;
-import ru.ratauth.server.extended.common.RedirectResponse;
 
 public class SuccessResponse extends RedirectResponse {
 

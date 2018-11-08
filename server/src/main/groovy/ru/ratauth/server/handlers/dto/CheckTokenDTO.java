@@ -18,21 +18,23 @@ import java.util.UUID;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CheckTokenDTO {
-  @JsonProperty("id_token")
-  private String idToken;
-  private String jti;
-  private @Singular("auds") Set<String> aud;
-  private Long exp;
-  @JsonProperty("client_id")
-  private String clientId;
-  @JsonProperty("scope")
-  private @Singular Set<String> scopes;
+    @JsonProperty("id_token")
+    private String idToken;
+    private String jti;
+    private @Singular("auds")
+    Set<String> aud;
+    private Long exp;
+    @JsonProperty("client_id")
+    private String clientId;
+    @JsonProperty("scope")
+    private @Singular
+    Set<String> scopes;
 
-  public CheckTokenDTO(CheckTokenResponse response) {
-    this.idToken = response.getIdToken();
-    this.exp = response.getExpiresIn();
-    this.clientId = response.getClientId();
-    this.scopes = response.getScopes();
-    this.jti = UUID.randomUUID().toString();
-  }
+    public CheckTokenDTO(CheckTokenResponse response) {
+        this.idToken = response.getIdToken();
+        this.exp = response.getExpiresIn();
+        this.clientId = response.getClientId();
+        this.scopes = response.getScopes();
+        this.jti = UUID.randomUUID().toString();
+    }
 }

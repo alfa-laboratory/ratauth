@@ -24,11 +24,11 @@ public class OpenIdDeviceService implements DeviceService {
     @Override
     public Observable<DeviceInfo> resolveDeviceInfo(String clientId, String enroll, DeviceInfo deviceInfo, Map<String, Object> userInfo) {
         return deviceInfoService
-                        .findByUserId(deviceInfo.getUserId())
-                        .map(oldDevices -> {
-                            sendChangeDeviceInfoEvent(oldDevices, clientId, enroll, deviceInfo, userInfo);
-                            return oldDevices;
-                        })
+                .findByUserId(deviceInfo.getUserId())
+                .map(oldDevices -> {
+                    sendChangeDeviceInfoEvent(oldDevices, clientId, enroll, deviceInfo, userInfo);
+                    return oldDevices;
+                })
                 .flatMap(it -> deviceInfoService.create(clientId, enroll, deviceInfo));
     }
 
