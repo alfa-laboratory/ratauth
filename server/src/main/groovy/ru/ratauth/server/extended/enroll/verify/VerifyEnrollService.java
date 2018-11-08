@@ -71,7 +71,7 @@ public class VerifyEnrollService {
                 if(relyingParty.getUpdateRedirectURI() == null){
                     throw new UpdateFlowException(UpdateFlowException.ID.UPDATE_URI_MISSING);
                 }
-                String redirectUri = createRedirectURIWithPath(relyingParty, relyingParty.getUpdateRedirectURI());
+                String redirectUri = relyingParty.getUpdateRedirectURI();
                 boolean required = (Boolean) verifyResult.getData().get("required");
 
                 return updateDataService.create(session.getId(), reason, updateService, redirectUri, required)
