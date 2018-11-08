@@ -196,7 +196,10 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                                 .map(request::addVerifyResultAcrToRequest)
                                 .map(authRes -> new ImmutableTriple<>(rp, authRes, request.getAcrValues())))
                 .flatMap(rpAuth -> createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
-                                .doOnNext(session -> createUpdateToken(rpAuth.middle, session, rpAuth.left))
+                                .flatMap(session ->
+                                        createUpdateToken(rpAuth.middle, session, rpAuth.left)
+                                            .map((entry) -> session)
+                                )
                                 .doOnNext(sessionService::updateAcrValues)
                                 .flatMap(session -> createIdToken(rpAuth.left, session, rpAuth.right)
                                         .map(idToken -> buildResponse(rpAuth.left, session, rpAuth.middle, idToken, request))
@@ -217,14 +220,16 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .doOnCompleted(() -> log.info("Authorization succeed"));
     }
 
-    private void createUpdateToken(VerifyResult verifyResult, Session session, RelyingParty relyingParty) {
+    private Observable<Boolean> createUpdateToken(VerifyResult verifyResult, Session session, RelyingParty relyingParty) {
         if (Status.NEED_UPDATE.equals(verifyResult.getStatus())) {
-            updateDataService.create(session.getSessionToken(),
+            return updateDataService.create(session.getSessionToken(),
                     (String) verifyResult.getData().get("reason"),
                     (String) verifyResult.getData().get("update_service"),
                     relyingParty.getUpdateRedirectURI(),
-                    (Boolean) verifyResult.getData().get("required")).subscribe();
+                    (Boolean) verifyResult.getData().get("required"))
+                .map(entry -> Boolean.TRUE);
         }
+        return Observable.just(Boolean.FALSE);
     }
 
     private boolean isAuthRequired(AuthzRequest request) {

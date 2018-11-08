@@ -57,7 +57,7 @@ public class VerifyEnrollService {
     private final DeviceService deviceService;
 
     @SneakyThrows
-    private RedirectResponse createResponse(Session session, RelyingParty relyingParty, VerifyEnrollRequest request, VerifyResult verifyResult) {
+    private Observable<RedirectResponse> createResponse(Session session, RelyingParty relyingParty, VerifyEnrollRequest request, VerifyResult verifyResult) {
 
         AcrValues difference = request.getAuthContext().difference(session.getReceivedAcrValues());
         if (difference.getValues().isEmpty()) {
@@ -75,20 +75,19 @@ public class VerifyEnrollService {
                 boolean required = (Boolean) verifyResult.getData().get("required");
 
                 return updateDataService.create(session.getId(), reason, updateService, redirectUri, required)
-                    .map(updateDataEntry -> new UpdateProcessResponse(reason, updateDataEntry.getCode(), updateDataEntry.getService(), updateDataEntry.getRedirectUri())).toBlocking().single();
+                    .map(updateDataEntry -> new UpdateProcessResponse(reason, updateDataEntry.getCode(), updateDataEntry.getService(), updateDataEntry.getRedirectUri()));
             }
 
             String authCode = authEntry.getAuthCode();
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime authCodeExpiresIn = now.plus(relyingParty.getCodeTTL(), ChronoUnit.SECONDS);
 
-            sessionService.updateAuthCodeExpired(authCode, fromLocal(authCodeExpiresIn))
+            long expiresIn = ChronoUnit.SECONDS.between(now, authCodeExpiresIn);
+            return sessionService.updateAuthCodeExpired(authCode, fromLocal(authCodeExpiresIn))
                 .filter(Boolean::booleanValue)
                 .switchIfEmpty(Observable.error(new AuthorizationException(ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED)))
-                .subscribe();
+                .map(r -> new SuccessResponse(createRedirectURI(relyingParty, request.getRedirectURI()), authCode, expiresIn));
 
-            long expiresIn = ChronoUnit.SECONDS.between(now, authCodeExpiresIn);
-            return new SuccessResponse(createRedirectURI(relyingParty, request.getRedirectURI()), authCode, expiresIn);
         } else {
 
             String authorizationPageURI = relyingParty.getAuthorizationPageURI();
@@ -98,7 +97,7 @@ public class VerifyEnrollService {
                     url.getQuery()
             );
 
-            return new NeedApprovalResponse(redirectUrl, request.getRedirectURI(), request.getMfaToken(), request.getClientId(), request.getScope(), request.getAuthContext());
+            return Observable.just(new NeedApprovalResponse(redirectUrl, request.getRedirectURI(), request.getMfaToken(), request.getClientId(), request.getScope(), request.getAuthContext()));
         }
     }
 
@@ -110,11 +109,13 @@ public class VerifyEnrollService {
                 ImmutablePair::new
         )
                 .flatMap(p -> verifyAndUpdateUserInfo(p.right, request, p.left)
-                        .map(result -> {
+                        .flatMap(result -> {
                             Session session = p.right;
-                            RedirectResponse response = createResponse(session, p.left, request, result);
-                            response.putRedirectParameters("session_token", session.getSessionToken());
-                            return response;
+                            return createResponse(session, p.left, request, result)
+                                    .map(response -> {
+                                        response.putRedirectParameters("session_token", session.getSessionToken());
+                                        return response;
+                                    });
                         })
                         .flatMap(response -> {
                             if(response instanceof SuccessResponse) {
