@@ -46,6 +46,7 @@ public class AuthorizationException extends BaseAuthServerException implements I
         CLIENT_NOT_FOUND("Client not found"),
         CREDENTIALS_WRONG("Credentials are wrong"),
         TOKEN_NOT_FOUND("Token not found"),
+        MFA_TOKEN_NOT_FOUND("MFA token not found"),
         SESSION_NOT_FOUND("Session not found"),
         INVALID_ACR_VALUES("Invalid acr values"),
         SESSION_BLOCKED("Session is blocked"),

@@ -4,6 +4,7 @@ import groovy.transform.CompileStatic
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import ru.ratauth.entities.*
+import ru.ratauth.exception.AuthorizationException
 import ru.ratauth.exception.ExpiredException
 import ru.ratauth.server.utils.DateUtils
 import ru.ratauth.server.utils.SecurityUtils
@@ -362,7 +363,7 @@ class PersistenceServiceStubConfiguration {
                                                             created: new Date())] as Set
                                             )] as Set)
                     )
-                }
+                } else throw new AuthorizationException(AuthorizationException.ID.MFA_TOKEN_NOT_FOUND)
             }
 
             @Override
