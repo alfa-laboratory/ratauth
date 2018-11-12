@@ -109,7 +109,7 @@ public class VerifyEnrollService {
                 });
     }
 
-    private Observable<? extends RedirectResponse> createSuccessResponse(VerifyEnrollRequest request, RelyingParty relyingParty, AuthEntry authEntry) {
+    private Observable<SuccessResponse> createSuccessResponse(VerifyEnrollRequest request, RelyingParty relyingParty, AuthEntry authEntry) {
         String authCode = authEntry.getAuthCode();
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime authCodeExpiresIn = now.plus(relyingParty.getCodeTTL(), ChronoUnit.SECONDS);
