@@ -306,4 +306,54 @@ class EnrollAPISpec extends BaseDocumentationSpec {
         then:
         result.then().extract().jsonPath().get("id") == AuthorizationException.ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED.name()
     }
+
+    def 'verify enroll final step redirect to update'() {
+        given:
+        def setup = given(this.documentationSpec)
+                .accept(ContentType.URLENC)
+                .filter(document('mfa_activate_succeed',
+                preprocessResponse(prettyPrint()),
+                requestParameters(
+                        parameterWithName('mfa_token')
+                                .description('MFA token issued for permission update'),
+                        parameterWithName('redirect_uri')
+                                .description('Redirect URL'),
+                        parameterWithName('client_id')
+                                .description('Relying party identifier'),
+                        parameterWithName('username')
+                                .description('part of user\'s credentials'),
+                        parameterWithName('password')
+                                .description('part of user\'s credentials'),
+                        parameterWithName('scope')
+                                .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+                        parameterWithName('acr_values')
+                                .description('Authentication Context Class Reference'),
+                        parameterWithName('enroll')
+                                .description('Required Authentication Context Class Reference'),
+                )
+        ))
+                .given()
+                .formParam("username", "username")
+                .formParam("password", "password")
+                .formParam("redirect_uri", "https://domain.mine/login")
+                .formParam('mfa_token', PersistenceServiceStubConfiguration.MFA_TOKEN_WITH_UPDATE_DATA)
+                .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
+                .formParam('scope', 'rs.read')
+                .formParam('acr_values', 'username')
+                .formParam('enroll', 'username')
+        when:
+        def result = setup
+                .when()
+                .post("verify")
+        then:
+        result
+                .then()
+                .statusCode(HttpStatus.FOUND.value())
+                .header(HttpHeaders.LOCATION, startsWith("http://test/update?"))
+                .header(HttpHeaders.LOCATION, containsString("reason=need_update_password"))
+                .header(HttpHeaders.LOCATION, containsString("update_code=1111-2222-3333-4444"))
+                .header(HttpHeaders.LOCATION, containsString("update_service=corp-update-password"))
+                .header(HttpHeaders.LOCATION, containsString("session_token=session_token_with_update_data"))
+                .header(HttpHeaders.LOCATION, equalTo('http://test/update?session_token=session_token_with_update_data&reason=need_update_password&update_code=1111-2222-3333-4444&update_service=corp-update-password'))
+    }
 }

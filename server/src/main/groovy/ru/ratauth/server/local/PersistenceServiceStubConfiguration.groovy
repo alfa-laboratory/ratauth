@@ -27,6 +27,7 @@ import static ru.ratauth.update.services.dto.UpdateServiceResult.Status.SUCCESS
 class PersistenceServiceStubConfiguration {
     public static final String CLIENT_SECRET = 'HdC4t2Wpjn/obYj9JHLVwmGzSqQ5SlatYqMF6zuAL0s='
     public static final String SESSION_TOKEN = 'session_token'
+    public static final String SESSION_TOKEN_WITH_UPDATE_DATA = 'session_token_with_update_data'
     public static final String CLIENT_NAME = 'mine'
     public static final String CLIENT_NAME_DUMMY = 'DummyIdentityProvider'
     public static final String CLIENT_NAME_REST = 'RestIdentityProvider'
@@ -36,6 +37,7 @@ class PersistenceServiceStubConfiguration {
     public static final String TOKEN = '1234'
     public static final String MFA_TOKEN = 'mfa-token-test'
     public static final String MFA_TOKEN_2 = 'mfa-token-test-2'
+    public static final String MFA_TOKEN_WITH_UPDATE_DATA = 'mfa-token-with-update-data'
     public static final String REFRESH_TOKEN_OLD_SCHEME = '12345'
     public static final String REFRESH_TOKEN = '123456'
     public static final String CODE = '123'
@@ -363,6 +365,31 @@ class PersistenceServiceStubConfiguration {
                                                             created: new Date())] as Set
                                             )] as Set)
                     )
+                } else if (token == MFA_TOKEN_WITH_UPDATE_DATA) {
+                    return Observable.just(
+                            new Session(
+                                    id: 'id-6',
+                                    identityProvider: 'STUB',
+                                    sessionToken: SESSION_TOKEN_WITH_UPDATE_DATA,
+                                    userInfo: ID_TOKEN,
+                                    status: Status.ACTIVE,
+                                    mfaToken: MFA_TOKEN,
+                                    receivedAcrValues: AcrValues.valueOf("none"),
+                                    expiresIn: DateUtils.fromLocal(LocalDateTime.now().plusDays(1)),
+                                    entries: [
+                                            new AuthEntry(
+                                                    codeExpiresIn: DateUtils.fromLocal(LocalDateTime.now().plusDays(1)),
+                                                    authCode: '0b876286-56d6-33a0-85c6-72768c23c21f',
+                                                    relyingParty: CLIENT_NAME,
+                                                    scopes: ['rs.read'] as Set,
+                                                    refreshToken: REFRESH_TOKEN_OLD_SCHEME,
+                                                    tokens: [new Token(token: TOKEN,
+                                                            refreshToken: REFRESH_TOKEN,
+                                                            refreshTokenExpiresIn: DateUtils.fromLocal(TOMORROW),
+                                                            expiresIn: DateUtils.fromLocal(TOMORROW),
+                                                            created: new Date())] as Set
+                                            )] as Set)
+                    )
                 } else throw new AuthorizationException(AuthorizationException.ID.MFA_TOKEN_NOT_FOUND)
             }
 
@@ -453,18 +480,20 @@ class PersistenceServiceStubConfiguration {
 
             @Override
             Observable<UpdateDataEntry> getUpdateData(String sessionToken) {
-                def now = LocalDateTime.now()
-                return Observable.just(UpdateDataEntry.builder()
-                        .sessionToken("session_token")
-                        .code("1111-2222-3333-4444")
-                        .reason("need_update_password")
-                        .service("corp-update-password")
-                        .redirectUri("http://test/update")
-                        .required(false)
-                        .created(now)
-                        .expiresAt(now.plusMinutes(5L))
-                        .used(null)
-                        .build())
+                if (sessionToken == SESSION_TOKEN_WITH_UPDATE_DATA) {
+                    return Observable.just(UpdateDataEntry.builder()
+                            .sessionToken(SESSION_TOKEN_WITH_UPDATE_DATA)
+                            .code("1111-2222-3333-4444")
+                            .reason("need_update_password")
+                            .service("corp-update-password")
+                            .redirectUri("http://test/update")
+                            .required(false)
+                            .created(LocalDateTime.now())
+                            .expiresAt(LocalDateTime.now().plusMinutes(5L))
+                            .used(null)
+                            .build())
+                }
+                return Observable.empty()
             }
 
             @Override

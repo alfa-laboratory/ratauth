@@ -24,6 +24,7 @@ import ru.ratauth.server.services.TokenCacheService;
 import ru.ratauth.server.utils.RedirectUtils;
 import ru.ratauth.services.UpdateDataService;
 import rx.Observable;
+import rx.functions.Func1;
 
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -69,18 +70,17 @@ public class VerifyEnrollService {
                 boolean required = (Boolean) verifyResult.getData().get("required");
 
                 return updateDataService.create(session.getId(), reason, updateService, redirectUri, required)
-                        .map(updateDataEntry -> new UpdateProcessResponse(reason, updateDataEntry.getCode(), updateDataEntry.getService(), updateDataEntry.getRedirectUri()));
+                        .flatMap(createUpdateCode(session))
+                        .map(VerifyEnrollService::createUpdateResponse);
             }
 
-            String authCode = authEntry.getAuthCode();
-            LocalDateTime now = LocalDateTime.now();
-            LocalDateTime authCodeExpiresIn = now.plus(relyingParty.getCodeTTL(), ChronoUnit.SECONDS);
+            Observable<RedirectResponse> updateDataObservable = updateDataService
+                    .getUpdateData(session.getSessionToken())
+                    .flatMap(createUpdateCode(session))
+                    .map(VerifyEnrollService::createUpdateResponse);
 
-            long expiresIn = ChronoUnit.SECONDS.between(now, authCodeExpiresIn);
-            return sessionService.updateAuthCodeExpired(authCode, fromLocal(authCodeExpiresIn))
-                    .filter(Boolean::booleanValue)
-                    .switchIfEmpty(Observable.error(new AuthorizationException(ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED)))
-                    .map(r -> new SuccessResponse(createRedirectURI(relyingParty, request.getRedirectURI()), authCode, expiresIn));
+            return updateDataObservable
+                    .switchIfEmpty(createSuccessResponse(request, relyingParty, authEntry));
 
         } else {
 
@@ -93,6 +93,32 @@ public class VerifyEnrollService {
 
             return Observable.just(new NeedApprovalResponse(redirectUrl, request.getRedirectURI(), request.getMfaToken(), request.getClientId(), request.getScope(), request.getAuthContext()));
         }
+
+    }
+
+    private static UpdateProcessResponse createUpdateResponse(UpdateDataEntry u) {
+        return new UpdateProcessResponse(u.getReason(), u.getCode(), u.getService(), u.getRedirectUri());
+    }
+
+    private Func1<UpdateDataEntry, Observable<UpdateDataEntry>> createUpdateCode(Session session) {
+        return updateDataEntry -> updateDataService
+                .getCode(session.getSessionToken())
+                .map(code -> {
+                    updateDataEntry.setCode(code);
+                    return updateDataEntry;
+                });
+    }
+
+    private Observable<SuccessResponse> createSuccessResponse(VerifyEnrollRequest request, RelyingParty relyingParty, AuthEntry authEntry) {
+        String authCode = authEntry.getAuthCode();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime authCodeExpiresIn = now.plus(relyingParty.getCodeTTL(), ChronoUnit.SECONDS);
+
+        long expiresIn = ChronoUnit.SECONDS.between(now, authCodeExpiresIn);
+        return sessionService.updateAuthCodeExpired(authCode, fromLocal(authCodeExpiresIn))
+                .filter(Boolean::booleanValue)
+                .switchIfEmpty(Observable.error(new AuthorizationException(ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED)))
+                .map(r -> new SuccessResponse(createRedirectURI(relyingParty, request.getRedirectURI()), authCode, expiresIn));
     }
 
 
