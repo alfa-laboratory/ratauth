@@ -61,7 +61,6 @@ public class AuthzResponse {
         if (!StringUtils.isBlank(token)) {
             joiner.add("token=" + token);
             joiner.add("token_type=" + tokenType);
-
         }
         if (!StringUtils.isBlank(refreshToken)) {
             joiner.add("refresh_token=" + refreshToken.toString());
@@ -81,7 +80,7 @@ public class AuthzResponse {
         if (data != null && !data.isEmpty()) {
             data.entrySet().stream()
                     .filter(entry -> entry.getValue() != null)
-                    .map(entry -> joiner.add(entry.getKey() + "=" + entry.getValue().toString()));
+                    .forEach(entry -> joiner.add(entry.getKey() + "=" + entry.getValue().toString()));
         }
         if (!StringUtils.isBlank(reason) && !StringUtils.isBlank(updateCode) && !StringUtils.isBlank(updateService)) {
             joiner.add("reason=" + reason)
