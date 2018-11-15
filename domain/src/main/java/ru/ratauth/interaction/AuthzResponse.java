@@ -61,7 +61,6 @@ public class AuthzResponse {
         if (!StringUtils.isBlank(token)) {
             joiner.add("token=" + token);
             joiner.add("token_type=" + tokenType);
-
         }
         if (!StringUtils.isBlank(refreshToken)) {
             joiner.add("refresh_token=" + refreshToken.toString());
@@ -69,7 +68,6 @@ public class AuthzResponse {
         if (!StringUtils.isBlank(idToken)) {
             joiner.add("id_token=" + idToken.toString());
         }
-
         if (!StringUtils.isBlank(mfaToken)) {
             joiner.add("mfa_token=" + mfaToken.toString());
         }
