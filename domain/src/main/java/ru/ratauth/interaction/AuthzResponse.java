@@ -10,6 +10,7 @@ import ru.ratauth.utils.StringUtils;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
@@ -69,9 +70,7 @@ public class AuthzResponse {
         if (!StringUtils.isBlank(idToken)) {
             joiner.add("id_token=" + idToken.toString());
         }
-        if (!StringUtils.isBlank(data.get("username").toString())) {
-            joiner.add("username=" + data.get("username").toString());
-        }
+
         if (!StringUtils.isBlank(mfaToken)) {
             joiner.add("mfa_token=" + mfaToken.toString());
         }
@@ -85,6 +84,9 @@ public class AuthzResponse {
             data.entrySet().stream()
                     .filter(entry -> entry.getValue() != null)
                     .map(entry -> joiner.add(entry.getKey() + "=" + entry.getValue().toString()));
+            if (Objects.nonNull(data.get("username"))) {
+                joiner.add("username=" + data.get("username").toString());
+            }
         }
         if (!StringUtils.isBlank(reason) && !StringUtils.isBlank(updateCode) && !StringUtils.isBlank(updateService)) {
             joiner.add("reason=" + reason)
