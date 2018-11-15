@@ -4,13 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ru.ratauth.entities.AcrValues;
 import ru.ratauth.utils.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
-import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
@@ -21,6 +21,7 @@ import java.util.StringJoiner;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Slf4j
 public class AuthzResponse {
     private String code;
     //intermediate step data for two step authentication
@@ -83,10 +84,7 @@ public class AuthzResponse {
         if (data != null && !data.isEmpty()) {
             data.entrySet().stream()
                     .filter(entry -> entry.getValue() != null)
-                    .map(entry -> joiner.add(entry.getKey() + "=" + entry.getValue().toString()));
-            if (Objects.nonNull(data.get("username"))) {
-                joiner.add("username=" + data.get("username").toString());
-            }
+                    .forEach(entry -> joiner.add(entry.getKey() + "=" + entry.getValue().toString()));
         }
         if (!StringUtils.isBlank(reason) && !StringUtils.isBlank(updateCode) && !StringUtils.isBlank(updateService)) {
             joiner.add("reason=" + reason)
