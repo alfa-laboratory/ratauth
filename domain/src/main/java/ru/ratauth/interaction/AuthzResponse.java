@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import ru.ratauth.entities.AcrValues;
 import ru.ratauth.utils.StringUtils;
 
@@ -21,7 +20,6 @@ import java.util.StringJoiner;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Slf4j
 public class AuthzResponse {
     private String code;
     //intermediate step data for two step authentication
