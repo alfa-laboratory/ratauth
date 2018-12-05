@@ -36,6 +36,7 @@ public class AuthzRequest {
 
     private String deviceIp;
     private String deviceUserAgent;
+    private String xForwardedFor;
 
     private String enroll;
     private String clientId;

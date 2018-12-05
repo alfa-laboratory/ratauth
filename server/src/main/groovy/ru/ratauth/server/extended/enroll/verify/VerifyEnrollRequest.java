@@ -30,6 +30,7 @@ public class VerifyEnrollRequest {
 
     private String deviceIp;
     private String deviceUserAgent;
+    private String xForwardedFor;
 
     private Map<String, String> data;
 }

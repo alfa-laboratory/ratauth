@@ -1,6 +1,7 @@
 package ru.ratauth.server.handlers.readers
 
 import groovy.transform.CompileStatic
+import groovy.util.logging.Slf4j
 import ratpack.http.Headers
 import ratpack.util.MultiValueMap
 import ru.ratauth.entities.AcrValues
@@ -20,9 +21,11 @@ import static ru.ratauth.server.handlers.readers.RequestUtil.extractRest
  * @author djassan
  * @since 06/11/15
  */
+@Slf4j
 @CompileStatic
 class AuthzRequestReader {
     public static final String SPACE = " "
+    public static final String X_FORWARDED_FOR = "x_forwarded_for"
     private static final String RESPONSE_TYPE = "response_type"
     private static final String GRANT_TYPE = "grant_type"
     private static final String CLIENT_ID = "client_id"
@@ -61,8 +64,9 @@ class AuthzRequestReader {
                 .deviceOSVersion(extractField(params, "device_os_version", false))
                 .deviceBootTime(extractField(params, "device_boot_time", false))
                 .deviceTimezone(extractField(params, "device_timezone", false))
-                .deviceIp((extractField(params, "device_ip", false) ?: headers?.get("x-forwarded-for")))
+                .deviceIp((extractField(params, "device_ip", false)))
                 .deviceUserAgent(extractField(params, "device_user_agent", false))
+                .xForwardedFor(extractField(params,   X_FORWARDED_FOR, false))
 
         if (GrantType.AUTHENTICATION_TOKEN == grantType || GrantType.SESSION_TOKEN == grantType) {
             if (responseType == AuthzResponseType.TOKEN) {
