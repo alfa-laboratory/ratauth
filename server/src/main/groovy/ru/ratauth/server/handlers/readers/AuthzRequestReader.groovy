@@ -11,7 +11,10 @@ import ru.ratauth.interaction.GrantType
 import ru.ratauth.server.services.log.ActionLogger
 import ru.ratauth.server.services.log.AuthAction
 
-import static ru.ratauth.server.handlers.readers.RequestUtil.*
+import static ru.ratauth.server.handlers.readers.RequestUtil.extractAuth
+import static ru.ratauth.server.handlers.readers.RequestUtil.extractEnumField
+import static ru.ratauth.server.handlers.readers.RequestUtil.extractField
+import static ru.ratauth.server.handlers.readers.RequestUtil.extractRest
 
 /**
  * @author djassan
@@ -58,7 +61,7 @@ class AuthzRequestReader {
                 .deviceOSVersion(extractField(params, "device_os_version", false))
                 .deviceBootTime(extractField(params, "device_boot_time", false))
                 .deviceTimezone(extractField(params, "device_timezone", false))
-                .deviceIp(extractField(params, "device_ip", false))
+                .deviceIp((extractField(params, "device_ip", false) ?: headers?.get("x-forwarded-for")))
                 .deviceUserAgent(extractField(params, "device_user_agent", false))
 
         if (GrantType.AUTHENTICATION_TOKEN == grantType || GrantType.SESSION_TOKEN == grantType) {
