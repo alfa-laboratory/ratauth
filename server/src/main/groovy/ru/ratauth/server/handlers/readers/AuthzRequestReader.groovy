@@ -1,7 +1,6 @@
 package ru.ratauth.server.handlers.readers
 
 import groovy.transform.CompileStatic
-import groovy.util.logging.Slf4j
 import ratpack.http.Headers
 import ratpack.util.MultiValueMap
 import ru.ratauth.entities.AcrValues
@@ -21,7 +20,6 @@ import static ru.ratauth.server.handlers.readers.RequestUtil.extractRest
  * @author djassan
  * @since 06/11/15
  */
-@Slf4j
 @CompileStatic
 class AuthzRequestReader {
     public static final String SPACE = " "

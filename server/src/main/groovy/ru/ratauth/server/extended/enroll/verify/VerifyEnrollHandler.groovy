@@ -7,7 +7,6 @@ import ratpack.form.Form
 import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
-import ru.ratauth.server.handlers.readers.AuthzRequestReader
 import ru.ratauth.server.handlers.readers.RequestReader
 import rx.Observable
 import rx.functions.Action1
