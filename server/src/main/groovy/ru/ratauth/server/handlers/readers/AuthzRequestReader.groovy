@@ -62,7 +62,7 @@ class AuthzRequestReader {
                 .deviceOSVersion(extractField(params, "device_os_version", false))
                 .deviceBootTime(extractField(params, "device_boot_time", false))
                 .deviceTimezone(extractField(params, "device_timezone", false))
-                .deviceIp((extractField(params, "device_ip", false)))
+                .deviceIp(extractField(params, "device_ip", false))
                 .deviceUserAgent(extractField(params, "device_user_agent", false))
                 .xForwardedFor(extractField(params,   X_FORWARDED_FOR, false))
 
