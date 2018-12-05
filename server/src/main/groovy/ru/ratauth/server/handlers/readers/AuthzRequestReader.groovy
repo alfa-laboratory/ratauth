@@ -61,7 +61,7 @@ class AuthzRequestReader {
                 .deviceOSVersion(extractField(params, "device_os_version", false))
                 .deviceBootTime(extractField(params, "device_boot_time", false))
                 .deviceTimezone(extractField(params, "device_timezone", false))
-                .deviceIp((extractField(params, "device_ip", false) ?: headers?.get("x-forwarded-for")?.trim()))
+                .deviceIp((extractField(params, "device_ip", false) ?: headers?.get("x-forwarded-for")))
                 .deviceUserAgent(extractField(params, "device_user_agent", false))
 
         if (GrantType.AUTHENTICATION_TOKEN == grantType || GrantType.SESSION_TOKEN == grantType) {
