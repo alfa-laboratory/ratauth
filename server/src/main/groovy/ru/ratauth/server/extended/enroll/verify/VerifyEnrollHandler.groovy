@@ -12,6 +12,7 @@ import rx.Observable
 import rx.functions.Action1
 
 import static ratpack.rx.RxRatpack.observe
+import static ru.ratauth.server.handlers.readers.AuthzRequestReader.X_FORWARDED_FOR
 
 @Component
 class VerifyEnrollHandler implements Action<Chain> {
@@ -60,6 +61,7 @@ class VerifyEnrollHandler implements Action<Chain> {
                 deviceTimezone: params.removeField("device_timezone", false),
                 deviceIp: params.removeField("device_ip", false),
                 deviceUserAgent: params.removeField("device_user_agent", false),
+                xForwardedFor: params.removeField(X_FORWARDED_FOR, false),
                 data: params.toMap()
         )
     }
@@ -77,5 +79,4 @@ class VerifyEnrollHandler implements Action<Chain> {
     static Action1<Throwable> errorHandler(Context ctx) {
         return { throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable) } as Action1<Throwable>
     }
-
 }
