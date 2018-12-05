@@ -64,7 +64,7 @@ class AuthzRequestReader {
                 .deviceTimezone(extractField(params, "device_timezone", false))
                 .deviceIp(extractField(params, "device_ip", false))
                 .deviceUserAgent(extractField(params, "device_user_agent", false))
-                .xForwardedFor(extractField(params,   X_FORWARDED_FOR, false))
+                .xForwardedFor(extractField(params, X_FORWARDED_FOR, false))
 
         if (GrantType.AUTHENTICATION_TOKEN == grantType || GrantType.SESSION_TOKEN == grantType) {
             if (responseType == AuthzResponseType.TOKEN) {
