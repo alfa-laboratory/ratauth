@@ -9,4 +9,5 @@ public class DestinationConfiguration {
     String url;
     String authLogin;
     String authPassword;
+    Integer attemptMaxValue;
 }
