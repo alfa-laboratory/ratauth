@@ -1,5 +1,6 @@
 package ru.ratauth.server.services;
 
+import com.hazelcast.core.IMap;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,6 @@ import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
 import ru.ratauth.providers.auth.dto.VerifyResult.Status;
-import ru.ratauth.server.configuration.DestinationConfiguration;
 import ru.ratauth.server.configuration.IdentityProvidersConfiguration;
 import ru.ratauth.server.providers.IdentityProviderResolver;
 import ru.ratauth.server.services.dto.CachingUserKey;
@@ -27,6 +27,7 @@ import rx.exceptions.Exceptions;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import static java.util.Optional.ofNullable;
@@ -203,8 +204,10 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .flatMap(rp -> authenticateUser(request.getAuthData(), request.getAcrValues(), rp.getIdentityProvider(), rp.getName())
                         .map(request::addVerifyResultAcrToRequest)
                         .map(authRes -> {
-                            checkIsAuthAllowed(authRes.getAcrValues(), authRes.getData().get(USER_ID).toString());
-                            return new ImmutableTriple<>(rp, authRes, request.getAcrValues());}))
+                            log.error("I want to checkout if auth is allowed");
+                            checkIsAuthAllowed(authRes.getAcrValues(), authRes.getData().get(USER_ID.val()).toString());
+                            return new ImmutableTriple<>(rp, authRes, request.getAcrValues());
+                        }))
                 .flatMap(rpAuth -> createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
                         .flatMap(session ->
                                 createUpdateToken(rpAuth.middle, session, rpAuth.left)
@@ -340,21 +343,29 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         return provider.verify(verifyInput);
     }
 
-    private void checkIsAuthAllowed(AcrValues enroll, String userId){
-        Map<Object, Object> acrTimeMap = hazelcastCachingService.getMap("acrTime");
+    private void checkIsAuthAllowed(AcrValues enroll, String userId) {
+        IMap<Object, Object> acrTimeMap = hazelcastCachingService.getMap("acrTime");
         CachingUserKey key = new CachingUserKey(userId, enroll.getFirst());
-        Integer countValue = (Integer) acrTimeMap.get(key);
-        DestinationConfiguration config = identityProvidersConfiguration.getIdp().get(enroll).getActivate();
-        if(checkAttemptsCount(countValue, config.getAttemptMaxValue())){
-           acrTimeMap.put(key, ++countValue);
+        Integer countValue = 0;
+        countValue = (Integer) acrTimeMap.get(key);
+
+        int maxAttempts = 10;
+
+        if (countValue == null || countValue >= maxAttempts) {
+            countValue = 0;
+        }
+
+        if (checkAttemptsCount(countValue, maxAttempts)) {
+            acrTimeMap.put(key, ++countValue, 1, TimeUnit.MINUTES);
+
         } else {
-            throw new AuthorizationException("User with id " + userId + "is not allowed to authorize using " + enroll + "for some time");
+            throw new AuthorizationException("User with id " + userId + "is not allowed to authorize using " + enroll + " for some time ");
         }
 
     }
 
-    private boolean checkAttemptsCount (Integer attemptNumber, Integer maxAttemptNumber){
-        if(attemptNumber < maxAttemptNumber)
+    private boolean checkAttemptsCount(Integer attemptNumber, Integer maxAttemptNumber) {
+        if (attemptNumber < maxAttemptNumber)
             return true;
         return false;
     }
