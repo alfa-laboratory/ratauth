@@ -204,10 +204,8 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .flatMap(rp -> authenticateUser(request.getAuthData(), request.getAcrValues(), rp.getIdentityProvider(), rp.getName())
                         .map(request::addVerifyResultAcrToRequest)
                         .map(authRes -> {
-                            log.error("I want to checkout if auth is allowed");
                             checkIsAuthAllowed(authRes.getAcrValues(), authRes.getData().get(USER_ID.val()).toString());
-                            return new ImmutableTriple<>(rp, authRes, request.getAcrValues());
-                        }))
+                            return new ImmutableTriple<>(rp, authRes, request.getAcrValues());}))
                 .flatMap(rpAuth -> createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
                         .flatMap(session ->
                                 createUpdateToken(rpAuth.middle, session, rpAuth.left)
@@ -344,29 +342,24 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     }
 
     private void checkIsAuthAllowed(AcrValues enroll, String userId) {
-        IMap<Object, Object> acrTimeMap = hazelcastCachingService.getMap("acrTime");
-        CachingUserKey key = new CachingUserKey(userId, enroll.getFirst());
-        Integer countValue = 0;
-        countValue = (Integer) acrTimeMap.get(key);
+        log.debug("Checking if auth is allowed for user " + userId + " with enroll " + enroll);
 
-        int maxAttempts = 10;
+        IMap<Object, Object> attemptCacheCount = hazelcastCachingService.getMap();
+        CachingUserKey countKey = new CachingUserKey(userId, enroll.getFirst());
 
-        if (countValue == null || countValue >= maxAttempts) {
-            countValue = 0;
-        }
+        int countValue = attemptCacheCount.get(countKey) == null ? 0 : (int) attemptCacheCount.get(countKey);
+        int maxAttempts = identityProvidersConfiguration.getIdp().get(enroll.getFirst()).getCommon().getAttemptMaxValue();
+        int maxAttemptsTTL = identityProvidersConfiguration.getIdp().get(enroll.getFirst()).getCommon().getAttemptMaxValueTTL();
 
-        if (checkAttemptsCount(countValue, maxAttempts)) {
-            acrTimeMap.put(key, ++countValue, 1, TimeUnit.MINUTES);
+        if (countValue < maxAttempts) {
+            log.debug("Increment attempt count for user " + userId + " with enroll " + enroll);
+            attemptCacheCount.put(countKey, ++countValue, maxAttemptsTTL, TimeUnit.MINUTES);
+            log.debug("Attempt count for user " + userId + " is " + countKey.toString());
 
         } else {
-            throw new AuthorizationException("User with id " + userId + "is not allowed to authorize using " + enroll + " for some time ");
+            throw new AuthorizationException("User with id " + userId + "is not allowed to authorize using " + enroll + " for some time " + countValue);
         }
 
     }
 
-    private boolean checkAttemptsCount(Integer attemptNumber, Integer maxAttemptNumber) {
-        if (attemptNumber < maxAttemptNumber)
-            return true;
-        return false;
-    }
 }

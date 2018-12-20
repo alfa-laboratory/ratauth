@@ -4,6 +4,6 @@ public interface CachingService {
 
     void init();
 
-    Object getInstance();
+    Object getMap();
 
 }
