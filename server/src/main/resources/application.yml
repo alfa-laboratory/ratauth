@@ -33,9 +33,9 @@ ru.ratauth.idp.default: "DCA"
 ratauth.timeout: 4000
 
 ratauth.hazelcast:
-  name: test
-  password: test1
+  name: ratauth
+  password: ratauth
   nodes:
-    - asappdev1:5702
-    - asappdev2:5702
-    - asappdev3:5702
+    - ratauth1
+    - ratauth2
+    - ratauth3
