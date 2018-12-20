@@ -32,10 +32,10 @@ ru.ratauth.scope:
 ru.ratauth.idp.default: "DCA"
 ratauth.timeout: 4000
 
-hazelcast:
- name: test
- password: test1
- nodes:
- - asappdev1:5702
- - asappdev2:5702
- - asappdev3:5702
+ratauth.hazelcast:
+  name: test
+  password: test1
+  nodes:
+    - asappdev1:5702
+    - asappdev2:5702
+    - asappdev3:5702
