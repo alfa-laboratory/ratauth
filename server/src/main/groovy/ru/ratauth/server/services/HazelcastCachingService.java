@@ -6,46 +6,44 @@ import com.hazelcast.client.config.ClientNetworkConfig;
 import com.hazelcast.config.GroupConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
-import java.util.List;
+import ru.ratauth.server.configuration.HazelcastServiceConfiguration;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HazelcastCachingService implements CachingService {
 
     private HazelcastInstance hazelcastInstance;
-    @Value("${ratauth.hazelcast.auth.name:}")
-    private String name;
-    @Value("${ratauth.hazelcast.auth.password:}")
-    private String password;
-
-    @Value("${ratauth.hazelcast.nodes:}")
-    private List<String> host;
-
+    private final HazelcastServiceConfiguration hazelcastServiceConfiguration;
     private String ATTEMPT_COUNT_MAP_NAME = "attemptCacheCount";
 
-    @PostConstruct
-    public void init() {
+
+    private void init() {
         ClientNetworkConfig networkConfig = new ClientNetworkConfig().setSmartRouting(true)
-                .setAddresses(host)
+                .setAddresses(hazelcastServiceConfiguration.getNodes())
                 .setRedoOperation(true)
                 .setConnectionTimeout(5000)
                 .setConnectionAttemptLimit(5);
 
         ClientConfig config = new ClientConfig();
         GroupConfig groupConfig = config.getGroupConfig();
-        groupConfig.setName(name);
-        groupConfig.setPassword(password);
+        groupConfig.setName(hazelcastServiceConfiguration.getName());
+        groupConfig.setPassword(hazelcastServiceConfiguration.getPassword());
         config.setNetworkConfig(networkConfig);
         hazelcastInstance = HazelcastClient.newHazelcastClient(config);
 
     }
 
-    public IMap<Object, Object> getMap(){
+    public IMap<Object, Object> getMap() {
+
+        if (hazelcastInstance == null) {
+            init();
+        }
+
         return hazelcastInstance.getMap(ATTEMPT_COUNT_MAP_NAME);
     }
 

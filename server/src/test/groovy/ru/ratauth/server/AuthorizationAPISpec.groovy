@@ -5,6 +5,7 @@ import com.jayway.restassured.http.ContentType
 import org.hamcrest.core.StringContains
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.restdocs.payload.JsonFieldType
@@ -13,6 +14,7 @@ import ru.ratauth.exception.ExpiredException
 import ru.ratauth.interaction.AuthzResponseType
 import ru.ratauth.interaction.GrantType
 import ru.ratauth.server.local.PersistenceServiceStubConfiguration
+import ru.ratauth.server.services.HazelcastCachingService
 
 import static com.jayway.restassured.RestAssured.given
 import static org.hamcrest.Matchers.*
@@ -35,7 +37,8 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
     String port
     @Autowired
     ObjectMapper objectMapper
-
+    @MockBean
+    HazelcastCachingService hazelcastCachingService
 
     def 'should get authorization code'() {
         given:

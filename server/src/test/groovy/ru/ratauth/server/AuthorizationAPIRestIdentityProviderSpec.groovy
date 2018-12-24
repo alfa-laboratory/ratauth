@@ -1,6 +1,8 @@
 package ru.ratauth.server
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule
+import com.hazelcast.core.HazelcastInstance
+import com.hazelcast.test.TestHazelcastInstanceFactory
 import com.jayway.restassured.http.ContentType
 import groovy.json.JsonOutput
 import io.netty.handler.codec.http.HttpResponseStatus
@@ -8,11 +10,13 @@ import org.eclipse.jetty.http.HttpHeader
 import org.hamcrest.core.StringContains
 import org.junit.Rule
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import ru.ratauth.interaction.AuthzResponseType
 import ru.ratauth.server.local.PersistenceServiceStubConfiguration
+import ru.ratauth.server.services.HazelcastCachingService
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*
 import static com.jayway.restassured.RestAssured.given
@@ -27,8 +31,10 @@ class AuthorizationAPIRestIdentityProviderSpec extends BaseDocumentationSpec {
     @Value('${server.port}')
     String port
 
+    @MockBean
+    HazelcastCachingService hazelcastCachingService
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule(8089);
+    public WireMockRule wireMockRule = new WireMockRule(8089)
 
     def 'should get authorization code by rest provider'() {
         given:

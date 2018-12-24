@@ -50,7 +50,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     private final DeviceService deviceService;
     private final IdentityProviderResolver identityProviderResolver;
     private final UpdateDataService updateDataService;
-    private final HazelcastCachingService hazelcastCachingService;
+    private final CachingService cachingService;
     private final IdentityProvidersConfiguration identityProvidersConfiguration;
 
     @SneakyThrows
@@ -344,22 +344,25 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     private void checkIsAuthAllowed(AcrValues enroll, String userId) {
         log.debug("Checking if auth is allowed for user " + userId + " with enroll " + enroll);
 
-        IMap<Object, Object> attemptCacheCount = hazelcastCachingService.getMap();
+        IMap<Object, Object> attemptCacheCount = (IMap<Object, Object>) cachingService.getMap();
         CachingUserKey countKey = new CachingUserKey(userId, enroll.getFirst());
+        if (attemptCacheCount != null) {
+            int countValue = attemptCacheCount.get(countKey) == null ? 0 : (int) attemptCacheCount.get(countKey);
+            int maxAttempts = identityProvidersConfiguration.getIdp().get(enroll.getFirst()).getCommon().getAttemptMaxValue();
+            int maxAttemptsTTL = identityProvidersConfiguration.getIdp().get(enroll.getFirst()).getCommon().getAttemptMaxValueTTL();
 
-        int countValue = attemptCacheCount.get(countKey) == null ? 0 : (int) attemptCacheCount.get(countKey);
-        int maxAttempts = identityProvidersConfiguration.getIdp().get(enroll.getFirst()).getCommon().getAttemptMaxValue();
-        int maxAttemptsTTL = identityProvidersConfiguration.getIdp().get(enroll.getFirst()).getCommon().getAttemptMaxValueTTL();
+            if (countValue < maxAttempts) {
+                log.debug("Increment attempt count for user " + userId + " with enroll " + enroll);
+                if (countValue == 0)
+                    attemptCacheCount.put(countKey, ++countValue, maxAttemptsTTL, TimeUnit.MINUTES);
+                else attemptCacheCount.put(countKey, ++countValue);
 
-        if (countValue < maxAttempts) {
-            log.debug("Increment attempt count for user " + userId + " with enroll " + enroll);
-            attemptCacheCount.put(countKey, ++countValue, maxAttemptsTTL, TimeUnit.MINUTES);
-            log.debug("Attempt count for user " + userId + " is " + countKey.toString());
+                log.debug("Attempt count for user " + userId + " is " + countKey.toString());
 
-        } else {
-            throw new AuthorizationException("User with id " + userId + "is not allowed to authorize using " + enroll + " for some time " + countValue);
+            } else {
+                throw new AuthorizationException("User with id " + userId + "is not allowed to authorize using " + enroll + " for some time " + countValue);
+            }
+
         }
-
     }
-
 }
