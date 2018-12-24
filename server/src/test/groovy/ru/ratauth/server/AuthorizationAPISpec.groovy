@@ -42,7 +42,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
 
     def 'should get authorization code'() {
         given:
-        def setup = given(this.documentationSpeac)
+        def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('auth_code_succeed',
                 requestParameters(
