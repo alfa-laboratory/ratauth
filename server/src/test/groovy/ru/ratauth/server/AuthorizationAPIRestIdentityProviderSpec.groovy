@@ -1,8 +1,6 @@
 package ru.ratauth.server
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule
-import com.hazelcast.core.HazelcastInstance
-import com.hazelcast.test.TestHazelcastInstanceFactory
 import com.jayway.restassured.http.ContentType
 import groovy.json.JsonOutput
 import io.netty.handler.codec.http.HttpResponseStatus
