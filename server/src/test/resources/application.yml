@@ -73,6 +73,23 @@ ratauth.hazelcast:
   name: ratauth
   password: ratauth
   nodes:
-    - ratauth1
-    - ratauth2
-    - ratauth3
+    - 127.0.0.1:5701
+
+ratauth.idp:
+  card:
+    enabled: true
+    verify:
+      url: https://ratauth/
+      auth-login: ratauth
+      auth-password: ratauth
+    activate:
+      url: https://ratauth/
+      auth-login: ratauth
+      auth-password: ratauth
+    common:
+      attempt-max-value-TTL: 1
+      attempt-max-value: 10
+  username:
+    common:
+      attempt-max-value-TTL: 1
+      attempt-max-value: 10

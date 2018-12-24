@@ -1,11 +1,14 @@
 package ru.ratauth.server
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.hazelcast.config.Config
+import com.hazelcast.config.GroupConfig
+import com.hazelcast.config.NetworkConfig
+import com.hazelcast.core.Hazelcast
 import com.jayway.restassured.http.ContentType
 import org.hamcrest.core.StringContains
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.restdocs.payload.JsonFieldType
@@ -14,7 +17,6 @@ import ru.ratauth.exception.ExpiredException
 import ru.ratauth.interaction.AuthzResponseType
 import ru.ratauth.interaction.GrantType
 import ru.ratauth.server.local.PersistenceServiceStubConfiguration
-import ru.ratauth.server.services.HazelcastCachingService
 
 import static com.jayway.restassured.RestAssured.given
 import static org.hamcrest.Matchers.*
@@ -37,11 +39,10 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
     String port
     @Autowired
     ObjectMapper objectMapper
-    @MockBean
-    HazelcastCachingService hazelcastCachingService
 
     def 'should get authorization code'() {
         given:
+        mockHazelcastInstance()
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('auth_code_succeed',
@@ -269,6 +270,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
 
     def 'should successfully return token by implicit flow'() {
         given:
+        mockHazelcastInstance()
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('token_implicit_succeed',
@@ -317,6 +319,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
 
     def 'should not allow non-correct redirect url'() {
         given:
+        mockHazelcastInstance()
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('authorize_not_allowed_redirect',
@@ -405,5 +408,19 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
                 .header(HttpHeaders.LOCATION, StringContains.containsString('is_webview='))// according to test stub
                 .header(HttpHeaders.LOCATION, StringContains.containsString('http://domain.mine/oidc/web/authorize/card?is_webview=true&response_type=CODE&client_id=mine&scope=rs.read&acr_values=card&username=login&password=password'))
 
+    }
+
+    private static void mockHazelcastInstance() {
+        NetworkConfig networkConfig = new NetworkConfig()
+        networkConfig.setPort(5701).setPublicAddress("localhost")
+
+        Config config = new Config()
+        config.setInstanceName("dev")
+        GroupConfig groupConfig = config.getGroupConfig()
+        groupConfig.setName("ratauth")
+        groupConfig.setPassword("ratauth")
+        config.setNetworkConfig(networkConfig)
+        config.setNetworkConfig(networkConfig)
+        Hazelcast.getOrCreateHazelcastInstance(config)
     }
 }
