@@ -360,7 +360,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 log.debug("Attempt count for user " + userId + " is " + countKey.toString());
 
             } else {
-                throw new AuthorizationException("User with id " + userId + "is not allowed to authorize using " + enroll + " for some time " + countValue);
+                throw new AuthorizationException("User with id " + userId + " is not allowed to authorize using " + enroll + " for some time ");
             }
 
         }

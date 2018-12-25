@@ -88,6 +88,57 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
                 .header(HttpHeaders.LOCATION, StringContains.containsString("session_token="))
     }
 
+    def 'should not get authorization code because of attempt limit'() {
+        given:
+        mockHazelcastInstance()
+        def setup = given(this.documentationSpec)
+                .accept(ContentType.URLENC)
+                .filter(document('auth_code_succeed',
+                requestParameters(
+                        parameterWithName('response_type')
+                                .description('Response type that must be provided CODE or TOKEN'),
+                        parameterWithName('client_id')
+                                .description('relying party identifier'),
+                        parameterWithName('scope')
+                                .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+                        parameterWithName('username')
+                                .description('part of user\'s credentials'),
+                        parameterWithName('password')
+                                .description('part of user\'s credentials'),
+                        parameterWithName('acr_values')
+                                .description('Authentication Context Class Reference'),
+                        parameterWithName('enroll')
+                                .description('Required Authentication Context Class Reference')
+                                .optional()
+                )))
+                .given()
+                .formParam('response_type', AuthzResponseType.CODE.name())
+                .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
+                .formParam('scope', 'rs.read')
+                .formParam('username', 'login')
+                .formParam('password', 'password')
+                .formParam('acr_values', 'username')
+                .formParam('enroll', 'username')
+        when:
+        def success = setup
+                .when()
+                .post("authorize")
+
+        def result = setup
+                .when()
+                .post("authorize")
+        then:
+        success
+                .then()
+                .statusCode(HttpStatus.FOUND.value())
+                .header(HttpHeaders.LOCATION, StringContains.containsString("code="))
+        result
+                .then()
+                .statusCode(HttpStatus.FORBIDDEN.value())
+                .body(StringContains.containsString("AuthorizationException"))
+    }
+
+
     def 'should return bad request status for authorization code request'() {
         given:
         def setup = given(this.documentationSpec)
@@ -416,11 +467,15 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
 
         Config config = new Config()
         config.setInstanceName("dev")
+
         GroupConfig groupConfig = config.getGroupConfig()
         groupConfig.setName("ratauth")
         groupConfig.setPassword("ratauth")
+
         config.setNetworkConfig(networkConfig)
         config.setNetworkConfig(networkConfig)
+
+        Hazelcast.shutdownAll()
         Hazelcast.getOrCreateHazelcastInstance(config)
     }
 }
