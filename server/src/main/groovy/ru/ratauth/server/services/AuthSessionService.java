@@ -47,6 +47,16 @@ public interface AuthSessionService {
      */
     Observable<Boolean> addToken(TokenRequest oauthRequest, Session session, RelyingParty relyingParty);
 
+
+    /**
+     * Adds token to session. Could be used in refresh token flow
+     *
+     * @param oauthRequest
+     * @param session
+     * @param relyingParty
+     * @return
+     */
+    Observable<Boolean> addTokenOldRefreshToken(TokenRequest oauthRequest, Session session, RelyingParty relyingParty);
     /**
      * Creates new entry for relyingParty within existing session.
      * Could be used in cross-authorization flow

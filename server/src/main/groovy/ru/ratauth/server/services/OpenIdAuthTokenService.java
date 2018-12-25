@@ -15,14 +15,12 @@ import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.exception.ExpiredException;
 import ru.ratauth.interaction.*;
 import ru.ratauth.interaction.TokenType;
-import ru.ratauth.providers.auth.AuthProvider;
 import ru.ratauth.server.configuration.SessionConfiguration;
 import ru.ratauth.server.secutiry.OAuthSystemException;
 import rx.Observable;
 
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Map;
 
 import static ru.ratauth.interaction.GrantType.*;
 
@@ -34,7 +32,6 @@ import static ru.ratauth.interaction.GrantType.*;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OpenIdAuthTokenService implements AuthTokenService {
-    private final Map<String, AuthProvider> authProviders;
     private final AuthSessionService authSessionService;
     private final TokenCacheService tokenCacheService;
     private final AuthClientService clientService;
@@ -45,6 +42,16 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     @SneakyThrows
     public Observable<TokenResponse> getToken(TokenRequest oauthRequest) throws OAuthSystemException, JOSEException {
         final Observable<RelyingParty> relyingPartyObservable = clientService.loadAndAuthRelyingParty(oauthRequest.getClientId(), oauthRequest.getClientSecret(), true);
+
+
+
+        if (oauthRequest.getResponseTypes().contains(AuthzResponseType.ACCESS_TOKEN)) {
+            return relyingPartyObservable
+                    .flatMap(rp -> loadSession(oauthRequest, rp).map(ses -> new ImmutablePair<>(rp, ses)))
+                    .flatMap(rpSess -> authSessionService.addTokenOldRefreshToken(oauthRequest, rpSess.getRight(), rpSess.getLeft()).map(res -> rpSess))
+                    .flatMap(rpSess -> createIdTokenAndResponse(rpSess.getRight(), rpSess.getLeft()))
+                    .doOnCompleted(() -> log.info("Get-token succeed"));
+        }
         return relyingPartyObservable
                 .flatMap(rp -> loadSession(oauthRequest, rp).map(ses -> new ImmutablePair<>(rp, ses)))
                 .flatMap(rpSess -> authSessionService.addToken(oauthRequest, rpSess.getRight(), rpSess.getLeft()).map(res -> rpSess))
@@ -100,7 +107,6 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     }
 
     private void checkSession(Session session, AuthClient authClient) {
-
         if (!session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("sms"))
                 && !session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("ib-username-password"))
                 && !session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("upupcard"))
