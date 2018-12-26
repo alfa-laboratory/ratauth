@@ -1,6 +1,5 @@
 package ru.ratauth.server.services;
 
-import com.hazelcast.core.IMap;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +26,6 @@ import rx.exceptions.Exceptions;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import static java.util.Optional.ofNullable;
@@ -343,26 +341,11 @@ public class OpenIdAuthorizeService implements AuthorizeService {
 
     private void checkIsAuthAllowed(AcrValues enroll, String userId) {
         log.debug("Checking if auth is allowed for user " + userId + " with enroll " + enroll);
-
-        IMap<Object, Object> attemptCacheCount = (IMap<Object, Object>) cachingService.getMap();
         CachingUserKey countKey = new CachingUserKey(userId, enroll.getFirst());
-        if (attemptCacheCount != null) {
-            int countValue = attemptCacheCount.get(countKey) == null ? 0 : (int) attemptCacheCount.get(countKey);
-            int maxAttempts = identityProvidersConfiguration.getIdp().get(enroll.getFirst()).getCommon().getAttemptMaxValue();
-            int maxAttemptsTTL = identityProvidersConfiguration.getIdp().get(enroll.getFirst()).getCommon().getAttemptMaxValueTTL();
 
-            if (countValue < maxAttempts) {
-                log.debug("Increment attempt count for user " + userId + " with enroll " + enroll);
-                if (countValue == 0)
-                    attemptCacheCount.put(countKey, ++countValue, maxAttemptsTTL, TimeUnit.MINUTES);
-                else attemptCacheCount.put(countKey, ++countValue);
+        int maxAttempts = identityProvidersConfiguration.getIdp().get(enroll.getFirst()).getCommon().getAttemptMaxValue();
+        int maxAttemptsTTL = identityProvidersConfiguration.getIdp().get(enroll.getFirst()).getCommon().getAttemptMaxValueTTL();
+        cachingService.checkAttemptCount(countKey, maxAttempts, maxAttemptsTTL);
 
-                log.debug("Attempt count for user " + userId + " is " + countKey.toString());
-
-            } else {
-                throw new AuthorizationException("User with id " + userId + " is not allowed to authorize using " + enroll + " for some time ");
-            }
-
-        }
     }
 }

@@ -10,7 +10,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.server.configuration.HazelcastServiceConfiguration;
+import ru.ratauth.server.services.dto.CachingUserKey;
+
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -20,31 +24,49 @@ public class HazelcastCachingService implements CachingService {
     private HazelcastInstance hazelcastInstance;
     private final HazelcastServiceConfiguration hazelcastServiceConfiguration;
     private String ATTEMPT_COUNT_MAP_NAME = "attemptCacheCount";
+    private ClientConfig config;
 
-
-    private void init() {
+    private void configure() {
         ClientNetworkConfig networkConfig = new ClientNetworkConfig().setSmartRouting(true)
                 .setAddresses(hazelcastServiceConfiguration.getNodes())
                 .setRedoOperation(true)
                 .setConnectionTimeout(5000)
                 .setConnectionAttemptLimit(5);
 
-        ClientConfig config = new ClientConfig();
+        config = new ClientConfig();
         GroupConfig groupConfig = config.getGroupConfig();
         groupConfig.setName(hazelcastServiceConfiguration.getName());
         groupConfig.setPassword(hazelcastServiceConfiguration.getPassword());
         config.setNetworkConfig(networkConfig);
-        hazelcastInstance = HazelcastClient.newHazelcastClient(config);
 
     }
 
-    public IMap<Object, Object> getMap() {
-
+    public HazelcastInstance getInstance() {
         if (hazelcastInstance == null) {
-            init();
+            configure();
+            hazelcastInstance = HazelcastClient.newHazelcastClient(config);
         }
-
-        return hazelcastInstance.getMap(ATTEMPT_COUNT_MAP_NAME);
+        return hazelcastInstance;
     }
 
+
+    public void checkAttemptCount(CachingUserKey countKey, int maxAttempts, int maxAttemptsTTL) {
+        IMap<CachingUserKey, Integer> attemptCacheCount = getInstance().getMap(ATTEMPT_COUNT_MAP_NAME);
+        int countValue = attemptCacheCount.get(countKey) == null ? 0 : attemptCacheCount.get(countKey);
+
+        if (countValue < maxAttempts) {
+            log.debug("Increment attempt count for user " + countKey.getUserId() + " with enroll " + countKey.getAcrValue());
+            if (countValue == 0)
+                attemptCacheCount.put(countKey, ++countValue, maxAttemptsTTL, TimeUnit.MINUTES);
+            else {
+                long ttl = attemptCacheCount.getEntryView(countKey).getExpirationTime() - new java.util.Date().getTime();
+                attemptCacheCount.put(countKey, ++countValue, ttl, TimeUnit.MILLISECONDS);
+            }
+
+            log.debug("Attempt count for user " + countKey.getUserId() + " is " + countKey.toString());
+
+        } else {
+            throw new AuthorizationException("User with id " + countKey.getUserId() + " is not allowed to authorize using " + countKey.getAcrValue() + " for some time ");
+        }
+    }
 }
