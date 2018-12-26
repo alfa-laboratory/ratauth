@@ -293,7 +293,7 @@ class TokenAPISpec extends BaseDocumentationSpec {
                 .body('class', equalTo('class ' + AuthorizationException.class.name))
     }
 
-    def 'not updated refresh'() {
+    def 'not updated refresh token time'() {
         given:
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
@@ -312,6 +312,7 @@ class TokenAPISpec extends BaseDocumentationSpec {
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("access_token", notNullValue())
+                .body("refresh_token", notNullValue())
     }
 
 }
