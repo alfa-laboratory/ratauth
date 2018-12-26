@@ -1,14 +1,15 @@
 package ru.ratauth.server.services;
 
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
 import ru.ratauth.entities.AcrValues;
 import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.entities.Session;
 import ru.ratauth.entities.UserInfo;
 import ru.ratauth.interaction.TokenRequest;
 import rx.Observable;
+
+import java.util.Date;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author mgorelikov
@@ -43,20 +44,11 @@ public interface AuthSessionService {
      * @param oauthRequest
      * @param session
      * @param relyingParty
+     * @param updateRefresh
      * @return
      */
-    Observable<Boolean> addToken(TokenRequest oauthRequest, Session session, RelyingParty relyingParty);
+    Observable<Boolean> addToken(TokenRequest oauthRequest, Session session, RelyingParty relyingParty, boolean updateRefresh);
 
-
-    /**
-     * Adds token to session. Could be used in refresh token flow
-     *
-     * @param oauthRequest
-     * @param session
-     * @param relyingParty
-     * @return
-     */
-    Observable<Boolean> addTokenOldRefreshToken(TokenRequest oauthRequest, Session session, RelyingParty relyingParty);
     /**
      * Creates new entry for relyingParty within existing session.
      * Could be used in cross-authorization flow

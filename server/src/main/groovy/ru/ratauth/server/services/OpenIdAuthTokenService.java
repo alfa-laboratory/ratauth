@@ -37,24 +37,18 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     private final AuthClientService clientService;
     private final SessionStatusChecker sessionStatusChecker;
     private final SessionConfiguration sessionConfiguration;
+    private boolean updateRefresh = true;
 
     @Override
     @SneakyThrows
     public Observable<TokenResponse> getToken(TokenRequest oauthRequest) throws OAuthSystemException, JOSEException {
         final Observable<RelyingParty> relyingPartyObservable = clientService.loadAndAuthRelyingParty(oauthRequest.getClientId(), oauthRequest.getClientSecret(), true);
-
-
-
         if (oauthRequest.getResponseTypes().contains(AuthzResponseType.ACCESS_TOKEN)) {
-            return relyingPartyObservable
-                    .flatMap(rp -> loadSession(oauthRequest, rp).map(ses -> new ImmutablePair<>(rp, ses)))
-                    .flatMap(rpSess -> authSessionService.addTokenOldRefreshToken(oauthRequest, rpSess.getRight(), rpSess.getLeft()).map(res -> rpSess))
-                    .flatMap(rpSess -> createIdTokenAndResponse(rpSess.getRight(), rpSess.getLeft()))
-                    .doOnCompleted(() -> log.info("Get-token succeed"));
+            updateRefresh = false;
         }
         return relyingPartyObservable
                 .flatMap(rp -> loadSession(oauthRequest, rp).map(ses -> new ImmutablePair<>(rp, ses)))
-                .flatMap(rpSess -> authSessionService.addToken(oauthRequest, rpSess.getRight(), rpSess.getLeft()).map(res -> rpSess))
+                .flatMap(rpSess -> authSessionService.addToken(oauthRequest, rpSess.getRight(), rpSess.getLeft(), updateRefresh).map(res -> rpSess))
                 .flatMap(rpSess -> createIdTokenAndResponse(rpSess.getRight(), rpSess.getLeft()))
                 .doOnCompleted(() -> log.info("Get-token succeed"));
     }
