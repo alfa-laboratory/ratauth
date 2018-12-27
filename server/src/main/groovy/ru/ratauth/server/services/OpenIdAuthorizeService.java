@@ -15,6 +15,7 @@ import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
 import ru.ratauth.providers.auth.dto.VerifyResult.Status;
+import ru.ratauth.server.configuration.DestinationConfiguration;
 import ru.ratauth.server.configuration.IdentityProvidersConfiguration;
 import ru.ratauth.server.providers.IdentityProviderResolver;
 import ru.ratauth.server.services.dto.CachingUserKey;
@@ -342,10 +343,12 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     private void checkIsAuthAllowed(AcrValues enroll, String userId) {
         log.debug("Checking if auth is allowed for user " + userId + " with enroll " + enroll);
         CachingUserKey countKey = new CachingUserKey(userId, enroll.getFirst());
-
-        int maxAttempts = identityProvidersConfiguration.getIdp().get(enroll.getFirst()).getCommon().getAttemptMaxValue();
-        int maxAttemptsTTL = identityProvidersConfiguration.getIdp().get(enroll.getFirst()).getCommon().getAttemptMaxValueTTL();
-        cachingService.checkAttemptCount(countKey, maxAttempts, maxAttemptsTTL);
+        DestinationConfiguration destinationConfiguration = identityProvidersConfiguration.getIdp().get(enroll.getFirst()).getCommon();
+        if(destinationConfiguration != null) {
+            int maxAttempts = destinationConfiguration.getAttemptMaxValue();
+            int maxAttemptsTTL = destinationConfiguration.getAttemptMaxValueTTL();
+            cachingService.checkAttemptCount(countKey, maxAttempts, maxAttemptsTTL);
+        }
 
     }
 }
