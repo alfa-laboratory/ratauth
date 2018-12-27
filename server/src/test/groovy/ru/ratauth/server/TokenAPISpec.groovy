@@ -282,7 +282,6 @@ class TokenAPISpec extends BaseDocumentationSpec {
         def result = setup
                 .when()
                 .post("check_token")
-
         then:
         result
                 .then()
@@ -314,5 +313,4 @@ class TokenAPISpec extends BaseDocumentationSpec {
                 .body("access_token", notNullValue())
                 .body("refresh_token", notNullValue())
     }
-
 }

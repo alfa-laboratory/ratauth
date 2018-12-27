@@ -7,7 +7,7 @@ import java.util.Date;
 /**
  * @author mgorelikov
  * @since 01/11/15
- *
+ * <p>
  * Entity for access token
  */
 @Builder
@@ -16,14 +16,14 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Token {
-  /**
-   * unique
-   */
-  private String token;
-  private Date created;
-  private Date expiresIn;
+    /**
+     * unique
+     */
+    private String token;
+    private Date created;
+    private Date expiresIn;
 
-  private String refreshToken;
-  private Date refreshCreated;
-  private Date refreshTokenExpiresIn;
+    private String refreshToken;
+    private Date refreshCreated;
+    private Date refreshTokenExpiresIn;
 }

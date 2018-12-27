@@ -1,27 +1,15 @@
 package ru.ratauth.server.extended.enroll.verify;
 
-import java.net.URL;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.ratauth.entities.AcrValues;
-import ru.ratauth.entities.AuthEntry;
-import ru.ratauth.entities.DeviceInfo;
-import ru.ratauth.entities.IdentityProvider;
-import ru.ratauth.entities.RelyingParty;
-import ru.ratauth.entities.Session;
-import ru.ratauth.entities.UserInfo;
+import ru.ratauth.entities.*;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.exception.AuthorizationException.ID;
+import ru.ratauth.exception.UpdateFlowException;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
 import ru.ratauth.providers.auth.dto.VerifyResult.Status;
@@ -36,11 +24,19 @@ import ru.ratauth.server.services.TokenCacheService;
 import ru.ratauth.server.utils.RedirectUtils;
 import ru.ratauth.services.UpdateDataService;
 import rx.Observable;
+import rx.functions.Func1;
+
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import static java.util.Optional.ofNullable;
 import static ru.ratauth.server.utils.DateUtils.fromLocal;
 import static ru.ratauth.server.utils.RedirectUtils.createRedirectURI;
-import static ru.ratauth.server.utils.RedirectUtils.createRedirectURIWithPath;
 
 @Slf4j
 @Service
@@ -56,7 +52,7 @@ public class VerifyEnrollService {
     private final DeviceService deviceService;
 
     @SneakyThrows
-    private RedirectResponse createResponse(Session session, RelyingParty relyingParty, VerifyEnrollRequest request, VerifyResult verifyResult) {
+    private Observable<RedirectResponse> createResponse(Session session, RelyingParty relyingParty, VerifyEnrollRequest request, VerifyResult verifyResult) {
 
         AcrValues difference = request.getAuthContext().difference(session.getReceivedAcrValues());
         if (difference.getValues().isEmpty()) {
@@ -67,24 +63,25 @@ public class VerifyEnrollService {
             if (verifyResult.getStatus().equals(Status.NEED_UPDATE)) {
                 String reason = (String) verifyResult.getData().get("reason");
                 String updateService = (String) verifyResult.getData().get("update_service");
-                String redirectUri = createRedirectURIWithPath(relyingParty, (String) verifyResult.getData().get("redirect_uri"));
+                if (relyingParty.getUpdateRedirectURI() == null) {
+                    throw new UpdateFlowException(UpdateFlowException.ID.UPDATE_URI_MISSING);
+                }
+                String redirectUri = relyingParty.getUpdateRedirectURI();
                 boolean required = (Boolean) verifyResult.getData().get("required");
 
                 return updateDataService.create(session.getId(), reason, updateService, redirectUri, required)
-                    .map(updateDataEntry -> new UpdateProcessResponse(reason, updateDataEntry.getCode(), updateDataEntry.getService(), updateDataEntry.getRedirectUri())).toBlocking().single();
+                        .flatMap(createUpdateCode(session))
+                        .map(VerifyEnrollService::createUpdateResponse);
             }
 
-            String authCode = authEntry.getAuthCode();
-            LocalDateTime now = LocalDateTime.now();
-            LocalDateTime authCodeExpiresIn = now.plus(relyingParty.getCodeTTL(), ChronoUnit.SECONDS);
+            Observable<RedirectResponse> updateDataObservable = updateDataService
+                    .getUpdateData(session.getSessionToken())
+                    .flatMap(createUpdateCode(session))
+                    .map(VerifyEnrollService::createUpdateResponse);
 
-            sessionService.updateAuthCodeExpired(authCode, fromLocal(authCodeExpiresIn))
-                .filter(Boolean::booleanValue)
-                .switchIfEmpty(Observable.error(new AuthorizationException(ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED)))
-                .subscribe();
+            return updateDataObservable
+                    .switchIfEmpty(createSuccessResponse(request, relyingParty, authEntry));
 
-            long expiresIn = ChronoUnit.SECONDS.between(now, authCodeExpiresIn);
-            return new SuccessResponse(createRedirectURI(relyingParty, request.getRedirectURI()), authCode, expiresIn);
         } else {
 
             String authorizationPageURI = relyingParty.getAuthorizationPageURI();
@@ -94,8 +91,34 @@ public class VerifyEnrollService {
                     url.getQuery()
             );
 
-            return new NeedApprovalResponse(redirectUrl, request.getRedirectURI(), request.getMfaToken(), request.getClientId(), request.getScope(), request.getAuthContext());
+            return Observable.just(new NeedApprovalResponse(redirectUrl, request.getRedirectURI(), request.getMfaToken(), request.getClientId(), request.getScope(), request.getAuthContext()));
         }
+
+    }
+
+    private static UpdateProcessResponse createUpdateResponse(UpdateDataEntry u) {
+        return new UpdateProcessResponse(u.getReason(), u.getCode(), u.getService(), u.getRedirectUri());
+    }
+
+    private Func1<UpdateDataEntry, Observable<UpdateDataEntry>> createUpdateCode(Session session) {
+        return updateDataEntry -> updateDataService
+                .getCode(session.getSessionToken())
+                .map(code -> {
+                    updateDataEntry.setCode(code);
+                    return updateDataEntry;
+                });
+    }
+
+    private Observable<SuccessResponse> createSuccessResponse(VerifyEnrollRequest request, RelyingParty relyingParty, AuthEntry authEntry) {
+        String authCode = authEntry.getAuthCode();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime authCodeExpiresIn = now.plus(relyingParty.getCodeTTL(), ChronoUnit.SECONDS);
+
+        long expiresIn = ChronoUnit.SECONDS.between(now, authCodeExpiresIn);
+        return sessionService.updateAuthCodeExpired(authCode, fromLocal(authCodeExpiresIn))
+                .filter(Boolean::booleanValue)
+                .switchIfEmpty(Observable.error(new AuthorizationException(ID.AUTH_CODE_EXPIRES_IN_UPDATE_FAILED)))
+                .map(r -> new SuccessResponse(createRedirectURI(relyingParty, request.getRedirectURI()), authCode, expiresIn));
     }
 
 
@@ -106,14 +129,16 @@ public class VerifyEnrollService {
                 ImmutablePair::new
         )
                 .flatMap(p -> verifyAndUpdateUserInfo(p.right, request, p.left)
-                        .map(result -> {
+                        .flatMap(result -> {
                             Session session = p.right;
-                            RedirectResponse response = createResponse(session, p.left, request, result);
-                            response.putRedirectParameters("session_token", session.getSessionToken());
-                            return response;
+                            return createResponse(session, p.left, request, result)
+                                    .map(response -> {
+                                        response.putRedirectParameters("session_token", session.getSessionToken());
+                                        return response;
+                                    });
                         })
                         .flatMap(response -> {
-                            if(response instanceof SuccessResponse) {
+                            if (response instanceof SuccessResponse) {
                                 Session session = p.right;
                                 return deviceService
                                         .resolveDeviceInfo(

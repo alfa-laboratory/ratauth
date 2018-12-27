@@ -5,6 +5,6 @@ package ru.ratauth.interaction;
  * @since 04/02/16
  */
 public enum Status {
-  SUCCESS,
-  FAILED
+    SUCCESS,
+    FAILED
 }

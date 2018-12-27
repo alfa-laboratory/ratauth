@@ -14,5 +14,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SessionClient extends AuthClient {
-  private Long sessionTokenTTL;
+    private Long sessionTokenTTL;
 }

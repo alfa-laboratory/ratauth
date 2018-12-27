@@ -11,7 +11,10 @@ import ru.ratauth.interaction.GrantType
 import ru.ratauth.server.services.log.ActionLogger
 import ru.ratauth.server.services.log.AuthAction
 
-import static ru.ratauth.server.handlers.readers.RequestUtil.*
+import static ru.ratauth.server.handlers.readers.RequestUtil.extractAuth
+import static ru.ratauth.server.handlers.readers.RequestUtil.extractEnumField
+import static ru.ratauth.server.handlers.readers.RequestUtil.extractField
+import static ru.ratauth.server.handlers.readers.RequestUtil.extractRest
 
 /**
  * @author djassan
@@ -20,6 +23,7 @@ import static ru.ratauth.server.handlers.readers.RequestUtil.*
 @CompileStatic
 class AuthzRequestReader {
     public static final String SPACE = " "
+    public static final String X_FORWARDED_FOR = "x_forwarded_for"
     private static final String RESPONSE_TYPE = "response_type"
     private static final String GRANT_TYPE = "grant_type"
     private static final String CLIENT_ID = "client_id"
@@ -60,6 +64,7 @@ class AuthzRequestReader {
                 .deviceTimezone(extractField(params, "device_timezone", false))
                 .deviceIp(extractField(params, "device_ip", false))
                 .deviceUserAgent(extractField(params, "device_user_agent", false))
+                .xForwardedFor(extractField(params, X_FORWARDED_FOR, false))
 
         if (GrantType.AUTHENTICATION_TOKEN == grantType || GrantType.SESSION_TOKEN == grantType) {
             if (responseType == AuthzResponseType.TOKEN) {

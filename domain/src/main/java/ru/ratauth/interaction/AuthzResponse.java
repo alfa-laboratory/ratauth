@@ -1,15 +1,16 @@
 package ru.ratauth.interaction;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Map;
-import java.util.StringJoiner;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.ratauth.entities.AcrValues;
 import ru.ratauth.utils.StringUtils;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.StringJoiner;
 
 /**
  * @author djassan
@@ -60,7 +61,6 @@ public class AuthzResponse {
         if (!StringUtils.isBlank(token)) {
             joiner.add("token=" + token);
             joiner.add("token_type=" + tokenType);
-
         }
         if (!StringUtils.isBlank(refreshToken)) {
             joiner.add("refresh_token=" + refreshToken.toString());
@@ -74,18 +74,18 @@ public class AuthzResponse {
         if (StringUtils.isBlank(mfaToken) && !StringUtils.isBlank(sessionToken)) {
             joiner.add("session_token=" + sessionToken.toString());
         }
-        if (acrValues != null && acrValues.getValues() != null && !acrValues.getValues().isEmpty() ) {
+        if (acrValues != null && acrValues.getValues() != null && !acrValues.getValues().isEmpty()) {
             joiner.add("acr_values=" + acrValues.toString());
         }
         if (data != null && !data.isEmpty()) {
             data.entrySet().stream()
                     .filter(entry -> entry.getValue() != null)
-                    .map(entry -> joiner.add(entry.getKey() + "=" + entry.getValue().toString()));
+                    .forEach(entry -> joiner.add(entry.getKey() + "=" + entry.getValue().toString()));
         }
         if (!StringUtils.isBlank(reason) && !StringUtils.isBlank(updateCode) && !StringUtils.isBlank(updateService)) {
             joiner.add("reason=" + reason)
-                .add("update_code=" + updateCode)
-                .add("update_service=" + updateService);
+                    .add("update_code=" + updateCode)
+                    .add("update_service=" + updateService);
         }
         return createRedirectURI(location, joiner.toString());
     }
@@ -94,7 +94,7 @@ public class AuthzResponse {
         if (parameter == null || parameter.isEmpty()) {
             return url;
         }
-        if(url == null) {
+        if (url == null) {
             url = "";
         }
         StringBuilder sb = new StringBuilder(url);

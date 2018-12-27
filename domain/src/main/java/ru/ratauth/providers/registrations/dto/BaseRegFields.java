@@ -5,10 +5,10 @@ package ru.ratauth.providers.registrations.dto;
  * @since 28/01/16
  */
 public enum BaseRegFields {
-  USERNAME,
-  CODE;
+    USERNAME,
+    CODE;
 
-  public String val() {
-    return super.name().toLowerCase();
-  }
+    public String val() {
+        return super.name().toLowerCase();
+    }
 }

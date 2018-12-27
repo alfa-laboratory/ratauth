@@ -20,15 +20,15 @@ import java.util.Map;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RegisterDTO {
-  private String status;
-  private Map<String, Object> data;
-  private String code;
-  @JsonProperty("redirect_url")
-  private String redirectUrl;
+    private String status;
+    private Map<String, Object> data;
+    private String code;
+    @JsonProperty("redirect_url")
+    private String redirectUrl;
 
-  public RegisterDTO(RegResult regResult) {
-    this.status = regResult.getStatus().toString();
-    this.data = regResult.getData();
-    this.redirectUrl = regResult.getRedirectUrl();
-  }
+    public RegisterDTO(RegResult regResult) {
+        this.status = regResult.getStatus().toString();
+        this.data = regResult.getData();
+        this.redirectUrl = regResult.getRedirectUrl();
+    }
 }

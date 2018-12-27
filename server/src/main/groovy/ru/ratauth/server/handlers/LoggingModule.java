@@ -36,10 +36,10 @@ public class LoggingModule extends AbstractModule {
             Request request = ctx.getRequest();
             String deviceId = extractField(request.getQueryParams(), DEVICE_ID.val(), false);
             Headers headers = request.getHeaders();
-            if(isBlank(deviceId)) {
+            if (isBlank(deviceId)) {
                 deviceId = headers.get(DEVICE_ID.val());
             }
-            if(isBlank(deviceId)) {
+            if (isBlank(deviceId)) {
                 deviceId = headers.get(ALTERNATIVE_DEVICE_ID);
             }
             if (!isBlank(deviceId)) {
@@ -47,7 +47,7 @@ public class LoggingModule extends AbstractModule {
             }
             MDC.put(APPLICATION.val(), applicationName);
             String sessionId = headers.get(SESSION_ID.val());
-            if(!isBlank(sessionId)) {
+            if (!isBlank(sessionId)) {
                 MDC.put(SESSION_ID.val(), sessionId);
             }
             ctx.next();

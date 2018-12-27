@@ -23,7 +23,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static java.time.LocalDateTime.now;
-
 /**
  * @author djassan
  * @since 17/02/16

@@ -7,12 +7,12 @@ import static java.lang.Boolean.parseBoolean;
 public class UpdateServiceRequestReader {
     public static UpdateServiceRequest toUpdateServiceRequest(RequestReader params) {
         return UpdateServiceRequest.builder()
-            .clientId(params.removeField("client_id", true))
-            .code(params.removeField("update_code", true))
-            .skip(parseBoolean(params.removeField("skip", true)))
-            .updateService(params.removeField("update_service", true))
-            .reason(params.removeField("reason", true))
-            .data(params.toMap())
-            .build();
+                .clientId(params.removeField("client_id", true))
+                .code(params.removeField("update_code", true))
+                .skip(parseBoolean(params.removeField("skip", true)))
+                .updateService(params.removeField("update_service", true))
+                .reason(params.removeField("reason", true))
+                .data(params.toMap())
+                .build();
     }
 }
