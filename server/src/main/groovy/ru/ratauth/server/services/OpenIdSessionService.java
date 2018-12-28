@@ -44,14 +44,13 @@ public class OpenIdSessionService implements AuthSessionService {
     @Override
     public Observable<Session> initSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, AcrValues acrValues,
                                            String redirectUrl) {
-        final LocalDateTime now = now();
-        return createSession(relyingParty, userInfo, scopes, acrValues, redirectUrl, now, null);
+        return createSession(relyingParty, userInfo, scopes, acrValues, redirectUrl, now(), null);
     }
 
     @Override
     public Observable<Session> createSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, AcrValues acrValues,
                                              String redirectUrl) {
-        final LocalDateTime now = now();
+        LocalDateTime now = now();
         final LocalDateTime tokenExpires = now.plus(relyingParty.getTokenTTL(), ChronoUnit.SECONDS);
         final LocalDateTime refreshTokenExpires = now.plus(relyingParty.getRefreshTokenTTL(), ChronoUnit.SECONDS);
 
@@ -108,10 +107,10 @@ public class OpenIdSessionService implements AuthSessionService {
 
 
     @Override
-    public Observable<Boolean> addToken(TokenRequest oauthRequest, Session session, RelyingParty relyingParty, boolean updateRefreshTokenExpires) {
+    public Observable<Boolean> addToken(TokenRequest oauthRequest, Session session, RelyingParty relyingParty, boolean needUpdateRefresh) {
         final LocalDateTime now = now();
         final LocalDateTime tokenExpires = now.plus(relyingParty.getTokenTTL(), ChronoUnit.SECONDS);
-        final LocalDateTime refreshTokenExpiresIn = generateRefreshTokenExpiresIn(session, relyingParty, updateRefreshTokenExpires);
+        final LocalDateTime refreshTokenExpiresIn = generateRefreshTokenExpiresIn(session, relyingParty, needUpdateRefresh);
         final Token token = Token.builder()
                 .refreshToken(codeGenerator.refreshToken())
                 .refreshTokenExpiresIn(DateUtils.fromLocal(refreshTokenExpiresIn))
