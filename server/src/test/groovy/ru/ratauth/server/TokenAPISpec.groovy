@@ -331,8 +331,10 @@ class TokenAPISpec extends BaseDocumentationSpec {
         then:
         result
                 .then()
-                .statusCode(HttpStatus.OK.value())
-                .body("access_token", notNullValue())
-                .body("refresh_token", notNullValue())
+                .statusCode(HttpStatus.FORBIDDEN.value())
+                .body('id', equalTo(AuthorizationException.ID.SESSION_NOT_FOUND.name()))
+                .body('message.en', equalTo(AuthorizationException.ID.SESSION_NOT_FOUND.baseText))
+                .body('type_id', equalTo(AuthAction.AUTHORIZATION.name()))
+                .body('class', equalTo('class ' + AuthorizationException.class.name))
     }
 }
