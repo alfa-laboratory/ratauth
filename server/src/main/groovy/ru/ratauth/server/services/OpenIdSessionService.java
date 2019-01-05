@@ -71,7 +71,6 @@ public class OpenIdSessionService implements AuthSessionService {
         final LocalDateTime refreshExpires = now.plus(relyingParty.getRefreshTokenTTL(), ChronoUnit.SECONDS);
         final LocalDateTime authCodeExpires = now.plus(relyingParty.getCodeTTL(), ChronoUnit.SECONDS);
 
-
         final String jwtInfo = tokenProcessor.createToken(RATAUTH, masterSecret, null,
                 DateUtils.fromLocal(now), DateUtils.fromLocal(sessionExpires),
                 tokenCacheService.extractAudience(scopes), scopes, acrValues.getValues(), userInfo.get(Fields.USER_ID.val()).toString(), userInfo);
@@ -105,7 +104,6 @@ public class OpenIdSessionService implements AuthSessionService {
                 .doOnNext(actionLogger::addSessionInfo);
     }
 
-
     @Override
     public Observable<Boolean> addToken(TokenRequest oauthRequest, Session session, RelyingParty relyingParty, boolean needUpdateRefresh) {
         final LocalDateTime now = now();
@@ -123,7 +121,6 @@ public class OpenIdSessionService implements AuthSessionService {
                 .doOnNext(subs -> session.getEntry(relyingParty.getName()).ifPresent(entry -> entry.addToken(token)));
     }
 
-
     private LocalDateTime generateRefreshTokenExpiresIn(Session session, RelyingParty relyingParty, boolean needUpdateRefresh) {
         if (!needUpdateRefresh) {
             Optional<AuthEntry> lastEntry = session.getEntry(relyingParty.getName());
@@ -133,7 +130,6 @@ public class OpenIdSessionService implements AuthSessionService {
         }
         return now().plus(relyingParty.getRefreshTokenTTL(), ChronoUnit.SECONDS);
     }
-
 
     @Override
     public Observable<Session> addEntry(Session session, RelyingParty relyingParty, Set<String> scopes, String redirectUrl) {

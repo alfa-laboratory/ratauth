@@ -313,4 +313,26 @@ class TokenAPISpec extends BaseDocumentationSpec {
                 .body("access_token", notNullValue())
                 .body("refresh_token", notNullValue())
     }
+
+    def 'not updated incorrect refresh token time'() {
+        given:
+        def setup = given(this.documentationSpec)
+                .accept(ContentType.URLENC)
+                .given()
+                .formParam('response_type', AuthzResponseType.ACCESS_TOKEN.name())
+                .formParam('grant_type', GrantType.REFRESH_TOKEN.name())
+                .formParam('refresh_token', "23423423423423413123123123")
+                .header(IntegrationSpecUtil.createAuthHeaders(PersistenceServiceStubConfiguration.CLIENT_NAME,
+                PersistenceServiceStubConfiguration.PASSWORD))
+        when:
+        def result = setup
+                .when()
+                .post("token")
+        then:
+        result
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .body("access_token", notNullValue())
+                .body("refresh_token", notNullValue())
+    }
 }
