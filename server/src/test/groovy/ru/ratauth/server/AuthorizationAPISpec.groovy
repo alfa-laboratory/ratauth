@@ -42,7 +42,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
 
     def 'should get authorization code'() {
         given:
-        mockHazelcastInstance()
+        createHazelcastInstance()
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('auth_code_succeed',
@@ -90,7 +90,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
 
     def 'should not get authorization code because of attempt limit'() {
         given:
-        mockHazelcastInstance()
+        createHazelcastInstance()
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('auth_code_succeed',
@@ -370,7 +370,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
 
     def 'should not allow non-correct redirect url'() {
         given:
-        mockHazelcastInstance()
+        createHazelcastInstance()
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('authorize_not_allowed_redirect',
@@ -461,21 +461,12 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
 
     }
 
-    private static void mockHazelcastInstance() {
-        NetworkConfig networkConfig = new NetworkConfig()
-        networkConfig.setPort(5701).setPublicAddress("localhost")
-
-        Config config = new Config()
-        config.setInstanceName("dev")
-
-        GroupConfig groupConfig = config.getGroupConfig()
-        groupConfig.setName("ratauth")
-        groupConfig.setPassword("ratauth")
-
-        config.setNetworkConfig(networkConfig)
-        config.setNetworkConfig(networkConfig)
-
+    private static void createHazelcastInstance() {
         Hazelcast.shutdownAll()
-        Hazelcast.getOrCreateHazelcastInstance(config)
+        Hazelcast.getOrCreateHazelcastInstance(new Config(
+                networkConfig: new NetworkConfig(port: 5701, publicAddress: "localhost"),
+                groupConfig: new GroupConfig(name: "ratauth", password: "ratauth"),
+                instanceName: "dev"
+        ))
     }
 }

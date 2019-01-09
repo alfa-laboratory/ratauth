@@ -8,5 +8,5 @@ import lombok.RequiredArgsConstructor;
 public class IdentityProviderConfiguration {
     DestinationConfiguration activate;
     DestinationConfiguration verify;
-    DestinationConfiguration common;
+    DestinationConfiguration restrictions;
 }

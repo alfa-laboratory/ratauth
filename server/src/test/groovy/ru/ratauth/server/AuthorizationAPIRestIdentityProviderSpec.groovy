@@ -35,7 +35,7 @@ class AuthorizationAPIRestIdentityProviderSpec extends BaseDocumentationSpec {
 
     def 'should get authorization code by rest provider'() {
         given:
-        mockHazelcastInstance()
+        createHazelcastInstance()
         mockRestProviderWithResponse([status: 'SUCCESS', data: [user_id: "USER"]])
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
@@ -85,7 +85,7 @@ identifier received by REST-based identity provider''')
 
     def 'should not get authorization code by rest provider because of attempt limit'() {
         given:
-        mockHazelcastInstance()
+        createHazelcastInstance()
         mockRestProviderWithResponse([status: 'SUCCESS', data: [user_id: "USER"]])
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
@@ -137,7 +137,7 @@ identifier received by REST-based identity provider''')
 
     def 'should get error by rest provider without body'() {
         given:
-        mockHazelcastInstance()
+        createHazelcastInstance()
         mockRestProviderWithErrorResponse()
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
@@ -181,7 +181,7 @@ identifier received by REST-based identity provider''')
 
     def 'should get authorization error by rest provider when invalid login'() {
         given:
-        mockHazelcastInstance()
+        createHazelcastInstance()
         mockRestProviderWithInvalidLoginResponse()
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
@@ -262,21 +262,12 @@ identifier received by REST-based identity provider''')
         ))
     }
 
-    private static void mockHazelcastInstance() {
-        NetworkConfig networkConfig = new NetworkConfig()
-        networkConfig.setPort(5701).setPublicAddress("localhost")
-
-        Config config = new Config()
-        config.setInstanceName("dev")
-
-        GroupConfig groupConfig = config.getGroupConfig()
-        groupConfig.setName("ratauth")
-        groupConfig.setPassword("ratauth")
-
-        config.setNetworkConfig(networkConfig)
-        config.setNetworkConfig(networkConfig)
-
+    private static void createHazelcastInstance() {
         Hazelcast.shutdownAll()
-        Hazelcast.getOrCreateHazelcastInstance(config)
+        Hazelcast.getOrCreateHazelcastInstance(new Config(
+                networkConfig: new NetworkConfig(port: 5701, publicAddress: "localhost"),
+                groupConfig: new GroupConfig(name: "ratauth", password: "ratauth"),
+                instanceName: "dev"
+        ))
     }
 }

@@ -10,8 +10,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.ratauth.entities.AcrValues;
 import ru.ratauth.exception.AuthorizationException;
+import ru.ratauth.server.configuration.DestinationConfiguration;
 import ru.ratauth.server.configuration.HazelcastServiceConfiguration;
+import ru.ratauth.server.configuration.IdentityProvidersConfiguration;
 import ru.ratauth.server.services.dto.CachingUserKey;
 
 import java.util.concurrent.TimeUnit;
@@ -25,6 +28,7 @@ public class HazelcastCachingService implements CachingService {
     private final HazelcastServiceConfiguration hazelcastServiceConfiguration;
     private String ATTEMPT_COUNT_MAP_NAME = "attemptCacheCount";
     private ClientConfig config;
+    private final IdentityProvidersConfiguration identityProvidersConfiguration;
 
     private void configure() {
         ClientNetworkConfig networkConfig = new ClientNetworkConfig().setSmartRouting(true)
@@ -66,7 +70,19 @@ public class HazelcastCachingService implements CachingService {
             log.debug("Attempt count for user " + countKey.getUserId() + " is " + countKey.toString());
 
         } else {
-            throw new AuthorizationException("User with id " + countKey.getUserId() + " is not allowed to authorize using " + countKey.getAcrValue() + " for some time ");
+            throw new AuthorizationException(AuthorizationException.ID.TOO_MANY_ATTEMPTS.getBaseText(),"User with id " + countKey.getUserId() + " is not allowed to authorize using " + countKey.getAcrValue() + " for some time ");
         }
+    }
+
+    public void checkIsAuthAllowed(AcrValues enroll, String userId) {
+        log.info("Checking if auth is allowed for user " + userId + " with enroll " + enroll);
+        CachingUserKey countKey = new CachingUserKey(userId, enroll.getFirst());
+        DestinationConfiguration destinationConfiguration = identityProvidersConfiguration.getIdp().get(enroll.getFirst()).getRestrictions();
+        if(destinationConfiguration != null) {
+            int maxAttempts = destinationConfiguration.getAttemptMaxValue();
+            int maxAttemptsTTL = destinationConfiguration.getAttemptMaxValueTTL();
+            checkAttemptCount(countKey, maxAttempts, maxAttemptsTTL);
+        }
+
     }
 }

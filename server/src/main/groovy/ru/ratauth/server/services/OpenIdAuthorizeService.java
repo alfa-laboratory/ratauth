@@ -50,7 +50,6 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     private final IdentityProviderResolver identityProviderResolver;
     private final UpdateDataService updateDataService;
     private final CachingService cachingService;
-    private final IdentityProvidersConfiguration identityProvidersConfiguration;
 
     @SneakyThrows
     private Observable<AuthzResponse> buildResponse(RelyingParty relyingParty, Session session, VerifyResult verifyResult, TokenCache tokenCache, AuthzRequest authzRequest) {
@@ -203,7 +202,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .flatMap(rp -> authenticateUser(request.getAuthData(), request.getAcrValues(), rp.getIdentityProvider(), rp.getName())
                         .map(request::addVerifyResultAcrToRequest)
                         .map(authRes -> {
-                            checkIsAuthAllowed(authRes.getAcrValues(), authRes.getData().get(USER_ID.val()).toString());
+                            cachingService.checkIsAuthAllowed(authRes.getAcrValues(), authRes.getData().get(USER_ID.val()).toString());
                             return new ImmutableTriple<>(rp, authRes, request.getAcrValues());}))
                 .flatMap(rpAuth -> createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
                         .flatMap(session ->
@@ -340,15 +339,5 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         return provider.verify(verifyInput);
     }
 
-    private void checkIsAuthAllowed(AcrValues enroll, String userId) {
-        log.debug("Checking if auth is allowed for user " + userId + " with enroll " + enroll);
-        CachingUserKey countKey = new CachingUserKey(userId, enroll.getFirst());
-        DestinationConfiguration destinationConfiguration = identityProvidersConfiguration.getIdp().get(enroll.getFirst()).getCommon();
-        if(destinationConfiguration != null) {
-            int maxAttempts = destinationConfiguration.getAttemptMaxValue();
-            int maxAttemptsTTL = destinationConfiguration.getAttemptMaxValueTTL();
-            cachingService.checkAttemptCount(countKey, maxAttempts, maxAttemptsTTL);
-        }
 
-    }
 }
