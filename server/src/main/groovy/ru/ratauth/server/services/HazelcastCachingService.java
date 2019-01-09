@@ -27,32 +27,7 @@ public class HazelcastCachingService implements CachingService {
     private HazelcastInstance hazelcastInstance;
     private final HazelcastServiceConfiguration hazelcastServiceConfiguration;
     private String ATTEMPT_COUNT_MAP_NAME = "attemptCacheCount";
-    private ClientConfig config;
     private final IdentityProvidersConfiguration identityProvidersConfiguration;
-
-    private void configure() {
-        ClientNetworkConfig networkConfig = new ClientNetworkConfig().setSmartRouting(true)
-                .setAddresses(hazelcastServiceConfiguration.getNodes())
-                .setRedoOperation(true)
-                .setConnectionTimeout(5000)
-                .setConnectionAttemptLimit(5);
-
-        config = new ClientConfig();
-        GroupConfig groupConfig = config.getGroupConfig();
-        groupConfig.setName(hazelcastServiceConfiguration.getName());
-        groupConfig.setPassword(hazelcastServiceConfiguration.getPassword());
-        config.setNetworkConfig(networkConfig);
-
-    }
-
-    public HazelcastInstance getInstance() {
-        if (hazelcastInstance == null) {
-            configure();
-            hazelcastInstance = HazelcastClient.newHazelcastClient(config);
-        }
-        return hazelcastInstance;
-    }
-
 
     public void checkAttemptCount(CachingUserKey countKey, int maxAttempts, int maxAttemptsTTL) {
         IMap<CachingUserKey, Integer> attemptCacheCount = getInstance().getMap(ATTEMPT_COUNT_MAP_NAME);
@@ -84,5 +59,28 @@ public class HazelcastCachingService implements CachingService {
             checkAttemptCount(countKey, maxAttempts, maxAttemptsTTL);
         }
 
+    }
+
+    private ClientConfig configure() {
+        ClientConfig config = new ClientConfig();
+        config.getGroupConfig()
+                .setName(hazelcastServiceConfiguration.getName())
+                .setPassword(hazelcastServiceConfiguration.getPassword());
+        config.setNetworkConfig(
+                new ClientNetworkConfig()
+                        .setSmartRouting(true)
+                        .setAddresses(hazelcastServiceConfiguration.getNodes())
+                        .setRedoOperation(true)
+                        .setConnectionTimeout(5000)
+                        .setConnectionAttemptLimit(5)
+        );
+        return config;
+    }
+
+    private HazelcastInstance getInstance() {
+        if (hazelcastInstance == null) {
+            hazelcastInstance = HazelcastClient.newHazelcastClient(configure());
+        }
+        return hazelcastInstance;
     }
 }
