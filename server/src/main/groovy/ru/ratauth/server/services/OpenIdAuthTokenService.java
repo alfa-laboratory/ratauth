@@ -40,7 +40,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
 
     @Override
     @SneakyThrows
-    public Observable<TokenResponse> getToken(TokenRequest oauthRequest) {
+    public Observable<TokenResponse> getToken(TokenRequest oauthRequest) throws OAuthSystemException, JOSEException {
         final Observable<RelyingParty> relyingPartyObservable = clientService.loadAndAuthRelyingParty(oauthRequest.getClientId(), oauthRequest.getClientSecret(), true);
         boolean needUpdateRefresh = !oauthRequest.getResponseTypes().contains(AuthzResponseType.ACCESS_TOKEN);
 
