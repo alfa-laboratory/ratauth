@@ -311,10 +311,11 @@ class TokenAPISpec extends BaseDocumentationSpec {
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("access_token", notNullValue())
-                .body("refresh_token", notNullValue())
+                .body("refresh_token", is(PersistenceServiceStubConfiguration.REFRESH_TOKEN))
+
     }
 
-    def 'not updated incorrect refresh token time'() {
+    def 'not updated incorrect refresh token'() {
         given:
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
@@ -331,10 +332,6 @@ class TokenAPISpec extends BaseDocumentationSpec {
         then:
         result
                 .then()
-                .statusCode(HttpStatus.FORBIDDEN.value())
-                .body('id', equalTo(AuthorizationException.ID.SESSION_NOT_FOUND.name()))
-                .body('message.en', equalTo(AuthorizationException.ID.SESSION_NOT_FOUND.baseText))
-                .body('type_id', equalTo(AuthAction.AUTHORIZATION.name()))
-                .body('class', equalTo('class ' + AuthorizationException.class.name))
+                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
     }
 }
