@@ -321,7 +321,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
 
     def 'should successfully return token by implicit flow'() {
         given:
-        mockHazelcastInstance()
+        createHazelcastInstance()
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('token_implicit_succeed',
