@@ -10,5 +10,5 @@ public class DestinationConfiguration {
     String authLogin;
     String authPassword;
     Integer attemptMaxValue;
-    Integer attemptMaxValueTTL;
+    Integer ttlInSeconds;
 }

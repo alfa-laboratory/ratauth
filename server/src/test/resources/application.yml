@@ -78,5 +78,5 @@ ratauth.hazelcast:
 ratauth.idp:
   username:
     restrictions:
-      attempt-max-value-TTL: 1
+      ttl-in-seconds: 1
       attempt-max-value: 1

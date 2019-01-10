@@ -55,7 +55,7 @@ public class HazelcastCachingService implements CachingService {
         DestinationConfiguration destinationConfiguration = identityProvidersConfiguration.getIdp().get(enroll.getFirst()).getRestrictions();
         if(destinationConfiguration != null) {
             int maxAttempts = destinationConfiguration.getAttemptMaxValue();
-            int maxAttemptsTTL = destinationConfiguration.getAttemptMaxValueTTL();
+            int maxAttemptsTTL = destinationConfiguration.getTtlInSeconds();
             checkAttemptCount(countKey, maxAttempts, maxAttemptsTTL);
         }
 
