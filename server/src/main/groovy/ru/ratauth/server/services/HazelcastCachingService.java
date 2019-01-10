@@ -17,6 +17,7 @@ import ru.ratauth.server.configuration.HazelcastServiceConfiguration;
 import ru.ratauth.server.configuration.IdentityProvidersConfiguration;
 import ru.ratauth.server.services.dto.CachingUserKey;
 
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -38,7 +39,7 @@ public class HazelcastCachingService implements CachingService {
             if (countValue == 0)
                 attemptCacheCount.put(countKey, ++countValue, maxAttemptsTTL, TimeUnit.MINUTES);
             else {
-                long ttl = attemptCacheCount.getEntryView(countKey).getExpirationTime() - new java.util.Date().getTime();
+                long ttl = attemptCacheCount.getEntryView(countKey).getExpirationTime() - new Date().getTime();
                 attemptCacheCount.put(countKey, ++countValue, ttl, TimeUnit.MILLISECONDS);
             }
 
