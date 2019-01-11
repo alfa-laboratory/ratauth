@@ -8,5 +8,6 @@ public enum AuthzResponseType {
     CODE,
     TOKEN,
     ID_TOKEN,
-    SESSION_TOKEN
+    SESSION_TOKEN,
+    ACCESS_TOKEN
 }

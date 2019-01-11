@@ -44,9 +44,10 @@ public interface AuthSessionService {
      * @param oauthRequest
      * @param session
      * @param relyingParty
+     * @param needUpdateRefresh
      * @return
      */
-    Observable<Boolean> addToken(TokenRequest oauthRequest, Session session, RelyingParty relyingParty);
+    Observable<Boolean> addToken(TokenRequest oauthRequest, Session session, RelyingParty relyingParty, boolean needUpdateRefresh);
 
     /**
      * Creates new entry for relyingParty within existing session.

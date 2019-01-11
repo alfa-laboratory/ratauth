@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.ratauth.entities.*;
+import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.interaction.TokenRequest;
 import ru.ratauth.providers.Fields;
 import ru.ratauth.providers.auth.dto.BaseAuthFields;
@@ -17,9 +18,11 @@ import ru.ratauth.services.SessionService;
 import rx.Observable;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+import static java.time.LocalDateTime.now;
 /**
  * @author djassan
  * @since 17/02/16
@@ -41,14 +44,13 @@ public class OpenIdSessionService implements AuthSessionService {
     @Override
     public Observable<Session> initSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, AcrValues acrValues,
                                            String redirectUrl) {
-        final LocalDateTime now = LocalDateTime.now();
-        return createSession(relyingParty, userInfo, scopes, acrValues, redirectUrl, now, null);
+        return createSession(relyingParty, userInfo, scopes, acrValues, redirectUrl, now(), null);
     }
 
     @Override
     public Observable<Session> createSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, AcrValues acrValues,
                                              String redirectUrl) {
-        final LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = now();
         final LocalDateTime tokenExpires = now.plus(relyingParty.getTokenTTL(), ChronoUnit.SECONDS);
         final LocalDateTime refreshTokenExpires = now.plus(relyingParty.getRefreshTokenTTL(), ChronoUnit.SECONDS);
 
@@ -68,7 +70,6 @@ public class OpenIdSessionService implements AuthSessionService {
         final LocalDateTime sessionExpires = now.plus(relyingParty.getSessionTTL(), ChronoUnit.SECONDS);
         final LocalDateTime refreshExpires = now.plus(relyingParty.getRefreshTokenTTL(), ChronoUnit.SECONDS);
         final LocalDateTime authCodeExpires = now.plus(relyingParty.getCodeTTL(), ChronoUnit.SECONDS);
-
 
         final String jwtInfo = tokenProcessor.createToken(RATAUTH, masterSecret, null,
                 DateUtils.fromLocal(now), DateUtils.fromLocal(sessionExpires),
@@ -104,13 +105,13 @@ public class OpenIdSessionService implements AuthSessionService {
     }
 
     @Override
-    public Observable<Boolean> addToken(TokenRequest oauthRequest, Session session, RelyingParty relyingParty) {
-        final LocalDateTime now = LocalDateTime.now();
+    public Observable<Boolean> addToken(TokenRequest oauthRequest, Session session, RelyingParty relyingParty, boolean needUpdateRefresh) {
+        final LocalDateTime now = now();
         final LocalDateTime tokenExpires = now.plus(relyingParty.getTokenTTL(), ChronoUnit.SECONDS);
-        final LocalDateTime refreshTokenExpires = now.plus(relyingParty.getRefreshTokenTTL(), ChronoUnit.SECONDS);
+        final LocalDateTime refreshTokenExpiresIn = generateRefreshTokenExpiresIn(session, relyingParty, needUpdateRefresh);
         final Token token = Token.builder()
                 .refreshToken(codeGenerator.refreshToken())
-                .refreshTokenExpiresIn(DateUtils.fromLocal(refreshTokenExpires))
+                .refreshTokenExpiresIn(DateUtils.fromLocal(refreshTokenExpiresIn))
                 .refreshCreated(DateUtils.fromLocal(now))
                 .token(codeGenerator.accessToken())
                 .expiresIn(DateUtils.fromLocal(tokenExpires))
@@ -120,9 +121,19 @@ public class OpenIdSessionService implements AuthSessionService {
                 .doOnNext(subs -> session.getEntry(relyingParty.getName()).ifPresent(entry -> entry.addToken(token)));
     }
 
+    private LocalDateTime generateRefreshTokenExpiresIn(Session session, RelyingParty relyingParty, boolean needUpdateRefresh) {
+        if (!needUpdateRefresh) {
+            Optional<AuthEntry> lastEntry = session.getEntry(relyingParty.getName());
+            return lastEntry.flatMap(AuthEntry::getLatestToken)
+                    .map(token -> token.getRefreshTokenExpiresIn().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
+                    .orElseThrow(() -> new AuthorizationException("Last Refresh Token not found. Current session: " + session.getId()));
+        }
+        return now().plus(relyingParty.getRefreshTokenTTL(), ChronoUnit.SECONDS);
+    }
+
     @Override
     public Observable<Session> addEntry(Session session, RelyingParty relyingParty, Set<String> scopes, String redirectUrl) {
-        final LocalDateTime now = LocalDateTime.now();
+        final LocalDateTime now = now();
         final LocalDateTime refreshExpires = now.plus(relyingParty.getRefreshTokenTTL(), ChronoUnit.SECONDS);
         final LocalDateTime authCodeExpires = now.plus(relyingParty.getCodeTTL(), ChronoUnit.SECONDS);
         final AuthEntry authEntry = AuthEntry.builder()
@@ -174,7 +185,7 @@ public class OpenIdSessionService implements AuthSessionService {
     @Override
     public Observable<Boolean> updateIdToken(Session session, UserInfo userInfo, Set<String> scopes, Set<String> authContext) {
         final String jwtInfo = tokenProcessor.createToken(RATAUTH, masterSecret, null,
-                DateUtils.fromLocal(LocalDateTime.now()), session.getExpiresIn(),
+                DateUtils.fromLocal(now()), session.getExpiresIn(),
                 tokenCacheService.extractAudience(scopes), scopes, authContext, session.getUserId(), userInfo.toMap());
         session.setUserInfo(jwtInfo);
         return sessionService.updateUserInfo(session.getId(), jwtInfo);
