@@ -15,7 +15,10 @@ import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
 import ru.ratauth.providers.auth.dto.VerifyResult.Status;
+import ru.ratauth.server.configuration.DestinationConfiguration;
+import ru.ratauth.server.configuration.IdentityProvidersConfiguration;
 import ru.ratauth.server.providers.IdentityProviderResolver;
+import ru.ratauth.server.services.dto.CachingUserKey;
 import ru.ratauth.server.utils.RedirectUtils;
 import ru.ratauth.services.UpdateDataService;
 import rx.Observable;
@@ -28,6 +31,7 @@ import java.util.function.Function;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
+import static ru.ratauth.providers.Fields.USER_ID;
 import static ru.ratauth.providers.auth.dto.VerifyResult.Status.*;
 import static ru.ratauth.server.utils.RedirectUtils.createRedirectURI;
 
@@ -45,6 +49,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     private final DeviceService deviceService;
     private final IdentityProviderResolver identityProviderResolver;
     private final UpdateDataService updateDataService;
+    private final CachingService cachingService;
 
     @SneakyThrows
     private Observable<AuthzResponse> buildResponse(RelyingParty relyingParty, Session session, VerifyResult verifyResult, TokenCache tokenCache, AuthzRequest authzRequest) {
@@ -196,7 +201,9 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         return clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), isAuthRequired(request))
                 .flatMap(rp -> authenticateUser(request.getAuthData(), request.getAcrValues(), rp.getIdentityProvider(), rp.getName())
                         .map(request::addVerifyResultAcrToRequest)
-                        .map(authRes -> new ImmutableTriple<>(rp, authRes, request.getAcrValues())))
+                        .map(authRes -> {
+                            cachingService.checkIsAuthAllowed(authRes.getAcrValues(), authRes.getData().get(USER_ID.val()).toString());
+                            return new ImmutableTriple<>(rp, authRes, request.getAcrValues());}))
                 .flatMap(rpAuth -> createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
                         .flatMap(session ->
                                 createUpdateToken(rpAuth.middle, session, rpAuth.left)
@@ -326,8 +333,11 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     }
 
     private Observable<VerifyResult> authenticateUser(Map<String, String> authData, AcrValues enroll, String identityProviderName, String relyingPartyName) {
+
         IdentityProvider provider = identityProviderResolver.getProvider(identityProviderName);
         VerifyInput verifyInput = new VerifyInput(authData, enroll, new UserInfo(), relyingPartyName);
         return provider.verify(verifyInput);
     }
+
+
 }

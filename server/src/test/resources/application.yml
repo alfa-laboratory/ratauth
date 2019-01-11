@@ -69,3 +69,14 @@ ru.ratauth.scope:
 
 ru.ratauth.idp.default: "STUB"
 ratauth.timeout: 4000
+ratauth.hazelcast:
+  name: ratauth
+  password: ratauth
+  nodes:
+    - 127.0.0.1:5701
+
+ratauth.idp:
+  username:
+    restrictions:
+      ttl-in-seconds: 1
+      attempt-max-value: 1

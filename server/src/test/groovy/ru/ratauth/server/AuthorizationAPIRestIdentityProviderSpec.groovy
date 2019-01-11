@@ -1,6 +1,10 @@
 package ru.ratauth.server
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule
+import com.hazelcast.config.Config
+import com.hazelcast.config.GroupConfig
+import com.hazelcast.config.NetworkConfig
+import com.hazelcast.core.Hazelcast
 import com.jayway.restassured.http.ContentType
 import groovy.json.JsonOutput
 import io.netty.handler.codec.http.HttpResponseStatus
@@ -26,12 +30,12 @@ class AuthorizationAPIRestIdentityProviderSpec extends BaseDocumentationSpec {
 
     @Value('${server.port}')
     String port
-
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule(8089);
+    public WireMockRule wireMockRule = new WireMockRule(8089)
 
     def 'should get authorization code by rest provider'() {
         given:
+        createHazelcastInstance()
         mockRestProviderWithResponse([status: 'SUCCESS', data: [user_id: "USER"]])
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
@@ -79,8 +83,61 @@ identifier received by REST-based identity provider''')
                 .header(HttpHeaders.LOCATION, StringContains.containsString("code="))
     }
 
+    def 'should not get authorization code by rest provider because of attempt limit'() {
+        given:
+        createHazelcastInstance()
+        mockRestProviderWithResponse([status: 'SUCCESS', data: [user_id: "USER"]])
+        def setup = given(this.documentationSpec)
+                .accept(ContentType.URLENC)
+                .filter(document('auth_code_succeed',
+                requestParameters(
+                        parameterWithName('response_type')
+                                .description('Response type that must be provided CODE or TOKEN'),
+                        parameterWithName('client_id')
+                                .description('relying party identifier'),
+                        parameterWithName('scope')
+                                .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+                        parameterWithName('username')
+                                .description('part of user\'s credentials'),
+                        parameterWithName('password')
+                                .description('part of user\'s credentials'),
+                        parameterWithName('acr_values')
+                                .description('Authentication Context Class Reference'),
+                        parameterWithName('enroll')
+                                .description('Required Authentication Context Class Reference')
+                                .optional()
+                )))
+                .given()
+                .formParam('response_type', AuthzResponseType.CODE.name())
+                .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME_REST)
+                .formParam('scope', 'rs.read')
+                .formParam('username', 'login')
+                .formParam('password', 'password')
+                .formParam('acr_values', 'username')
+                .formParam('enroll', 'username')
+        when:
+        def success = setup
+                .when()
+                .post("authorize")
+
+        def result = setup
+                .when()
+                .post("authorize")
+        then:
+        success
+                .then()
+                .statusCode(HttpStatus.FOUND.value())
+                .header(HttpHeaders.LOCATION, StringContains.containsString("code="))
+        result
+                .then()
+                .statusCode(HttpStatus.FORBIDDEN.value())
+                .body(StringContains.containsString("AuthorizationException"))
+    }
+
+
     def 'should get error by rest provider without body'() {
         given:
+        createHazelcastInstance()
         mockRestProviderWithErrorResponse()
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
@@ -124,6 +181,7 @@ identifier received by REST-based identity provider''')
 
     def 'should get authorization error by rest provider when invalid login'() {
         given:
+        createHazelcastInstance()
         mockRestProviderWithInvalidLoginResponse()
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
@@ -201,6 +259,15 @@ identifier received by REST-based identity provider''')
                 .willReturn(
                 aResponse()
                         .withStatus(HttpResponseStatus.FORBIDDEN.code())
+        ))
+    }
+
+    private static void createHazelcastInstance() {
+        Hazelcast.shutdownAll()
+        Hazelcast.getOrCreateHazelcastInstance(new Config(
+                networkConfig: new NetworkConfig(port: 5701, publicAddress: "localhost"),
+                groupConfig: new GroupConfig(name: "ratauth", password: "ratauth"),
+                instanceName: "dev"
         ))
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import ratpack.spring.config.EnableRatpack
+import ru.ratauth.server.configuration.HazelcastServiceConfiguration
 import ru.ratauth.server.configuration.IdentityProvidersConfiguration
 import ru.ratauth.server.configuration.OpenIdConnectDefaultDiscoveryProperties
 import ru.ratauth.server.configuration.SessionConfiguration
@@ -20,7 +21,8 @@ import ru.ratauth.server.configuration.UpdateServicesConfiguration
         OpenIdConnectDefaultDiscoveryProperties,
         IdentityProvidersConfiguration,
         SessionConfiguration,
-        UpdateServicesConfiguration
+        UpdateServicesConfiguration,
+        HazelcastServiceConfiguration
 ])
 class RatAuthApplication {
     public static final int DEFAULT_PADDING = 50

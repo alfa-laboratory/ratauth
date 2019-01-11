@@ -1,6 +1,10 @@
 package ru.ratauth.server
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.hazelcast.config.Config
+import com.hazelcast.config.GroupConfig
+import com.hazelcast.config.NetworkConfig
+import com.hazelcast.core.Hazelcast
 import com.jayway.restassured.http.ContentType
 import org.hamcrest.core.StringContains
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,9 +40,9 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
     @Autowired
     ObjectMapper objectMapper
 
-
     def 'should get authorization code'() {
         given:
+        createHazelcastInstance()
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('auth_code_succeed',
@@ -83,6 +87,57 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
                 .header(HttpHeaders.LOCATION, StringContains.containsString("code="))
                 .header(HttpHeaders.LOCATION, StringContains.containsString("session_token="))
     }
+
+    def 'should not get authorization code because of attempt limit'() {
+        given:
+        createHazelcastInstance()
+        def setup = given(this.documentationSpec)
+                .accept(ContentType.URLENC)
+                .filter(document('auth_code_succeed',
+                requestParameters(
+                        parameterWithName('response_type')
+                                .description('Response type that must be provided CODE or TOKEN'),
+                        parameterWithName('client_id')
+                                .description('relying party identifier'),
+                        parameterWithName('scope')
+                                .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+                        parameterWithName('username')
+                                .description('part of user\'s credentials'),
+                        parameterWithName('password')
+                                .description('part of user\'s credentials'),
+                        parameterWithName('acr_values')
+                                .description('Authentication Context Class Reference'),
+                        parameterWithName('enroll')
+                                .description('Required Authentication Context Class Reference')
+                                .optional()
+                )))
+                .given()
+                .formParam('response_type', AuthzResponseType.CODE.name())
+                .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
+                .formParam('scope', 'rs.read')
+                .formParam('username', 'login')
+                .formParam('password', 'password')
+                .formParam('acr_values', 'username')
+                .formParam('enroll', 'username')
+        when:
+        def success = setup
+                .when()
+                .post("authorize")
+
+        def result = setup
+                .when()
+                .post("authorize")
+        then:
+        success
+                .then()
+                .statusCode(HttpStatus.FOUND.value())
+                .header(HttpHeaders.LOCATION, StringContains.containsString("code="))
+        result
+                .then()
+                .statusCode(HttpStatus.FORBIDDEN.value())
+                .body(StringContains.containsString("AuthorizationException"))
+    }
+
 
     def 'should return bad request status for authorization code request'() {
         given:
@@ -266,6 +321,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
 
     def 'should successfully return token by implicit flow'() {
         given:
+        createHazelcastInstance()
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('token_implicit_succeed',
@@ -314,6 +370,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
 
     def 'should not allow non-correct redirect url'() {
         given:
+        createHazelcastInstance()
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('authorize_not_allowed_redirect',
@@ -402,5 +459,14 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
                 .header(HttpHeaders.LOCATION, StringContains.containsString('is_webview='))// according to test stub
                 .header(HttpHeaders.LOCATION, StringContains.containsString('http://domain.mine/oidc/web/authorize/card?is_webview=true&response_type=CODE&client_id=mine&scope=rs.read&acr_values=card&username=login&password=password'))
 
+    }
+
+    private static void createHazelcastInstance() {
+        Hazelcast.shutdownAll()
+        Hazelcast.getOrCreateHazelcastInstance(new Config(
+                networkConfig: new NetworkConfig(port: 5701, publicAddress: "localhost"),
+                groupConfig: new GroupConfig(name: "ratauth", password: "ratauth"),
+                instanceName: "dev"
+        ))
     }
 }

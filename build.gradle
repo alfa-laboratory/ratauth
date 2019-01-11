@@ -74,6 +74,10 @@ allprojects {
       //crypto
       dependency 'com.nimbusds:nimbus-jose-jwt:4.20'
 
+      //cache
+      dependency 'com.hazelcast:hazelcast:3.7.2'
+      dependency 'com.hazelcast:hazelcast-client:3.7.2'
+
       //test
       dependency "io.ratpack:ratpack-test:${ratpackVersion}"
       dependency 'org.spockframework:spock-core:1.1-groovy-2.4-rc-2'
@@ -191,6 +195,8 @@ subprojects {
     compile 'org.codehaus.groovy:groovy-all'
     compile 'io.reactivex:rxjava'
 
+    compile 'com.hazelcast:hazelcast'
+    compile 'com.hazelcast:hazelcast-client'
     //test
     testCompile 'org.springframework.boot:spring-boot-starter-test'
     testCompile 'org.spockframework:spock-core', {
