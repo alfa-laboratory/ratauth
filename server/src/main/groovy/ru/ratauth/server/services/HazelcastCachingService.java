@@ -3,10 +3,8 @@ package ru.ratauth.server.services;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.client.config.ClientNetworkConfig;
-import com.hazelcast.config.GroupConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,18 +15,26 @@ import ru.ratauth.server.configuration.HazelcastServiceConfiguration;
 import ru.ratauth.server.configuration.IdentityProvidersConfiguration;
 import ru.ratauth.server.services.dto.CachingUserKey;
 
+import java.beans.ConstructorProperties;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HazelcastCachingService implements CachingService {
 
     private HazelcastInstance hazelcastInstance;
     private final HazelcastServiceConfiguration hazelcastServiceConfiguration;
     private String ATTEMPT_COUNT_MAP_NAME = "attemptCacheCount";
     private final IdentityProvidersConfiguration identityProvidersConfiguration;
+
+    @Autowired
+    @ConstructorProperties({"hazelcastServiceConfiguration", "identityProvidersConfiguration"})
+    public HazelcastCachingService(HazelcastServiceConfiguration hazelcastServiceConfiguration, IdentityProvidersConfiguration identityProvidersConfiguration) {
+        this.hazelcastServiceConfiguration = hazelcastServiceConfiguration;
+        this.identityProvidersConfiguration = identityProvidersConfiguration;
+        configure();
+    }
 
     public void checkAttemptCount(CachingUserKey countKey, int maxAttempts, int maxAttemptsTTL) {
         IMap<CachingUserKey, Integer> attemptCacheCount = getInstance().getMap(ATTEMPT_COUNT_MAP_NAME);
