@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import ru.ratauth.entities.*;
 import ru.ratauth.exception.AuthorizationException;
+import ru.ratauth.exception.ExpiredException;
 import ru.ratauth.interaction.*;
 import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.dto.VerifyInput;
@@ -292,7 +293,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 clientService.loadRelyingParty(request.getExternalClientId())
                         .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND))),
                 sessionObs
-                        .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.TOKEN_NOT_FOUND))),
+                        .switchIfEmpty(Observable.error(new ExpiredException(ExpiredException.ID.TOKEN_EXPIRED))),
                 (oldRP, newRP, session) -> new ImmutablePair<>(newRP, session)
         ).flatMap(rpSession -> {
                     String redirectURI = rpSession.getLeft().getAuthorizationRedirectURI();

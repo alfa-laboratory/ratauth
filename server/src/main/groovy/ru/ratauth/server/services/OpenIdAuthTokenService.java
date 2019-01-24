@@ -57,7 +57,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
         return tokenCacheService.getToken(session, relyingParty, entry)
                 .map(idToken -> new ImmutablePair<>(entry, idToken))
                 .map(entryToken -> convertToResponse(entryToken.getLeft(), entryToken.getRight().getIdToken(), session.getSessionToken()))
-                .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.TOKEN_NOT_FOUND)));
+                .switchIfEmpty(Observable.error(new ExpiredException(ExpiredException.ID.TOKEN_EXPIRED)));
     }
 
     @Override
@@ -66,7 +66,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
         return tokenCacheService.getToken(session, relyingParty, entry)
                 .map(idToken -> new ImmutablePair<>(entry, idToken))
                 .map(entryToken -> convertToResponse(entryToken.getLeft(), entryToken.getRight().getIdToken(), session.getSessionToken()))
-                .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.TOKEN_NOT_FOUND)));
+                .switchIfEmpty(Observable.error(new ExpiredException(ExpiredException.ID.TOKEN_EXPIRED)));
     }
 
     @Override
@@ -94,7 +94,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
                             .scopes(entry.getScopes())
                             .build();
                 })
-                .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.TOKEN_NOT_FOUND)))
+                .switchIfEmpty(Observable.error(new ExpiredException(ExpiredException.ID.TOKEN_EXPIRED)))
                 .doOnCompleted(() -> log.info("Check token succeed"));
     }
 
