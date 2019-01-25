@@ -64,8 +64,18 @@ public interface SessionService {
      *
      * @param sessionId session identifier
      * @param entry     new entry
+     * @deprecated need to provide whole session in order not to load session again
      */
+    @Deprecated
     Observable<Boolean> addEntry(String sessionId, AuthEntry entry);
+
+    /**
+     * Adds new entry into existing session
+     *
+     * @param session   session
+     * @param entry     new entry
+     */
+    Observable<Boolean> addEntry(Session session, AuthEntry entry);
 
     /**
      * Adds new token related to session

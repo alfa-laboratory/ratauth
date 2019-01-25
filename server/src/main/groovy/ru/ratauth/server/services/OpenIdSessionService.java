@@ -147,7 +147,7 @@ public class OpenIdSessionService implements AuthSessionService {
                 .authType(AuthType.CROSS)
                 .redirectUrl(redirectUrl)
                 .build();
-        return sessionService.addEntry(session.getId(), authEntry)
+        return sessionService.addEntry(session, authEntry)
                 .doOnNext(res -> session.getEntries().add(authEntry))
                 .map(res -> session);
     }
