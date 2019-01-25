@@ -417,6 +417,11 @@ class PersistenceServiceStubConfiguration {
             }
 
             @Override
+            Observable<Boolean> addEntry(Session session, AuthEntry entry) {
+                return Observable.just(true)
+            }
+
+            @Override
             Observable<Boolean> addToken(String sessionId, String relyingParty, Token token) {
                 return Observable.just(true)
             }
