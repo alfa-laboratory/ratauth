@@ -78,7 +78,7 @@ class RestIdentityProvider implements IdentityProvider {
         try {
             return jacksonObjectMapper.readValue(body, AuthErrorHandler.ExceptionDTO)
         } catch (JsonMappingException e) {
-            log.info("Can't parse exception: '${body}'", e)
+            log.debug("Can't parse exception: '${body}'", e)
             throw new ProviderException(ProviderException.ID.DESERIALIZATION_ERROR, body)
         }
     }
