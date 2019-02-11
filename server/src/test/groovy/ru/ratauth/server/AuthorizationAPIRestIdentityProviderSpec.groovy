@@ -182,7 +182,7 @@ identifier received by REST-based identity provider''')
     def 'should get authorization error by rest provider when invalid login'() {
         given:
         createHazelcastInstance()
-        mockRestProviderWithInvalidLoginResponse()
+        mockRestProviderWithInvalidLoginResponse([id: "ERR", message: [en: "Invalid login"], class: "class ru.ratauth.exception.AuthorizationException"])
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('auth_code_succeed',
@@ -220,6 +220,7 @@ identifier received by REST-based identity provider''')
                 .then()
                 .statusCode(HttpStatus.FORBIDDEN.value())
                 .body(StringContains.containsString("AuthorizationException"))
+                .body(StringContains.containsString('{"id":"ERR","message":{"en":"Invalid login"}'))
     }
 
     private static void mockRestProviderWithResponse(mockResponse) {
@@ -250,7 +251,7 @@ identifier received by REST-based identity provider''')
         ))
     }
 
-    private static void mockRestProviderWithInvalidLoginResponse() {
+    private static void mockRestProviderWithInvalidLoginResponse(mockResponse) {
         stubFor(post(
                 urlEqualTo("/verify"))
                 .withHeader(HttpHeader.CONTENT_TYPE.asString(), equalTo(MediaType.APPLICATION_JSON_VALUE))
@@ -259,6 +260,7 @@ identifier received by REST-based identity provider''')
                 .willReturn(
                 aResponse()
                         .withStatus(HttpResponseStatus.FORBIDDEN.code())
+                        .withBody(JsonOutput.toJson(mockResponse))
         ))
     }
 
