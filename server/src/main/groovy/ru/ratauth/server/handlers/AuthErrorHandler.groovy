@@ -67,17 +67,36 @@ class AuthErrorHandler implements ServerErrorHandler {
         context.response.send(MediaType.APPLICATION_JSON, dto)
     }
 
-    private class ExceptionDTO {
+    static Exception castToException(ExceptionDTO e) {
+
+        String message = e.message.get(ExceptionDTO.DEFAULT_LANG)
+        if (!message) {
+            throw new ProviderException(ProviderException.ID.DESERIALIZATION_ERROR, "Can't deserialize ${e}")
+        }
+
+        if (e.clazz == AuthorizationException as String) {
+            return new AuthorizationException(e.id, message)
+        } else if (e.clazz == RegistrationException as String) {
+            return new RegistrationException(e.id, message)
+        }
+        return new ProviderException(e.id, message)
+    }
+
+    static class ExceptionDTO {
         @JsonProperty("base_id")
-        final String baseId
+        String baseId
         @JsonProperty("type_id")
-        final String typeId
-        final String id
-        final Map<String, String> message
+        String typeId
+        String id
+        Map<String, String> message
         @JsonProperty("class")
-        final String clazz
+        String clazz
 
         private static final String DEFAULT_LANG = "en"
+
+        ExceptionDTO() {
+
+        }
 
         ExceptionDTO(IdentifiedException exception) {
             this.baseId = exception.baseId
