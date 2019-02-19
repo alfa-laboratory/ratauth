@@ -3,6 +3,7 @@ package ru.ratauth.server.extended.enroll.verify;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,7 +54,7 @@ public class VerifyEnrollService {
 
     @SneakyThrows
     private Observable<RedirectResponse> createResponse(Session session, RelyingParty relyingParty, VerifyEnrollRequest request, VerifyResult verifyResult) {
-
+        String username = verifyResult.getData().get("username").toString();
         AcrValues difference = request.getAuthContext().difference(session.getReceivedAcrValues());
         if (difference.getValues().isEmpty()) {
             AuthEntry authEntry = session
@@ -71,13 +72,13 @@ public class VerifyEnrollService {
 
                 return updateDataService.create(session.getId(), reason, updateService, redirectUri, required)
                         .flatMap(createUpdateCode(session))
-                        .map(VerifyEnrollService::createUpdateResponse);
+                        .map(updateEntry -> createUpdateResponse(updateEntry, username));
             }
 
             Observable<RedirectResponse> updateDataObservable = updateDataService
                     .getUpdateData(session.getSessionToken())
                     .flatMap(createUpdateCode(session))
-                    .map(VerifyEnrollService::createUpdateResponse);
+                    .map(updateEntry -> createUpdateResponse(updateEntry, username));
 
             return updateDataObservable
                     .switchIfEmpty(createSuccessResponse(request, relyingParty, authEntry));
@@ -94,10 +95,12 @@ public class VerifyEnrollService {
             return Observable.just(new NeedApprovalResponse(redirectUrl, request.getRedirectURI(), request.getMfaToken(), request.getClientId(), request.getScope(), request.getAuthContext()));
         }
 
-    }
+    }:x
 
-    private static UpdateProcessResponse createUpdateResponse(UpdateDataEntry u) {
-        return new UpdateProcessResponse(u.getReason(), u.getCode(), u.getService(), u.getRedirectUri());
+    private static UpdateProcessResponse createUpdateResponse(UpdateDataEntry u, String username) {
+        UpdateProcessResponse response = new UpdateProcessResponse(u.getReason(), u.getCode(), u.getService(), u.getRedirectUri(), username);
+        response.putRedirectParameters("username", username);
+        return response;
     }
 
     private Func1<UpdateDataEntry, Observable<UpdateDataEntry>> createUpdateCode(Session session) {
