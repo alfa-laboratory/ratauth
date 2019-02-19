@@ -148,7 +148,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
                     checkSession(session, relyingParty);
                     return session;
                 })
-                .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.SESSION_NOT_FOUND)));
+                .switchIfEmpty(Observable.error(new ExpiredException(ExpiredException.ID.REFRESH_TOKEN_EXPIRED)));
     }
 
     /**
