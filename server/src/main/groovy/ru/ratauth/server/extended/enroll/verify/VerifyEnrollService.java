@@ -3,7 +3,6 @@ package ru.ratauth.server.extended.enroll.verify;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -99,9 +98,7 @@ public class VerifyEnrollService {
     }
 
     private static UpdateProcessResponse createUpdateResponse(UpdateDataEntry u, String username) {
-        UpdateProcessResponse response = new UpdateProcessResponse(u.getReason(), u.getCode(), u.getService(), u.getRedirectUri(), username);
-        response.putRedirectParameters("username", username);
-        return response;
+        return new UpdateProcessResponse(u.getReason(), u.getCode(), u.getService(), u.getRedirectUri(), username);
     }
 
     private Func1<UpdateDataEntry, Observable<UpdateDataEntry>> createUpdateCode(Session session) {

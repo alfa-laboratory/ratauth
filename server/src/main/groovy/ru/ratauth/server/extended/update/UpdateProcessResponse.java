@@ -1,6 +1,5 @@
 package ru.ratauth.server.extended.update;
 
-import lombok.extern.slf4j.Slf4j;
 import ru.ratauth.server.extended.common.RedirectResponse;
 
 import java.util.HashMap;
@@ -11,7 +10,6 @@ public class UpdateProcessResponse extends RedirectResponse {
     private final String reason;
     private final String updateCode;
     private final String updateService;
-    private final String username;
     private final Map<String, String> redirectParameters;
 
     public UpdateProcessResponse(String reason, String updateCode, String updateService, String location, String username) {
@@ -19,10 +17,10 @@ public class UpdateProcessResponse extends RedirectResponse {
         this.reason = reason;
         this.updateCode = updateCode;
         this.updateService = updateService;
-        this.username = username;
         redirectParameters = new HashMap<>();
         redirectParameters.put("update_code", updateCode);
         redirectParameters.put("update_service", updateService);
+        redirectParameters.put("username", username);
         redirectParameters.put("reason", reason);
     }
 
