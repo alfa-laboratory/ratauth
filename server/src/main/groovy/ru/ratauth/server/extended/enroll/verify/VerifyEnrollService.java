@@ -54,13 +54,14 @@ public class VerifyEnrollService {
 
     @SneakyThrows
     private Observable<RedirectResponse> createResponse(Session session, RelyingParty relyingParty, VerifyEnrollRequest request, VerifyResult verifyResult) {
-        String username = verifyResult.getData().get("username").toString();
+
+
         AcrValues difference = request.getAuthContext().difference(session.getReceivedAcrValues());
         if (difference.getValues().isEmpty()) {
             AuthEntry authEntry = session
                     .getEntry(relyingParty.getName())
                     .orElseThrow(() -> new IllegalStateException("sessionID = " + session.getId() + ", relyingParty = " + relyingParty));
-
+            String username = (String) verifyResult.getData().get("username");
             if (verifyResult.getStatus().equals(Status.NEED_UPDATE)) {
                 String reason = (String) verifyResult.getData().get("reason");
                 String updateService = (String) verifyResult.getData().get("update_service");
@@ -95,7 +96,7 @@ public class VerifyEnrollService {
             return Observable.just(new NeedApprovalResponse(redirectUrl, request.getRedirectURI(), request.getMfaToken(), request.getClientId(), request.getScope(), request.getAuthContext()));
         }
 
-    }:x
+    }
 
     private static UpdateProcessResponse createUpdateResponse(UpdateDataEntry u, String username) {
         UpdateProcessResponse response = new UpdateProcessResponse(u.getReason(), u.getCode(), u.getService(), u.getRedirectUri(), username);
