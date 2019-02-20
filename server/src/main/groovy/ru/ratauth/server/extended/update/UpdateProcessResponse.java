@@ -12,7 +12,7 @@ public class UpdateProcessResponse extends RedirectResponse {
     private final String updateService;
     private final Map<String, String> redirectParameters;
 
-    public UpdateProcessResponse(String reason, String updateCode, String updateService, String location) {
+    public UpdateProcessResponse(String reason, String updateCode, String updateService, String location, String username) {
         super(location);
         this.reason = reason;
         this.updateCode = updateCode;
@@ -20,6 +20,7 @@ public class UpdateProcessResponse extends RedirectResponse {
         redirectParameters = new HashMap<>();
         redirectParameters.put("update_code", updateCode);
         redirectParameters.put("update_service", updateService);
+        redirectParameters.put("username", username);
         redirectParameters.put("reason", reason);
     }
 

@@ -54,12 +54,13 @@ public class VerifyEnrollService {
     @SneakyThrows
     private Observable<RedirectResponse> createResponse(Session session, RelyingParty relyingParty, VerifyEnrollRequest request, VerifyResult verifyResult) {
 
+
         AcrValues difference = request.getAuthContext().difference(session.getReceivedAcrValues());
         if (difference.getValues().isEmpty()) {
             AuthEntry authEntry = session
                     .getEntry(relyingParty.getName())
                     .orElseThrow(() -> new IllegalStateException("sessionID = " + session.getId() + ", relyingParty = " + relyingParty));
-
+            String username = (String) verifyResult.getData().get("username");
             if (verifyResult.getStatus().equals(Status.NEED_UPDATE)) {
                 String reason = (String) verifyResult.getData().get("reason");
                 String updateService = (String) verifyResult.getData().get("update_service");
@@ -71,13 +72,13 @@ public class VerifyEnrollService {
 
                 return updateDataService.create(session.getId(), reason, updateService, redirectUri, required)
                         .flatMap(createUpdateCode(session))
-                        .map(VerifyEnrollService::createUpdateResponse);
+                        .map(updateEntry -> createUpdateResponse(updateEntry, username));
             }
 
             Observable<RedirectResponse> updateDataObservable = updateDataService
                     .getUpdateData(session.getSessionToken())
                     .flatMap(createUpdateCode(session))
-                    .map(VerifyEnrollService::createUpdateResponse);
+                    .map(updateEntry -> createUpdateResponse(updateEntry, username));
 
             return updateDataObservable
                     .switchIfEmpty(createSuccessResponse(request, relyingParty, authEntry));
@@ -96,8 +97,8 @@ public class VerifyEnrollService {
 
     }
 
-    private static UpdateProcessResponse createUpdateResponse(UpdateDataEntry u) {
-        return new UpdateProcessResponse(u.getReason(), u.getCode(), u.getService(), u.getRedirectUri());
+    private static UpdateProcessResponse createUpdateResponse(UpdateDataEntry u, String username) {
+        return new UpdateProcessResponse(u.getReason(), u.getCode(), u.getService(), u.getRedirectUri(), username);
     }
 
     private Func1<UpdateDataEntry, Observable<UpdateDataEntry>> createUpdateCode(Session session) {
