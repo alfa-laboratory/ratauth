@@ -16,11 +16,9 @@ import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
 import ru.ratauth.providers.auth.dto.VerifyResult.Status;
-import ru.ratauth.server.configuration.DestinationConfiguration;
-import ru.ratauth.server.configuration.IdentityProvidersConfiguration;
 import ru.ratauth.server.providers.IdentityProviderResolver;
-import ru.ratauth.server.services.dto.CachingUserKey;
 import ru.ratauth.server.utils.RedirectUtils;
+import ru.ratauth.services.RestrictionService;
 import ru.ratauth.services.UpdateDataService;
 import rx.Observable;
 import rx.exceptions.Exceptions;
@@ -50,7 +48,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     private final DeviceService deviceService;
     private final IdentityProviderResolver identityProviderResolver;
     private final UpdateDataService updateDataService;
-    private final CachingService cachingService;
+    private final RestrictionService cachingService;
 
     @SneakyThrows
     private Observable<AuthzResponse> buildResponse(RelyingParty relyingParty, Session session, VerifyResult verifyResult, TokenCache tokenCache, AuthzRequest authzRequest) {
@@ -203,7 +201,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .flatMap(rp -> authenticateUser(request.getAuthData(), request.getAcrValues(), rp.getIdentityProvider(), rp.getName())
                         .map(request::addVerifyResultAcrToRequest)
                         .map(authRes -> {
-                            cachingService.checkIsAuthAllowed(authRes.getAcrValues(), authRes.getData().get(USER_ID.val()).toString());
+                            cachingService.checkIsAuthAllowed(request.getClientId(), authRes.getAcrValues(), authRes.getData().get(USER_ID.val()).toString());
                             return new ImmutableTriple<>(rp, authRes, request.getAcrValues());}))
                 .flatMap(rpAuth -> createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
                         .flatMap(session ->
