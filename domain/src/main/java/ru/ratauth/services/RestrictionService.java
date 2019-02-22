@@ -8,6 +8,6 @@ public interface RestrictionService {
 
     void checkAttemptCount(RestrictionUserKey countKey, int attempts, int ttl);
 
-    void checkIsAuthAllowed(String clientId, AcrValues enroll, String userId);
+    void checkIsAuthAllowed(String clientId, String userId, AcrValues enroll,  int maxAttempts, int maxAttemptsTTL);
 
 }
