@@ -29,6 +29,7 @@ public class CheckTokenDTO {
     @JsonProperty("scope")
     private @Singular
     Set<String> scopes;
+    private Boolean active;
 
     public CheckTokenDTO(CheckTokenResponse response) {
         this.idToken = response.getIdToken();
@@ -36,5 +37,6 @@ public class CheckTokenDTO {
         this.clientId = response.getClientId();
         this.scopes = response.getScopes();
         this.jti = UUID.randomUUID().toString();
+        this.active = response.getActive();
     }
 }
