@@ -17,7 +17,6 @@ import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
 import ru.ratauth.providers.auth.dto.VerifyResult.Status;
 import ru.ratauth.server.configuration.DestinationConfiguration;
-import ru.ratauth.server.configuration.IdentityProviderConfiguration;
 import ru.ratauth.server.configuration.IdentityProvidersConfiguration;
 import ru.ratauth.server.providers.IdentityProviderResolver;
 import ru.ratauth.server.utils.RedirectUtils;
@@ -53,6 +52,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     private final UpdateDataService updateDataService;
     private final RestrictionService restrictionService;
     private final IdentityProvidersConfiguration identityProvidersConfiguration;
+
 
     @SneakyThrows
     private Observable<AuthzResponse> buildResponse(RelyingParty relyingParty, Session session, VerifyResult verifyResult, TokenCache tokenCache, AuthzRequest authzRequest) {
@@ -206,14 +206,15 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                         .map(request::addVerifyResultAcrToRequest)
                         .map(authRes -> {
                             DestinationConfiguration destinationConfiguration = identityProvidersConfiguration.getIdp().get(request.getAcrValues().getFirst()).getRestrictions();
-                            if(destinationConfiguration != null) {
+                            if (destinationConfiguration != null) {
                                 restrictionService.checkIsAuthAllowed(request.getClientId(),
-                                                                      authRes.getData().get(USER_ID.val()).toString(),
-                                                                      authRes.getAcrValues(),
-                                                                      destinationConfiguration.getAttemptMaxValue(),
-                                                                      destinationConfiguration.getTtlInSeconds());
+                                        authRes.getData().get(USER_ID.val()).toString(),
+                                        authRes.getAcrValues(),
+                                        destinationConfiguration.getAttemptMaxValue(),
+                                        destinationConfiguration.getTtlInSeconds());
                             }
-                            return new ImmutableTriple<>(rp, authRes, request.getAcrValues());}))
+                            return new ImmutableTriple<>(rp, authRes, request.getAcrValues());
+                        }))
                 .flatMap(rpAuth -> createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
                         .flatMap(session ->
                                 createUpdateToken(rpAuth.middle, session, rpAuth.left)

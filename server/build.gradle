@@ -43,6 +43,7 @@ dependencies {
   compile 'io.ratpack:ratpack-groovy'
   compile 'com.google.inject:guice'
   compile 'com.auth0:java-jwt'
+//  compile 'ru.ratauth.restriction:restriction-hazelcast-spring-boot-starter'
 
   //crypto
   compile 'com.nimbusds:nimbus-jose-jwt'

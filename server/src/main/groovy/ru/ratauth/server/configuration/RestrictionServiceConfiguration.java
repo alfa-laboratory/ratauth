@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @ConfigurationProperties("ratauth.hazelcast")
-public class HazelcastServiceConfiguration {
+public class RestrictionServiceConfiguration {
     private String name;
     private String password;
     private List<String> nodes;

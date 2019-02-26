@@ -1,7 +1,6 @@
 package ru.ratauth.services;
 
 import ru.ratauth.entities.AcrValues;
-import ru.ratauth.entities.RelyingParty;
 import ru.ratauth.entities.RestrictionUserKey;
 
 public interface RestrictionService {

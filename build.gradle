@@ -74,10 +74,6 @@ allprojects {
       //crypto
       dependency 'com.nimbusds:nimbus-jose-jwt:4.20'
 
-      //cache
-      dependency 'com.hazelcast:hazelcast:3.7.2'
-      dependency 'com.hazelcast:hazelcast-client:3.7.2'
-
       //test
       dependency "io.ratpack:ratpack-test:${ratpackVersion}"
       dependency 'org.spockframework:spock-core:1.1-groovy-2.4-rc-2'
@@ -86,6 +82,9 @@ allprojects {
       dependency 'org.assertj:assertj-core:3.6.2'
       dependency 'org.skyscreamer:jsonassert:1.5.0'
       dependency 'io.rest-assured:rest-assured:3.0.2'
+
+
+
     }
   }
 }
