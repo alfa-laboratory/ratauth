@@ -1,9 +1,5 @@
 package ru.ratauth.server
 
-import com.hazelcast.config.Config
-import com.hazelcast.config.GroupConfig
-import com.hazelcast.config.NetworkConfig
-import com.hazelcast.core.Hazelcast
 import com.jayway.restassured.builder.RequestSpecBuilder
 import com.jayway.restassured.config.RestAssuredConfig
 import com.jayway.restassured.specification.RequestSpecification
@@ -33,23 +29,10 @@ class BaseDocumentationSpec extends Specification {
 
     protected RequestSpecification documentationSpec
 
-    void setupSpec(){
-        createHazelcastServer()
-    }
     void setup() {
-//        createHazelcastServer()
         this.documentationSpec = new RequestSpecBuilder()
                 .addFilter(documentationConfiguration(restDocumentation))
                 .setConfig(RestAssuredConfig.config().redirect(RestAssuredConfig.config().getRedirectConfig().followRedirects(false)))
                 .build()
     }
-
-    private static void createHazelcastServer() {
-        Hazelcast.shutdownAll()
-        Config config = new Config().setNetworkConfig(new NetworkConfig().setPort(5701).setPublicAddress("localhost"))
-                .setGroupConfig(new GroupConfig().setName("ratauth").setPassword("ratauth"))
-                .setInstanceName("dev");
-        Hazelcast.getOrCreateHazelcastInstance(config);
-    }
-
 }

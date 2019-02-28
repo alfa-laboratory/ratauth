@@ -44,7 +44,6 @@ public class RatAuthAutoConfigurationTest {
         assertThat(this.context.getBean(RatpackProperties.class)).isNotNull();
         assertThat(this.context.getBean(OpenIdConnectDefaultDiscoveryProperties.class)).isNotNull();
         assertThat(this.context.getBean(IdentityProvidersConfiguration.class)).isNotNull();
-//        assertThat(this.context.getBean(RestrictionServiceConfiguration.class)).isNotNull();
     }
 
     @Test
