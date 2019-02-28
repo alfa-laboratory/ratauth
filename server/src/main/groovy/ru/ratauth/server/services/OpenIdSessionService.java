@@ -123,10 +123,7 @@ public class OpenIdSessionService implements AuthSessionService {
 
     private LocalDateTime generateRefreshTokenExpiresIn(Session session, RelyingParty relyingParty, boolean needUpdateRefresh) {
         if (!needUpdateRefresh) {
-            Optional<AuthEntry> lastEntry = session.getEntry(relyingParty.getName());
-            return lastEntry.flatMap(AuthEntry::getLatestToken)
-                    .map(token -> token.getRefreshTokenExpiresIn().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
-                    .orElseThrow(() -> new AuthorizationException("Last Refresh Token not found. Current session: " + session.getId()));
+            return now();
         }
         return now().plus(relyingParty.getRefreshTokenTTL(), ChronoUnit.SECONDS);
     }
