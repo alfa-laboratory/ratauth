@@ -1,4 +1,4 @@
-package ru.ratauth.server.services.dto;
+package ru.ratauth.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,8 @@ import java.io.Serializable;
 
 @Data
 @AllArgsConstructor
-public class CachingUserKey implements Serializable {
+public class RestrictionUserKey implements Serializable {
     String userId;
     String acrValue;
+    String clientId;
 }

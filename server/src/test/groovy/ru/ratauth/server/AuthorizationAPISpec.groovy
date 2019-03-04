@@ -42,7 +42,6 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
 
     def 'should get authorization code'() {
         given:
-        createHazelcastInstance()
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('auth_code_succeed',
@@ -90,7 +89,6 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
 
     def 'should not get authorization code because of attempt limit'() {
         given:
-        createHazelcastInstance()
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('auth_code_succeed',
@@ -110,32 +108,25 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
                         parameterWithName('enroll')
                                 .description('Required Authentication Context Class Reference')
                                 .optional()
-                )))
+                )
+                ))
                 .given()
                 .formParam('response_type', AuthzResponseType.CODE.name())
-                .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
+                .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME_RESTRICTED)
                 .formParam('scope', 'rs.read')
                 .formParam('username', 'login')
                 .formParam('password', 'password')
                 .formParam('acr_values', 'username')
                 .formParam('enroll', 'username')
         when:
-        def success = setup
-                .when()
-                .post("authorize")
-
         def result = setup
                 .when()
                 .post("authorize")
         then:
-        success
-                .then()
-                .statusCode(HttpStatus.FOUND.value())
-                .header(HttpHeaders.LOCATION, StringContains.containsString("code="))
         result
                 .then()
                 .statusCode(HttpStatus.FORBIDDEN.value())
-                .body(StringContains.containsString("AuthorizationException"))
+                .body(StringContains.containsString("Too many attempts"))
     }
 
 
@@ -321,7 +312,6 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
 
     def 'should successfully return token by implicit flow'() {
         given:
-        createHazelcastInstance()
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('token_implicit_succeed',
@@ -370,7 +360,6 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
 
     def 'should not allow non-correct redirect url'() {
         given:
-        createHazelcastInstance()
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('authorize_not_allowed_redirect',
@@ -461,12 +450,4 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
 
     }
 
-    private static void createHazelcastInstance() {
-        Hazelcast.shutdownAll()
-        Hazelcast.getOrCreateHazelcastInstance(new Config(
-                networkConfig: new NetworkConfig(port: 5701, publicAddress: "localhost"),
-                groupConfig: new GroupConfig(name: "ratauth", password: "ratauth"),
-                instanceName: "dev"
-        ))
-    }
 }
