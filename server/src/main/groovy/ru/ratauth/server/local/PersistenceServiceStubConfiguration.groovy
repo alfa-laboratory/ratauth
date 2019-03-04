@@ -31,6 +31,7 @@ class PersistenceServiceStubConfiguration {
     public static final String CLIENT_NAME = 'mine'
     public static final String CLIENT_NAME_DUMMY = 'DummyIdentityProvider'
     public static final String CLIENT_NAME_REST = 'RestIdentityProvider'
+    public static final String CLIENT_NAME_RESTRICTED = 'RestrictedIdentityProvider'
     public static final String NONEXISTENT_CLIENT_NAME = 'bad_name'
     public static final String PASSWORD = 'password'
     public static final String SALT = 'JBn7SnEzMy0MXdNsh5GVvktSGuRs0+BNVZ47kmm3TDM='
@@ -98,6 +99,24 @@ class PersistenceServiceStubConfiguration {
                             id: 'id',
                             name: CLIENT_NAME_DUMMY,
                             identityProvider: 'REST',
+                            secret: CLIENT_SECRET,
+                            password: SecurityUtils.hashPassword(PASSWORD, SALT),
+                            salt: SALT,
+                            codeTTL: 36000l,
+                            refreshTokenTTL: 36000l,
+                            sessionTTL: 36000l,
+                            tokenTTL: 36000l,
+                            redirectURIs: ['https://domain.mine', 'mine.domain'],
+                            registrationRedirectURI: 'http://domain.mine/oidc/register',
+                            authorizationRedirectURI: 'http://domain.mine/oidc/authorize',
+                            authorizationPageURI: 'http://domain.mine/oidc/web/authorize?is_webview=true',
+                            registrationPageURI: 'http://domain.mine/oidc/web/register?is_webview=true',
+                            incAuthLevelPageURI: 'http://domain.mine/oidc/web/inc_auth_level?is_webview=true'))
+                else if (name == CLIENT_NAME_RESTRICTED)
+                    return Observable.just(new RelyingParty(
+                            id: 'id',
+                            name: CLIENT_NAME_RESTRICTED,
+                            identityProvider: 'STUB',
                             secret: CLIENT_SECRET,
                             password: SecurityUtils.hashPassword(PASSWORD, SALT),
                             salt: SALT,
@@ -555,4 +574,18 @@ class PersistenceServiceStubConfiguration {
             }
         }
     }
+
+
+    @Bean
+    RestrictionService restrictionService(){
+        return new RestrictionService() {
+            @Override
+            void checkIsAuthAllowed(String clientId, String userId, AcrValues enroll, int maxAttempts, int maxAttemptsTTL) {
+                if (clientId == CLIENT_NAME_RESTRICTED) {
+                    throw new AuthorizationException(AuthorizationException.ID.TOO_MANY_ATTEMPTS)
+                }
+            }
+        }
+    }
+
 }

@@ -35,7 +35,6 @@ class AuthorizationAPIRestIdentityProviderSpec extends BaseDocumentationSpec {
 
     def 'should get authorization code by rest provider'() {
         given:
-        createHazelcastInstance()
         mockRestProviderWithResponse([status: 'SUCCESS', data: [user_id: "USER"]])
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
@@ -85,7 +84,6 @@ identifier received by REST-based identity provider''')
 
     def 'should not get authorization code by rest provider because of attempt limit'() {
         given:
-        createHazelcastInstance()
         mockRestProviderWithResponse([status: 'SUCCESS', data: [user_id: "USER"]])
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
@@ -109,35 +107,26 @@ identifier received by REST-based identity provider''')
                 )))
                 .given()
                 .formParam('response_type', AuthzResponseType.CODE.name())
-                .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME_REST)
+                .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME_RESTRICTED)
                 .formParam('scope', 'rs.read')
                 .formParam('username', 'login')
                 .formParam('password', 'password')
                 .formParam('acr_values', 'username')
                 .formParam('enroll', 'username')
         when:
-        def success = setup
-                .when()
-                .post("authorize")
-
         def result = setup
                 .when()
                 .post("authorize")
         then:
-        success
-                .then()
-                .statusCode(HttpStatus.FOUND.value())
-                .header(HttpHeaders.LOCATION, StringContains.containsString("code="))
         result
                 .then()
                 .statusCode(HttpStatus.FORBIDDEN.value())
-                .body(StringContains.containsString("AuthorizationException"))
+                .body(StringContains.containsString("Too many attempts"))
     }
 
 
     def 'should get error by rest provider without body'() {
         given:
-        createHazelcastInstance()
         mockRestProviderWithErrorResponse()
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
@@ -181,7 +170,6 @@ identifier received by REST-based identity provider''')
 
     def 'should get authorization error by rest provider when invalid login'() {
         given:
-        createHazelcastInstance()
         mockRestProviderWithInvalidLoginResponse([id: "ERR", message: [en: "Invalid login"], class: "class ru.ratauth.exception.AuthorizationException"])
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
@@ -264,12 +252,4 @@ identifier received by REST-based identity provider''')
         ))
     }
 
-    private static void createHazelcastInstance() {
-        Hazelcast.shutdownAll()
-        Hazelcast.getOrCreateHazelcastInstance(new Config(
-                networkConfig: new NetworkConfig(port: 5701, publicAddress: "localhost"),
-                groupConfig: new GroupConfig(name: "ratauth", password: "ratauth"),
-                instanceName: "dev"
-        ))
-    }
 }
