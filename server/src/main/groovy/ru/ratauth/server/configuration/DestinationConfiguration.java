@@ -13,5 +13,5 @@ public class DestinationConfiguration {
     String authPassword;
     Integer attemptMaxValue;
     Integer ttlInSeconds;
-    List<String> cliendId;
+    List<String> clientId;
 }

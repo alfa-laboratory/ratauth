@@ -205,13 +205,18 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .flatMap(rp -> authenticateUser(request.getAuthData(), request.getAcrValues(), rp.getIdentityProvider(), rp.getName())
                         .map(request::addVerifyResultAcrToRequest)
                         .map(authRes -> {
-                            DestinationConfiguration destinationConfiguration = identityProvidersConfiguration.getIdp().get(request.getAcrValues().getFirst()).getRestrictions();
-                            if (destinationConfiguration != null) {
-                                restrictionService.checkIsAuthAllowed(request.getClientId(),
+                            DestinationConfiguration restrictionConfiguration = identityProvidersConfiguration.getIdp().get(request.getAcrValues().getFirst()).getRestrictions();
+                            String clientId = request.getClientId();
+                            List<String> clientIdRestriction  = null;
+                            if(restrictionConfiguration != null) {
+                                clientIdRestriction = restrictionConfiguration.getClientId();
+                            }
+                            if (clientIdRestriction != null && clientIdRestriction.contains(clientId)) {
+                                restrictionService.checkIsAuthAllowed(clientId,
                                         authRes.getData().get(USER_ID.val()).toString(),
                                         authRes.getAcrValues(),
-                                        destinationConfiguration.getAttemptMaxValue(),
-                                        destinationConfiguration.getTtlInSeconds());
+                                        restrictionConfiguration.getAttemptMaxValue(),
+                                        restrictionConfiguration.getTtlInSeconds());
                             }
                             return new ImmutableTriple<>(rp, authRes, request.getAcrValues());
                         }))
