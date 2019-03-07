@@ -80,3 +80,4 @@ ratauth.idp:
     restrictions:
       ttl-in-seconds: 1
       attempt-max-value: 1
+      client-id: RestrictedIdentityProvider
