@@ -13,6 +13,8 @@ import ru.ratauth.exception.UpdateFlowException;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
 import ru.ratauth.providers.auth.dto.VerifyResult.Status;
+import ru.ratauth.server.configuration.DestinationConfiguration;
+import ru.ratauth.server.configuration.IdentityProvidersConfiguration;
 import ru.ratauth.server.extended.common.RedirectResponse;
 import ru.ratauth.server.extended.update.UpdateProcessResponse;
 import ru.ratauth.server.providers.IdentityProviderResolver;
@@ -22,6 +24,7 @@ import ru.ratauth.server.services.AuthSessionService;
 import ru.ratauth.server.services.DeviceService;
 import ru.ratauth.server.services.TokenCacheService;
 import ru.ratauth.server.utils.RedirectUtils;
+import ru.ratauth.services.RestrictionService;
 import ru.ratauth.services.UpdateDataService;
 import rx.Observable;
 import rx.functions.Func1;
@@ -29,12 +32,10 @@ import rx.functions.Func1;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Optional.ofNullable;
+import static ru.ratauth.providers.Fields.USER_ID;
 import static ru.ratauth.server.utils.DateUtils.fromLocal;
 import static ru.ratauth.server.utils.RedirectUtils.createRedirectURI;
 
@@ -50,6 +51,9 @@ public class VerifyEnrollService {
     private final TokenProcessor tokenProcessor;
     private final IdentityProviderResolver identityProviderResolver;
     private final DeviceService deviceService;
+    private final RestrictionService restrictionService;
+    private final IdentityProvidersConfiguration identityProvidersConfiguration;
+
 
     @SneakyThrows
     private Observable<RedirectResponse> createResponse(Session session, RelyingParty relyingParty, VerifyEnrollRequest request, VerifyResult verifyResult) {
@@ -61,6 +65,19 @@ public class VerifyEnrollService {
                     .getEntry(relyingParty.getName())
                     .orElseThrow(() -> new IllegalStateException("sessionID = " + session.getId() + ", relyingParty = " + relyingParty));
             String username = (String) verifyResult.getData().get("username");
+            DestinationConfiguration restrictionConfiguration = identityProvidersConfiguration.getIdp().get(request.getEnroll().getFirst()).getRestrictions();
+            String clientId = request.getClientId();
+            List<String> clientIdRestriction  = null;
+            if(restrictionConfiguration != null) {
+                clientIdRestriction = restrictionConfiguration.getClientId();
+            }
+            if (clientIdRestriction != null && clientIdRestriction.contains(clientId)) {
+                restrictionService.checkIsAuthAllowed(clientId,
+                        request.getData().get(USER_ID.val()),
+                        request.getEnroll(),
+                        restrictionConfiguration.getAttemptMaxValue(),
+                        restrictionConfiguration.getTtlInSeconds());
+            }
             if (verifyResult.getStatus().equals(Status.NEED_UPDATE)) {
                 String reason = (String) verifyResult.getData().get("reason");
                 String updateService = (String) verifyResult.getData().get("update_service");
