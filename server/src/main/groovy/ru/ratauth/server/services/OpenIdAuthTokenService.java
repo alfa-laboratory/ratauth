@@ -78,16 +78,6 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     }
 
     @Override
-    public Observable<TokenResponse> createIdTokenAndResponse(Session session, RelyingParty relyingParty, String authContext) {
-        AuthEntry entry = session.getEntry(relyingParty.getName()).get();
-        final String refreshToken = entry.getLatestToken().get().getRefreshToken();
-        return tokenCacheService.getToken(session, relyingParty, entry)
-                .map(idToken -> new ImmutablePair<>(entry, idToken))
-                .map(entryToken -> convertToResponse(entryToken.getLeft(), entryToken.getRight().getIdToken(), session.getSessionToken(), refreshToken))
-                .switchIfEmpty(Observable.error(new ExpiredException(ExpiredException.ID.TOKEN_EXPIRED)));
-    }
-
-    @Override
     public Observable<CheckTokenResponse> checkToken(CheckTokenRequest oauthRequest) {
         // check basic auth first
         Observable<AuthClient> authClient = loadRelyingParty(oauthRequest);
