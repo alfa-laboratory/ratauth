@@ -53,7 +53,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
                     if (refreshTokenReissue) {
                         return createIdTokenAndResponse(rpSess.getRight(), rpSess.getLeft());
                     }
-                    return createIdTokenAndResponse(rpSess.getRight(), rpSess.getLeft(), oauthRequest.getRefreshToken());
+                    return createIdTokenAndResponseWithRefreshToken(rpSess.getRight(), rpSess.getLeft(), oauthRequest.getRefreshToken());
                 })
                 .doOnCompleted(() -> log.info("Get-token succeed"));
     }
@@ -66,13 +66,10 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     public Observable<TokenResponse> createIdTokenAndResponse(Session session, RelyingParty relyingParty) {
         AuthEntry entry = session.getEntry(relyingParty.getName()).get();
         final String refreshToken = entry.getLatestToken().get().getRefreshToken();
-        return tokenCacheService.getToken(session, relyingParty, entry)
-                .map(idToken -> new ImmutablePair<>(entry, idToken))
-                .map(entryToken -> convertToResponse(entryToken.getLeft(), entryToken.getRight().getIdToken(), session.getSessionToken(), refreshToken))
-                .switchIfEmpty(Observable.error(new ExpiredException(ExpiredException.ID.TOKEN_EXPIRED)));
+        return createIdTokenAndResponseWithRefreshToken(session, relyingParty, refreshToken);
     }
 
-    private Observable<TokenResponse> createIdTokenAndResponseWithOldRefreshToken(Session session, RelyingParty relyingParty, String refreshToken) {
+    private Observable<TokenResponse> createIdTokenAndResponseWithRefreshToken(Session session, RelyingParty relyingParty, String refreshToken) {
         AuthEntry entry = session.getEntry(relyingParty.getName()).get();
         return tokenCacheService.getToken(session, relyingParty, entry)
                 .map(idToken -> new ImmutablePair<>(entry, idToken))
