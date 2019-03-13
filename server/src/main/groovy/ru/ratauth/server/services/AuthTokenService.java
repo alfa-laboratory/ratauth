@@ -36,6 +36,4 @@ public interface AuthTokenService {
      */
     Observable<TokenResponse> createIdTokenAndResponse(Session session, RelyingParty relyingParty);
 
-    Observable<TokenResponse> createIdTokenAndResponse(Session session, RelyingParty relyingParty, String authContext);
-
 }
