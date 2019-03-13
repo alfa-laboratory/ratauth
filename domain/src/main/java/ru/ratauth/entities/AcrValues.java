@@ -33,6 +33,11 @@ public class AcrValues implements AcrValue, Enroll {
         return this.getValues().stream().findFirst().orElse(null);
     }
 
+
+    public String getSecond() {
+        return this.getValues().get(1);
+    }
+
     public AcrValues difference(AcrValues acrValues) {
         return this.withValues(this.getValues().stream()
                 .filter(value -> !acrValues.getValues().contains(value))

@@ -205,18 +205,22 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .flatMap(rp -> authenticateUser(request.getAuthData(), request.getAcrValues(), rp.getIdentityProvider(), rp.getName())
                         .map(request::addVerifyResultAcrToRequest)
                         .map(authRes -> {
-                            DestinationConfiguration restrictionConfiguration = identityProvidersConfiguration.getIdp().get(request.getAcrValues().getFirst()).getRestrictions();
+                            List<DestinationConfiguration> restrictionConfigurations = new ArrayList<>();
+                            restrictionConfigurations.add(identityProvidersConfiguration.getIdp().get(request.getAcrValues().getFirst()).getRestrictions());
+                            restrictionConfigurations.add(identityProvidersConfiguration.getIdp().get(request.getAcrValues().getSecond()).getRestrictions());
                             String clientId = request.getClientId();
                             List<String> clientIdRestriction  = null;
-                            if(restrictionConfiguration != null) {
-                                clientIdRestriction = restrictionConfiguration.getClientId();
-                            }
-                            if (clientIdRestriction != null && clientIdRestriction.contains(clientId)) {
-                                restrictionService.checkIsAuthAllowed(clientId,
-                                        authRes.getData().get(USER_ID.val()).toString(),
-                                        authRes.getAcrValues(),
-                                        restrictionConfiguration.getAttemptMaxValue(),
-                                        restrictionConfiguration.getTtlInSeconds());
+                            for(DestinationConfiguration restrictionConfiguration: restrictionConfigurations) {
+                                if (restrictionConfiguration != null) {
+                                    clientIdRestriction = restrictionConfiguration.getClientId();
+                                }
+                                if (clientIdRestriction != null && clientIdRestriction.contains(clientId)) {
+                                    restrictionService.checkIsAuthAllowed(clientId,
+                                            authRes.getData().get(USER_ID.val()).toString(),
+                                            authRes.getAcrValues(),
+                                            restrictionConfiguration.getAttemptMaxValue(),
+                                            restrictionConfiguration.getTtlInSeconds());
+                                }
                             }
                             return new ImmutableTriple<>(rp, authRes, request.getAcrValues());
                         }))
