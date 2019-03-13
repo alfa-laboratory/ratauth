@@ -205,24 +205,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .flatMap(rp -> authenticateUser(request.getAuthData(), request.getAcrValues(), rp.getIdentityProvider(), rp.getName())
                         .map(request::addVerifyResultAcrToRequest)
                         .map(authRes -> {
-                            List<DestinationConfiguration> restrictionConfigurations = new ArrayList<>();
-                            restrictionConfigurations.add(identityProvidersConfiguration.getIdp().get(request.getAcrValues().getFirst()).getRestrictions());
-                            if(request.getAcrValues().getSecond() != null)
-                                restrictionConfigurations.add(identityProvidersConfiguration.getIdp().get(request.getAcrValues().getSecond()).getRestrictions());
-                            String clientId = request.getClientId();
-                            List<String> clientIdRestriction  = null;
-                            for(DestinationConfiguration restrictionConfiguration: restrictionConfigurations) {
-                                if (restrictionConfiguration != null) {
-                                    clientIdRestriction = restrictionConfiguration.getClientId();
-                                }
-                                if (clientIdRestriction != null && clientIdRestriction.contains(clientId)) {
-                                    restrictionService.checkIsAuthAllowed(clientId,
-                                            authRes.getData().get(USER_ID.val()).toString(),
-                                            authRes.getAcrValues(),
-                                            restrictionConfiguration.getAttemptMaxValue(),
-                                            restrictionConfiguration.getTtlInSeconds());
-                                }
-                            }
+                            checkAuthRestrictions(request, authRes);
                             return new ImmutableTriple<>(rp, authRes, request.getAcrValues());
                         }))
                 .flatMap(rpAuth -> createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
@@ -360,5 +343,25 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         return provider.verify(verifyInput);
     }
 
+    private void checkAuthRestrictions(AuthzRequest request, VerifyResult verifyResult){
+        List<DestinationConfiguration> restrictionConfigurations = new ArrayList<>();
+        restrictionConfigurations.add(identityProvidersConfiguration.getIdp().get(request.getAcrValues().getFirst()).getRestrictions());
+        if(request.getAcrValues().getSecond() != null)
+            restrictionConfigurations.add(identityProvidersConfiguration.getIdp().get(request.getAcrValues().getSecond()).getRestrictions());
+        String clientId = request.getClientId();
+        List<String> clientIdRestriction  = null;
+        for(DestinationConfiguration restrictionConfiguration: restrictionConfigurations) {
+            if (restrictionConfiguration != null) {
+                clientIdRestriction = restrictionConfiguration.getClientId();
+            }
+            if (clientIdRestriction != null && clientIdRestriction.contains(clientId)) {
+                restrictionService.checkIsAuthAllowed(clientId,
+                        verifyResult.getData().get(USER_ID.val()).toString(),
+                        verifyResult.getAcrValues(),
+                        restrictionConfiguration.getAttemptMaxValue(),
+                        restrictionConfiguration.getTtlInSeconds());
+            }
+        }
+    }
 
 }
