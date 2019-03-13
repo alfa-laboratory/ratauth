@@ -207,7 +207,8 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                         .map(authRes -> {
                             List<DestinationConfiguration> restrictionConfigurations = new ArrayList<>();
                             restrictionConfigurations.add(identityProvidersConfiguration.getIdp().get(request.getAcrValues().getFirst()).getRestrictions());
-                            restrictionConfigurations.add(identityProvidersConfiguration.getIdp().get(request.getAcrValues().getSecond()).getRestrictions());
+                            if(request.getAcrValues().getSecond() != null)
+                                restrictionConfigurations.add(identityProvidersConfiguration.getIdp().get(request.getAcrValues().getSecond()).getRestrictions());
                             String clientId = request.getClientId();
                             List<String> clientIdRestriction  = null;
                             for(DestinationConfiguration restrictionConfiguration: restrictionConfigurations) {
