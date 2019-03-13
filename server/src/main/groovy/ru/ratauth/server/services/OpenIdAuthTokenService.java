@@ -20,7 +20,9 @@ import ru.ratauth.server.secutiry.OAuthSystemException;
 import rx.Observable;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Set;
 
 import static ru.ratauth.interaction.GrantType.*;
 
@@ -42,13 +44,22 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     @SneakyThrows
     public Observable<TokenResponse> getToken(TokenRequest oauthRequest) throws OAuthSystemException, JOSEException {
         final Observable<RelyingParty> relyingPartyObservable = clientService.loadAndAuthRelyingParty(oauthRequest.getClientId(), oauthRequest.getClientSecret(), true);
-        boolean needUpdateRefresh = !oauthRequest.getResponseTypes().contains(AuthzResponseType.ACCESS_TOKEN);
+        boolean refreshTokenReissue = !isReponseTypeAccessTokenOnly(oauthRequest.getResponseTypes());
 
         return relyingPartyObservable
                 .flatMap(rp -> loadSession(oauthRequest, rp).map(ses -> new ImmutablePair<>(rp, ses)))
-                .flatMap(rpSess -> authSessionService.addToken(oauthRequest, rpSess.getRight(), rpSess.getLeft(), needUpdateRefresh).map(res -> rpSess))
-                .flatMap(rpSess -> createIdTokenAndResponse(rpSess.getRight(), rpSess.getLeft()))
+                .flatMap(rpSess -> authSessionService.addToken(oauthRequest, rpSess.getRight(), rpSess.getLeft(), refreshTokenReissue).map(res -> rpSess))
+                .flatMap(rpSess -> {
+                    if (refreshTokenReissue) {
+                        return createIdTokenAndResponse(rpSess.getRight(), rpSess.getLeft());
+                    }
+                    return createIdTokenAndResponseWithRefreshToken(rpSess.getRight(), rpSess.getLeft(), oauthRequest.getRefreshToken());
+                })
                 .doOnCompleted(() -> log.info("Get-token succeed"));
+    }
+
+    private boolean isReponseTypeAccessTokenOnly(Set<AuthzResponseType> responseTypes) {
+        return responseTypes.equals(Collections.singleton(AuthzResponseType.ACCESS_TOKEN));
     }
 
     @Override
@@ -56,16 +67,18 @@ public class OpenIdAuthTokenService implements AuthTokenService {
         AuthEntry entry = session.getEntry(relyingParty.getName()).get();
         return tokenCacheService.getToken(session, relyingParty, entry)
                 .map(idToken -> new ImmutablePair<>(entry, idToken))
-                .map(entryToken -> convertToResponse(entryToken.getLeft(), entryToken.getRight().getIdToken(), session.getSessionToken()))
+                .map(entryToken -> {
+                    String refreshToken = entryToken.getLeft().getLatestToken().get().getRefreshToken();
+                    return convertToResponse(entryToken.getLeft(), entryToken.getRight().getIdToken(), session.getSessionToken(), refreshToken);
+                })
                 .switchIfEmpty(Observable.error(new ExpiredException(ExpiredException.ID.TOKEN_EXPIRED)));
     }
 
-    @Override
-    public Observable<TokenResponse> createIdTokenAndResponse(Session session, RelyingParty relyingParty, String authContext) {
+    private Observable<TokenResponse> createIdTokenAndResponseWithRefreshToken(Session session, RelyingParty relyingParty, String refreshToken) {
         AuthEntry entry = session.getEntry(relyingParty.getName()).get();
         return tokenCacheService.getToken(session, relyingParty, entry)
                 .map(idToken -> new ImmutablePair<>(entry, idToken))
-                .map(entryToken -> convertToResponse(entryToken.getLeft(), entryToken.getRight().getIdToken(), session.getSessionToken()))
+                .map(entryToken -> convertToResponse(entryToken.getLeft(), entryToken.getRight().getIdToken(), session.getSessionToken(), refreshToken))
                 .switchIfEmpty(Observable.error(new ExpiredException(ExpiredException.ID.TOKEN_EXPIRED)));
     }
 
@@ -116,14 +129,14 @@ public class OpenIdAuthTokenService implements AuthTokenService {
             throw new ExpiredException(ExpiredException.ID.SESSION_EXPIRED);
     }
 
-    private TokenResponse convertToResponse(AuthEntry authEntry, String idToken, String sessionToken) {
+    private TokenResponse convertToResponse(AuthEntry authEntry, String idToken, String sessionToken, String refreshToken) {
         final Token token = authEntry.getLatestToken().get();
         return TokenResponse.builder()
                 .accessToken(token.getToken())
                 .expiresIn(token.getExpiresIn().getTime())
                 .tokenType(TokenType.BEARER.toString())
                 .idToken(idToken)
-                .refreshToken(token.getRefreshToken())
+                .refreshToken(refreshToken)
                 .clientId(authEntry.getRelyingParty())
                 .sessionToken(sessionToken)
                 .build();

@@ -1,5 +1,6 @@
 package ru.ratauth.server.providers
 
+import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonSlurper
@@ -77,7 +78,7 @@ class RestIdentityProvider implements IdentityProvider {
     private AuthErrorHandler.ExceptionDTO toExceptionDTO(String body) {
         try {
             return jacksonObjectMapper.readValue(body, AuthErrorHandler.ExceptionDTO)
-        } catch (JsonMappingException e) {
+        } catch (JsonMappingException | JsonParseException e) {
             log.debug("Can't parse exception: '${body}'", e)
             throw new ProviderException(ProviderException.ID.DESERIALIZATION_ERROR, body)
         }

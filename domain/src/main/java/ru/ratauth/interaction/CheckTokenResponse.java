@@ -18,4 +18,5 @@ public class CheckTokenResponse {
     private String clientId;
     private @Singular
     Set<String> scopes;
+    private Boolean active;
 }

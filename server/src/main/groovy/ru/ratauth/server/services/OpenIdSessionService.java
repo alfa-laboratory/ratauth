@@ -108,7 +108,7 @@ public class OpenIdSessionService implements AuthSessionService {
     public Observable<Boolean> addToken(TokenRequest oauthRequest, Session session, RelyingParty relyingParty, boolean needUpdateRefresh) {
         final LocalDateTime now = now();
         final LocalDateTime tokenExpires = now.plus(relyingParty.getTokenTTL(), ChronoUnit.SECONDS);
-        final LocalDateTime refreshTokenExpiresIn = generateRefreshTokenExpiresIn(session, relyingParty, needUpdateRefresh);
+        final LocalDateTime refreshTokenExpiresIn = generateRefreshTokenExpiresIn(tokenExpires, relyingParty, needUpdateRefresh);
         final Token token = Token.builder()
                 .refreshToken(codeGenerator.refreshToken())
                 .refreshTokenExpiresIn(DateUtils.fromLocal(refreshTokenExpiresIn))
@@ -121,12 +121,9 @@ public class OpenIdSessionService implements AuthSessionService {
                 .doOnNext(subs -> session.getEntry(relyingParty.getName()).ifPresent(entry -> entry.addToken(token)));
     }
 
-    private LocalDateTime generateRefreshTokenExpiresIn(Session session, RelyingParty relyingParty, boolean needUpdateRefresh) {
+    private LocalDateTime generateRefreshTokenExpiresIn(LocalDateTime tokenExpires, RelyingParty relyingParty, boolean needUpdateRefresh) {
         if (!needUpdateRefresh) {
-            Optional<AuthEntry> lastEntry = session.getEntry(relyingParty.getName());
-            return lastEntry.flatMap(AuthEntry::getLatestToken)
-                    .map(token -> token.getRefreshTokenExpiresIn().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
-                    .orElseThrow(() -> new AuthorizationException("Last Refresh Token not found. Current session: " + session.getId()));
+            return tokenExpires;
         }
         return now().plus(relyingParty.getRefreshTokenTTL(), ChronoUnit.SECONDS);
     }
