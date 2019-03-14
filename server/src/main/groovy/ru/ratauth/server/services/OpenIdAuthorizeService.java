@@ -343,18 +343,14 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         return provider.verify(verifyInput);
     }
 
-    private void checkAuthRestrictions(AuthzRequest request, VerifyResult verifyResult){
+    private void checkAuthRestrictions(AuthzRequest request, VerifyResult verifyResult) {
         List<DestinationConfiguration> restrictionConfigurations = new ArrayList<>();
         restrictionConfigurations.add(identityProvidersConfiguration.getIdp().get(request.getAcrValues().getFirst()).getRestrictions());
-        if(request.getAcrValues().getSecond() != null)
+        if (request.getAcrValues().getSecond() != null)
             restrictionConfigurations.add(identityProvidersConfiguration.getIdp().get(request.getAcrValues().getSecond()).getRestrictions());
         String clientId = request.getClientId();
-        List<String> clientIdRestriction  = null;
-        for(DestinationConfiguration restrictionConfiguration: restrictionConfigurations) {
-            if (restrictionConfiguration != null) {
-                clientIdRestriction = restrictionConfiguration.getClientId();
-            }
-            if (clientIdRestriction != null && clientIdRestriction.contains(clientId)) {
+        for (DestinationConfiguration restrictionConfiguration : restrictionConfigurations) {
+            if (shouldIncrementRestrictionCount(restrictionConfiguration, clientId)) {
                 restrictionService.checkIsAuthAllowed(clientId,
                         verifyResult.getData().get(USER_ID.val()).toString(),
                         verifyResult.getAcrValues(),
@@ -364,4 +360,12 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         }
     }
 
+    private List<String> getClientIdRestriction(DestinationConfiguration restrictionConfiguration) {
+        return restrictionConfiguration == null ? null : restrictionConfiguration.getClientId();
+    }
+
+    private boolean shouldIncrementRestrictionCount(DestinationConfiguration restrictionConfiguration, String requestClientId) {
+        List<String> clientIdsRestriction = getClientIdRestriction(restrictionConfiguration);
+        return clientIdsRestriction != null && clientIdsRestriction.contains(requestClientId);
+    }
 }
