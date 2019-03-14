@@ -35,9 +35,7 @@ public class AcrValues implements AcrValue, Enroll {
 
 
     public String getSecond() {
-        if (this.getValues().size() > 1)
-            return this.getValues().get(1);
-        else return null;
+        return this.getValues().stream().skip(1).findFirst().orElse(null);
     }
 
     public AcrValues difference(AcrValues acrValues) {
