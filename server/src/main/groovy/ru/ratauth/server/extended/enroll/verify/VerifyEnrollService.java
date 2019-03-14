@@ -158,6 +158,7 @@ public class VerifyEnrollService {
     private DeviceInfo createDeviceInfoFromRequest(Session session, VerifyEnrollRequest request) {
         return DeviceInfo.builder()
                 .userId(session.getUserId())
+                .sessionToken(session.getSessionToken())
                 .deviceAppVersion(request.getDeviceAppVersion())
                 .deviceId(request.getDeviceId())
                 .deviceUUID(request.getDeviceUUID())
