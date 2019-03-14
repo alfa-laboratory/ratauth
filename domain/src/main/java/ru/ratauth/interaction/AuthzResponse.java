@@ -10,7 +10,9 @@ import ru.ratauth.utils.StringUtils;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 /**
  * @author djassan
@@ -38,6 +40,9 @@ public class AuthzResponse {
     private String reason;
     private String updateCode;
     private String updateService;
+
+    private String clientId;
+    private Set<String> scopes;
 
     private String getEncodedRedirectURI() {
         try {
@@ -76,6 +81,12 @@ public class AuthzResponse {
         }
         if (acrValues != null && acrValues.getValues() != null && !acrValues.getValues().isEmpty()) {
             joiner.add("acr_values=" + acrValues.toString());
+        }
+        if (clientId != null) {
+            joiner.add("client_id=" + clientId);
+        }
+        if (scopes != null) {
+            joiner.add("scope=" + scopes.stream().collect(Collectors.joining(" ")));
         }
         if (data != null && !data.isEmpty()) {
             data.entrySet().stream()
