@@ -61,6 +61,8 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         //in case of autCode sent by authProvider
         if (session == null || CollectionUtils.isEmpty(session.getEntries())) {
             AuthzResponse resp = AuthzResponse.builder()
+                    .clientId(authzRequest.getClientId())
+                    .scopes(authzRequest.getScopes())
                     .location(relyingParty.getAuthorizationRedirectURI())
                     .data(verifyResult.getData())
                     .redirectURI(targetRedirectURI)
@@ -70,6 +72,8 @@ public class OpenIdAuthorizeService implements AuthorizeService {
 
         AuthEntry entry = session.getEntry(relyingParty.getName()).get();
         AuthzResponse resp = AuthzResponse.builder()
+                .clientId(authzRequest.getClientId())
+                .scopes(authzRequest.getScopes())
                 .location(entry.getRedirectUrl())
                 .sessionToken(session.getSessionToken())
                 .acrValues(verifyResult.getAcrValues())
