@@ -272,6 +272,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     private DeviceInfo createDeviceInfoFromRequest(Session session, AuthzRequest request) {
         return DeviceInfo.builder()
                 .userId(session.getUserId())
+                .sessionToken(session.getSessionToken())
                 .deviceAppVersion(request.getDeviceAppVersion())
                 .deviceId(request.getDeviceId())
                 .deviceUUID(request.getDeviceUUID())

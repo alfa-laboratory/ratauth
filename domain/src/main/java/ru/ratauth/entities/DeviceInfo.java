@@ -14,6 +14,7 @@ import java.util.Date;
 public class DeviceInfo {
 
     private String id;
+    private String sessionToken;
     private String userId;
 
     private String deviceAppVersion;
