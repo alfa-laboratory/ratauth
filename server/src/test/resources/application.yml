@@ -78,6 +78,6 @@ ratauth.hazelcast:
 ratauth.idp:
   username:
     restrictions:
-      ttl-in-seconds: 1
+      ttl-in-minutes: 1
       attempt-max-value: 1
       client-id: RestrictedIdentityProvider
