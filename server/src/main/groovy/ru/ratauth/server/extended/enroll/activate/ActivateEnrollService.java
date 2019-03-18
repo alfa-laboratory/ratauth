@@ -5,25 +5,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.ratauth.entities.IdentityProvider;
-import ru.ratauth.entities.RelyingParty;
-import ru.ratauth.entities.Session;
-import ru.ratauth.entities.UserInfo;
+import ru.ratauth.entities.*;
 import ru.ratauth.providers.auth.dto.ActivateInput;
 import ru.ratauth.providers.auth.dto.ActivateResult;
+import ru.ratauth.server.configuration.DestinationConfiguration;
+import ru.ratauth.server.configuration.IdentityProvidersConfiguration;
 import ru.ratauth.server.providers.IdentityProviderResolver;
 import ru.ratauth.server.secutiry.TokenProcessor;
 import ru.ratauth.server.services.AuthClientService;
 import ru.ratauth.server.services.AuthSessionService;
 import ru.ratauth.server.services.TokenCacheService;
+import ru.ratauth.services.RestrictionService;
 import rx.Observable;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Optional.ofNullable;
+import static ru.ratauth.providers.Fields.USER_ID;
 
 @Slf4j
 @Service
@@ -36,15 +34,24 @@ public class ActivateEnrollService {
     private final TokenProcessor tokenProcessor;
     private final IdentityProviderResolver identityProviderResolver;
 
+    private final RestrictionService restrictionService;
+    private final IdentityProvidersConfiguration identityProvidersConfiguration;
+
     public Observable<ActivateEnrollResponse> incAuthLevel(ActivateEnrollRequest request) {
         String mfa = request.getMfaToken();
+        log.error("Activate incAuthLevel " + request);
         return Observable.zip(
                 clientService.loadAndAuthRelyingParty(request.getClientId(), null, false),
                 mfa != null ? sessionService.getByValidMFAToken(request.getMfaToken(), new Date()) : Observable.just(null),
                 ImmutablePair::new
         )
-                .flatMap(p -> activateAndUpdateUserInfo(p.right, request, p.left))
-                .map(result -> new ActivateEnrollResponse(request.getMfaToken(), result.getData()));
+                .flatMap(p -> {
+                    checkAuthRestrictions(p.right, request);
+                    return activateAndUpdateUserInfo(p.right, request, p.left);
+                })
+                .map(result -> {
+                    return new ActivateEnrollResponse(request.getMfaToken(), result.getData());
+                });
     }
 
     private Observable<Boolean> updateUserInfo(Session session, UserInfo userInfo, Set<String> scopes, Set<String> authContext) {
@@ -86,4 +93,28 @@ public class ActivateEnrollService {
         return identityProvider.activate(activateInput);
     }
 
+
+    private void checkAuthRestrictions(Session session, ActivateEnrollRequest request) {
+        DestinationConfiguration restrictionConfiguration = identityProvidersConfiguration.getIdp().get(request.getEnroll().getFirst()).getRestrictions();
+        String clientId = request.getClientId();
+
+        log.error("activate check restrictions for " + session.toString() + " _________    " + session.getUserId());
+        if (shouldIncrementRestrictionCount(restrictionConfiguration, clientId)) {
+            restrictionService.checkIsAuthAllowed(clientId,
+                    session.getUserId(),
+                    (AcrValues) request.getEnroll(),
+                    restrictionConfiguration.getAttemptMaxValue(),
+                    restrictionConfiguration.getTtlInSeconds());
+        }
+
+    }
+
+    private List<String> getClientIdRestriction(DestinationConfiguration restrictionConfiguration) {
+        return restrictionConfiguration == null ? null : restrictionConfiguration.getClientId();
+    }
+
+    private boolean shouldIncrementRestrictionCount(DestinationConfiguration restrictionConfiguration, String requestClientId) {
+        List<String> clientIdsRestriction = getClientIdRestriction(restrictionConfiguration);
+        return clientIdsRestriction != null && clientIdsRestriction.contains(requestClientId);
+    }
 }
