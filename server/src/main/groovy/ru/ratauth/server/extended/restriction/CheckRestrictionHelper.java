@@ -10,6 +10,7 @@ import ru.ratauth.providers.auth.dto.VerifyResult;
 import ru.ratauth.server.configuration.DestinationConfiguration;
 import ru.ratauth.server.configuration.IdentityProviderConfiguration;
 import ru.ratauth.server.configuration.IdentityProvidersConfiguration;
+import ru.ratauth.server.configuration.RestrictionConfiguration;
 import ru.ratauth.server.extended.enroll.activate.ActivateEnrollRequest;
 import ru.ratauth.services.RestrictionService;
 
@@ -25,7 +26,7 @@ public class CheckRestrictionHelper {
     private final RestrictionService restrictionService;
 
     public void checkAuthRestrictions(AuthzRequest request, VerifyResult verifyResult) {
-        DestinationConfiguration restrictionConfiguration = identityProvidersConfiguration.getIdp().get(request.getEnroll()).getRestrictions();
+        RestrictionConfiguration restrictionConfiguration = identityProvidersConfiguration.getIdp().get(request.getEnroll()).getRestrictions();
         String clientId = request.getClientId();
         if (shouldIncrementRestrictionCount(restrictionConfiguration, clientId)) {
             restrictionService.checkIsAuthAllowed(clientId,
@@ -37,7 +38,7 @@ public class CheckRestrictionHelper {
     }
 
     public void checkAuthRestrictions(Session session, ActivateEnrollRequest request) {
-        DestinationConfiguration restrictionConfiguration = identityProvidersConfiguration.getIdp().get(request.getEnroll().getFirst()).getRestrictions();
+        RestrictionConfiguration restrictionConfiguration = identityProvidersConfiguration.getIdp().get(request.getEnroll().getFirst()).getRestrictions();
         String clientId = request.getClientId();
         if (shouldIncrementRestrictionCount(restrictionConfiguration, clientId)) {
             restrictionService.checkIsAuthAllowed(clientId,
@@ -49,11 +50,11 @@ public class CheckRestrictionHelper {
 
     }
 
-    private List<String> getClientIdRestriction(DestinationConfiguration restrictionConfiguration) {
+    private List<String> getClientIdRestriction(RestrictionConfiguration restrictionConfiguration) {
         return restrictionConfiguration == null ? null : restrictionConfiguration.getClientId();
     }
 
-    private boolean shouldIncrementRestrictionCount(DestinationConfiguration restrictionConfiguration, String requestClientId) {
+    private boolean shouldIncrementRestrictionCount(RestrictionConfiguration restrictionConfiguration, String requestClientId) {
         List<String> clientIdsRestriction = getClientIdRestriction(restrictionConfiguration);
         return clientIdsRestriction != null && clientIdsRestriction.contains(requestClientId);
     }
