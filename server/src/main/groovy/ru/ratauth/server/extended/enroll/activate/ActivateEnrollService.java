@@ -21,7 +21,6 @@ import rx.Observable;
 import java.util.*;
 
 import static java.util.Optional.ofNullable;
-import static ru.ratauth.providers.Fields.USER_ID;
 
 @Slf4j
 @Service
@@ -39,7 +38,6 @@ public class ActivateEnrollService {
 
     public Observable<ActivateEnrollResponse> incAuthLevel(ActivateEnrollRequest request) {
         String mfa = request.getMfaToken();
-        log.error("Activate incAuthLevel " + request);
         return Observable.zip(
                 clientService.loadAndAuthRelyingParty(request.getClientId(), null, false),
                 mfa != null ? sessionService.getByValidMFAToken(request.getMfaToken(), new Date()) : Observable.just(null),
@@ -98,8 +96,6 @@ public class ActivateEnrollService {
     private void checkAuthRestrictions(Session session, ActivateEnrollRequest request) {
         DestinationConfiguration restrictionConfiguration = identityProvidersConfiguration.getIdp().get(request.getEnroll().getFirst()).getRestrictions();
         String clientId = request.getClientId();
-
-        log.error("activate check restrictions for " + session.toString() + " _________    " + session.getUserId());
         if (shouldIncrementRestrictionCount(restrictionConfiguration, clientId)) {
             restrictionService.checkIsAuthAllowed(clientId,
                     session.getUserId(),
