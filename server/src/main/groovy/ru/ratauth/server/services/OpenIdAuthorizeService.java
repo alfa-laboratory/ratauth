@@ -344,12 +344,8 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     }
 
     private void checkAuthRestrictions(AuthzRequest request, VerifyResult verifyResult) {
-        List<DestinationConfiguration> restrictionConfigurations = new ArrayList<>();
-        restrictionConfigurations.add(identityProvidersConfiguration.getIdp().get(request.getAcrValues().getFirst()).getRestrictions());
-        if (request.getAcrValues().getSecond() != null)
-            restrictionConfigurations.add(identityProvidersConfiguration.getIdp().get(request.getAcrValues().getSecond()).getRestrictions());
+        DestinationConfiguration restrictionConfiguration = identityProvidersConfiguration.getIdp().get(request.getEnroll()).getRestrictions();
         String clientId = request.getClientId();
-        for (DestinationConfiguration restrictionConfiguration : restrictionConfigurations) {
             if (shouldIncrementRestrictionCount(restrictionConfiguration, clientId)) {
                 restrictionService.checkIsAuthAllowed(clientId,
                         verifyResult.getData().get(USER_ID.val()).toString(),
@@ -357,7 +353,6 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                         restrictionConfiguration.getAttemptMaxValue(),
                         restrictionConfiguration.getTtlInSeconds());
             }
-        }
     }
 
     private List<String> getClientIdRestriction(DestinationConfiguration restrictionConfiguration) {
