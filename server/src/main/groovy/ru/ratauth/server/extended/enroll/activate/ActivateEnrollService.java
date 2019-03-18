@@ -43,13 +43,8 @@ public class ActivateEnrollService {
                 mfa != null ? sessionService.getByValidMFAToken(request.getMfaToken(), new Date()) : Observable.just(null),
                 ImmutablePair::new
         )
-                .flatMap(p -> {
-
-                    return activateAndUpdateUserInfo(p.right, request, p.left);
-                })
-                .map(result -> {
-                    return new ActivateEnrollResponse(request.getMfaToken(), result.getData());
-                });
+                .flatMap(p ->  activateAndUpdateUserInfo(p.right, request, p.left))
+                .map(result ->  new ActivateEnrollResponse(request.getMfaToken(), result.getData()));
     }
 
     private Observable<Boolean> updateUserInfo(Session session, UserInfo userInfo, Set<String> scopes, Set<String> authContext) {
