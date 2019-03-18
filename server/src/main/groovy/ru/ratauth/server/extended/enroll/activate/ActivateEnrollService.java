@@ -5,20 +5,24 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.ratauth.entities.*;
+import ru.ratauth.entities.IdentityProvider;
+import ru.ratauth.entities.RelyingParty;
+import ru.ratauth.entities.Session;
+import ru.ratauth.entities.UserInfo;
 import ru.ratauth.providers.auth.dto.ActivateInput;
 import ru.ratauth.providers.auth.dto.ActivateResult;
-import ru.ratauth.server.configuration.DestinationConfiguration;
-import ru.ratauth.server.configuration.IdentityProvidersConfiguration;
+import ru.ratauth.server.extended.restriction.CheckRestrictionHelper;
 import ru.ratauth.server.providers.IdentityProviderResolver;
 import ru.ratauth.server.secutiry.TokenProcessor;
 import ru.ratauth.server.services.AuthClientService;
 import ru.ratauth.server.services.AuthSessionService;
 import ru.ratauth.server.services.TokenCacheService;
-import ru.ratauth.services.RestrictionService;
 import rx.Observable;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map;
+import java.util.Set;
 
 import static java.util.Optional.ofNullable;
 
@@ -32,9 +36,7 @@ public class ActivateEnrollService {
     private final TokenCacheService tokenCacheService;
     private final TokenProcessor tokenProcessor;
     private final IdentityProviderResolver identityProviderResolver;
-
-    private final RestrictionService restrictionService;
-    private final IdentityProvidersConfiguration identityProvidersConfiguration;
+    private final CheckRestrictionHelper checkRestrictionHelper;
 
     public Observable<ActivateEnrollResponse> incAuthLevel(ActivateEnrollRequest request) {
         String mfa = request.getMfaToken();
@@ -53,7 +55,7 @@ public class ActivateEnrollService {
 
     private Observable<ActivateResult> activateAndUpdateUserInfo(Session session, ActivateEnrollRequest request, RelyingParty relyingParty) {
         if (session != null) {
-            checkAuthRestrictions(session, request);
+            checkRestrictionHelper.checkAuthRestrictions(session, request);
             Map<String, Object> tokenInfo = extractUserInfo(session);
             UserInfo userInfo = new UserInfo(tokenProcessor.filterUserInfo(tokenInfo));
             Set<String> authContext = tokenProcessor.extractAuthContext(tokenInfo);
@@ -87,26 +89,4 @@ public class ActivateEnrollService {
         return identityProvider.activate(activateInput);
     }
 
-
-    private void checkAuthRestrictions(Session session, ActivateEnrollRequest request) {
-        DestinationConfiguration restrictionConfiguration = identityProvidersConfiguration.getIdp().get(request.getEnroll().getFirst()).getRestrictions();
-        String clientId = request.getClientId();
-        if (shouldIncrementRestrictionCount(restrictionConfiguration, clientId)) {
-            restrictionService.checkIsAuthAllowed(clientId,
-                    session.getUserId(),
-                    (AcrValues) request.getEnroll(),
-                    restrictionConfiguration.getAttemptMaxValue(),
-                    restrictionConfiguration.getTtlInSeconds());
-        }
-
-    }
-
-    private List<String> getClientIdRestriction(DestinationConfiguration restrictionConfiguration) {
-        return restrictionConfiguration == null ? null : restrictionConfiguration.getClientId();
-    }
-
-    private boolean shouldIncrementRestrictionCount(DestinationConfiguration restrictionConfiguration, String requestClientId) {
-        List<String> clientIdsRestriction = getClientIdRestriction(restrictionConfiguration);
-        return clientIdsRestriction != null && clientIdsRestriction.contains(requestClientId);
-    }
 }
