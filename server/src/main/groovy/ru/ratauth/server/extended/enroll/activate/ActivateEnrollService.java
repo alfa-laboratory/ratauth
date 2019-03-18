@@ -46,7 +46,7 @@ public class ActivateEnrollService {
                 ImmutablePair::new
         )
                 .flatMap(p -> {
-                    checkAuthRestrictions(p.right, request);
+
                     return activateAndUpdateUserInfo(p.right, request, p.left);
                 })
                 .map(result -> {
@@ -60,6 +60,7 @@ public class ActivateEnrollService {
 
     private Observable<ActivateResult> activateAndUpdateUserInfo(Session session, ActivateEnrollRequest request, RelyingParty relyingParty) {
         if (session != null) {
+            checkAuthRestrictions(session, request);
             Map<String, Object> tokenInfo = extractUserInfo(session);
             UserInfo userInfo = new UserInfo(tokenProcessor.filterUserInfo(tokenInfo));
             Set<String> authContext = tokenProcessor.extractAuthContext(tokenInfo);
