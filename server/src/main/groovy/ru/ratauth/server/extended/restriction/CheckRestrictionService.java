@@ -31,7 +31,7 @@ public class CheckRestrictionService {
                     verifyResult.getData().get(USER_ID.val()).toString(),
                     verifyResult.getAcrValues(),
                     restrictionConfiguration.getAttemptMaxValue(),
-                    restrictionConfiguration.getTtlInSeconds());
+                    restrictionConfiguration.getTtlInMinutes());
         }
     }
 
@@ -43,7 +43,7 @@ public class CheckRestrictionService {
                     session.getUserId(),
                     (AcrValues) request.getEnroll(),
                     restrictionConfiguration.getAttemptMaxValue(),
-                    restrictionConfiguration.getTtlInSeconds());
+                    restrictionConfiguration.getTtlInMinutes());
         }
 
     }

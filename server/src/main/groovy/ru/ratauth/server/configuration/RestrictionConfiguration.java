@@ -8,6 +8,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RestrictionConfiguration {
     Integer attemptMaxValue;
-    Integer ttlInSeconds;
+    Integer ttlInMinutes;
     List<String> clientId;
 }
