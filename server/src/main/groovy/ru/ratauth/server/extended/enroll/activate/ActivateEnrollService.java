@@ -11,7 +11,7 @@ import ru.ratauth.entities.Session;
 import ru.ratauth.entities.UserInfo;
 import ru.ratauth.providers.auth.dto.ActivateInput;
 import ru.ratauth.providers.auth.dto.ActivateResult;
-import ru.ratauth.server.extended.restriction.CheckRestrictionHelper;
+import ru.ratauth.server.extended.restriction.CheckRestrictionService;
 import ru.ratauth.server.providers.IdentityProviderResolver;
 import ru.ratauth.server.secutiry.TokenProcessor;
 import ru.ratauth.server.services.AuthClientService;
@@ -36,7 +36,7 @@ public class ActivateEnrollService {
     private final TokenCacheService tokenCacheService;
     private final TokenProcessor tokenProcessor;
     private final IdentityProviderResolver identityProviderResolver;
-    private final CheckRestrictionHelper checkRestrictionHelper;
+    private final CheckRestrictionService checkRestrictionService;
 
     public Observable<ActivateEnrollResponse> incAuthLevel(ActivateEnrollRequest request) {
         String mfa = request.getMfaToken();
@@ -55,7 +55,7 @@ public class ActivateEnrollService {
 
     private Observable<ActivateResult> activateAndUpdateUserInfo(Session session, ActivateEnrollRequest request, RelyingParty relyingParty) {
         if (session != null) {
-            checkRestrictionHelper.checkAuthRestrictions(session, request);
+            checkRestrictionService.checkAuthRestrictions(session, request);
             Map<String, Object> tokenInfo = extractUserInfo(session);
             UserInfo userInfo = new UserInfo(tokenProcessor.filterUserInfo(tokenInfo));
             Set<String> authContext = tokenProcessor.extractAuthContext(tokenInfo);

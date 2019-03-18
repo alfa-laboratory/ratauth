@@ -7,8 +7,6 @@ import ru.ratauth.entities.AcrValues;
 import ru.ratauth.entities.Session;
 import ru.ratauth.interaction.AuthzRequest;
 import ru.ratauth.providers.auth.dto.VerifyResult;
-import ru.ratauth.server.configuration.DestinationConfiguration;
-import ru.ratauth.server.configuration.IdentityProviderConfiguration;
 import ru.ratauth.server.configuration.IdentityProvidersConfiguration;
 import ru.ratauth.server.configuration.RestrictionConfiguration;
 import ru.ratauth.server.extended.enroll.activate.ActivateEnrollRequest;
@@ -20,7 +18,7 @@ import static ru.ratauth.providers.Fields.USER_ID;
 
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class CheckRestrictionHelper {
+public class CheckRestrictionService {
 
     private final IdentityProvidersConfiguration identityProvidersConfiguration;
     private final RestrictionService restrictionService;
