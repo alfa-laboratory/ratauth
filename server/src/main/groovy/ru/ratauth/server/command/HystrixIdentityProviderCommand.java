@@ -19,10 +19,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.*;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
@@ -33,6 +30,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.netflix.hystrix.HystrixCommandGroupKey.Factory.asKey;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Optional.ofNullable;
 
 @Slf4j
@@ -114,6 +112,7 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
         return "Basic " + new String(encodedAuth, "UTF-8");
     }
 
+    @SneakyThrows(UnsupportedEncodingException.class)
     protected Observable<ReceivedResponse> construct() {
         Promise<ReceivedResponse> promise = httpClient.post(
                 uri,
@@ -146,7 +145,7 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
                         body.type(MediaType.APPLICATION_JSON);
                         body.text(data.entrySet().stream()
                                 .filter(e -> e.getKey() != null && e.getValue() != null)
-                                .map(e -> e.getKey() + "=" + e.getValue())
+                                .map(e -> e.getKey() + "=" + URLEncoder.encode(String.valueOf(e.getValue()), UTF_8.name()))
                                 .collect(Collectors.joining("&")));
                     });
                 }
