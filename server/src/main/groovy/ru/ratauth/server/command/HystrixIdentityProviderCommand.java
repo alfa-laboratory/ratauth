@@ -112,7 +112,6 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
         return "Basic " + new String(encodedAuth, "UTF-8");
     }
 
-    @SneakyThrows(UnsupportedEncodingException.class)
     protected Observable<ReceivedResponse> construct() {
         Promise<ReceivedResponse> promise = httpClient.post(
                 uri,
@@ -145,7 +144,13 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
                         body.type(MediaType.APPLICATION_JSON);
                         body.text(data.entrySet().stream()
                                 .filter(e -> e.getKey() != null && e.getValue() != null)
-                                .map(e -> e.getKey() + "=" + URLEncoder.encode(String.valueOf(e.getValue()), UTF_8.name()))
+                                .map(e -> {
+                                    try {
+                                        return e.getKey() + "=" + URLEncoder.encode(String.valueOf(e.getValue()), UTF_8.name());
+                                    } catch (UnsupportedEncodingException exception) {
+                                        throw new AssertionError("Encoding UTF-8 is not supported", exception);
+                                    }
+                                })
                                 .collect(Collectors.joining("&")));
                     });
                 }
