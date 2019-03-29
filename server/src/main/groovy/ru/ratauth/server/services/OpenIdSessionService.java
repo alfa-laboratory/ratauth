@@ -122,7 +122,7 @@ public class OpenIdSessionService implements AuthSessionService {
     }
 
     private LocalDateTime generateRefreshTokenExpiresIn(LocalDateTime tokenExpires, RelyingParty relyingParty, boolean needUpdateRefresh) {
-        if (!needUpdateRefresh) {
+        if (needUpdateRefresh) {
             return tokenExpires;
         }
         return now().plus(relyingParty.getRefreshTokenTTL(), ChronoUnit.SECONDS);
