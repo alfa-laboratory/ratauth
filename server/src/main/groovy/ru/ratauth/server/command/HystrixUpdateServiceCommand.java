@@ -17,8 +17,10 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.validation.constraints.NotNull;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
@@ -99,12 +101,17 @@ public class HystrixUpdateServiceCommand extends HystrixObservableCommand<Receiv
                         body.type(MediaType.APPLICATION_JSON);
                         body.text(data.entrySet().stream()
                                 .filter(e -> e.getKey() != null && e.getValue() != null)
-                                .map(e -> e.getKey() + "=" + e.getValue())
+                                .map(e -> e.getKey() + "=" + encode(e.getValue()))
                                 .collect(Collectors.joining("&")));
                     });
                 }
         );
         return RxRatpack.observe(promise);
+    }
+
+    @SneakyThrows(UnsupportedEncodingException.class)
+    private static String encode(Object value) {
+        return URLEncoder.encode(String.valueOf(value), "UTF-8");
     }
 
     @SneakyThrows
