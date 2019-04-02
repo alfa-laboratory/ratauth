@@ -31,11 +31,3 @@ ru.ratauth.scope:
 
 ru.ratauth.idp.default: "DCA"
 ratauth.timeout: 4000
-
-ratauth.hazelcast:
-  name: ratauth
-  password: ratauth
-  nodes:
-    - ratauth1
-    - ratauth2
-    - ratauth3
