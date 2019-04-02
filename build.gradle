@@ -194,8 +194,6 @@ subprojects {
     compile 'org.codehaus.groovy:groovy-all'
     compile 'io.reactivex:rxjava'
 
-    compile 'com.hazelcast:hazelcast'
-    compile 'com.hazelcast:hazelcast-client'
     //test
     testCompile 'org.springframework.boot:spring-boot-starter-test'
     testCompile 'org.spockframework:spock-core', {
