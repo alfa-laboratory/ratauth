@@ -2,10 +2,12 @@ package ru.ratauth.server.services;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.ratauth.entities.*;
+import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.interaction.TokenRequest;
 import ru.ratauth.providers.Fields;
 import ru.ratauth.providers.auth.dto.BaseAuthFields;
@@ -26,6 +28,7 @@ import static java.time.LocalDateTime.now;
  * @author djassan
  * @since 17/02/16
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OpenIdSessionService implements AuthSessionService {
@@ -39,6 +42,9 @@ public class OpenIdSessionService implements AuthSessionService {
 
     @Value("${auth.master_secret}")
     private String masterSecret;//final
+
+    @Value("${auth.session.tokens_limit:0}")
+    private int tokensLimit;
 
     @Override
     public Observable<Session> initSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, AcrValues acrValues,
@@ -119,9 +125,17 @@ public class OpenIdSessionService implements AuthSessionService {
         return sessionService.addToken(session, relyingParty.getName(), token)
                 .map(b -> {
                     session.getEntry(relyingParty.getName())
+                            .map(this::checkTokensCount)
                             .ifPresent(entry -> entry.addToken(token));
                     return b;
                 });
+    }
+
+    private AuthEntry checkTokensCount(AuthEntry authEntry) {
+        if (tokensLimit > 0 && authEntry.getTokens().size() > tokensLimit) {
+            throw new IllegalStateException("Session cross tokens threshold");
+        }
+        return authEntry;
     }
 
     private LocalDateTime generateRefreshTokenExpiresIn(LocalDateTime tokenExpires, RelyingParty relyingParty, boolean needUpdateRefresh) {
