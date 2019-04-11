@@ -117,7 +117,7 @@ public class OpenIdSessionService implements AuthSessionService {
                 .expiresIn(DateUtils.fromLocal(tokenExpires))
                 .created(DateUtils.fromLocal(now))
                 .build();
-        return sessionService.addToken(session.getId(), relyingParty.getName(), token)
+        return sessionService.addToken(session, relyingParty.getName(), token)
                 .doOnNext(subs -> session.getEntry(relyingParty.getName()).ifPresent(entry -> entry.addToken(token)));
     }
 
