@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.ratauth.entities.*;
-import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.interaction.TokenRequest;
 import ru.ratauth.providers.Fields;
 import ru.ratauth.providers.auth.dto.BaseAuthFields;
@@ -18,11 +17,11 @@ import ru.ratauth.services.SessionService;
 import rx.Observable;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static java.time.LocalDateTime.now;
+
 /**
  * @author djassan
  * @since 17/02/16
@@ -118,7 +117,11 @@ public class OpenIdSessionService implements AuthSessionService {
                 .created(DateUtils.fromLocal(now))
                 .build();
         return sessionService.addToken(session, relyingParty.getName(), token)
-                .doOnNext(subs -> session.getEntry(relyingParty.getName()).ifPresent(entry -> entry.addToken(token)));
+                .map(b -> {
+                    session.getEntry(relyingParty.getName())
+                            .ifPresent(entry -> entry.addToken(token));
+                    return b;
+                });
     }
 
     private LocalDateTime generateRefreshTokenExpiresIn(LocalDateTime tokenExpires, RelyingParty relyingParty, boolean needUpdateRefresh) {
