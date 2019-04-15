@@ -12,9 +12,8 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateServiceRequest {
-
     private String code;
-    private boolean skip;
+    private Boolean skip;
     private String clientId;
     private String reason;
     private String updateService;
