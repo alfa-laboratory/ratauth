@@ -91,12 +91,15 @@ class UpdateHandler implements Action<Chain> {
             updateDataService.invalidate(updateServiceRequest.code)
                     .filter { response -> response.booleanValue() }
                     .flatMap { response ->
+
                 return updateService.update(UpdateServiceInput.builder()
                         .code(updateServiceRequest.code)
                         .updateService(updateServiceRequest.updateService)
                         .relyingParty(updateServiceRequest.clientId)
+                        .skip(updateServiceRequest.skip)
                         .data(updateServiceRequest.data).build())
                         .map { updateServiceResult -> [updateDataEntry, updateServiceRequest, updateServiceResult] }
+
             }
         }
     }

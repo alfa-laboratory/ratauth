@@ -10,9 +10,9 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 public class UpdateServiceInput {
-
     private String updateService;
     private Map<String, String> data;
     private String relyingParty;
     private String code;
+    private Boolean skip;
 }
