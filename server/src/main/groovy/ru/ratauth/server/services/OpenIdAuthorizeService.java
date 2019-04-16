@@ -16,7 +16,7 @@ import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
 import ru.ratauth.providers.auth.dto.VerifyResult.Status;
-import ru.ratauth.server.extended.restriction.CheckRestrictionService;
+//import ru.ratauth.server.extended.restriction.CheckRestrictionService;
 import ru.ratauth.server.providers.IdentityProviderResolver;
 import ru.ratauth.server.utils.RedirectUtils;
 import ru.ratauth.services.UpdateDataService;
@@ -47,7 +47,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     private final DeviceService deviceService;
     private final IdentityProviderResolver identityProviderResolver;
     private final UpdateDataService updateDataService;
-    private final CheckRestrictionService checkRestrictionService;
+//    private final CheckRestrictionService checkRestrictionService;
 
 
     @SneakyThrows
@@ -205,7 +205,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .flatMap(rp -> authenticateUser(request.getAuthData(), request.getAcrValues(), rp.getIdentityProvider(), rp.getName())
                         .map(request::addVerifyResultAcrToRequest)
                         .map(authRes -> {
-                            checkRestrictionService.checkAuthRestrictions(request, authRes);
+//                            checkRestrictionService.checkAuthRestrictions(request, authRes);
                             return new ImmutableTriple<>(rp, authRes, request.getAcrValues());
                         }))
                 .flatMap(rpAuth -> createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
