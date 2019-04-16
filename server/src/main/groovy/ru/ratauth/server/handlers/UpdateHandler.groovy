@@ -103,9 +103,10 @@ class UpdateHandler implements Action<Chain> {
         }
     }
 
-    private static Map<String, String> addSkipValueIntoData(UpdateServiceRequest updateServiceRequest){
+    private static Map<String, String> addSkipValueIntoData(UpdateServiceRequest updateServiceRequest) {
         return updateServiceRequest.data.put("skip", updateServiceRequest.skip.toString())
     }
+    
     private Observable<UpdateDataEntry> tryRepeatUpdate(UpdateDataEntry updateDataEntry, UpdateServiceResult updateServiceResult) {
         String sessionToken = updateDataEntry.sessionToken
         String reason = updateServiceResult.data['message']
