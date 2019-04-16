@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import ru.ratauth.interaction.AuthzResponseType
 import ru.ratauth.server.local.PersistenceServiceStubConfiguration
+import spock.lang.Ignore
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*
 import static com.jayway.restassured.RestAssured.given
@@ -82,6 +83,7 @@ identifier received by REST-based identity provider''')
                 .header(HttpHeaders.LOCATION, StringContains.containsString("code="))
     }
 
+    @Ignore
     def 'should not get authorization code by rest provider because of attempt limit'() {
         given:
         mockRestProviderWithResponse([status: 'SUCCESS', data: [user_id: "USER"]])

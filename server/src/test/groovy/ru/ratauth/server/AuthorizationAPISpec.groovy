@@ -17,6 +17,7 @@ import ru.ratauth.exception.ExpiredException
 import ru.ratauth.interaction.AuthzResponseType
 import ru.ratauth.interaction.GrantType
 import ru.ratauth.server.local.PersistenceServiceStubConfiguration
+import spock.lang.Ignore
 
 import static com.jayway.restassured.RestAssured.given
 import static org.hamcrest.Matchers.*
@@ -87,6 +88,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
                 .header(HttpHeaders.LOCATION, StringContains.containsString("session_token="))
     }
 
+    @Ignore
     def 'should not get authorization code because of attempt limit'() {
         given:
         def setup = given(this.documentationSpec)
