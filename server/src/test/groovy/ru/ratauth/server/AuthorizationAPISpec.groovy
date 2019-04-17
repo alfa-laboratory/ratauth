@@ -1,10 +1,6 @@
 package ru.ratauth.server
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.hazelcast.config.Config
-import com.hazelcast.config.GroupConfig
-import com.hazelcast.config.NetworkConfig
-import com.hazelcast.core.Hazelcast
 import com.jayway.restassured.http.ContentType
 import org.hamcrest.core.StringContains
 import org.springframework.beans.factory.annotation.Autowired
@@ -109,7 +105,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
                                 .description('Required Authentication Context Class Reference')
                                 .optional()
                 )
-                ))
+        ))
                 .given()
                 .formParam('response_type', AuthzResponseType.CODE.name())
                 .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME_RESTRICTED)
