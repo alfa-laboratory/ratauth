@@ -103,7 +103,7 @@ class UpdateHandler implements Action<Chain> {
     }
 
     private static Map<String, String> addSkipValueIntoData(UpdateServiceRequest request) {
-        request.data.put("skip", Objects.toString(request.getSkip()))
+        request.data.put("skip", Objects.toString(request.skip))
         return request.data
     }
     
