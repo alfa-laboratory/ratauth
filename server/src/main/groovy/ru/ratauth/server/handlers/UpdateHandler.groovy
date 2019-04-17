@@ -91,7 +91,6 @@ class UpdateHandler implements Action<Chain> {
             updateDataService.invalidate(updateServiceRequest.code)
                     .filter { response -> response.booleanValue() }
                     .flatMap { response ->
-
                 return updateService.update(UpdateServiceInput.builder()
                         .code(updateServiceRequest.code)
                         .updateService(updateServiceRequest.updateService)
@@ -104,7 +103,8 @@ class UpdateHandler implements Action<Chain> {
     }
 
     private static Map<String, String> addSkipValueIntoData(UpdateServiceRequest request) {
-        return request.skip ? request.data.put("skip", request.skip.toString()) : request.data
+        request.data.put("skip", Objects.toString(request.getSkip()))
+        return request.data
     }
     
     private Observable<UpdateDataEntry> tryRepeatUpdate(UpdateDataEntry updateDataEntry, UpdateServiceResult updateServiceResult) {

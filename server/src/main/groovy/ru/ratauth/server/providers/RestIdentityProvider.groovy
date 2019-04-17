@@ -45,7 +45,8 @@ class RestIdentityProvider implements IdentityProvider {
         String enroll = input.enroll.first
         DestinationConfiguration config = identityProvidersConfiguration.idp?.get(enroll)?.activate
         Integer timeout = identityProvidersConfiguration.timeout
-        log.info("Sending request to ${enroll}")
+        log.info("Sending activate request to ${enroll} with params% ${input.toString()}")
+
         return new HystrixIdentityProviderCommand(
                 HttpClientHolder.instance,
                 input.data,
@@ -90,7 +91,8 @@ class RestIdentityProvider implements IdentityProvider {
         DestinationConfiguration config = identityProvidersConfiguration.idp?.get(enroll)?.verify
         int timeout = identityProvidersConfiguration.timeout
 
-        log.info("Sending request to ${enroll}")
+        log.info("Sending verify request to ${enroll} with params% ${input.toString()}")
+
         return new HystrixIdentityProviderCommand(
                 HttpClientHolder.instance,
                 input.data,
