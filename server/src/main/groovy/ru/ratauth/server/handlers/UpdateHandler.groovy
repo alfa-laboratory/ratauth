@@ -91,19 +91,22 @@ class UpdateHandler implements Action<Chain> {
             updateDataService.invalidate(updateServiceRequest.code)
                     .filter { response -> response.booleanValue() }
                     .flatMap { response ->
-
                 return updateService.update(UpdateServiceInput.builder()
                         .code(updateServiceRequest.code)
                         .updateService(updateServiceRequest.updateService)
                         .relyingParty(updateServiceRequest.clientId)
-                        .skip(updateServiceRequest.skip)
-                        .data(updateServiceRequest.data).build())
+                        .data(addSkipValueIntoData(updateServiceRequest)).build())
                         .map { updateServiceResult -> [updateDataEntry, updateServiceRequest, updateServiceResult] }
 
             }
         }
     }
 
+    private static Map<String, String> addSkipValueIntoData(UpdateServiceRequest request) {
+        request.data.put("skip", Objects.toString(request.skip))
+        return request.data
+    }
+    
     private Observable<UpdateDataEntry> tryRepeatUpdate(UpdateDataEntry updateDataEntry, UpdateServiceResult updateServiceResult) {
         String sessionToken = updateDataEntry.sessionToken
         String reason = updateServiceResult.data['message']

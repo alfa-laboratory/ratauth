@@ -1,6 +1,7 @@
 package ru.ratauth.server.services
 
 import groovy.json.JsonSlurper
+import groovy.util.logging.Slf4j
 import lombok.SneakyThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -19,6 +20,7 @@ import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY
 import static ru.ratauth.exception.UpdateFlowException.ID.UPDATE_CALL_SERVICE
 import static ru.ratauth.update.services.dto.UpdateServiceResult.Status.ERROR
 
+@Slf4j
 @Component
 class RestUpdateService implements UpdateService {
 
@@ -30,6 +32,8 @@ class RestUpdateService implements UpdateService {
     Observable<UpdateServiceResult> update(UpdateServiceInput updateServiceInput) {
 
         def serviceConfiguration = configuration.updateServices[updateServiceInput.updateService]
+
+        log.info("Update request params: ${updateServiceInput.toString()} ")
 
         return new HystrixUpdateServiceCommand(
                 HttpClientHolder.instance,
