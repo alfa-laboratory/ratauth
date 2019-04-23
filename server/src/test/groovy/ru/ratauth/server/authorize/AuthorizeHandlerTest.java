@@ -16,8 +16,7 @@ import java.net.URL;
 
 import static io.restassured.RestAssured.given;
 import static java.lang.String.format;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
 
 @RunWith(SpringRunner.class)
@@ -67,6 +66,27 @@ public class AuthorizeHandlerTest {
         assertEquals(authorizationEndpoint.getHost(), location.getHost());
         assertEquals(authorizationEndpoint.getPath() + "/card", location.getPath());
         assertQuery(location);
+    }
+
+    @Test
+    public void testUserIdHiding() {
+        String location = when()
+                .header("Content-Type", "application/json")
+                .formParam("response_type", "code")
+                .formParam("client_id", CLIENT_ID)
+                .formParam("acr_values", "username")
+                .formParam("scope", "read")
+                .formParam("enroll", "username")
+                .formParam("username", "12865564")
+                .formParam("password", "password")
+                .post("/authorize")
+                .then()
+                .statusCode(302)
+                .extract()
+                .response()
+                .getHeader("Location");
+
+        assertFalse(location.contains("user_id="));
     }
 
     private void assertQuery(URL location) {
