@@ -5,14 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.ratauth.entities.AcrValues;
+import ru.ratauth.providers.auth.dto.BaseAuthFields;
 import ru.ratauth.utils.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
-import java.util.stream.Collectors;
 
 /**
  * @author djassan
@@ -68,16 +69,16 @@ public class AuthzResponse {
             joiner.add("token_type=" + tokenType);
         }
         if (!StringUtils.isBlank(refreshToken)) {
-            joiner.add("refresh_token=" + refreshToken.toString());
+            joiner.add("refresh_token=" + refreshToken);
         }
         if (!StringUtils.isBlank(idToken)) {
-            joiner.add("id_token=" + idToken.toString());
+            joiner.add("id_token=" + idToken);
         }
         if (!StringUtils.isBlank(mfaToken)) {
-            joiner.add("mfa_token=" + mfaToken.toString());
+            joiner.add("mfa_token=" + mfaToken);
         }
         if (StringUtils.isBlank(mfaToken) && !StringUtils.isBlank(sessionToken)) {
-            joiner.add("session_token=" + sessionToken.toString());
+            joiner.add("session_token=" + sessionToken);
         }
         if (acrValues != null && acrValues.getValues() != null && !acrValues.getValues().isEmpty()) {
             joiner.add("acr_values=" + acrValues.toString());
@@ -86,11 +87,12 @@ public class AuthzResponse {
             joiner.add("client_id=" + clientId);
         }
         if (scopes != null) {
-            joiner.add("scope=" + scopes.stream().collect(Collectors.joining(" ")));
+            joiner.add("scope=" + String.join(" ", scopes));
         }
         if (data != null && !data.isEmpty()) {
             data.entrySet().stream()
-                    .filter(entry -> entry.getValue() != null)
+                    .filter(this::hasValue)
+                    .filter(this::isNotUserIdEntry)
                     .forEach(entry -> joiner.add(entry.getKey() + "=" + entry.getValue().toString()));
         }
         if (!StringUtils.isBlank(reason) && !StringUtils.isBlank(updateCode) && !StringUtils.isBlank(updateService)) {
@@ -99,6 +101,14 @@ public class AuthzResponse {
                     .add("update_service=" + updateService);
         }
         return createRedirectURI(location, joiner.toString());
+    }
+
+    private boolean hasValue(Map.Entry<String, Object> e) {
+        return e.getValue() != null;
+    }
+
+    private boolean isNotUserIdEntry(Map.Entry<String, Object> e) {
+        return !Objects.equals(BaseAuthFields.USER_ID.val(), e.getKey());
     }
 
     private static String createRedirectURI(String url, String parameter) {
