@@ -9,9 +9,6 @@ import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
 import ru.ratauth.entities.AcrValues
-import ru.ratauth.entities.AuthClient
-import ru.ratauth.entities.RelyingParty
-import ru.ratauth.exception.AuthorizationException
 import ru.ratauth.interaction.AuthzRequest
 import ru.ratauth.server.acr.AcrResolver
 import ru.ratauth.server.services.AuthClientService
