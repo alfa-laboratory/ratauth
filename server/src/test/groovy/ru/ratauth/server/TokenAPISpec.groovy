@@ -367,4 +367,36 @@ class TokenAPISpec extends BaseDocumentationSpec {
                 .body(StringContains.containsString("AuthorizationException"))
                 .body(StringContains.containsString('{"id":"ERR","message":{"en":"BlockClientId is BLOCKED"}'))
     }
+
+
+    def 'should check token blocked clientId'() {
+        given:
+        def setup = given(this.documentationSpec)
+                .accept(ContentType.URLENC)
+                .filter(document('check_token_succeed',
+                        preprocessResponse(prettyPrint()),
+                        requestParameters(
+                                parameterWithName('token')
+                                        .description('access token that must be checked'),
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION)
+                                        .description('Authorization header for relying party basic authorization')
+                        ),
+                ))
+                .given()
+                .formParam('token', PersistenceServiceStubConfiguration.TOKEN)
+                .header(IntegrationSpecUtil.createAuthHeaders(PersistenceServiceStubConfiguration.CLIENT_NAME_BLOCKED,
+                        PersistenceServiceStubConfiguration.PASSWORD))
+        when:
+        def result = setup
+                .when()
+                .post("check_token")
+        then:
+        result
+                .then()
+                .statusCode(HttpStatus.FORBIDDEN.value())
+                .body(StringContains.containsString("AuthorizationException"))
+                .body(StringContains.containsString('{"id":"ERR","message":{"en":"BlockClientId is BLOCKED"}'))
+    }
 }

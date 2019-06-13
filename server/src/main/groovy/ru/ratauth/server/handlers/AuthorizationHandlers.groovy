@@ -9,6 +9,8 @@ import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
 import ru.ratauth.entities.AcrValues
+import ru.ratauth.entities.AuthClient
+import ru.ratauth.entities.RelyingParty
 import ru.ratauth.exception.AuthorizationException
 import ru.ratauth.interaction.AuthzRequest
 import ru.ratauth.server.acr.AcrResolver
@@ -116,10 +118,6 @@ class AuthorizationHandlers implements Action<Chain> {
 
     private void authorize(Context ctx, Observable<AuthzRequest> requestObs) {
         requestObs.flatMap { authRequest ->
-            if (isBlockAuthClient(authRequest.clientId)) {
-                throw new AuthorizationException("ERR", authRequest.clientId + " is BLOCKED")
-            }
-
             if (AUTHENTICATION_TOKEN == authRequest.grantType || SESSION_TOKEN == authRequest.grantType) {
                 authorizeService.crossAuthenticate(authRequest)
             } else {
@@ -131,12 +129,6 @@ class AuthorizationHandlers implements Action<Chain> {
         throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable)
         }
         )
-    }
 
-    private boolean isBlockAuthClient(String clientId) {
-        println clientId
-        def authClient = authClientService.loadRelyingParty(clientId).toBlocking().single()
-        println authClient
-        return authClient.status == AuthClient.Status.BLOCKED
     }
 }

@@ -28,6 +28,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.function.Function;
 
+import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static ru.ratauth.providers.auth.dto.VerifyResult.Status.*;
@@ -202,6 +203,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     @SneakyThrows
     public Observable<AuthzResponse> authenticate(AuthzRequest request) {
         return clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), isAuthRequired(request))
+                .filter(rp -> !isBlockAuthClient(rp))
                 .flatMap(rp -> authenticateUser(request.getAuthData(), request.getAcrValues(), rp.getIdentityProvider(), rp.getName())
                         .map(request::addVerifyResultAcrToRequest)
                         .map(authRes -> {
@@ -285,14 +287,17 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         Observable<? extends AuthClient> authClientObs;
         if (GrantType.AUTHENTICATION_TOKEN == request.getGrantType()) {
             sessionObs = sessionService.getByValidRefreshToken(request.getRefreshToken(), new Date());
-            authClientObs = clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), true);
+            authClientObs = clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), true)
+                    .filter(rp -> rp.getStatus().equals(AuthClient.Status.ACTIVE));
         } else {
             sessionObs = sessionService.getByValidSessionToken(request.getSessionToken(), new Date(), true);
-            authClientObs = clientService.loadAndAuthSessionClient(request.getClientId(), request.getClientSecret(), true);
+            authClientObs = clientService.loadAndAuthSessionClient(request.getClientId(), request.getClientSecret(), true).filter(rp -> rp.getStatus().equals(AuthClient.Status.ACTIVE))
+            ;
         }
 
         return Observable.zip(
                 authClientObs
+                        .filter(rp -> !isBlockAuthClient(rp))
                         .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CREDENTIALS_WRONG))),
                 clientService.loadRelyingParty(request.getExternalClientId())
                         .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND))),
@@ -343,4 +348,12 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         VerifyInput verifyInput = new VerifyInput(authData, enroll, new UserInfo(), relyingPartyName);
         return provider.verify(verifyInput);
     }
+
+    private <T extends AuthClient> boolean isBlockAuthClient(T relyingParty) {
+        if (relyingParty.getStatus().equals(AuthClient.Status.BLOCKED)) {
+            throw new AuthorizationException("ERR", format("%s is BLOCKED", relyingParty.getName()));
+        }
+        return false;
+    }
+
 }

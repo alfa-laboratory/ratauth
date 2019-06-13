@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
 
+import static java.lang.String.format;
 import static ru.ratauth.interaction.GrantType.*;
 
 /**
@@ -43,11 +44,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     @Override
     @SneakyThrows
     public Observable<TokenResponse> getToken(TokenRequest oauthRequest) throws OAuthSystemException, JOSEException {
-        if (isBlockAuthClient(oauthRequest.getClientId())) {
-            throw new AuthorizationException("ERR", oauthRequest.getClientId() + " is BLOCKED");
-        }
-
-        final Observable<RelyingParty> relyingPartyObservable = clientService.loadAndAuthRelyingParty(oauthRequest.getClientId(), oauthRequest.getClientSecret(), true);
+        final Observable<RelyingParty> relyingPartyObservable = clientService.loadAndAuthRelyingParty(oauthRequest.getClientId(), oauthRequest.getClientSecret(), true).filter(rp-> !isBlockAuthClient(rp));
         boolean refreshTokenReissue = !isReponseTypeAccessTokenOnly(oauthRequest.getResponseTypes());
 
         return relyingPartyObservable
@@ -90,10 +87,6 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     public Observable<CheckTokenResponse> checkToken(CheckTokenRequest oauthRequest) {
         // check basic auth first
         Observable<AuthClient> authClient = loadRelyingParty(oauthRequest);
-
-        if (isBlockAuthClient(oauthRequest.getClientId())) {
-            throw new AuthorizationException("ERR", oauthRequest.getClientId() + " is BLOCKED");
-        }
 
         authClient.subscribe();
         return authSessionService.getByValidToken(oauthRequest.getToken(), new Date())
@@ -180,7 +173,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
      * @return requester or externalClientId in case it is defined in request
      */
     private Observable<AuthClient> loadRelyingParty(CheckTokenRequest request) {
-        Observable<AuthClient> res = clientService.loadAndAuthClient(request.getClientId(), request.getClientSecret(), true);
+        Observable<AuthClient> res = clientService.loadAndAuthClient(request.getClientId(), request.getClientSecret(), true).filter(rp-> !isBlockAuthClient(rp));
         if (!StringUtils.isEmpty(request.getExternalClientId()))
             //since we want only to authenticate requester
             return res.zipWith(clientService.loadClient(request.getExternalClientId()),
@@ -189,8 +182,10 @@ public class OpenIdAuthTokenService implements AuthTokenService {
             return res;
     }
 
-    private boolean isBlockAuthClient(String clientId) {
-        RelyingParty authClient = clientService.loadRelyingParty(clientId).toBlocking().single();
-        return authClient.getStatus().equals(AuthClient.Status.BLOCKED);
+    private <T extends AuthClient> boolean isBlockAuthClient(T relyingParty) {
+        if (relyingParty.getStatus().equals(AuthClient.Status.BLOCKED)) {
+            throw new AuthorizationException("ERR", format("%s is BLOCKED", relyingParty.getName()));
+        }
+        return false;
     }
 }

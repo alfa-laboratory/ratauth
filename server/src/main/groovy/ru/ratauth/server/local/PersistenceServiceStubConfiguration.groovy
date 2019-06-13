@@ -20,8 +20,7 @@ import static ru.ratauth.update.services.dto.UpdateServiceResult.Status.ERROR
 import static ru.ratauth.update.services.dto.UpdateServiceResult.Status.SUCCESS
 
 /**
- * @author mgorelikov
- * @since 25/02/16
+ * @author mgorelikov* @since 25/02/16
  */
 @CompileStatic
 class PersistenceServiceStubConfiguration {
@@ -66,11 +65,11 @@ class PersistenceServiceStubConfiguration {
                             identityProvider: 'STUB',
                             secret: CLIENT_SECRET,
                             password: SecurityUtils.hashPassword(PASSWORD, SALT),
+                            status: AuthClient.Status.ACTIVE,
                             salt: SALT,
-                            codeTTL: 36000l,
+                            codeTTL: 3603300l,
                             refreshTokenTTL: 36000l,
                             sessionTTL: 36000l,
-                            status: AuthClient.Status.ACTIVE,
                             tokenTTL: 36000l,
                             redirectURIs: ['https://domain.mine', 'mine.domain'],
                             registrationRedirectURI: 'http://domain.mine/oidc/register',
@@ -82,6 +81,7 @@ class PersistenceServiceStubConfiguration {
                     return Observable.just(new RelyingParty(
                             id: 'id',
                             name: CLIENT_NAME_DUMMY,
+                            status: AuthClient.Status.ACTIVE,
                             identityProvider: 'DummyIdentityProvider',
                             secret: CLIENT_SECRET,
                             password: SecurityUtils.hashPassword(PASSWORD, SALT),
@@ -90,7 +90,6 @@ class PersistenceServiceStubConfiguration {
                             refreshTokenTTL: 36000l,
                             sessionTTL: 36000l,
                             tokenTTL: 36000l,
-                            status: AuthClient.Status.ACTIVE,
                             redirectURIs: ['https://domain.mine', 'mine.domain'],
                             registrationRedirectURI: 'http://domain.mine/oidc/register',
                             authorizationRedirectURI: 'http://domain.mine/oidc/authorize',
@@ -102,6 +101,7 @@ class PersistenceServiceStubConfiguration {
                             id: 'id',
                             name: CLIENT_NAME_DUMMY,
                             identityProvider: 'REST',
+                            status: AuthClient.Status.ACTIVE,
                             secret: CLIENT_SECRET,
                             password: SecurityUtils.hashPassword(PASSWORD, SALT),
                             salt: SALT,
@@ -109,7 +109,6 @@ class PersistenceServiceStubConfiguration {
                             refreshTokenTTL: 36000l,
                             sessionTTL: 36000l,
                             tokenTTL: 36000l,
-                            status: AuthClient.Status.ACTIVE,
                             redirectURIs: ['https://domain.mine', 'mine.domain'],
                             registrationRedirectURI: 'http://domain.mine/oidc/register',
                             authorizationRedirectURI: 'http://domain.mine/oidc/authorize',
@@ -121,6 +120,7 @@ class PersistenceServiceStubConfiguration {
                             id: 'id',
                             name: CLIENT_NAME_RESTRICTED,
                             identityProvider: 'STUB',
+                            status: AuthClient.Status.ACTIVE,
                             secret: CLIENT_SECRET,
                             password: SecurityUtils.hashPassword(PASSWORD, SALT),
                             salt: SALT,
@@ -128,7 +128,6 @@ class PersistenceServiceStubConfiguration {
                             refreshTokenTTL: 36000l,
                             sessionTTL: 36000l,
                             tokenTTL: 36000l,
-                            status: AuthClient.Status.ACTIVE,
                             redirectURIs: ['https://domain.mine', 'mine.domain'],
                             registrationRedirectURI: 'http://domain.mine/oidc/register',
                             authorizationRedirectURI: 'http://domain.mine/oidc/authorize',
@@ -142,12 +141,12 @@ class PersistenceServiceStubConfiguration {
                             identityProvider: 'REST',
                             secret: CLIENT_SECRET,
                             password: SecurityUtils.hashPassword(PASSWORD, SALT),
+                            status: AuthClient.Status.BLOCKED,
                             salt: SALT,
                             codeTTL: 36000l,
                             refreshTokenTTL: 36000l,
                             sessionTTL: 36000l,
                             tokenTTL: 36000l,
-                            status: AuthClient.Status.BLOCKED,
                             redirectURIs: ['https://domain.mine', 'mine.domain'],
                             registrationRedirectURI: 'http://domain.mine/oidc/register',
                             authorizationRedirectURI: 'http://domain.mine/oidc/authorize',
@@ -182,6 +181,15 @@ class PersistenceServiceStubConfiguration {
                             salt: SALT,
                             password: SecurityUtils.hashPassword(PASSWORD, SALT),
                             status: AuthClient.Status.ACTIVE,
+                    ))
+                else if (name == CLIENT_NAME_BLOCKED)
+                    return Observable.just(new AuthClient(
+                            id: 'id',
+                            name: CLIENT_NAME_BLOCKED,
+                            secret: CLIENT_SECRET,
+                            salt: SALT,
+                            password: SecurityUtils.hashPassword(PASSWORD, SALT),
+                            status: AuthClient.Status.BLOCKED,
                     ))
                 else if (name == NONEXISTENT_CLIENT_NAME)
                     return Observable.empty()
