@@ -43,6 +43,10 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     @Override
     @SneakyThrows
     public Observable<TokenResponse> getToken(TokenRequest oauthRequest) throws OAuthSystemException, JOSEException {
+        if (isBlockAuthClient(oauthRequest.getClientId())) {
+            throw new AuthorizationException("ERR", oauthRequest.getClientId() + " is BLOCKED");
+        }
+
         final Observable<RelyingParty> relyingPartyObservable = clientService.loadAndAuthRelyingParty(oauthRequest.getClientId(), oauthRequest.getClientSecret(), true);
         boolean refreshTokenReissue = !isReponseTypeAccessTokenOnly(oauthRequest.getResponseTypes());
 
@@ -86,6 +90,11 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     public Observable<CheckTokenResponse> checkToken(CheckTokenRequest oauthRequest) {
         // check basic auth first
         Observable<AuthClient> authClient = loadRelyingParty(oauthRequest);
+
+        if (isBlockAuthClient(oauthRequest.getClientId())) {
+            throw new AuthorizationException("ERR", oauthRequest.getClientId() + " is BLOCKED");
+        }
+
         authClient.subscribe();
         return authSessionService.getByValidToken(oauthRequest.getToken(), new Date())
                 .doOnNext(sessionStatusChecker::checkAndUpdateSession)
@@ -178,5 +187,10 @@ public class OpenIdAuthTokenService implements AuthTokenService {
                     (client, externalClient) -> externalClient);
         else
             return res;
+    }
+
+    private boolean isBlockAuthClient(String clientId) {
+        RelyingParty authClient = clientService.loadRelyingParty(clientId).toBlocking().single();
+        return authClient.getStatus().equals(AuthClient.Status.BLOCKED);
     }
 }

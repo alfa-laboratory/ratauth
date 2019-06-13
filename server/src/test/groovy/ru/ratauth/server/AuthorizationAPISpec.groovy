@@ -446,4 +446,49 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
 
     }
 
+    def 'should get authorization with clientId is block'() {
+        given:
+        def setup = given(this.documentationSpec)
+                .accept(ContentType.URLENC)
+                .filter(document('auth_code_succeed',
+                        preprocessResponse(prettyPrint()),
+
+                        requestParameters(
+                                parameterWithName('response_type')
+                                        .description('Response type that must be provided CODE or TOKEN'),
+                                parameterWithName('client_id')
+                                        .description('relying party identifier'),
+                                parameterWithName('scope')
+                                        .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+                                parameterWithName('username')
+                                        .description('part of user\'s credentials'),
+                                parameterWithName('password')
+                                        .description('part of user\'s credentials'),
+                                parameterWithName('acr_values')
+                                        .description('Authentication Context Class Reference'),
+                                parameterWithName('enroll')
+                                        .description('Required Authentication Context Class Reference')
+                                        .optional()
+                        ),
+                ))
+                .given()
+                .formParam('response_type', AuthzResponseType.CODE.name())
+                .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME_BLOCKED)
+                .formParam('scope', 'rs.read')
+                .formParam('username', 'login')
+                .formParam('password', 'password')
+                .formParam('acr_values', 'username')
+                .formParam('enroll', 'username')
+        when:
+        def result = setup
+                .when()
+                .post("authorize")
+        then:
+        result
+                .then()
+                .statusCode(HttpStatus.FORBIDDEN.value())
+                .body(StringContains.containsString("AuthorizationException"))
+                .body(StringContains.containsString('{"id":"ERR","message":{"en":"BlockClientId is BLOCKED"}'))    }
+
+
 }

@@ -9,6 +9,7 @@ import ratpack.func.Action
 import ratpack.handling.Chain
 import ratpack.handling.Context
 import ru.ratauth.entities.AcrValues
+import ru.ratauth.exception.AuthorizationException
 import ru.ratauth.interaction.AuthzRequest
 import ru.ratauth.server.acr.AcrResolver
 import ru.ratauth.server.services.AuthClientService
@@ -24,8 +25,7 @@ import static ru.ratauth.server.handlers.readers.AuthzRequestReader.readClientId
 import static ru.ratauth.utils.URIUtils.appendQuery
 
 /**
- * @author mgorelikov
- * @since 30/10/15
+ * @author mgorelikov* @since 30/10/15
  */
 @Component
 class AuthorizationHandlers implements Action<Chain> {
@@ -80,8 +80,8 @@ class AuthorizationHandlers implements Action<Chain> {
                 .map({ url -> url.toString() })
                 .bindExec()
                 .subscribe {
-            res -> context.redirect(HttpResponseStatus.MOVED_PERMANENTLY.code(), res)
-        }
+                    res -> context.redirect(HttpResponseStatus.MOVED_PERMANENTLY.code(), res)
+                }
     }
 
     private URL appendAcrValues(URL url, String clientId) {
@@ -116,6 +116,10 @@ class AuthorizationHandlers implements Action<Chain> {
 
     private void authorize(Context ctx, Observable<AuthzRequest> requestObs) {
         requestObs.flatMap { authRequest ->
+            if (isBlockAuthClient(authRequest.clientId)) {
+                throw new AuthorizationException("ERR", authRequest.clientId + " is BLOCKED")
+            }
+
             if (AUTHENTICATION_TOKEN == authRequest.grantType || SESSION_TOKEN == authRequest.grantType) {
                 authorizeService.crossAuthenticate(authRequest)
             } else {
@@ -127,5 +131,12 @@ class AuthorizationHandlers implements Action<Chain> {
         throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable)
         }
         )
+    }
+
+    private boolean isBlockAuthClient(String clientId) {
+        println clientId
+        def authClient = authClientService.loadRelyingParty(clientId).toBlocking().single()
+        println authClient
+        return authClient.status == AuthClient.Status.BLOCKED
     }
 }
