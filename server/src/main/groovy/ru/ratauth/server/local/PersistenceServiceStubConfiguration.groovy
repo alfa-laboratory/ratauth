@@ -67,7 +67,7 @@ class PersistenceServiceStubConfiguration {
                             password: SecurityUtils.hashPassword(PASSWORD, SALT),
                             status: AuthClient.Status.ACTIVE,
                             salt: SALT,
-                            codeTTL: 3603300l,
+                            codeTTL: 36000l,
                             refreshTokenTTL: 36000l,
                             sessionTTL: 36000l,
                             tokenTTL: 36000l,
