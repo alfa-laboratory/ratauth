@@ -203,7 +203,6 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     @SneakyThrows
     public Observable<AuthzResponse> authenticate(AuthzRequest request) {
         return clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), isAuthRequired(request))
-//                .filter(rp -> !isBlockAuthClient(rp))
                 .flatMap(rp -> authenticateUser(request.getAuthData(), request.getAcrValues(), rp.getIdentityProvider(), rp.getName())
                         .map(request::addVerifyResultAcrToRequest)
                         .map(authRes -> {
