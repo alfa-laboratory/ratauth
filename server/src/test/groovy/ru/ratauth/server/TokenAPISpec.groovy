@@ -365,7 +365,7 @@ class TokenAPISpec extends BaseDocumentationSpec {
                 .then()
                 .statusCode(HttpStatus.FORBIDDEN.value())
                 .body(StringContains.containsString("AuthorizationException"))
-                .body(StringContains.containsString('{"id":"ERR","message":{"en":"BlockClientId is BLOCKED"}'))
+                .body(StringContains.containsString('{"id":"CLIENT_BLOCKED","message":{"en":"Client is blocked"}'))
     }
 
 
@@ -397,6 +397,6 @@ class TokenAPISpec extends BaseDocumentationSpec {
                 .then()
                 .statusCode(HttpStatus.FORBIDDEN.value())
                 .body(StringContains.containsString("AuthorizationException"))
-                .body(StringContains.containsString('{"id":"ERR","message":{"en":"BlockClientId is BLOCKED"}'))
+                .body(StringContains.containsString('{"id":"CLIENT_BLOCKED","message":{"en":"Client is blocked"}'))
     }
 }

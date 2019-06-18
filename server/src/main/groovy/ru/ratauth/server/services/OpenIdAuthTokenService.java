@@ -9,12 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import ru.ratauth.entities.*;
 import ru.ratauth.entities.Status;
+import ru.ratauth.entities.*;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.exception.ExpiredException;
-import ru.ratauth.interaction.*;
 import ru.ratauth.interaction.TokenType;
+import ru.ratauth.interaction.*;
 import ru.ratauth.server.configuration.SessionConfiguration;
 import ru.ratauth.server.secutiry.OAuthSystemException;
 import rx.Observable;
@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
 
-import static java.lang.String.format;
 import static ru.ratauth.interaction.GrantType.*;
 
 /**
@@ -44,7 +43,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     @Override
     @SneakyThrows
     public Observable<TokenResponse> getToken(TokenRequest oauthRequest) throws OAuthSystemException, JOSEException {
-        final Observable<RelyingParty> relyingPartyObservable = clientService.loadAndAuthRelyingParty(oauthRequest.getClientId(), oauthRequest.getClientSecret(), true).filter(rp-> !isBlockAuthClient(rp));
+        final Observable<RelyingParty> relyingPartyObservable = clientService.loadAndAuthRelyingParty(oauthRequest.getClientId(), oauthRequest.getClientSecret(), true);
         boolean refreshTokenReissue = !isReponseTypeAccessTokenOnly(oauthRequest.getResponseTypes());
 
         return relyingPartyObservable
@@ -173,19 +172,12 @@ public class OpenIdAuthTokenService implements AuthTokenService {
      * @return requester or externalClientId in case it is defined in request
      */
     private Observable<AuthClient> loadRelyingParty(CheckTokenRequest request) {
-        Observable<AuthClient> res = clientService.loadAndAuthClient(request.getClientId(), request.getClientSecret(), true).filter(rp-> !isBlockAuthClient(rp));
+        Observable<AuthClient> res = clientService.loadAndAuthClient(request.getClientId(), request.getClientSecret(), true);
         if (!StringUtils.isEmpty(request.getExternalClientId()))
             //since we want only to authenticate requester
             return res.zipWith(clientService.loadClient(request.getExternalClientId()),
                     (client, externalClient) -> externalClient);
         else
             return res;
-    }
-
-    private <T extends AuthClient> boolean isBlockAuthClient(T relyingParty) {
-        if (relyingParty.getStatus().equals(AuthClient.Status.BLOCKED)) {
-            throw new AuthorizationException("ERR", format("%s is BLOCKED", relyingParty.getName()));
-        }
-        return false;
     }
 }

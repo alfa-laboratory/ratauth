@@ -44,6 +44,7 @@ public class AuthorizationException extends BaseAuthServerException implements I
 
     public enum ID {
         CLIENT_NOT_FOUND("Client not found"),
+        CLIENT_BLOCKED("Client is blocked"),
         CREDENTIALS_WRONG("Credentials are wrong"),
         TOKEN_NOT_FOUND("Token not found"),
         MFA_TOKEN_NOT_FOUND("MFA token not found"),

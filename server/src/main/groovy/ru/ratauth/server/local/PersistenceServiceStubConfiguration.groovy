@@ -20,7 +20,8 @@ import static ru.ratauth.update.services.dto.UpdateServiceResult.Status.ERROR
 import static ru.ratauth.update.services.dto.UpdateServiceResult.Status.SUCCESS
 
 /**
- * @author mgorelikov* @since 25/02/16
+ * @author mgorelikov
+ * @since 25/02/16
  */
 @CompileStatic
 class PersistenceServiceStubConfiguration {

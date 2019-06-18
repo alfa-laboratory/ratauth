@@ -26,8 +26,7 @@ import static org.springframework.restdocs.request.RequestDocumentation.requestP
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document
 
 /**
- * @author mgorelikov
- * @since 03/11/15
+ * @author mgorelikov* @since 03/11/15
  */
 
 class AuthorizationAPISpec extends BaseDocumentationSpec {
@@ -41,28 +40,28 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('auth_code_succeed',
-                requestParameters(
-                        parameterWithName('response_type')
-                                .description('Response type that must be provided CODE or TOKEN'),
-                        parameterWithName('client_id')
-                                .description('relying party identifier'),
-                        parameterWithName('scope')
-                                .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
-                        parameterWithName('username')
-                                .description('part of user\'s credentials'),
-                        parameterWithName('password')
-                                .description('part of user\'s credentials'),
-                        parameterWithName('acr_values')
-                                .description('Authentication Context Class Reference'),
-                        parameterWithName('enroll')
-                                .description('Required Authentication Context Class Reference')
-                                .optional()
-                ),
-                responseHeaders(
-                        headerWithName(HttpHeaders.LOCATION)
-                                .description('Header that contains authorization code for the next step of authorization code flow,' +
-                                '\nits expiration date and optional user identifier')
-                )))
+                        requestParameters(
+                                parameterWithName('response_type')
+                                        .description('Response type that must be provided CODE or TOKEN'),
+                                parameterWithName('client_id')
+                                        .description('relying party identifier'),
+                                parameterWithName('scope')
+                                        .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+                                parameterWithName('username')
+                                        .description('part of user\'s credentials'),
+                                parameterWithName('password')
+                                        .description('part of user\'s credentials'),
+                                parameterWithName('acr_values')
+                                        .description('Authentication Context Class Reference'),
+                                parameterWithName('enroll')
+                                        .description('Required Authentication Context Class Reference')
+                                        .optional()
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.LOCATION)
+                                        .description('Header that contains authorization code for the next step of authorization code flow,' +
+                                                '\nits expiration date and optional user identifier')
+                        )))
                 .given()
                 .formParam('response_type', AuthzResponseType.CODE.name())
                 .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
@@ -88,24 +87,24 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('auth_code_succeed',
-                requestParameters(
-                        parameterWithName('response_type')
-                                .description('Response type that must be provided CODE or TOKEN'),
-                        parameterWithName('client_id')
-                                .description('relying party identifier'),
-                        parameterWithName('scope')
-                                .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
-                        parameterWithName('username')
-                                .description('part of user\'s credentials'),
-                        parameterWithName('password')
-                                .description('part of user\'s credentials'),
-                        parameterWithName('acr_values')
-                                .description('Authentication Context Class Reference'),
-                        parameterWithName('enroll')
-                                .description('Required Authentication Context Class Reference')
-                                .optional()
-                )
-        ))
+                        requestParameters(
+                                parameterWithName('response_type')
+                                        .description('Response type that must be provided CODE or TOKEN'),
+                                parameterWithName('client_id')
+                                        .description('relying party identifier'),
+                                parameterWithName('scope')
+                                        .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+                                parameterWithName('username')
+                                        .description('part of user\'s credentials'),
+                                parameterWithName('password')
+                                        .description('part of user\'s credentials'),
+                                parameterWithName('acr_values')
+                                        .description('Authentication Context Class Reference'),
+                                parameterWithName('enroll')
+                                        .description('Required Authentication Context Class Reference')
+                                        .optional()
+                        )
+                ))
                 .given()
                 .formParam('response_type', AuthzResponseType.CODE.name())
                 .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME_RESTRICTED)
@@ -131,24 +130,24 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('auth_code_bad_request',
-                preprocessResponse(prettyPrint()),
-                responseFields(
-                        fieldWithPath('id')
-                                .description('Error identifier')
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath('message')
-                                .description('Different localizations of message')
-                                .type(JsonFieldType.OBJECT),
-                        fieldWithPath('base_id')
-                                .description('Base identifier for auth module exceptions')
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath('type_id')
-                                .description('String identifier of exception type')
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath('class')
-                                .description('Exception class')
-                                .type(JsonFieldType.STRING),
-                )))
+                        preprocessResponse(prettyPrint()),
+                        responseFields(
+                                fieldWithPath('id')
+                                        .description('Error identifier')
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath('message')
+                                        .description('Different localizations of message')
+                                        .type(JsonFieldType.OBJECT),
+                                fieldWithPath('base_id')
+                                        .description('Base identifier for auth module exceptions')
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath('type_id')
+                                        .description('String identifier of exception type')
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath('class')
+                                        .description('Exception class')
+                                        .type(JsonFieldType.STRING),
+                        )))
                 .given()
                 .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
                 .formParam('scope', 'rs.read')
@@ -170,24 +169,24 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('auth_code_forbidden',
-                preprocessResponse(prettyPrint()),
-                responseFields(
-                        fieldWithPath('id')
-                                .description('Error identifier')
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath('message')
-                                .description('Different localizations of message')
-                                .type(JsonFieldType.OBJECT),
-                        fieldWithPath('base_id')
-                                .description('Base identifier for auth module exceptions')
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath('type_id')
-                                .description('String identifier of exception type')
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath('class')
-                                .description('Exception class')
-                                .type(JsonFieldType.STRING),
-                )))
+                        preprocessResponse(prettyPrint()),
+                        responseFields(
+                                fieldWithPath('id')
+                                        .description('Error identifier')
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath('message')
+                                        .description('Different localizations of message')
+                                        .type(JsonFieldType.OBJECT),
+                                fieldWithPath('base_id')
+                                        .description('Base identifier for auth module exceptions')
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath('type_id')
+                                        .description('String identifier of exception type')
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath('class')
+                                        .description('Exception class')
+                                        .type(JsonFieldType.STRING),
+                        )))
                 .given()
                 .formParam('response_type', AuthzResponseType.CODE.name())
                 .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
@@ -212,45 +211,45 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('token_succeed',
-                preprocessResponse(prettyPrint()),
-                requestParameters(
-                        parameterWithName('response_type')
-                                .description('Response type that must be provided'),
-                        parameterWithName('grant_type')
-                                .description('grant type for token request'),
-                        parameterWithName('code')
-                                .description('authorization code'),
-                ),
-                requestHeaders(
-                        headerWithName(HttpHeaders.AUTHORIZATION)
-                                .description('Authorization header for relying party basic authorization')
-                ),
-                responseFields(
-                        fieldWithPath('access_token')
-                                .description('Access token')
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath('refresh_token')
-                                .description('token that can be used to refresh expired access token')
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath('token_type')
-                                .description('token type according to OpenID specification')
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath('id_token')
-                                .description('JWT token')
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath('expires_in')
-                                .description('expiration date of access token')
-                                .type(JsonFieldType.NUMBER),
-                        fieldWithPath('client_id')
-                                .description('identifier of relying party')
-                                .type(JsonFieldType.STRING),
-                )))
+                        preprocessResponse(prettyPrint()),
+                        requestParameters(
+                                parameterWithName('response_type')
+                                        .description('Response type that must be provided'),
+                                parameterWithName('grant_type')
+                                        .description('grant type for token request'),
+                                parameterWithName('code')
+                                        .description('authorization code'),
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION)
+                                        .description('Authorization header for relying party basic authorization')
+                        ),
+                        responseFields(
+                                fieldWithPath('access_token')
+                                        .description('Access token')
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath('refresh_token')
+                                        .description('token that can be used to refresh expired access token')
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath('token_type')
+                                        .description('token type according to OpenID specification')
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath('id_token')
+                                        .description('JWT token')
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath('expires_in')
+                                        .description('expiration date of access token')
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath('client_id')
+                                        .description('identifier of relying party')
+                                        .type(JsonFieldType.STRING),
+                        )))
                 .given()
                 .formParam('grant_type', GrantType.AUTHORIZATION_CODE.name())
                 .formParam('response_type', AuthzResponseType.TOKEN.name())
                 .formParam('code', PersistenceServiceStubConfiguration.CODE)
                 .header(IntegrationSpecUtil.createAuthHeaders(PersistenceServiceStubConfiguration.CLIENT_NAME,
-                PersistenceServiceStubConfiguration.PASSWORD))
+                        PersistenceServiceStubConfiguration.PASSWORD))
         when:
         def result = setup
                 .when()
@@ -267,34 +266,34 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('token_code_expired',
-                preprocessResponse(prettyPrint()),
-                requestHeaders(
-                        headerWithName(HttpHeaders.AUTHORIZATION)
-                                .description('Authorization header for relying party basic authorization')
-                ),
-                responseFields(
-                        fieldWithPath('id')
-                                .description('Error identifier')
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath('message')
-                                .description('Different localizations of message')
-                                .type(JsonFieldType.OBJECT),
-                        fieldWithPath('base_id')
-                                .description('Base identifier for auth module exceptions')
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath('type_id')
-                                .description('String identifier of exception type')
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath('class')
-                                .description('Exception class')
-                                .type(JsonFieldType.STRING),
-                )))
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION)
+                                        .description('Authorization header for relying party basic authorization')
+                        ),
+                        responseFields(
+                                fieldWithPath('id')
+                                        .description('Error identifier')
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath('message')
+                                        .description('Different localizations of message')
+                                        .type(JsonFieldType.OBJECT),
+                                fieldWithPath('base_id')
+                                        .description('Base identifier for auth module exceptions')
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath('type_id')
+                                        .description('String identifier of exception type')
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath('class')
+                                        .description('Exception class')
+                                        .type(JsonFieldType.STRING),
+                        )))
                 .given()
                 .formParam('grant_type', GrantType.AUTHORIZATION_CODE.name())
                 .formParam('response_type', AuthzResponseType.TOKEN.name())
                 .formParam('code', PersistenceServiceStubConfiguration.CODE_EXPIRED)
                 .header(IntegrationSpecUtil.createAuthHeaders(PersistenceServiceStubConfiguration.CLIENT_NAME,
-                PersistenceServiceStubConfiguration.PASSWORD))
+                        PersistenceServiceStubConfiguration.PASSWORD))
         when:
         def result = setup
                 .when()
@@ -311,29 +310,29 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('token_implicit_succeed',
-                requestParameters(
-                        parameterWithName('response_type')
-                                .description('Response type that must be provided CODE or TOKEN'),
-                        parameterWithName('scope')
-                                .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
-                        parameterWithName('username')
-                                .description('part of user\'s credentials'),
-                        parameterWithName('password')
-                                .description('part of user\'s credentials'),
-                        parameterWithName('acr_values')
-                                .description('Authentication Context Class Reference'),
-                        parameterWithName('enroll')
-                                .description('Required Authentication Context Class Reference')
-                                .optional()
-                ),
-                requestHeaders(
-                        headerWithName(HttpHeaders.AUTHORIZATION)
-                                .description('Authorization header for relying party basic authorization')
-                ),
-                responseHeaders(
-                        headerWithName(HttpHeaders.LOCATION)
-                                .description('Header that contains token, refresh token and expiration date of access token')
-                )))
+                        requestParameters(
+                                parameterWithName('response_type')
+                                        .description('Response type that must be provided CODE or TOKEN'),
+                                parameterWithName('scope')
+                                        .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+                                parameterWithName('username')
+                                        .description('part of user\'s credentials'),
+                                parameterWithName('password')
+                                        .description('part of user\'s credentials'),
+                                parameterWithName('acr_values')
+                                        .description('Authentication Context Class Reference'),
+                                parameterWithName('enroll')
+                                        .description('Required Authentication Context Class Reference')
+                                        .optional()
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION)
+                                        .description('Authorization header for relying party basic authorization')
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.LOCATION)
+                                        .description('Header that contains token, refresh token and expiration date of access token')
+                        )))
                 .given()
                 .formParam('response_type', AuthzResponseType.TOKEN.name())
                 .formParam('scope', 'read')
@@ -342,7 +341,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
                 .formParam('acr_values', 'username')
                 .formParam('enroll', 'username')
                 .header(IntegrationSpecUtil.createAuthHeaders(PersistenceServiceStubConfiguration.CLIENT_NAME,
-                PersistenceServiceStubConfiguration.PASSWORD))
+                        PersistenceServiceStubConfiguration.PASSWORD))
         when:
         def result = setup
                 .when()
@@ -359,26 +358,26 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('authorize_not_allowed_redirect',
-                requestParameters(
-                        parameterWithName('response_type')
-                                .description('Response type that must be provided CODE or TOKEN'),
-                        parameterWithName('client_id')
-                                .description('relying party identifier'),
-                        parameterWithName('scope')
-                                .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
-                        parameterWithName('username')
-                                .description('part of user\'s credentials'),
-                        parameterWithName('password')
-                                .description('part of user\'s credentials'),
-                        parameterWithName('acr_values')
-                                .description('Authentication Context Class Reference'),
-                        parameterWithName('enroll')
-                                .description('Required Authentication Context Class Reference')
-                                .optional(),
-                        parameterWithName('redirect_uri')
-                                .description('end-user will be redirected on that URI with authorization code')
-                                .optional()
-                )))
+                        requestParameters(
+                                parameterWithName('response_type')
+                                        .description('Response type that must be provided CODE or TOKEN'),
+                                parameterWithName('client_id')
+                                        .description('relying party identifier'),
+                                parameterWithName('scope')
+                                        .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+                                parameterWithName('username')
+                                        .description('part of user\'s credentials'),
+                                parameterWithName('password')
+                                        .description('part of user\'s credentials'),
+                                parameterWithName('acr_values')
+                                        .description('Authentication Context Class Reference'),
+                                parameterWithName('enroll')
+                                        .description('Required Authentication Context Class Reference')
+                                        .optional(),
+                                parameterWithName('redirect_uri')
+                                        .description('end-user will be redirected on that URI with authorization code')
+                                        .optional()
+                        )))
                 .given()
                 .formParam('response_type', AuthzResponseType.CODE.name())
                 .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
@@ -403,26 +402,26 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
         def setup = given(this.documentationSpec)
                 .accept(ContentType.HTML)
                 .filter(document('authorize_redirect_to_web',
-                requestParameters(
-                        parameterWithName('response_type')
-                                .description('Response type that must be provided CODE or TOKEN'),
-                        parameterWithName('client_id')
-                                .description('relying party identifier'),
-                        parameterWithName('scope')
-                                .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
-                        parameterWithName('acr_values')
-                                .description('Authentication context class reference'),
-                        parameterWithName('username')
-                                .description('part of user\'s credentials'),
-                        parameterWithName('password')
-                                .description('part of user\'s credentials')
-                                .optional()
-                ),
-                responseHeaders(
-                        headerWithName(HttpHeaders.LOCATION)
-                                .description('Header that contains authorization code for the next step of authorization code flow,' +
-                                '\nits expiration date and optional user identifier')
-                )))
+                        requestParameters(
+                                parameterWithName('response_type')
+                                        .description('Response type that must be provided CODE or TOKEN'),
+                                parameterWithName('client_id')
+                                        .description('relying party identifier'),
+                                parameterWithName('scope')
+                                        .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+                                parameterWithName('acr_values')
+                                        .description('Authentication context class reference'),
+                                parameterWithName('username')
+                                        .description('part of user\'s credentials'),
+                                parameterWithName('password')
+                                        .description('part of user\'s credentials')
+                                        .optional()
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.LOCATION)
+                                        .description('Header that contains authorization code for the next step of authorization code flow,' +
+                                                '\nits expiration date and optional user identifier')
+                        )))
                 .given()
                 .formParam('response_type', AuthzResponseType.CODE.name())
                 .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
@@ -488,7 +487,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
                 .then()
                 .statusCode(HttpStatus.FORBIDDEN.value())
                 .body(StringContains.containsString("AuthorizationException"))
-                .body(StringContains.containsString('{"id":"ERR","message":{"en":"BlockClientId is BLOCKED"}'))    }
-
+                .body(StringContains.containsString('{"id":"CLIENT_BLOCKED","message":{"en":"Client is blocked"}'))
+    }
 
 }

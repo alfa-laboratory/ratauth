@@ -24,8 +24,7 @@ import static org.springframework.restdocs.request.RequestDocumentation.requestP
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document
 
 /**
- * @author djassan
- * @since 11/09/16
+ * @author djassan* @since 11/09/16
  */
 class RegistrationAPISpec extends BaseDocumentationSpec {
     @Value('${server.port}')
@@ -38,22 +37,22 @@ class RegistrationAPISpec extends BaseDocumentationSpec {
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('reg_code_provider_channel_succeed',
-                requestParameters(
-                        parameterWithName('client_id')
-                                .description('relying party identifier'),
-                        parameterWithName('scope')
-                                .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
-                        parameterWithName(ProvidersStubConfiguration.REG_CREDENTIAL)
-                                .description('Some credential fields...')
-                                .optional(),
-                        parameterWithName('response_type')
-                                .description('response type values')
-                ),
-                responseHeaders(
-                        headerWithName(HttpHeaders.LOCATION)
-                                .description('Header that contains authorization code for the next step of authorization code flow,' +
-                                '\nits expiration date and optional user identifier')
-                )))
+                        requestParameters(
+                                parameterWithName('client_id')
+                                        .description('relying party identifier'),
+                                parameterWithName('scope')
+                                        .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+                                parameterWithName(ProvidersStubConfiguration.REG_CREDENTIAL)
+                                        .description('Some credential fields...')
+                                        .optional(),
+                                parameterWithName('response_type')
+                                        .description('response type values')
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.LOCATION)
+                                        .description('Header that contains authorization code for the next step of authorization code flow,' +
+                                                '\nits expiration date and optional user identifier')
+                        )))
                 .given()
                 .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
                 .formParam('scope', 'rs.read')
@@ -75,46 +74,46 @@ class RegistrationAPISpec extends BaseDocumentationSpec {
         def setup = given(this.documentationSpec)
                 .accept(ContentType.URLENC)
                 .filter(document('reg_code_finish_provider_channel_succeed',
-                requestParameters(
-                        parameterWithName('code')
-                                .description('registration code provided by user for second'),
-                        parameterWithName('username')
-                                .description('Some user identifier got from first step in data object, e.g.: username')
-                                .optional(),
-                        parameterWithName('response_type')
-                                .description('Response type that must be provided'),
-                        parameterWithName('grant_type')
-                                .description('grant type for token request'),
-                        parameterWithName('scope')
-                                .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
-                ),
-                requestHeaders(
-                        headerWithName(HttpHeaders.AUTHORIZATION)
-                                .description('Authorization header for relying party basic authorization')
-                ),
-                responseFields(
-                        fieldWithPath('access_token')
-                                .description('Access token')
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath('refresh_token')
-                                .description('token that can be used to refresh expired access token')
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath('token_type')
-                                .description('type of auth token, e.g.: BEARER')
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath('id_token')
-                                .description('JWT token')
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath('expires_in')
-                                .description('expiration date of access token')
-                                .type(JsonFieldType.NUMBER),
-                        fieldWithPath('client_id')
-                                .description('identifier of relying party')
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath('session_token')
-                                .description('session token')
-                                .type(JsonFieldType.STRING)
-                )))
+                        requestParameters(
+                                parameterWithName('code')
+                                        .description('registration code provided by user for second'),
+                                parameterWithName('username')
+                                        .description('Some user identifier got from first step in data object, e.g.: username')
+                                        .optional(),
+                                parameterWithName('response_type')
+                                        .description('Response type that must be provided'),
+                                parameterWithName('grant_type')
+                                        .description('grant type for token request'),
+                                parameterWithName('scope')
+                                        .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION)
+                                        .description('Authorization header for relying party basic authorization')
+                        ),
+                        responseFields(
+                                fieldWithPath('access_token')
+                                        .description('Access token')
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath('refresh_token')
+                                        .description('token that can be used to refresh expired access token')
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath('token_type')
+                                        .description('type of auth token, e.g.: BEARER')
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath('id_token')
+                                        .description('JWT token')
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath('expires_in')
+                                        .description('expiration date of access token')
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath('client_id')
+                                        .description('identifier of relying party')
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath('session_token')
+                                        .description('session token')
+                                        .type(JsonFieldType.STRING)
+                        )))
                 .given()
                 .formParam('code', ProvidersStubConfiguration.REG_CODE)
                 .formParam('username', 'login')
@@ -122,7 +121,7 @@ class RegistrationAPISpec extends BaseDocumentationSpec {
                 .formParam('grant_type', GrantType.AUTHORIZATION_CODE.name())
                 .formParam('response_type', AuthzResponseType.TOKEN.name() + ' ' + AuthzResponseType.SESSION_TOKEN.name())
                 .header(IntegrationSpecUtil.createAuthHeaders(PersistenceServiceStubConfiguration.CLIENT_NAME,
-                PersistenceServiceStubConfiguration.PASSWORD))
+                        PersistenceServiceStubConfiguration.PASSWORD))
         when:
         def result = setup
                 .when()
@@ -143,20 +142,20 @@ class RegistrationAPISpec extends BaseDocumentationSpec {
         def setup = given(this.documentationSpec)
                 .accept(ContentType.HTML)
                 .filter(document('register_redirect_to_web',
-                requestParameters(
-                        parameterWithName('client_id')
-                                .description('relying party identifier'),
-                        parameterWithName('scope')
-                                .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
-                        parameterWithName(ProvidersStubConfiguration.REG_CREDENTIAL)
-                                .description('Some credential fields...')
-                                .optional()
-                ),
-                responseHeaders(
-                        headerWithName(HttpHeaders.LOCATION)
-                                .description('Header that contains authorization code for the next step of authorization code flow,' +
-                                '\nits expiration date and optional user identifier')
-                )))
+                        requestParameters(
+                                parameterWithName('client_id')
+                                        .description('relying party identifier'),
+                                parameterWithName('scope')
+                                        .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+                                parameterWithName(ProvidersStubConfiguration.REG_CREDENTIAL)
+                                        .description('Some credential fields...')
+                                        .optional()
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.LOCATION)
+                                        .description('Header that contains authorization code for the next step of authorization code flow,' +
+                                                '\nits expiration date and optional user identifier')
+                        )))
                 .given()
                 .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
                 .formParam('scope', 'rs.read')
@@ -174,4 +173,79 @@ class RegistrationAPISpec extends BaseDocumentationSpec {
                 .header(HttpHeaders.LOCATION, StringContains.containsString('is_webview='))// according to test stub
     }
 
+
+    def 'should request registration code over provider channel with block clientId'() {
+        given:
+        def setup = given(this.documentationSpec)
+                .accept(ContentType.URLENC)
+                .filter(document('reg_code_provider_channel_succeed',
+                        requestParameters(
+                                parameterWithName('client_id')
+                                        .description('relying party identifier'),
+                                parameterWithName('scope')
+                                        .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+                                parameterWithName(ProvidersStubConfiguration.REG_CREDENTIAL)
+                                        .description('Some credential fields...')
+                                        .optional(),
+                                parameterWithName('response_type')
+                                        .description('response type values')
+                        )))
+                .given()
+                .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME_BLOCKED)
+                .formParam('scope', 'rs.read')
+                .formParam('response_type', AuthzResponseType.CODE.name())
+                .formParam(ProvidersStubConfiguration.REG_CREDENTIAL, 'credential')
+        when:
+        def result = setup
+                .when()
+                .get("register")
+        then:
+        result
+                .then()
+                .statusCode(HttpStatus.FORBIDDEN.value())
+                .body(StringContains.containsString("AuthorizationException"))
+                .body(StringContains.containsString('{"id":"CLIENT_BLOCKED","message":{"en":"Client is blocked"}'))
+    }
+
+    def 'should successfully finish registration over provider channel with block clientId'() {
+        given:
+        def setup = given(this.documentationSpec)
+                .accept(ContentType.URLENC)
+                .filter(document('reg_code_finish_provider_channel_succeed',
+                        requestParameters(
+                                parameterWithName('code')
+                                        .description('registration code provided by user for second'),
+                                parameterWithName('username')
+                                        .description('Some user identifier got from first step in data object, e.g.: username')
+                                        .optional(),
+                                parameterWithName('response_type')
+                                        .description('Response type that must be provided'),
+                                parameterWithName('grant_type')
+                                        .description('grant type for token request'),
+                                parameterWithName('scope')
+                                        .description('Scope for authorization that will be provided through JWT to all resource servers in flow'),
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION)
+                                        .description('Authorization header for relying party basic authorization')
+                        )))
+                .given()
+                .formParam('code', ProvidersStubConfiguration.REG_CODE)
+                .formParam('username', 'login')
+                .formParam('scope', 'read')
+                .formParam('grant_type', GrantType.AUTHORIZATION_CODE.name())
+                .formParam('response_type', AuthzResponseType.TOKEN.name() + ' ' + AuthzResponseType.SESSION_TOKEN.name())
+                .header(IntegrationSpecUtil.createAuthHeaders(PersistenceServiceStubConfiguration.CLIENT_NAME_BLOCKED,
+                        PersistenceServiceStubConfiguration.PASSWORD))
+        when:
+        def result = setup
+                .when()
+                .post("register")
+        then:
+        result
+                .then()
+                .statusCode(HttpStatus.FORBIDDEN.value())
+                .body(StringContains.containsString("AuthorizationException"))
+                .body(StringContains.containsString('{"id":"CLIENT_BLOCKED","message":{"en":"Client is blocked"}'))
+    }
 }
