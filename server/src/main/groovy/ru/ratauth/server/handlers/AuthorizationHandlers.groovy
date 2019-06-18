@@ -24,7 +24,8 @@ import static ru.ratauth.server.handlers.readers.AuthzRequestReader.readClientId
 import static ru.ratauth.utils.URIUtils.appendQuery
 
 /**
- * @author mgorelikov* @since 30/10/15
+ * @author mgorelikov
+ * @since 30/10/15
  */
 @Component
 class AuthorizationHandlers implements Action<Chain> {
