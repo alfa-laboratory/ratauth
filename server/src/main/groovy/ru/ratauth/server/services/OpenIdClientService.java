@@ -24,22 +24,22 @@ public class OpenIdClientService implements AuthClientService {
     @Override
     public Observable<RelyingParty> loadRelyingParty(String name) {
         return clientService.getRelyingParty(name)
-                .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)))
-                .flatMap(this::checkRelyingPartyStatus);
+                .doOnNext(this::checkRelyingPartyStatus)
+                .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)));
     }
 
     @Override
     public Observable<AuthClient> loadClient(String name) {
         return clientService.getClient(name)
-                .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)))
-                .flatMap(this::checkRelyingPartyStatus);
+                .doOnNext(this::checkRelyingPartyStatus)
+                .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)));
     }
 
     @Override
     public Observable<SessionClient> loadSessionClient(String name) {
         return clientService.getSessionClient(name)
-                .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)))
-                .flatMap(this::checkRelyingPartyStatus);
+                .doOnNext(this::checkRelyingPartyStatus)
+                .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)));
     }
 
     @Override
@@ -54,10 +54,9 @@ public class OpenIdClientService implements AuthClientService {
                 .map(rp -> appendQuery(rp.getRegistrationPageURI(), query));
     }
 
-
-    private <T extends AuthClient> Observable<T> checkRelyingPartyStatus(T relyingParty) {
-        return Observable.just(relyingParty).filter(rp -> AuthClient.Status.ACTIVE.equals(rp.getStatus()))
-                .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_BLOCKED)));
+    private <T extends AuthClient> void checkRelyingPartyStatus(T relyingParty) {
+        if (AuthClient.Status.BLOCKED.equals(relyingParty.getStatus())) {
+            throw new AuthorizationException(AuthorizationException.ID.CLIENT_BLOCKED);
+        }
     }
-
 }

@@ -490,4 +490,41 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
                 .body(StringContains.containsString('{"id":"CLIENT_BLOCKED","message":{"en":"Client is blocked"}'))
     }
 
+
+    def 'should request token with clientId is block'() {
+        given:
+        def setup = given(this.documentationSpec)
+                .accept(ContentType.URLENC)
+                .filter(document('token_succeed',
+                        preprocessResponse(prettyPrint()),
+                        requestParameters(
+                                parameterWithName('response_type')
+                                        .description('Response type that must be provided'),
+                                parameterWithName('grant_type')
+                                        .description('grant type for token request'),
+                                parameterWithName('code')
+                                        .description('authorization code'),
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION)
+                                        .description('Authorization header for relying party basic authorization')
+                        )))
+                .given()
+                .formParam('grant_type', GrantType.AUTHORIZATION_CODE.name())
+                .formParam('response_type', AuthzResponseType.TOKEN.name())
+                .formParam('code', PersistenceServiceStubConfiguration.CODE)
+                .header(IntegrationSpecUtil.createAuthHeaders(PersistenceServiceStubConfiguration.CLIENT_NAME_BLOCKED,
+                        PersistenceServiceStubConfiguration.PASSWORD))
+        when:
+        def result = setup
+                .when()
+                .post("token")
+        then:
+        result
+                .then()
+                .statusCode(HttpStatus.FORBIDDEN.value())
+                .body(StringContains.containsString("AuthorizationException"))
+                .body(StringContains.containsString('{"id":"CLIENT_BLOCKED","message":{"en":"Client is blocked"}'))
+    }
+
 }
