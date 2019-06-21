@@ -32,7 +32,7 @@ class PersistenceServiceStubConfiguration {
     public static final String CLIENT_NAME_DUMMY = 'DummyIdentityProvider'
     public static final String CLIENT_NAME_REST = 'RestIdentityProvider'
     public static final String CLIENT_NAME_RESTRICTED = 'RestrictedIdentityProvider'
-    public static final String CLIENT_NAME_BLOCKED = 'BlockClientId'
+    public static final String CLIENT_NAME_BLOCKED = 'BlockedClientId'
     public static final String NONEXISTENT_CLIENT_NAME = 'bad_name'
     public static final String PASSWORD = 'password'
     public static final String SALT = 'JBn7SnEzMy0MXdNsh5GVvktSGuRs0+BNVZ47kmm3TDM='

@@ -28,7 +28,6 @@ import java.net.URL;
 import java.util.*;
 import java.util.function.Function;
 
-import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static ru.ratauth.providers.auth.dto.VerifyResult.Status.*;
