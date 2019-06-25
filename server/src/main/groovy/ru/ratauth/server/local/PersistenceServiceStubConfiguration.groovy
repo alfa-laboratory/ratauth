@@ -32,6 +32,7 @@ class PersistenceServiceStubConfiguration {
     public static final String CLIENT_NAME_DUMMY = 'DummyIdentityProvider'
     public static final String CLIENT_NAME_REST = 'RestIdentityProvider'
     public static final String CLIENT_NAME_RESTRICTED = 'RestrictedIdentityProvider'
+    public static final String CLIENT_NAME_BLOCKED = 'BlockedClientId'
     public static final String NONEXISTENT_CLIENT_NAME = 'bad_name'
     public static final String PASSWORD = 'password'
     public static final String SALT = 'JBn7SnEzMy0MXdNsh5GVvktSGuRs0+BNVZ47kmm3TDM='
@@ -65,6 +66,7 @@ class PersistenceServiceStubConfiguration {
                             identityProvider: 'STUB',
                             secret: CLIENT_SECRET,
                             password: SecurityUtils.hashPassword(PASSWORD, SALT),
+                            status: AuthClient.Status.ACTIVE,
                             salt: SALT,
                             codeTTL: 36000l,
                             refreshTokenTTL: 36000l,
@@ -80,6 +82,7 @@ class PersistenceServiceStubConfiguration {
                     return Observable.just(new RelyingParty(
                             id: 'id',
                             name: CLIENT_NAME_DUMMY,
+                            status: AuthClient.Status.ACTIVE,
                             identityProvider: 'DummyIdentityProvider',
                             secret: CLIENT_SECRET,
                             password: SecurityUtils.hashPassword(PASSWORD, SALT),
@@ -99,6 +102,7 @@ class PersistenceServiceStubConfiguration {
                             id: 'id',
                             name: CLIENT_NAME_DUMMY,
                             identityProvider: 'REST',
+                            status: AuthClient.Status.ACTIVE,
                             secret: CLIENT_SECRET,
                             password: SecurityUtils.hashPassword(PASSWORD, SALT),
                             salt: SALT,
@@ -117,8 +121,28 @@ class PersistenceServiceStubConfiguration {
                             id: 'id',
                             name: CLIENT_NAME_RESTRICTED,
                             identityProvider: 'STUB',
+                            status: AuthClient.Status.ACTIVE,
                             secret: CLIENT_SECRET,
                             password: SecurityUtils.hashPassword(PASSWORD, SALT),
+                            salt: SALT,
+                            codeTTL: 36000l,
+                            refreshTokenTTL: 36000l,
+                            sessionTTL: 36000l,
+                            tokenTTL: 36000l,
+                            redirectURIs: ['https://domain.mine', 'mine.domain'],
+                            registrationRedirectURI: 'http://domain.mine/oidc/register',
+                            authorizationRedirectURI: 'http://domain.mine/oidc/authorize',
+                            authorizationPageURI: 'http://domain.mine/oidc/web/authorize?is_webview=true',
+                            registrationPageURI: 'http://domain.mine/oidc/web/register?is_webview=true',
+                            incAuthLevelPageURI: 'http://domain.mine/oidc/web/inc_auth_level?is_webview=true'))
+                else if (name == CLIENT_NAME_BLOCKED)
+                    return Observable.just(new RelyingParty(
+                            id: 'id',
+                            name: CLIENT_NAME_BLOCKED,
+                            identityProvider: 'REST',
+                            secret: CLIENT_SECRET,
+                            password: SecurityUtils.hashPassword(PASSWORD, SALT),
+                            status: AuthClient.Status.BLOCKED,
                             salt: SALT,
                             codeTTL: 36000l,
                             refreshTokenTTL: 36000l,
@@ -140,6 +164,7 @@ class PersistenceServiceStubConfiguration {
                             codeTTL: 36000l,
                             refreshTokenTTL: 36000l,
                             sessionTTL: 36000l,
+                            status: AuthClient.Status.ACTIVE,
                             tokenTTL: 36000l,
                             redirectURIs: ['https://domain.mine', 'mine.domain'],
                             authorizationRedirectURI: 'http://domain.mine/oidc/authorize',
@@ -156,6 +181,16 @@ class PersistenceServiceStubConfiguration {
                             secret: CLIENT_SECRET,
                             salt: SALT,
                             password: SecurityUtils.hashPassword(PASSWORD, SALT),
+                            status: AuthClient.Status.ACTIVE,
+                    ))
+                else if (name == CLIENT_NAME_BLOCKED)
+                    return Observable.just(new AuthClient(
+                            id: 'id',
+                            name: CLIENT_NAME_BLOCKED,
+                            secret: CLIENT_SECRET,
+                            salt: SALT,
+                            password: SecurityUtils.hashPassword(PASSWORD, SALT),
+                            status: AuthClient.Status.BLOCKED,
                     ))
                 else if (name == NONEXISTENT_CLIENT_NAME)
                     return Observable.empty()
@@ -164,7 +199,8 @@ class PersistenceServiceStubConfiguration {
                             id: 'id',
                             name: CLIENT_NAME + '3',
                             secret: CLIENT_SECRET,
-                            password: PASSWORD
+                            password: PASSWORD,
+                            status: AuthClient.Status.ACTIVE,
                     ))
             }
 
@@ -177,13 +213,15 @@ class PersistenceServiceStubConfiguration {
                             secret: CLIENT_SECRET,
                             salt: SALT,
                             password: SecurityUtils.hashPassword(PASSWORD, SALT),
+                            status: AuthClient.Status.ACTIVE,
                     ))
                 else
                     return Observable.just(new SessionClient(
                             id: 'id',
                             name: CLIENT_NAME + '3',
                             secret: CLIENT_SECRET,
-                            password: PASSWORD
+                            password: PASSWORD,
+                            status: AuthClient.Status.ACTIVE,
                     ))
             }
         }
@@ -577,7 +615,7 @@ class PersistenceServiceStubConfiguration {
 
 
     @Bean
-    RestrictionService restrictionService(){
+    RestrictionService restrictionService() {
         return new RestrictionService() {
             @Override
             void checkIsAuthAllowed(String clientId, String userId, AcrValues enroll, int maxAttempts, int maxAttemptsTTL) {

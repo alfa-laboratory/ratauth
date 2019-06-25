@@ -80,8 +80,8 @@ class AuthorizationHandlers implements Action<Chain> {
                 .map({ url -> url.toString() })
                 .bindExec()
                 .subscribe {
-            res -> context.redirect(HttpResponseStatus.MOVED_PERMANENTLY.code(), res)
-        }
+                    res -> context.redirect(HttpResponseStatus.MOVED_PERMANENTLY.code(), res)
+                }
     }
 
     private URL appendAcrValues(URL url, String clientId) {
@@ -127,5 +127,6 @@ class AuthorizationHandlers implements Action<Chain> {
         throwable -> ctx.get(ServerErrorHandler).error(ctx, throwable)
         }
         )
+
     }
 }

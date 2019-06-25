@@ -2,6 +2,7 @@ package ru.ratauth.server
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.jayway.restassured.http.ContentType
+import org.hamcrest.core.StringContains
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
@@ -333,5 +334,69 @@ class TokenAPISpec extends BaseDocumentationSpec {
         result
                 .then()
                 .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+    }
+
+    def 'refresh token with blocked clientId'() {
+        given:
+        def setup = given(this.documentationSpec)
+                .accept(ContentType.URLENC)
+                .filter(document('token_refresh_fail_with_clienId_blocked',
+                        preprocessResponse(prettyPrint()),
+                        requestParameters(
+                                parameterWithName('response_type')
+                                        .description('Response type, this case it must be TOKEN'),
+                                parameterWithName('grant_type')
+                                        .description('grant type for operation'),
+                                parameterWithName('refresh_token')
+                                        .description('refresh token')
+                        )))
+                .given()
+                .formParam('response_type', AuthzResponseType.TOKEN.name())
+                .formParam('grant_type', GrantType.REFRESH_TOKEN.name())
+                .formParam('refresh_token', PersistenceServiceStubConfiguration.REFRESH_TOKEN)
+                .header(IntegrationSpecUtil.createAuthHeaders(PersistenceServiceStubConfiguration.CLIENT_NAME_BLOCKED,
+                        PersistenceServiceStubConfiguration.PASSWORD))
+        when:
+        def result = setup
+                .when()
+                .post("token")
+        then:
+        result
+                .then()
+                .statusCode(HttpStatus.FORBIDDEN.value())
+                .body(StringContains.containsString("AuthorizationException"))
+                .body(StringContains.containsString('{"id":"CLIENT_BLOCKED","message":{"en":"Client is blocked"}'))
+    }
+
+
+    def 'should check token blocked clientId'() {
+        given:
+        def setup = given(this.documentationSpec)
+                .accept(ContentType.URLENC)
+                .filter(document('check_token_succeed',
+                        preprocessResponse(prettyPrint()),
+                        requestParameters(
+                                parameterWithName('token')
+                                        .description('access token that must be checked'),
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION)
+                                        .description('Authorization header for relying party basic authorization')
+                        ),
+                ))
+                .given()
+                .formParam('token', PersistenceServiceStubConfiguration.TOKEN)
+                .header(IntegrationSpecUtil.createAuthHeaders(PersistenceServiceStubConfiguration.CLIENT_NAME_BLOCKED,
+                        PersistenceServiceStubConfiguration.PASSWORD))
+        when:
+        def result = setup
+                .when()
+                .post("check_token")
+        then:
+        result
+                .then()
+                .statusCode(HttpStatus.FORBIDDEN.value())
+                .body(StringContains.containsString("AuthorizationException"))
+                .body(StringContains.containsString('{"id":"CLIENT_BLOCKED","message":{"en":"Client is blocked"}'))
     }
 }

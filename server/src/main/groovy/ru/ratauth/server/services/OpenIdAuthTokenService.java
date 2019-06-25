@@ -9,12 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import ru.ratauth.entities.*;
 import ru.ratauth.entities.Status;
+import ru.ratauth.entities.*;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.exception.ExpiredException;
-import ru.ratauth.interaction.*;
 import ru.ratauth.interaction.TokenType;
+import ru.ratauth.interaction.*;
 import ru.ratauth.server.configuration.SessionConfiguration;
 import ru.ratauth.server.secutiry.OAuthSystemException;
 import rx.Observable;
@@ -86,6 +86,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     public Observable<CheckTokenResponse> checkToken(CheckTokenRequest oauthRequest) {
         // check basic auth first
         Observable<AuthClient> authClient = loadRelyingParty(oauthRequest);
+
         authClient.subscribe();
         return authSessionService.getByValidToken(oauthRequest.getToken(), new Date())
                 .doOnNext(sessionStatusChecker::checkAndUpdateSession)

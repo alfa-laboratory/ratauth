@@ -289,6 +289,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         } else {
             sessionObs = sessionService.getByValidSessionToken(request.getSessionToken(), new Date(), true);
             authClientObs = clientService.loadAndAuthSessionClient(request.getClientId(), request.getClientSecret(), true);
+
         }
 
         return Observable.zip(
@@ -338,9 +339,9 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     }
 
     private Observable<VerifyResult> authenticateUser(Map<String, String> authData, AcrValues enroll, String identityProviderName, String relyingPartyName) {
-
         IdentityProvider provider = identityProviderResolver.getProvider(identityProviderName);
         VerifyInput verifyInput = new VerifyInput(authData, enroll, new UserInfo(), relyingPartyName);
         return provider.verify(verifyInput);
     }
+
 }

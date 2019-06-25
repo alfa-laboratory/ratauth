@@ -49,7 +49,7 @@ public interface AuthClientService {
     Observable<String> getAuthorizationPageURI(String name, String query);
 
     /**
-     * Loads relying party reisterPageURI from database and appends query to it
+     * Loads relying party registerPageURI from database and appends query to it
      *
      * @param name  unique client name
      * @param query input query string

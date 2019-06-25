@@ -24,18 +24,21 @@ public class OpenIdClientService implements AuthClientService {
     @Override
     public Observable<RelyingParty> loadRelyingParty(String name) {
         return clientService.getRelyingParty(name)
+                .doOnNext(this::checkRelyingPartyStatus)
                 .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)));
     }
 
     @Override
     public Observable<AuthClient> loadClient(String name) {
         return clientService.getClient(name)
+                .doOnNext(this::checkRelyingPartyStatus)
                 .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)));
     }
 
     @Override
     public Observable<SessionClient> loadSessionClient(String name) {
         return clientService.getSessionClient(name)
+                .doOnNext(this::checkRelyingPartyStatus)
                 .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CLIENT_NOT_FOUND)));
     }
 
@@ -49,5 +52,11 @@ public class OpenIdClientService implements AuthClientService {
     public Observable<String> getRegistrationPageURI(String name, String query) {
         return loadRelyingParty(name)
                 .map(rp -> appendQuery(rp.getRegistrationPageURI(), query));
+    }
+
+    private <T extends AuthClient> void checkRelyingPartyStatus(T relyingParty) {
+        if (AuthClient.Status.BLOCKED.equals(relyingParty.getStatus())) {
+            throw new AuthorizationException(AuthorizationException.ID.CLIENT_BLOCKED);
+        }
     }
 }
