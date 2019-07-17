@@ -205,7 +205,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .flatMap(rp -> authenticateUserWithRestrictions(request, rp))
                 .flatMap(rpAuth -> createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
                         .flatMap(session -> fillDeviceInfoInformation(session, request)
-                                .map(deviceInfo -> createUpdateToken(rpAuth.middle, session, rpAuth.left)).map((entry) -> session)
+                                .doOnNext(deviceInfo -> createUpdateToken(rpAuth.middle, session, rpAuth.left))
                         )
                         .doOnNext(sessionService::updateAcrValues)
                         .flatMap(session -> createIdToken(rpAuth.left, session, rpAuth.right)
