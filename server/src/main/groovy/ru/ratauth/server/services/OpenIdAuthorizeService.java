@@ -11,8 +11,8 @@ import org.springframework.util.CollectionUtils;
 import ru.ratauth.entities.*;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.exception.ExpiredException;
-import ru.ratauth.interaction.*;
 import ru.ratauth.interaction.TokenType;
+import ru.ratauth.interaction.*;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
 import ru.ratauth.providers.auth.dto.VerifyResult.Status;
@@ -202,35 +202,35 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     @SneakyThrows
     public Observable<AuthzResponse> authenticate(AuthzRequest request) {
         return clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), isAuthRequired(request))
-                .flatMap(rp -> authenticateUser(request.getAuthData(), request.getAcrValues(), rp.getIdentityProvider(), rp.getName())
-                        .map(request::addVerifyResultAcrToRequest)
-                        .map(authRes -> {
-                            checkRestrictionService.checkAuthRestrictions(request, authRes);
-                            return new ImmutableTriple<>(rp, authRes, request.getAcrValues());
-                        }))
+                .flatMap(rp -> authenticateUserWithRestrictions(request, rp))
                 .flatMap(rpAuth -> createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
-                        .flatMap(session ->
-                                createUpdateToken(rpAuth.middle, session, rpAuth.left)
-                                        .map((entry) -> session)
+                        .flatMap(session -> fillDeviceInfoInformation(session, request)
+                                .doOnNext(deviceInfo -> createUpdateToken(rpAuth.middle, session, rpAuth.left))
                         )
                         .doOnNext(sessionService::updateAcrValues)
                         .flatMap(session -> createIdToken(rpAuth.left, session, rpAuth.right)
                                 .flatMap(idToken -> buildResponse(rpAuth.left, session, rpAuth.middle, idToken, request))
-                                .flatMap(authzResponse -> {
-                                    if (authzResponse.getCode() != null || authzResponse.getUpdateCode() != null) {
-                                        return deviceService
-                                                .resolveDeviceInfo(
-                                                        request.getClientId(),
-                                                        Objects.toString(request.getAcrValues()),
-                                                        createDeviceInfoFromRequest(session, request),
-                                                        extractUserInfo(session)
-                                                )
-                                                .map(it -> authzResponse);
-                                    }
-                                    return Observable.just(authzResponse);
-                                })
                         ))
                 .doOnCompleted(() -> log.info("Authorization succeed"));
+    }
+
+    private Observable<ImmutableTriple<RelyingParty, VerifyResult, AcrValues>> authenticateUserWithRestrictions(AuthzRequest request, RelyingParty rp) {
+        return authenticateUser(request.getAuthData(), request.getAcrValues(), rp.getIdentityProvider(), rp.getName())
+                .map(request::addVerifyResultAcrToRequest)
+                .map(authRes -> {
+                    checkRestrictionService.checkAuthRestrictions(request, authRes);
+                    return new ImmutableTriple<>(rp, authRes, request.getAcrValues());
+                });
+    }
+
+    private Observable<Session> fillDeviceInfoInformation(Session session, AuthzRequest request) {
+        deviceService.resolveDeviceInfo(
+                request.getClientId(),
+                Objects.toString(request.getAcrValues()),
+                createDeviceInfoFromRequest(session, request),
+                extractUserInfo(session)
+        );
+        return Observable.just(session);
     }
 
     private Observable<Boolean> createUpdateToken(VerifyResult verifyResult, Session session, RelyingParty relyingParty) {
@@ -308,6 +308,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                                             .data(Collections.emptyMap())
                                             .status(NEED_APPROVAL)
                                             .build(), null, request));
+
                 }
         ).doOnCompleted(() -> log.info("Cross-authorization succeed"));
     }
