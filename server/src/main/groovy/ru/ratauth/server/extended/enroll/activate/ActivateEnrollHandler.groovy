@@ -1,5 +1,6 @@
 package ru.ratauth.server.extended.enroll.activate
 
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import ratpack.error.ServerErrorHandler
@@ -37,14 +38,28 @@ class ActivateEnrollHandler implements Action<Chain> {
     }
 
     static ActivateEnrollRequest readActivateEnrollRequest(RequestReader params) {
-        return new ActivateEnrollRequest(
-                clientId: params.removeField("client_id", true),
-                mfaToken: params.removeField("mfa_token", false),
-                scope: params.removeField("scope", true).split(' ').toList(),
-                authContext: AcrValues.valueOf(params.removeField("acr_values", true)),
-                enroll: AcrValues.valueOf(params.removeField("enroll", true)),
-                data: params.toMap()
-        )
+        return ActivateEnrollRequest.builder()
+                .clientId(params.removeField("client_id", true))
+                .mfaToken(params.removeField("mfa_token", false))
+                .scope(new HashSet<String>(Arrays.asList(params.removeField("scope", true).split(' '))))
+                .authContext(AcrValues.valueOf(params.removeField("acr_values", true)))
+                .enroll(AcrValues.valueOf(params.removeField("enroll", true)))
+                .data(params.toMap())
+                .deviceAppVersion(params.removeField("device_app_version", false))
+                .deviceId(params.removeField("device_id", false))
+                .deviceUUID(params.removeField("device_uuid", false))
+                .deviceModel(params.removeField("device_model", false))
+                .deviceGeo(params.removeField("device_geo", false))
+                .deviceLocale(params.removeField("device_locale", false))
+                .deviceCity(params.removeField("device_city", false))
+                .deviceName(params.removeField("device_name", false))
+                .deviceOSVersion(params.removeField("device_OS_version", false))
+                .deviceBootTime(params.removeField("device_boot_time", false))
+                .deviceTimezone(params.removeField("device_timezone", false))
+                .deviceIp(params.removeField("device_ip", false))
+                .deviceUserAgent(params.removeField("device_user_agent", false))
+                .creationDate(new Date())
+                .build()
     }
 
     private void incAuthLevel(Context ctx, Observable<ActivateEnrollRequest> requestObservable) {

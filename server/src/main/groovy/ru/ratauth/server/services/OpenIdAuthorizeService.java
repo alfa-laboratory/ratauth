@@ -204,8 +204,8 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         return clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), isAuthRequired(request))
                 .flatMap(rp -> authenticateUserWithRestrictions(request, rp))
                 .flatMap(rpAuth -> createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
-                        .flatMap(session -> fillDeviceInfoInformation(session, request)
-                                .doOnNext(deviceInfo -> createUpdateToken(rpAuth.middle, session, rpAuth.left))
+                        .flatMap(session -> sendDeviceInfoInformation(session, request)
+                                .map(deviceInfo -> createUpdateToken(rpAuth.middle, session, rpAuth.left)).map((entry) -> session)
                         )
                         .doOnNext(sessionService::updateAcrValues)
                         .flatMap(session -> createIdToken(rpAuth.left, session, rpAuth.right)
@@ -223,8 +223,8 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 });
     }
 
-    private Observable<Session> fillDeviceInfoInformation(Session session, AuthzRequest request) {
-        deviceService.resolveDeviceInfo(
+    private Observable<Session> sendDeviceInfoInformation(Session session, AuthzRequest request) {
+        deviceService.sendDeviceInfo(
                 request.getClientId(),
                 Objects.toString(request.getAcrValues()),
                 createDeviceInfoFromRequest(session, request),
