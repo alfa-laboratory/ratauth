@@ -11,8 +11,8 @@ import org.springframework.util.CollectionUtils;
 import ru.ratauth.entities.*;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.exception.ExpiredException;
-import ru.ratauth.interaction.TokenType;
 import ru.ratauth.interaction.*;
+import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
 import ru.ratauth.providers.auth.dto.VerifyResult.Status;
@@ -204,8 +204,9 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         return clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), isAuthRequired(request))
                 .flatMap(rp -> authenticateUserWithRestrictions(request, rp))
                 .flatMap(rpAuth -> createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
-                        .flatMap(session -> sendDeviceInfoInformation(session, request)
-                                .map(deviceInfo -> createUpdateToken(rpAuth.middle, session, rpAuth.left)).map((entry) -> session)
+                        .flatMap(session ->
+                                createUpdateToken(rpAuth.middle, session, rpAuth.left)
+                                        .map((entry) -> session)
                         )
                         .doOnNext(sessionService::updateAcrValues)
                         .flatMap(session -> createIdToken(rpAuth.left, session, rpAuth.right)
@@ -221,16 +222,6 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                     checkRestrictionService.checkAuthRestrictions(request, authRes);
                     return new ImmutableTriple<>(rp, authRes, request.getAcrValues());
                 });
-    }
-
-    private Observable<Session> sendDeviceInfoInformation(Session session, AuthzRequest request) {
-        deviceService.sendDeviceInfo(
-                request.getClientId(),
-                Objects.toString(request.getAcrValues()),
-                createDeviceInfoFromRequest(session, request),
-                extractUserInfo(session)
-        );
-        return Observable.just(session);
     }
 
     private Observable<Boolean> createUpdateToken(VerifyResult verifyResult, Session session, RelyingParty relyingParty) {
@@ -289,7 +280,6 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         } else {
             sessionObs = sessionService.getByValidSessionToken(request.getSessionToken(), new Date(), true);
             authClientObs = clientService.loadAndAuthSessionClient(request.getClientId(), request.getClientSecret(), true);
-
         }
 
         return Observable.zip(
@@ -308,7 +298,6 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                                             .data(Collections.emptyMap())
                                             .status(NEED_APPROVAL)
                                             .build(), null, request));
-
                 }
         ).doOnCompleted(() -> log.info("Cross-authorization succeed"));
     }
@@ -340,9 +329,9 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     }
 
     private Observable<VerifyResult> authenticateUser(Map<String, String> authData, AcrValues enroll, String identityProviderName, String relyingPartyName) {
+
         IdentityProvider provider = identityProviderResolver.getProvider(identityProviderName);
         VerifyInput verifyInput = new VerifyInput(authData, enroll, new UserInfo(), relyingPartyName);
         return provider.verify(verifyInput);
     }
-
 }
