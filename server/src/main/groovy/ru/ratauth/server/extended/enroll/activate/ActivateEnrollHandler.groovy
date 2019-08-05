@@ -14,6 +14,8 @@ import ru.ratauth.server.handlers.readers.RequestReader
 import rx.Observable
 import rx.functions.Action1
 
+import java.time.Instant
+
 import static ratpack.rx.RxRatpack.observe
 
 @Component
@@ -58,7 +60,7 @@ class ActivateEnrollHandler implements Action<Chain> {
                 .deviceTimezone(params.removeField("device_timezone", false))
                 .deviceIp(params.removeField("device_ip", false))
                 .deviceUserAgent(params.removeField("device_user_agent", false))
-                .creationDate(new Date())
+                .creationDate(Instant.now())
                 .build()
     }
 

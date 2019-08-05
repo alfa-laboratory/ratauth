@@ -5,6 +5,7 @@ import lombok.Data;
 import ru.ratauth.entities.AcrValue;
 import ru.ratauth.entities.Enroll;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -18,7 +19,7 @@ public class ActivateEnrollRequest {
     private Set<String> scope;
     private AcrValue authContext;
     private Enroll enroll;
-    private Date creationDate;
+    private Instant creationDate;
 
 
     private String deviceAppVersion;
