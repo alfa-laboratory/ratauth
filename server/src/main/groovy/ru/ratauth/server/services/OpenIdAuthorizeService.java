@@ -11,8 +11,8 @@ import org.springframework.util.CollectionUtils;
 import ru.ratauth.entities.*;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.exception.ExpiredException;
-import ru.ratauth.interaction.TokenType;
 import ru.ratauth.interaction.*;
+import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
 import ru.ratauth.providers.auth.dto.VerifyResult.Status;
@@ -44,7 +44,6 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     private final AuthClientService clientService;
     private final TokenCacheService tokenCacheService;
     private final AuthSessionService sessionService;
-    private final DeviceService deviceService;
     private final IdentityProviderResolver identityProviderResolver;
     private final UpdateDataService updateDataService;
     private final CheckRestrictionService checkRestrictionService;
@@ -107,7 +106,6 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         AcrValues difference = acrValues.difference(receivedAcrValues);
 
         if (isReceivedRequiredAcrs(difference)) {
-
             return updateDataService
                     .getUpdateData(session.getSessionToken())
                     .flatMap(updateDataEntry -> updateDataService
@@ -119,7 +117,6 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                     )
                     .flatMap(updateDataEntry -> fillUpdateData(resp, relyingParty, updateDataEntry))
                     .switchIfEmpty(fillFinishAuthorization(targetRedirectURI, entry, resp));
-
         }
 
         return onNextAuthMethod(relyingParty, session, targetRedirectURI, resp, difference.getFirst());
@@ -194,21 +191,18 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         );
     }
 
-    private static Function<String, Function<String, Function<String, String>>> addToPathIfExistCurry() {
-        return path -> sign -> parameter -> isNoneBlank(parameter) ? path + sign + parameter : path;
-    }
-
     @Override
     @SneakyThrows
     public Observable<AuthzResponse> authenticate(AuthzRequest request) {
         return clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), isAuthRequired(request))
                 .flatMap(rp -> authenticateUserWithRestrictions(request, rp))
                 .flatMap(rpAuth -> createSession(request, rpAuth.getMiddle(), rpAuth.getRight(), rpAuth.getLeft())
-                        .flatMap(session -> fillDeviceInfoInformation(session, request)
-                                .doOnNext(deviceInfo -> createUpdateToken(rpAuth.middle, session, rpAuth.left))
+                        .flatMap(session ->
+                                createUpdateToken(rpAuth.middle, session, rpAuth.left)
+                                        .map((entry) -> session)
                         )
                         .doOnNext(sessionService::updateAcrValues)
-                        .flatMap(session -> createIdToken(rpAuth.left, session, rpAuth.right)
+                        .flatMap(session -> createIdToken(rpAuth.left, session)
                                 .flatMap(idToken -> buildResponse(rpAuth.left, session, rpAuth.middle, idToken, request))
                         ))
                 .doOnCompleted(() -> log.info("Authorization succeed"));
@@ -221,16 +215,6 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                     checkRestrictionService.checkAuthRestrictions(request, authRes);
                     return new ImmutableTriple<>(rp, authRes, request.getAcrValues());
                 });
-    }
-
-    private Observable<Session> fillDeviceInfoInformation(Session session, AuthzRequest request) {
-        deviceService.resolveDeviceInfo(
-                request.getClientId(),
-                Objects.toString(request.getAcrValues()),
-                createDeviceInfoFromRequest(session, request),
-                extractUserInfo(session)
-        );
-        return Observable.just(session);
     }
 
     private Observable<Boolean> createUpdateToken(VerifyResult verifyResult, Session session, RelyingParty relyingParty) {
@@ -249,35 +233,6 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         return request.getResponseType() != AuthzResponseType.CODE;
     }
 
-    private Map<String, Object> extractUserInfo(Session session) {
-        return ofNullable(session)
-                .map(Session::getUserInfo)
-                .map(tokenCacheService::extractUserInfo)
-                .orElseThrow(IllegalArgumentException::new);
-    }
-
-
-    private DeviceInfo createDeviceInfoFromRequest(Session session, AuthzRequest request) {
-        return DeviceInfo.builder()
-                .userId(session.getUserId())
-                .sessionToken(session.getSessionToken())
-                .deviceAppVersion(request.getDeviceAppVersion())
-                .deviceId(request.getDeviceId())
-                .deviceUUID(request.getDeviceUUID())
-                .deviceModel(request.getDeviceModel())
-                .deviceGeo(request.getDeviceGeo())
-                .deviceLocale(request.getDeviceLocale())
-                .deviceCity(request.getDeviceCity())
-                .deviceName(request.getDeviceName())
-                .deviceOSVersion(request.getDeviceOSVersion())
-                .deviceBootTime(request.getDeviceBootTime())
-                .deviceTimezone(request.getDeviceTimezone())
-                .deviceIp(request.getDeviceIp())
-                .deviceUserAgent(request.getDeviceUserAgent())
-                .creationDate(new Date())
-                .build();
-    }
-
     //TODO check token relation
     @Override
     public Observable<AuthzResponse> crossAuthenticate(AuthzRequest request) {
@@ -289,7 +244,6 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         } else {
             sessionObs = sessionService.getByValidSessionToken(request.getSessionToken(), new Date(), true);
             authClientObs = clientService.loadAndAuthSessionClient(request.getClientId(), request.getClientSecret(), true);
-
         }
 
         return Observable.zip(
@@ -308,12 +262,11 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                                             .data(Collections.emptyMap())
                                             .status(NEED_APPROVAL)
                                             .build(), null, request));
-
                 }
         ).doOnCompleted(() -> log.info("Cross-authorization succeed"));
     }
 
-    private Observable<TokenCache> createIdToken(RelyingParty relyingParty, Session session, AcrValues acrValues) {
+    private Observable<TokenCache> createIdToken(RelyingParty relyingParty, Session session) {
         Optional<AuthEntry> entry = session.getEntry(relyingParty.getName());
         Optional<Token> token = entry.flatMap(AuthEntry::getLatestToken);
         if (token.isPresent()) {
@@ -344,5 +297,4 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         VerifyInput verifyInput = new VerifyInput(authData, enroll, new UserInfo(), relyingPartyName);
         return provider.verify(verifyInput);
     }
-
 }

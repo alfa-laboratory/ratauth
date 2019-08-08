@@ -1,14 +1,10 @@
 package ru.ratauth.server.extended.enroll.activate;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.ratauth.entities.IdentityProvider;
-import ru.ratauth.entities.RelyingParty;
-import ru.ratauth.entities.Session;
-import ru.ratauth.entities.UserInfo;
+import ru.ratauth.entities.*;
 import ru.ratauth.providers.auth.dto.ActivateInput;
 import ru.ratauth.providers.auth.dto.ActivateResult;
 import ru.ratauth.server.extended.restriction.CheckRestrictionService;
@@ -16,17 +12,14 @@ import ru.ratauth.server.providers.IdentityProviderResolver;
 import ru.ratauth.server.secutiry.TokenProcessor;
 import ru.ratauth.server.services.AuthClientService;
 import ru.ratauth.server.services.AuthSessionService;
+import ru.ratauth.server.services.DeviceService;
 import ru.ratauth.server.services.TokenCacheService;
 import rx.Observable;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Optional.ofNullable;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ActivateEnrollService {
@@ -35,6 +28,7 @@ public class ActivateEnrollService {
     private final AuthSessionService sessionService;
     private final TokenCacheService tokenCacheService;
     private final TokenProcessor tokenProcessor;
+    private final DeviceService deviceService;
     private final IdentityProviderResolver identityProviderResolver;
     private final CheckRestrictionService checkRestrictionService;
 
@@ -56,6 +50,7 @@ public class ActivateEnrollService {
     private Observable<ActivateResult> activateAndUpdateUserInfo(Session session, ActivateEnrollRequest request, RelyingParty relyingParty) {
         if (session != null) {
             checkRestrictionService.checkAuthRestrictions(session, request);
+            saveDeviceInfoInformation(session, request);
             Map<String, Object> tokenInfo = extractUserInfo(session);
             UserInfo userInfo = new UserInfo(tokenProcessor.filterUserInfo(tokenInfo));
             Set<String> authContext = tokenProcessor.extractAuthContext(tokenInfo);
@@ -64,6 +59,36 @@ public class ActivateEnrollService {
                             .map(b -> result));
         }
         return activate(request, null, relyingParty);
+    }
+
+    private void saveDeviceInfoInformation(Session session, ActivateEnrollRequest request) {
+        deviceService.saveDeviceInfo(
+                request.getClientId(),
+                Objects.toString(request.getEnroll()),
+                createDeviceInfoFromRequest(session, request),
+                extractUserInfo(session)
+        ).subscribe();
+    }
+
+    private DeviceInfo createDeviceInfoFromRequest(Session session, ActivateEnrollRequest request) {
+        return DeviceInfo.builder()
+                .userId(session.getUserId())
+                .sessionToken(session.getSessionToken())
+                .deviceAppVersion(request.getDeviceAppVersion())
+                .deviceId(request.getDeviceId())
+                .deviceUUID(request.getDeviceUUID())
+                .deviceModel(request.getDeviceModel())
+                .deviceGeo(request.getDeviceGeo())
+                .deviceLocale(request.getDeviceLocale())
+                .deviceCity(request.getDeviceCity())
+                .deviceName(request.getDeviceName())
+                .deviceOSVersion(request.getDeviceOSVersion())
+                .deviceBootTime(request.getDeviceBootTime())
+                .deviceTimezone(request.getDeviceTimezone())
+                .deviceIp(request.getDeviceIp())
+                .deviceUserAgent(request.getDeviceUserAgent())
+                .creationDate(new Date())
+                .build();
     }
 
     @SuppressWarnings("unchecked")

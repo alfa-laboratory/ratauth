@@ -142,7 +142,7 @@ public class VerifyEnrollService {
                             if (response instanceof SuccessResponse) {
                                 Session session = p.right;
                                 return deviceService
-                                        .resolveDeviceInfo(
+                                        .sendDeviceInfo(
                                                 request.getClientId(),
                                                 Objects.toString(request.getAuthContext()),
                                                 createDeviceInfoFromRequest(session, request),
