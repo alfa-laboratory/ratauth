@@ -46,7 +46,9 @@ public class OpenIdDeviceService implements DeviceService {
 
     private Optional<DeviceInfo> getLastDevice(List<DeviceInfo> oldDevices) {
         return oldDevices.stream()
-                .max(Comparator.comparing(DeviceInfo::getCreationDate));
+                .sorted(Comparator.comparing(DeviceInfo::getCreationDate))
+                .skip(1)
+                .findFirst();
     }
 
 }
