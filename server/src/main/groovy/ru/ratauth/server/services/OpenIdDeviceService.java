@@ -38,7 +38,7 @@ public class OpenIdDeviceService implements DeviceService {
                                     getLastDevice(oldDevices).orElseGet(DeviceInfo::new),
                                     deviceInfo,
                                     userInfo
-                            );
+                            ).subscribe();
                             return deviceInfo;
                         }
                 );
