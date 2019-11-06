@@ -66,6 +66,7 @@ public class OpenIdSessionService implements AuthSessionService {
                 .token(codeGenerator.accessToken())
                 .expiresIn(DateUtils.fromLocal(tokenExpires))
                 .created(DateUtils.fromLocal(now))
+                .lifeType(TokenLifeType.MAIN)
                 .build();
         return createSession(relyingParty, userInfo, scopes, acrValues, redirectUrl, now, token);
     }
@@ -119,6 +120,7 @@ public class OpenIdSessionService implements AuthSessionService {
                 .refreshTokenExpiresIn(DateUtils.fromLocal(refreshTokenExpiresIn))
                 .refreshCreated(DateUtils.fromLocal(now))
                 .token(codeGenerator.accessToken())
+                .lifeType(needUpdateRefresh ? TokenLifeType.REISSUED : TokenLifeType.MAIN)
                 .expiresIn(DateUtils.fromLocal(tokenExpires))
                 .created(DateUtils.fromLocal(now))
                 .build();
