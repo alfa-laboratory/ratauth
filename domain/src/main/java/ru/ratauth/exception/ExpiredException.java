@@ -46,7 +46,8 @@ public class ExpiredException extends BaseAuthServerException implements Identif
         AUTH_CODE_EXPIRED("Auth code has expired"),
         TOKEN_EXPIRED("Token has expired"),
         REFRESH_TOKEN_EXPIRED("Refresh token has expired"),
-        SESSION_EXPIRED("Session has expired");
+        SESSION_EXPIRED("Session has expired"),
+        MFA_TOKEN_EXPIRED("MFA Token has expired");
 
         private final String baseText;
 
