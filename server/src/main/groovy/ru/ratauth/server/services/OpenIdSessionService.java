@@ -74,6 +74,17 @@ public class OpenIdSessionService implements AuthSessionService {
         return createSession(relyingParty, userInfo, scopes, acrValues, redirectUrl, now, token);
     }
 
+    @Override
+    public Observable<Session> updateSession(RelyingParty relyingParty, Session session, Map<String, String> additionalUserInfo){
+        Map<String, Object> oldJwtToken = new HashMap<>();
+        oldJwtToken.putAll(tokenProcessor.extractInfo(session.getUserInfo(), masterSecret));
+        oldJwtToken.putAll(additionalUserInfo);
+        Set<String> scopes = new HashSet<>((List<String>) oldJwtToken.get("scope"));
+        scopes.add(relyingParty.getName());
+        Set<String> acrValues = new HashSet<>((List<String>) oldJwtToken.get("acr_values"));
+        return updateIdToken(session, new UserInfo(oldJwtToken), scopes, acrValues).map(b -> session);
+    }
+
     private Observable<Session> createSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes,
                                               AcrValues acrValues, String redirectUrl, LocalDateTime now, Token token) {
         final LocalDateTime sessionExpires = now.plus(relyingParty.getSessionTTL(), ChronoUnit.SECONDS);
