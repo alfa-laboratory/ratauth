@@ -258,7 +258,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                     String redirectURI = rpSession.getLeft().getAuthorizationRedirectURI();
                     return sessionService.addEntry(rpSession.getRight(), rpSession.getLeft(), request.getScopes(), redirectURI)
                             .flatMap(session -> {
-                                if (request.getAuthData() != null) {
+                                if (!request.getAuthData().isEmpty()) {
                                     return sessionService.updateSession(rpSession.getLeft(), rpSession.getRight(), request.getAuthData());
                                 }
                                 return Observable.just(session);
