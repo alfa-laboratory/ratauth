@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -47,13 +48,13 @@ public class OpenIdAuthTokenService implements AuthTokenService {
         boolean refreshTokenReissue = !isReponseTypeAccessTokenOnly(oauthRequest.getResponseTypes());
 
         return relyingPartyObservable
-                .flatMap(rp -> loadSession(oauthRequest, rp).map(ses -> new ImmutablePair<>(rp, ses)))
-                .flatMap(rpSess -> authSessionService.addToken(oauthRequest, rpSess.getRight(), rpSess.getLeft(), refreshTokenReissue).map(res -> rpSess))
+                .flatMap(rp -> loadSession(oauthRequest, rp).map(ses -> new ImmutableTriple<>(rp, ses, rp.getShouldReissueLongRefreshToken() != null ? rp.getShouldReissueLongRefreshToken() : false)))
+                .flatMap(rpSess -> authSessionService.addToken(oauthRequest, rpSess.getMiddle(), rpSess.getLeft(), refreshTokenReissue || rpSess.getRight()).map(res -> rpSess))
                 .flatMap(rpSess -> {
-                    if (refreshTokenReissue) {
-                        return createIdTokenAndResponse(rpSess.getRight(), rpSess.getLeft());
+                    if (refreshTokenReissue || rpSess.getRight()) {
+                        return createIdTokenAndResponse(rpSess.getMiddle(), rpSess.getLeft());
                     }
-                    return createIdTokenAndResponseWithRefreshToken(rpSess.getRight(), rpSess.getLeft(), oauthRequest.getRefreshToken());
+                    return createIdTokenAndResponseWithRefreshToken(rpSess.getMiddle(), rpSess.getLeft(), oauthRequest.getRefreshToken());
                 })
                 .doOnCompleted(() -> log.info("Get-token succeed"));
     }
