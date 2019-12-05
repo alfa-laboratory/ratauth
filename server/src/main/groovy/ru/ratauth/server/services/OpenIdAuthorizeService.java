@@ -11,8 +11,8 @@ import org.springframework.util.CollectionUtils;
 import ru.ratauth.entities.*;
 import ru.ratauth.exception.AuthorizationException;
 import ru.ratauth.exception.ExpiredException;
-import ru.ratauth.interaction.TokenType;
 import ru.ratauth.interaction.*;
+import ru.ratauth.interaction.TokenType;
 import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
 import ru.ratauth.providers.auth.dto.VerifyResult.Status;
@@ -25,11 +25,11 @@ import rx.exceptions.Exceptions;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
 
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static ru.ratauth.providers.auth.dto.VerifyResult.Status.*;
 import static ru.ratauth.server.utils.RedirectUtils.createRedirectURI;
 
@@ -241,11 +241,11 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         if (GrantType.AUTHENTICATION_TOKEN == request.getGrantType()) {
             sessionObs = sessionService.getByValidRefreshToken(request.getRefreshToken(), new Date());
             authClientObs = clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), true);
-
         } else {
             sessionObs = sessionService.getByValidSessionToken(request.getSessionToken(), new Date(), true);
             authClientObs = clientService.loadAndAuthSessionClient(request.getClientId(), request.getClientSecret(), true);
         }
+
         return Observable.zip(
                 authClientObs
                         .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CREDENTIALS_WRONG))),
@@ -257,12 +257,6 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         ).flatMap(rpSession -> {
                     String redirectURI = rpSession.getLeft().getAuthorizationRedirectURI();
                     return sessionService.addEntry(rpSession.getRight(), rpSession.getLeft(), request.getScopes(), redirectURI)
-                            .flatMap(session -> {
-                                if (!request.getAuthData().isEmpty()) {
-                                    return sessionService.updateSession(rpSession.getLeft(), rpSession.getRight(), request.getAuthData());
-                                }
-                                return Observable.just(session);
-                            })
                             .flatMap(session -> buildResponse(rpSession.getLeft(), session,
                                     VerifyResult.builder()
                                             .data(Collections.emptyMap())
