@@ -38,15 +38,6 @@ public interface AuthSessionService {
      */
     Observable<Session> createSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, AcrValues acrValues, String redirectUrl);
 
-
-    /** Updates existing session id_token with additional information
-     * @param relyingParty
-     * @param session
-     * @param additionalUserInfo additional info that should be put into id_token (jwt)
-     * @return
-     */
-    Observable<Session> updateSession(RelyingParty relyingParty, Session session, Map<String, String> additionalUserInfo);
-
     /**
      * Adds token to session. Could be used in refresh token flow
      *
