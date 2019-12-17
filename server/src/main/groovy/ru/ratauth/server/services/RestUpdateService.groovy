@@ -33,8 +33,6 @@ class RestUpdateService implements UpdateService {
 
         def serviceConfiguration = configuration.updateServices[updateServiceInput.updateService]
 
-        log.info("Update request params: ${updateServiceInput.toString()} ")
-
         return new HystrixUpdateServiceCommand(
                 HttpClientHolder.instance,
                 updateServiceInput.data,
