@@ -37,6 +37,8 @@ public class Session {
 
     private String mfaToken;
 
+    private Date mfaTokenExpiresIn;
+
     /**
      * Abstract user identifier got from provider
      */

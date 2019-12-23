@@ -22,6 +22,7 @@ public class Token {
     private String token;
     private Date created;
     private Date expiresIn;
+    private TokenLifeType lifeType;
 
     private String refreshToken;
     private Date refreshCreated;

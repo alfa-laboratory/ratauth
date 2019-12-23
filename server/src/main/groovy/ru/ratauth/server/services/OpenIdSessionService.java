@@ -46,6 +46,9 @@ public class OpenIdSessionService implements AuthSessionService {
     @Value("${auth.session.tokens_limit:0}")
     private int tokensLimit;
 
+    @Value("${auth.session.mfa-ttl:3600}")
+    private int mfaTokenTTL;
+
     @Override
     public Observable<Session> initSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, AcrValues acrValues,
                                            String redirectUrl) {
@@ -66,8 +69,20 @@ public class OpenIdSessionService implements AuthSessionService {
                 .token(codeGenerator.accessToken())
                 .expiresIn(DateUtils.fromLocal(tokenExpires))
                 .created(DateUtils.fromLocal(now))
+                .lifeType(TokenLifeType.MAIN)
                 .build();
         return createSession(relyingParty, userInfo, scopes, acrValues, redirectUrl, now, token);
+    }
+
+    @Override
+    public Observable<Session> updateSession(RelyingParty relyingParty, Session session, Map<String, String> additionalUserInfo){
+        Map<String, Object> oldJwtToken = new HashMap<>();
+        oldJwtToken.putAll(tokenProcessor.extractInfo(session.getUserInfo(), masterSecret));
+        oldJwtToken.putAll(additionalUserInfo);
+        Set<String> scopes = new HashSet<>((List<String>) oldJwtToken.get("scope"));
+        scopes.add(relyingParty.getName());
+        Set<String> acrValues = new HashSet<>((List<String>) oldJwtToken.get("acr_values"));
+        return updateIdToken(session, new UserInfo(oldJwtToken), scopes, acrValues).map(b -> session);
     }
 
     private Observable<Session> createSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes,
@@ -75,6 +90,7 @@ public class OpenIdSessionService implements AuthSessionService {
         final LocalDateTime sessionExpires = now.plus(relyingParty.getSessionTTL(), ChronoUnit.SECONDS);
         final LocalDateTime refreshExpires = now.plus(relyingParty.getRefreshTokenTTL(), ChronoUnit.SECONDS);
         final LocalDateTime authCodeExpires = now.plus(relyingParty.getCodeTTL(), ChronoUnit.SECONDS);
+        final LocalDateTime mfaTokenExpires = now.plus(mfaTokenTTL, ChronoUnit.SECONDS);
 
         final String jwtInfo = tokenProcessor.createToken(RATAUTH, masterSecret, null,
                 DateUtils.fromLocal(now), DateUtils.fromLocal(sessionExpires),
@@ -95,6 +111,7 @@ public class OpenIdSessionService implements AuthSessionService {
         final Session session = Session.builder()
                 .sessionToken(codeGenerator.refreshToken())
                 .mfaToken(codeGenerator.mfaToken())
+                .mfaTokenExpiresIn(DateUtils.fromLocal(mfaTokenExpires))
                 .receivedAcrValues(AcrValues.valueOf(acrValues.getFirst()))
                 .identityProvider(relyingParty.getIdentityProvider())
                 .authClient(relyingParty.getName())
@@ -119,6 +136,7 @@ public class OpenIdSessionService implements AuthSessionService {
                 .refreshTokenExpiresIn(DateUtils.fromLocal(refreshTokenExpiresIn))
                 .refreshCreated(DateUtils.fromLocal(now))
                 .token(codeGenerator.accessToken())
+                .lifeType(needUpdateRefresh ? TokenLifeType.REISSUED : TokenLifeType.MAIN)
                 .expiresIn(DateUtils.fromLocal(tokenExpires))
                 .created(DateUtils.fromLocal(now))
                 .build();
