@@ -46,6 +46,9 @@ public class OpenIdSessionService implements AuthSessionService {
     @Value("${auth.session.tokens_limit:0}")
     private int tokensLimit;
 
+    @Value("${auth.session.mfa-ttl:3600}")
+    private int mfaTokenTTL;
+
     @Override
     public Observable<Session> initSession(RelyingParty relyingParty, Map<String, Object> userInfo, Set<String> scopes, AcrValues acrValues,
                                            String redirectUrl) {
@@ -86,6 +89,7 @@ public class OpenIdSessionService implements AuthSessionService {
         final LocalDateTime sessionExpires = now.plus(relyingParty.getSessionTTL(), ChronoUnit.SECONDS);
         final LocalDateTime refreshExpires = now.plus(relyingParty.getRefreshTokenTTL(), ChronoUnit.SECONDS);
         final LocalDateTime authCodeExpires = now.plus(relyingParty.getCodeTTL(), ChronoUnit.SECONDS);
+        final LocalDateTime mfaTokenExpires = now.plus(mfaTokenTTL, ChronoUnit.SECONDS);
 
         final String jwtInfo = tokenProcessor.createToken(RATAUTH, masterSecret, null,
                 DateUtils.fromLocal(now), DateUtils.fromLocal(sessionExpires),
@@ -106,6 +110,7 @@ public class OpenIdSessionService implements AuthSessionService {
         final Session session = Session.builder()
                 .sessionToken(codeGenerator.refreshToken())
                 .mfaToken(codeGenerator.mfaToken())
+                .mfaTokenExpiresIn(DateUtils.fromLocal(mfaTokenExpires))
                 .receivedAcrValues(AcrValues.valueOf(acrValues.getFirst()))
                 .identityProvider(relyingParty.getIdentityProvider())
                 .authClient(relyingParty.getName())
