@@ -136,7 +136,7 @@ public class OpenIdSessionService implements AuthSessionService {
                 .refreshTokenExpiresIn(DateUtils.fromLocal(refreshTokenExpiresIn))
                 .refreshCreated(DateUtils.fromLocal(now))
                 .token(codeGenerator.accessToken())
-                .lifeType(needUpdateRefresh ? TokenLifeType.REISSUED : TokenLifeType.MAIN)
+                .lifeType(needUpdateRefresh ? TokenLifeType.MAIN : TokenLifeType.REISSUED)
                 .expiresIn(DateUtils.fromLocal(tokenExpires))
                 .created(DateUtils.fromLocal(now))
                 .build();
