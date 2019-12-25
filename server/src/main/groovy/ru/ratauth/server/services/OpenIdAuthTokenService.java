@@ -151,19 +151,20 @@ public class OpenIdAuthTokenService implements AuthTokenService {
                     .getByValidCode(oauthRequest.getAuthzCode(), new Date())
                     .filter(session -> session.getEntry(relyingParty.getName())
                             .map(entry -> !sessionConfiguration.isNeedToCheckSession() || CollectionUtils.isEmpty(entry.getTokens()))
-                            .orElse(false));
+                            .orElse(false))
+                    .switchIfEmpty(Observable.error(new ExpiredException(ExpiredException.ID.AUTH_CODE_EXPIRED)));
         } else if (oauthRequest.getGrantType() == REFRESH_TOKEN || oauthRequest.getGrantType() == AUTHENTICATION_TOKEN) {
-            authObs = authSessionService.getByValidRefreshToken(oauthRequest.getRefreshToken(), new Date());
+            authObs = authSessionService.getByValidRefreshToken(oauthRequest.getRefreshToken(), new Date())
+                    .switchIfEmpty(Observable.error(new ExpiredException(ExpiredException.ID.REFRESH_TOKEN_EXPIRED)));
         } else {
             return Observable.error(new AuthorizationException(AuthorizationException.ID.INVALID_GRANT_TYPE));
         }
 
         return authObs
-                .map(session -> {
+                .flatMap(session -> {
                     checkSession(session, relyingParty);
-                    return session;
-                })
-                .switchIfEmpty(Observable.error(new ExpiredException(ExpiredException.ID.REFRESH_TOKEN_EXPIRED)));
+                    return Observable.just(session);
+                });
     }
 
     /**
