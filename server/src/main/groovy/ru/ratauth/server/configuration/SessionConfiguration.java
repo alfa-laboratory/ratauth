@@ -9,7 +9,7 @@ public class SessionConfiguration {
 
     private Boolean needToCheckSession;
 
-    public Boolean isNeedToCheckSession() {
+    public Boolean needToCheckSession() {
         return needToCheckSession == null || needToCheckSession;
     }
 }

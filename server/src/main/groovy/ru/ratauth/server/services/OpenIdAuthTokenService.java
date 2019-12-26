@@ -125,9 +125,9 @@ public class OpenIdAuthTokenService implements AuthTokenService {
             log.error("Invalid acr values: " + session.getReceivedAcrValues());
             throw new AuthorizationException(AuthorizationException.ID.INVALID_ACR_VALUES);
         }
-        if (sessionConfiguration.isNeedToCheckSession() && (Status.BLOCKED == session.getStatus() || Status.LOGGED_OUT == session.getStatus()))
+        if (sessionConfiguration.needToCheckSession() && (Status.BLOCKED == session.getStatus() || Status.LOGGED_OUT == session.getStatus()))
             throw new AuthorizationException(AuthorizationException.ID.SESSION_BLOCKED);
-        if (sessionConfiguration.isNeedToCheckSession() && session.getExpiresIn().before(new Date()))
+        if (sessionConfiguration.needToCheckSession() && session.getExpiresIn().before(new Date()))
             throw new ExpiredException(ExpiredException.ID.SESSION_EXPIRED);
     }
 
@@ -150,7 +150,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
             authObs = authSessionService
                     .getByValidCode(oauthRequest.getAuthzCode(), new Date())
                     .filter(session -> session.getEntry(relyingParty.getName())
-                            .map(entry -> !sessionConfiguration.isNeedToCheckSession() || CollectionUtils.isEmpty(entry.getTokens()))
+                            .map(entry -> !sessionConfiguration.needToCheckSession() || CollectionUtils.isEmpty(entry.getTokens()))
                             .orElse(false))
                     .switchIfEmpty(Observable.error(new ExpiredException(ExpiredException.ID.AUTH_CODE_EXPIRED)));
         } else if (oauthRequest.getGrantType() == REFRESH_TOKEN || oauthRequest.getGrantType() == AUTHENTICATION_TOKEN) {
