@@ -107,9 +107,17 @@ public class OpenIdAuthTokenService implements AuthTokenService {
                             .clientId(entryToken.getRight().getClient())
                             .expiresIn(token.getExpiresIn().getTime())
                             .scopes(entry.getScopes())
+                            .active(true)
                             .build();
                 })
-                .switchIfEmpty(Observable.error(new ExpiredException(ExpiredException.ID.TOKEN_EXPIRED)))
+                .switchIfEmpty(
+                        Observable.just(
+                                CheckTokenResponse
+                                        .builder()
+                                        .active(false)
+                                        .build()
+                        )
+                )
                 .doOnCompleted(() -> log.info("Check token succeed"));
     }
 
