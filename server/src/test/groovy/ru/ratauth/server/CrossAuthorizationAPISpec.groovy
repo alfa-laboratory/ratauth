@@ -248,6 +248,9 @@ class CrossAuthorizationAPISpec extends BaseDocumentationSpec {
                                 .description('Authorization header for relying party basic authorization')
                 ),
                 responseFields(
+                        fieldWithPath('active')
+                                .description('The token validity is determined by the active parameter in the response body')
+                                .type(JsonFieldType.BOOLEAN),
                         fieldWithPath('jti')
                                 .description('JWT ID. A unique identifier for the token. The JWT ID MAY be used by implementations requiring message de-duplication for one-time use assertions.')
                                 .type(JsonFieldType.STRING),
