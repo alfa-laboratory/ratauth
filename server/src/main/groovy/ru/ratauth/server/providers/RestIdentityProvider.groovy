@@ -47,7 +47,11 @@ class RestIdentityProvider implements IdentityProvider {
         Integer timeout = identityProvidersConfiguration.timeout
         log.info("Sending request to ${enroll}")
 
-        log.info("Sending activate request with params: ${input.toString()}")
+        log.info("Sending activate request with params: " +
+                " ${input.userInfo.toMap()} " +
+                " ${input.data} " +
+                " ${input.relyingParty} " +
+                " ${input.enroll}")
 
         return new HystrixIdentityProviderCommand(
                 HttpClientHolder.instance,
@@ -95,7 +99,11 @@ class RestIdentityProvider implements IdentityProvider {
 
         log.info("Sending request to ${enroll}")
 
-        log.info("Sending verify request with params: ${input.toString()}")
+        log.info("Sending verify request with params:" +
+                " ${input.userInfo.toMap()} " +
+                " ${input.data}  " +
+                " ${input.relyingParty}  " +
+                " ${input.enroll}")
 
         return new HystrixIdentityProviderCommand(
                 HttpClientHolder.instance,
