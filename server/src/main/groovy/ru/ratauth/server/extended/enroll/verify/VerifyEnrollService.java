@@ -141,19 +141,18 @@ public class VerifyEnrollService {
                         .flatMap(response -> {
                             if (response instanceof SuccessResponse) {
                                 Session session = p.right;
-                                try {
-                                    return deviceService
-                                            .sendDeviceInfo(
-                                                    request.getClientId(),
-                                                    Objects.toString(request.getAuthContext()),
-                                                    createDeviceInfoFromRequest(session, request),
-                                                    extractUserInfo(session)
-                                            )
-                                            .map(it -> response);
-                                } catch (Exception ex) {
-                                    log.error("Exception in jms", ex);
-                                    return Observable.just(response);
-                                }
+                                return deviceService
+                                        .sendDeviceInfo(
+                                                request.getClientId(),
+                                                Objects.toString(request.getAuthContext()),
+                                                createDeviceInfoFromRequest(session, request),
+                                                extractUserInfo(session)
+                                        )
+                                        .onErrorReturn(ex -> {
+                                            log.error("Exception in jms", ex);
+                                            return DeviceInfo.builder().build();
+                                        })
+                                        .map(it -> response);
                             }
                             return Observable.just(response);
                         })
