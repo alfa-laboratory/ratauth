@@ -10,8 +10,8 @@ public enum LogHeader {
     DEVICE_ID("Device-Id", "device_id"),
     SESSION_ID("Session-Id", "session_id"),
     TRACE_ID("Trace-Id", "trace_id"),
-    X_B3_TRACE_ID("X-B3-Trace-Id", "X-B3-Trace-Id"),
-    X_B3_SPAN_ID("X-B3-Span-Id", "X-B3-Span-Id");
+    X_B3_TRACE_ID("X-B3-TraceId", "X-B3-TraceId"),
+    X_B3_SPAN_ID("X-B3-SpanId", "X-B3-SpanId");
 
     private final String headerValue;
     private final String mdcValue;

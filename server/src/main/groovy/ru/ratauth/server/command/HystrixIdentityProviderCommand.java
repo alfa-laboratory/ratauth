@@ -131,7 +131,7 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
 
                 for (LogHeader logHeader: LogHeader.values()) {
                     if (MDC.get(logHeader.mdcVal()) != null) {
-                        headers.add(logHeader.headerVal(), MDC.get(logHeader.headerVal()));
+                        headers.add(logHeader.headerVal(), MDC.get(logHeader.mdcVal()));
                     }
                 }
             });
