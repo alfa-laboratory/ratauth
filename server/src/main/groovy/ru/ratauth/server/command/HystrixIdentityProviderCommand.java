@@ -11,8 +11,10 @@ import ratpack.exec.Promise;
 import ratpack.http.MediaType;
 import ratpack.http.client.HttpClient;
 import ratpack.http.client.ReceivedResponse;
+import ratpack.http.client.RequestSpec;
 import ratpack.rx.RxRatpack;
 import ru.ratauth.entities.UserInfo;
+import ru.ratauth.server.services.log.LogHeader;
 import rx.Observable;
 
 import javax.net.ssl.SSLContext;
@@ -20,7 +22,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
-import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
@@ -30,6 +31,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.netflix.hystrix.HystrixCommandGroupKey.Factory.asKey;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Optional.ofNullable;
 
 @Slf4j
@@ -104,11 +106,10 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
                 );
     }
 
-    @SneakyThrows(UnsupportedEncodingException.class)
     private static String createAuthHeader(String login, String password) {
         String auth = login + ":" + password;
-        byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(Charset.forName("UTF-8")));
-        return "Basic " + new String(encodedAuth, "UTF-8");
+        byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(UTF_8));
+        return "Basic " + new String(encodedAuth, UTF_8);
     }
 
     protected Observable<ReceivedResponse> construct() {
@@ -116,39 +117,35 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
                 uri,
                 r -> {
                     r.sslContext(createSSLContext());
-                    if (login != null && password != null) {
-                        r.headers(headers -> {
-                            headers.add(HttpHeaders.AUTHORIZATION, createAuthHeader(login, password));
-                            if (MDC.get("session_id") != null) {
-                                headers.add("Session-Id", MDC.get("session_id"));
-                            }
-                            if (MDC.get("user_id") != null) {
-                                headers.add("User-Id", MDC.get("user_id"));
-                            }
-                            if (MDC.get("client_id") != null) {
-                                headers.add("Client-Id", MDC.get("client_id"));
-                            }
-                            if (MDC.get("device_id") != null) {
-                                headers.add("Device-Id", MDC.get("device_id"));
-                            }
-                            if (MDC.get("client_ip") != null) {
-                                headers.add("Client-Ip", MDC.get("client_ip"));
-                            }
-                            if (MDC.get("trace_id") != null) {
-                                headers.add("Trace-Id", MDC.get("trace_id"));
-                            }
-                        });
-                    }
-                    r.body(body -> {
-                        body.type(MediaType.APPLICATION_JSON);
-                        body.text(data.entrySet().stream()
-                                .filter(e -> e.getKey() != null && e.getValue() != null)
-                                .map(e -> e.getKey() + "=" + encode(e.getValue()))
-                                .collect(Collectors.joining("&")));
-                    });
+                    fillRequestHeaders(r);
+                    fillRequestBody(r);
                 }
         );
         return RxRatpack.observe(promise);
+    }
+
+    private void fillRequestHeaders(RequestSpec requestSpec) throws Exception {
+        if (login != null && password != null) {
+            requestSpec.headers(headers -> {
+                headers.add(HttpHeaders.AUTHORIZATION, createAuthHeader(login, password));
+
+                for (LogHeader logHeader: LogHeader.values()) {
+                    if (MDC.get(logHeader.mdcVal()) != null) {
+                        headers.add(logHeader.headerVal(), MDC.get(logHeader.headerVal()));
+                    }
+                }
+            });
+        }
+    }
+
+    private void fillRequestBody(RequestSpec requestSpec) throws Exception {
+        requestSpec.body(body -> {
+            body.type(MediaType.APPLICATION_JSON);
+            body.text(data.entrySet().stream()
+                    .filter(e -> e.getKey() != null && e.getValue() != null)
+                    .map(e -> e.getKey() + "=" + encode(e.getValue()))
+                    .collect(Collectors.joining("&")));
+        });
     }
 
     @SneakyThrows(UnsupportedEncodingException.class)
