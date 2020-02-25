@@ -9,6 +9,7 @@ import ru.ratauth.entities.DeviceInfo;
 import ru.ratauth.services.DeviceInfoEventService;
 import ru.ratauth.services.DeviceInfoService;
 import rx.Observable;
+import rx.schedulers.Schedulers;
 
 import java.util.Comparator;
 import java.util.List;
@@ -38,7 +39,7 @@ public class OpenIdDeviceService implements DeviceService {
                                     getLastDevice(oldDevices).orElseGet(DeviceInfo::new),
                                     deviceInfo,
                                     userInfo
-                            ).subscribe();
+                            ).subscribeOn(Schedulers.io());
                             return deviceInfo;
                         }
                 );
