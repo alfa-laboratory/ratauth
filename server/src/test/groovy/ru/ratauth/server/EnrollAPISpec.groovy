@@ -200,7 +200,7 @@ class EnrollAPISpec extends BaseDocumentationSpec {
                 .formParam('client_id', PersistenceServiceStubConfiguration.CLIENT_NAME)
                 .formParam('scope', 'rs.read')
                 .formParam('state', 'relyingpartystate')
-                .formParam('acr_values', 'username:sms')
+                .formParam('acr_values', 'username:sms:passcode')
                 .formParam('enroll', 'username')
         when:
         def result = setup
@@ -212,8 +212,8 @@ class EnrollAPISpec extends BaseDocumentationSpec {
                 .statusCode(HttpStatus.FOUND.value())
                 .header(HttpHeaders.LOCATION, StringContains.containsString('mfa_token='))
                 .header(HttpHeaders.LOCATION, StringContains.containsString('state=relyingpartystate'))
-                .header(HttpHeaders.LOCATION, StringContains.containsString("acr_values=${encode('username:sms', 'UTF-8')}"))
-                .header(HttpHeaders.LOCATION, StringContains.containsString('http://localhost:8080/domain.mine/oidc/web/authorize/username?is_webview=true&session_token=session_token&scope=rs.read&acr_values=username%3Asms&mfa_token=mfa-token-test&state=relyingpartystate&client_id=mine'))
+                .header(HttpHeaders.LOCATION, StringContains.containsString("acr_values=${encode('username:sms:passcode', 'UTF-8')}"))
+                .header(HttpHeaders.LOCATION, StringContains.containsString('http://domain.mine/oidc/web/authorize/sms?is_webview=true&session_token=session_token&scope=rs.read&acr_values=username%3Asms%3Apasscode&mfa_token=mfa-token-test&state=relyingpartystate&client_id=mine'))
     }
 
     def 'verify enroll final step'() {
