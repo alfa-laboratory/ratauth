@@ -7,6 +7,8 @@ import ru.ratauth.utils.StringUtils;
 import ru.ratauth.utils.URIUtils;
 
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,6 +24,14 @@ public class RedirectUtils {
             else
                 return redirectUri;
         }
+    }
+
+    public static String createRedirectUrl(RelyingParty relyingParty, String nextAcr) throws MalformedURLException {
+        URL url = new URL(relyingParty.getAuthorizationPageURI());
+        return RedirectUtils.createRedirectURI(
+                url.getProtocol() + "://" + url.getHost() + url.getPath() + "/" + nextAcr,
+                url.getQuery()
+        );
     }
 
     public static String createRedirectURI(String url, String parameter) {

@@ -20,7 +20,6 @@ import ru.ratauth.server.configuration.SessionConfiguration;
 import ru.ratauth.server.secutiry.OAuthSystemException;
 import rx.Observable;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
@@ -114,15 +113,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
     }
 
     private void checkSession(Session session, AuthClient authClient) {
-        if (!session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("sms"))
-                && !session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("ib-username-password"))
-                && !session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("upupcard"))
-                && !session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("username"))
-                && !session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("ad-username-password"))
-                && !session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("not-client-sms"))
-                && !session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("corp-username"))
-                && !session.getReceivedAcrValues().getValues().containsAll(Arrays.asList("employees"))
-                && !"private-vr-api".equals(authClient.getName())) {
+        if (!sessionConfiguration.containsRequiredAcrValues(session.getReceivedAcrValues()) && !"private-vr-api".equals(authClient.getName())) {
             log.error("Invalid acr values: " + session.getReceivedAcrValues());
             throw new AuthorizationException(AuthorizationException.ID.INVALID_ACR_VALUES);
         }

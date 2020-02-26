@@ -26,7 +26,6 @@ import ru.ratauth.services.UpdateDataService;
 import rx.Observable;
 import rx.functions.Func1;
 
-import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -85,16 +84,19 @@ public class VerifyEnrollService {
 
         } else {
 
-            String authorizationPageURI = relyingParty.getAuthorizationPageURI();
-            URL url = new URL(authorizationPageURI);
-            String redirectUrl = RedirectUtils.createRedirectURI(
-                    url.getHost() + url.getPath() + "/" + request.getAuthContext().getFirst(),
-                    url.getQuery()
-            );
-
-            return Observable.just(new NeedApprovalResponse(redirectUrl, request.getRedirectURI(), request.getMfaToken(), request.getClientId(), request.getScope(), request.getAuthContext()));
+            String nextAcrValue = getNextAcrValue(request.getAuthContext(), request.getEnroll());
+            String redirectUrl = RedirectUtils.createRedirectUrl(relyingParty, nextAcrValue);
+            return Observable.just(new NeedApprovalResponse(
+                    redirectUrl, request.getRedirectURI(), request.getMfaToken(),
+                    request.getClientId(), request.getScope(), request.getAuthContext()
+            ));
         }
 
+    }
+
+    private static String getNextAcrValue(AcrValues acrValues, AcrValues enroll) {
+        int currentAcrPosition = acrValues.getValues().indexOf(enroll.getFirst());
+        return acrValues.getValues().get(currentAcrPosition + 1);
     }
 
     private static UpdateProcessResponse createUpdateResponse(UpdateDataEntry u, String username) {
