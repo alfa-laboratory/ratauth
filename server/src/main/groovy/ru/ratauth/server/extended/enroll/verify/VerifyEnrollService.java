@@ -150,6 +150,10 @@ public class VerifyEnrollService {
                                                 createDeviceInfoFromRequest(session, request),
                                                 extractUserInfo(session)
                                         )
+                                        .onErrorReturn(ex -> {
+                                            log.error("Exception in jms", ex);
+                                            return DeviceInfo.builder().build();
+                                        })
                                         .map(it -> response);
                             }
                             return Observable.just(response);
