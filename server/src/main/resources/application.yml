@@ -18,6 +18,8 @@ auth:
  session:
   check_threads: 10
   check_interval: 300
+  possibleRequiredAcrValues: ["sms", "ib-username-password", "upupcard",
+                              "username", "ad-username-password", "not-client-sms", "corp-username"]
 
 ru.ratauth.auth.code:
   expires_in_second: 120

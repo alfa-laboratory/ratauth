@@ -24,7 +24,6 @@ import rx.Observable;
 import rx.exceptions.Exceptions;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
@@ -157,7 +156,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
         return Observable.just(resp)
                 .map(r -> {
                     try {
-                        r.setLocation(createRedirectUrl(relyingParty, firstAcr));
+                        r.setLocation(RedirectUtils.createRedirectUrl(relyingParty, firstAcr));
                         r.setRedirectURI(targetRedirectURI);
                         r.setMfaToken(session.getMfaToken());
                         return r;
@@ -173,7 +172,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                 .map(r -> {
                     try {
                         r.setReason(updateDataEntry.getReason());
-                        r.setLocation(createRedirectUrl(relyingParty, updateDataEntry.getRedirectUri()));
+                        r.setLocation(RedirectUtils.createRedirectUrl(relyingParty, updateDataEntry.getRedirectUri()));
                         r.setUpdateCode(updateDataEntry.getCode());
                         r.setUpdateService(updateDataEntry.getService());
                         return r;
@@ -181,14 +180,6 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                         throw Exceptions.propagate(e);
                     }
                 });
-    }
-
-    private static String createRedirectUrl(RelyingParty relyingParty, String firstAcr) throws MalformedURLException {
-        URL url = new URL(relyingParty.getAuthorizationPageURI());
-        return RedirectUtils.createRedirectURI(
-                url.getProtocol() + "://" + url.getHost() + url.getPath() + "/" + firstAcr,
-                url.getQuery()
-        );
     }
 
     @Override
