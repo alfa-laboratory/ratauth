@@ -123,6 +123,38 @@ class RestIdentityProvider implements IdentityProvider {
         })
     }
 
+    @Override
+    Observable<VerifyResult> verify(VerifyInput input) {
+        String enroll = input.enroll.first
+        DestinationConfiguration config = identityProvidersConfiguration.idp?.get(enroll)?.verify
+        int timeout = identityProvidersConfiguration.timeout
+
+        log.info("Sending request to ${enroll}")
+
+        log.info("Sending verify request with params:" +
+                " ${input.userInfo.toMap()} " +
+                " ${input.data}  " +
+                " ${input.relyingParty}  " +
+                " ${input.enroll}")
+
+        return new HystrixIdentityProviderCommand(
+                HttpClientHolder.instance,
+                input.data,
+                input.userInfo,
+                input.relyingParty,
+                enroll,
+                config?.url,
+                config?.authLogin,
+                config?.authPassword,
+                timeout
+        )
+                .toObservable()
+                .map({ ReceivedResponse res ->
+                    handleErrorIfPresent(res.status, res.body)
+                    makeVerifyResultFromResponse(res)
+                })
+    }
+
     private static VerifyResult makeVerifyResultFromResponse(ReceivedResponse receivedResponse) {
         def response = (new JsonSlurper().parseText(receivedResponse.body.text) as List)[0] as Map
         new VerifyResult(

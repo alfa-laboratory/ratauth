@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.ratauth.entities.DeviceInfo;
+import ru.ratauth.server.providers.RestIdentityProvider;
 import ru.ratauth.services.DeviceInfoEventService;
 import ru.ratauth.services.DeviceInfoService;
 import rx.Observable;
@@ -22,7 +23,7 @@ import java.util.Optional;
 public class OpenIdDeviceService implements DeviceService {
 
     private final DeviceInfoService deviceInfoService;
-    private final DeviceInfoEventService deviceInfoEventService;
+    private final RestIdentityProvider deviceInfoEventService;
 
     @Override
     public Observable<DeviceInfo> saveDeviceInfo(String clientId, String enroll, DeviceInfo deviceInfo, Map<String, Object> userInfo) {
@@ -30,7 +31,7 @@ public class OpenIdDeviceService implements DeviceService {
     }
 
     public Observable<DeviceInfo> sendDeviceInfo(String clientId, String enroll, DeviceInfo deviceInfo, Map<String, Object> userInfo) {
-        return deviceInfoService
+        return deviceInfoService.
                 .findByUserId(deviceInfo.getUserId())
                 .map(oldDevices -> {
                             deviceInfoEventService.sendChangeDeviceInfoEvent(
