@@ -1,6 +1,7 @@
 package ru.ratauth.server.configuration;
 
 import lombok.Data;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import ru.ratauth.entities.AcrValues;
 
@@ -16,7 +17,7 @@ public class SessionConfiguration {
     private List<String> possibleRequiredAcrValues;
 
     public boolean isNeedToCheckSession() {
-        return needToCheckSession == null || needToCheckSession;
+        return BooleanUtils.isNotFalse(needToCheckSession);
     }
 
     public boolean containsRequiredAcrValues(AcrValues receivedAcrValues) {
