@@ -82,6 +82,7 @@ public class OpenIdSessionService implements AuthSessionService {
         Set<String> scopes = new HashSet<>((List<String>) oldJwtToken.get("scope"));
         scopes.add(relyingParty.getName());
         Set<String> acrValues = new HashSet<>((List<String>) oldJwtToken.get("acr_values"));
+        log.info("New userinfo " + oldJwtToken);
         return updateIdToken(session, new UserInfo(oldJwtToken), scopes, acrValues).map(b -> session);
     }
 

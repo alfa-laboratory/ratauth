@@ -229,6 +229,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
     public Observable<AuthzResponse> crossAuthenticate(AuthzRequest request) {
         Observable<Session> sessionObs;
         Observable<? extends AuthClient> authClientObs;
+        log.info("Request auth data" + request.getAuthData());
         if (GrantType.AUTHENTICATION_TOKEN == request.getGrantType()) {
             sessionObs = sessionService.getByValidRefreshToken(request.getRefreshToken(), new Date());
             authClientObs = clientService.loadAndAuthRelyingParty(request.getClientId(), request.getClientSecret(), true);

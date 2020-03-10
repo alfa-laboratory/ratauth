@@ -101,6 +101,7 @@ public class OpenIdAuthTokenService implements AuthTokenService {
                 .map(entryToken -> {
                     AuthEntry entry = entryToken.getLeft();
                     Token token = entry.getTokens().iterator().next();
+                    log.info("Auth data " + entryToken.getRight().getIdToken());
                     return CheckTokenResponse.builder()
                             .idToken(entryToken.getRight().getIdToken())
                             .clientId(entryToken.getRight().getClient())
