@@ -84,7 +84,7 @@ public class VerifyEnrollService {
 
         } else {
 
-            String nextAcrValue = getNextAcrValue(request.getAuthContext(), request.getEnroll());
+            String nextAcrValue = difference.getFirst();
             String redirectUrl = RedirectUtils.createRedirectUrl(relyingParty, nextAcrValue);
             return Observable.just(new NeedApprovalResponse(
                     redirectUrl, request.getRedirectURI(), request.getMfaToken(),
@@ -92,11 +92,6 @@ public class VerifyEnrollService {
             ));
         }
 
-    }
-
-    private static String getNextAcrValue(AcrValues acrValues, AcrValues enroll) {
-        int currentAcrPosition = acrValues.getValues().indexOf(enroll.getFirst());
-        return acrValues.getValues().get(currentAcrPosition + 1);
     }
 
     private static UpdateProcessResponse createUpdateResponse(UpdateDataEntry u, String username) {
