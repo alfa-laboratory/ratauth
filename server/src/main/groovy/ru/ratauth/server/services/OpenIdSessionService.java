@@ -76,6 +76,8 @@ public class OpenIdSessionService implements AuthSessionService {
 
     @Override
     public Observable<Session> updateSession(RelyingParty relyingParty, Session session, Map<String, String> additionalUserInfo){
+        log.info("Session user info = " + session.getUserInfo());
+        log.info("Add user info = " + additionalUserInfo);
         Map<String, Object> oldJwtToken = new HashMap<>();
         oldJwtToken.putAll(tokenProcessor.extractInfo(session.getUserInfo(), masterSecret));
         oldJwtToken.putAll(additionalUserInfo);

@@ -238,6 +238,7 @@ public class OpenIdAuthorizeService implements AuthorizeService {
             sessionObs = sessionService.getByValidSessionToken(request.getSessionToken(), new Date(), true);
             authClientObs = clientService.loadAndAuthSessionClient(request.getClientId(), request.getClientSecret(), true);
         }
+
         return Observable.zip(
                 authClientObs
                         .switchIfEmpty(Observable.error(new AuthorizationException(AuthorizationException.ID.CREDENTIALS_WRONG))),
@@ -251,8 +252,11 @@ public class OpenIdAuthorizeService implements AuthorizeService {
                     return sessionService.addEntry(rpSession.getRight(), rpSession.getLeft(), request.getScopes(), redirectURI)
                             .flatMap(session -> {
                                 if (!request.getAuthData().isEmpty()) {
+                                    log.info("Auth data not empty");
                                     return sessionService.updateSession(rpSession.getLeft(), rpSession.getRight(), request.getAuthData());
                                 }
+
+                                log.info("Auth data is empty");
                                 return Observable.just(session);
                             })
                             .flatMap(session -> buildResponse(rpSession.getLeft(), session,
