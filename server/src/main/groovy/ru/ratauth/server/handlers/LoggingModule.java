@@ -13,6 +13,8 @@ import ratpack.logging.MDCInterceptor;
 
 import static ru.ratauth.server.handlers.readers.RequestUtil.extractField;
 import static ru.ratauth.server.services.log.LogFields.*;
+import static ru.ratauth.server.services.log.LogHeader.X_B3_SPAN_ID;
+import static ru.ratauth.server.services.log.LogHeader.X_B3_TRACE_ID;
 import static ru.ratauth.utils.StringUtils.isBlank;
 
 /**
@@ -50,6 +52,8 @@ public class LoggingModule extends AbstractModule {
             if (!isBlank(sessionId)) {
                 MDC.put(SESSION_ID.val(), sessionId);
             }
+            MDC.put(X_B3_TRACE_ID.mdcVal(), headers.get(X_B3_TRACE_ID.headerVal()));
+            MDC.put(X_B3_SPAN_ID.mdcVal(), headers.get(X_B3_SPAN_ID.headerVal()));
             ctx.next();
         }));
     }
