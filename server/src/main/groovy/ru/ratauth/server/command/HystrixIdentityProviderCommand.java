@@ -5,7 +5,6 @@ import com.netflix.hystrix.HystrixObservableCommand;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import net.minidev.json.JSONObject;
 import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import ratpack.exec.Promise;
@@ -15,33 +14,30 @@ import ratpack.http.client.ReceivedResponse;
 import ratpack.http.client.RequestSpec;
 import ratpack.rx.RxRatpack;
 import ru.ratauth.entities.UserInfo;
+import ru.ratauth.server.extended.common.IDPRequest;
 import ru.ratauth.server.services.log.LogHeader;
 import rx.Observable;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import static com.netflix.hystrix.HystrixCommandGroupKey.Factory.asKey;
-import static java.util.Optional.ofNullable;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Slf4j
 public class HystrixIdentityProviderCommand extends HystrixObservableCommand<ReceivedResponse> {
 
     private final HttpClient httpClient;
-    private final Map<String, Object> data;
+    private final IDPRequest data;
     private final URI uri;
 
     private String login;
@@ -71,7 +67,7 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
         super(setter);
         this.httpClient = httpClient;
         this.uri = new URL(url).toURI();
-        this.data = performData(data, userInfo, relyingParty, enroll);
+        this.data = new IDPRequest(data, userInfo, relyingParty, enroll);
 
     }
 
@@ -86,27 +82,10 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
         return setter;
     }
 
-    private Map<String, Object> performData(Map<String, String> data, UserInfo userInfo, String relyingParty, String enroll) {
-        Map<String, Object> result = new HashMap<>();
-        result.put("data", new JSONObject(data));
-        result.put("userInfo", new JSONObject(toMap(userInfo)));
-        result.put("relying_party", relyingParty);
-        result.put("enroll", enroll);
-        return result;
-    }
-
-    private Map<String, Object> toMap(UserInfo userInfo) {
-        return ofNullable(userInfo)
-                .map(UserInfo::toMap)
-                .orElse(Collections.emptyMap());
-    }
-
-
-    @SneakyThrows(UnsupportedEncodingException.class)
     private static String createAuthHeader(String login, String password) {
         String auth = login + ":" + password;
-        byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(Charset.forName("UTF-8")));
-        return "Basic " + new String(encodedAuth, "UTF-8");
+        byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(UTF_8));
+        return "Basic " + new String(encodedAuth, UTF_8);
     }
 
     protected Observable<ReceivedResponse> construct() {
@@ -135,10 +114,10 @@ public class HystrixIdentityProviderCommand extends HystrixObservableCommand<Rec
         }
     }
 
-    private void fillRequestBody(RequestSpec requestSpec) throws Exception {
+    private void fillRequestBody(RequestSpec requestSpec) {
         requestSpec.getBody().type(MediaType.APPLICATION_JSON);
-        requestSpec.getBody().text(new JSONObject(data).toJSONString());
-        log.info("Request to idp, body is {}", new JSONObject(data).toJSONString());
+        requestSpec.getBody().text(data.toJsonString());
+        log.info("Request to idp, body is {}", data.toJsonString());
     }
 
     @SneakyThrows
