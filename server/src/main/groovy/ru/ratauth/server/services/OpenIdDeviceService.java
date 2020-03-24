@@ -39,7 +39,8 @@ public class OpenIdDeviceService implements DeviceService {
                                     getLastDevice(oldDevices).orElseGet(DeviceInfo::new),
                                     deviceInfo,
                                     userInfo
-                            ).subscribeOn(Schedulers.io());
+                            ).subscribeOn(Schedulers.io())
+                            .doOnError(throwable -> log.error("Error in JMS " + throwable.getMessage()));
                             return deviceInfo;
                         }
                 );
