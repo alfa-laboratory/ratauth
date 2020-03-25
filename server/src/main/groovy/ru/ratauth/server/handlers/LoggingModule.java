@@ -10,6 +10,7 @@ import ratpack.handling.RequestId;
 import ratpack.http.Headers;
 import ratpack.http.Request;
 import ratpack.logging.MDCInterceptor;
+import ru.ratauth.server.secutiry.TraceIdGenerator;
 
 import static ru.ratauth.server.handlers.readers.RequestUtil.extractField;
 import static ru.ratauth.server.services.log.LogFields.*;
@@ -23,7 +24,7 @@ import static ru.ratauth.utils.StringUtils.isBlank;
  */
 @Component
 public class LoggingModule extends AbstractModule {
-    private final static String ALTERNATIVE_DEVICE_ID = "DEVICE-ID";
+    private static final String ALTERNATIVE_DEVICE_ID = "DEVICE-ID";
 
     @Value("${spring.application.name}")
     private String applicationName;
@@ -52,9 +53,19 @@ public class LoggingModule extends AbstractModule {
             if (!isBlank(sessionId)) {
                 MDC.put(SESSION_ID.val(), sessionId);
             }
-            MDC.put(X_B3_TRACE_ID.mdcVal(), headers.get(X_B3_TRACE_ID.headerVal()));
-            MDC.put(X_B3_SPAN_ID.mdcVal(), headers.get(X_B3_SPAN_ID.headerVal()));
+            forwardTrace(headers);
             ctx.next();
         }));
+    }
+
+    private void forwardTrace(Headers headers) {
+        if (isBlank(headers.get(X_B3_TRACE_ID.headerVal()))) {
+            String initTraceId = TraceIdGenerator.generateValue();
+            MDC.put(X_B3_TRACE_ID.mdcVal(), initTraceId);
+            MDC.put(X_B3_SPAN_ID.mdcVal(), initTraceId);
+        } else {
+            MDC.put(X_B3_TRACE_ID.mdcVal(), headers.get(X_B3_TRACE_ID.headerVal()));
+            MDC.put(X_B3_SPAN_ID.mdcVal(), headers.get(X_B3_SPAN_ID.headerVal()));
+        }
     }
 }
