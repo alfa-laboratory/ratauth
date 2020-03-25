@@ -40,7 +40,7 @@ public class OpenIdDeviceService implements DeviceService {
                                     deviceInfo,
                                     userInfo
                             ).subscribeOn(Schedulers.io())
-                            .doOnError(throwable -> log.error("Error in JMS " + throwable.getMessage()));
+                            .doOnError(throwable -> log.error("Error in JMS "));
                             return deviceInfo;
                         }
                 );
