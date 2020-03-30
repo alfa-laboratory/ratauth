@@ -16,8 +16,9 @@ import ru.ratauth.providers.auth.dto.VerifyInput;
 import ru.ratauth.providers.auth.dto.VerifyResult;
 import rx.Observable;
 
-@Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@Deprecated
+//@Component
+@RequiredArgsConstructor
 public class DCAIdentityProvider implements IdentityProvider {
 
     private final ActivatorResolver activatorResolver;

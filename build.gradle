@@ -1,11 +1,11 @@
 buildscript {
   ext {
-    springBootVersion = '1.5.4.RELEASE'
-    ratpackVersion = '1.4.5'
+    springBootVersion = '2.0.5.RELEASE'
+    ratpackVersion = '1.5.4'
   }
   repositories {
-    jcenter()
     mavenCentral()
+    jcenter()
   }
   dependencies {
     classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
@@ -56,10 +56,10 @@ allprojects {
 
     dependencies {
       //common
-      dependency 'org.projectlombok:lombok:1.16.2'
+      dependency 'org.projectlombok:lombok:1.18.12'
       dependency 'com.google.code.findbugs:annotations:3.0.1'
-      dependency 'org.apache.commons:commons-lang3:3.4'
-      dependency 'com.google.guava:guava:19.0'
+      dependency 'org.apache.commons:commons-lang3:3.7'
+      dependency 'com.google.guava:guava:21.0'
       dependency 'com.google.inject:guice:4.1.0'
       dependency 'org.codehaus.groovy:groovy-all:2.4.7'//for ratpack server config
       dependency 'com.auth0:java-jwt:3.2.0'
@@ -78,7 +78,7 @@ allprojects {
       dependency "io.ratpack:ratpack-test:${ratpackVersion}"
       dependency 'org.spockframework:spock-core:1.1-groovy-2.4-rc-2'
       dependency 'org.spockframework:spock-spring:1.1-groovy-2.4-rc-2'
-      dependency 'org.springframework.restdocs:spring-restdocs-restassured:1.1.2.RELEASE'
+//      dependency 'org.springframework.restdocs:spring-restdocs-restassured:1.1.2.RELEASE'
       dependency 'org.assertj:assertj-core:3.6.2'
       dependency 'org.skyscreamer:jsonassert:1.5.0'
       dependency 'io.rest-assured:rest-assured:3.0.2'
@@ -165,7 +165,7 @@ subprojects {
     reports {
       xml.enabled true
       csv.enabled true
-      html.destination "${buildDir}/jacocoHtml"
+      html.destination new File("${buildDir}/jacocoHtml")
     }
   }
 
@@ -189,6 +189,11 @@ subprojects {
 
   dependencies {
     compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+
     compileOnly 'com.google.code.findbugs:annotations'
     compileOnly 'org.slf4j:slf4j-api'
     compile 'org.codehaus.groovy:groovy-all'
@@ -206,6 +211,12 @@ subprojects {
     testCompile 'org.assertj:assertj-core'
   }
 
+}
+
+project(":ratauth-spring-boot-autoconfigure") {
+  dependencies {
+    compile project(':server')
+  }
 }
 
 idea {

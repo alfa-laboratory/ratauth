@@ -13,7 +13,8 @@ import ru.ratauth.providers.auth.VerifierResolver
 import static ratpack.jackson.Jackson.json
 
 @Slf4j
-@Component
+@Deprecated
+//@Component
 class ActivatorsVerifiersVersionHandler implements Action<Chain> {
 
     @Autowired

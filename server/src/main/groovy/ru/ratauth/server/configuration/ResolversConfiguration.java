@@ -9,7 +9,8 @@ import ru.ratauth.providers.auth.VerifierResolver;
 
 import java.util.List;
 
-@Configuration
+@Deprecated
+//@Configuration
 public class ResolversConfiguration {
 
     @Bean

@@ -2,6 +2,7 @@ package ru.ratauth.server
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import org.springframework.boot.WebApplicationType
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -32,7 +33,7 @@ class RatAuthApplication {
         log.debug 'Starting'.center(DEFAULT_PADDING, '=')
 
         new SpringApplicationBuilder(RatAuthApplication)
-                .web(false)
+                .web(WebApplicationType.NONE)
                 .run(args)
 
         log.debug 'Started'.center(DEFAULT_PADDING, '=')
