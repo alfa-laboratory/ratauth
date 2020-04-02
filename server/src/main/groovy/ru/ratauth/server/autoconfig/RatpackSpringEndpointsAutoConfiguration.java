@@ -22,7 +22,6 @@ import org.springframework.boot.actuate.autoconfigure.web.server.ManagementServe
 import org.springframework.boot.actuate.metrics.export.prometheus.PrometheusScrapeEndpoint;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,24 +32,20 @@ import ratpack.handling.Chain;
  * @author Dave Syer
  * thanks Dave
  */
+
+//TODO подумать как переработать этот класс
 @Configuration
 @ConditionalOnClass({EndpointAutoConfiguration.class})
 @AutoConfigureAfter({EndpointAutoConfiguration.class})
 @EnableConfigurationProperties
 public class RatpackSpringEndpointsAutoConfiguration {
 
-//    @Bean
-//    @ConditionalOnMissingBean(ManagementServerProperties.class)
-//    public ManagementServerProperties managementServerProperties(ManagementServerProperties xxx) {
-//        return new ManagementServerProperties();
-//    }
-
     @Bean
     protected EndpointInitializer ratpackEndpointInitializer() {
         return new EndpointInitializer();
     }
 
-    private static class EndpointInitializer implements Action<Chain> {
+    public static class EndpointInitializer implements Action<Chain> {
 
         @Autowired(required = false)
         private PrometheusScrapeEndpoint prometheusScrapeEndpoint;

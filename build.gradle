@@ -51,7 +51,7 @@ allprojects {
 
   dependencyManagement {
     imports {
-      mavenBom 'io.spring.platform:platform-bom:Brussels-SR3'
+      mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
     }
 
     dependencies {
@@ -67,7 +67,9 @@ allprojects {
       //reactive
       dependency 'io.reactivex:rxjava:1.1.6'
       dependency "io.ratpack:ratpack-rx:${ratpackVersion}"
-      dependency "io.ratpack:ratpack-spring-boot:${ratpackVersion}"
+      dependency ("io.ratpack:ratpack-spring-boot:${ratpackVersion}") {
+        exclude "org.springframework.boot:spring-boot-autoconfigure"
+      }
       dependency "io.ratpack:ratpack-groovy:${ratpackVersion}"
       dependency "io.ratpack:ratpack-hystrix:${ratpackVersion}"
 
@@ -78,7 +80,6 @@ allprojects {
       dependency "io.ratpack:ratpack-test:${ratpackVersion}"
       dependency 'org.spockframework:spock-core:1.1-groovy-2.4-rc-2'
       dependency 'org.spockframework:spock-spring:1.1-groovy-2.4-rc-2'
-//      dependency 'org.springframework.restdocs:spring-restdocs-restassured:1.1.2.RELEASE'
       dependency 'org.assertj:assertj-core:3.6.2'
       dependency 'org.skyscreamer:jsonassert:1.5.0'
       dependency 'io.rest-assured:rest-assured:3.0.2'
@@ -191,9 +192,6 @@ subprojects {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    testCompileOnly 'org.projectlombok:lombok'
-    testAnnotationProcessor 'org.projectlombok:lombok'
-
     compileOnly 'com.google.code.findbugs:annotations'
     compileOnly 'org.slf4j:slf4j-api'
     compile 'org.codehaus.groovy:groovy-all'
@@ -209,6 +207,9 @@ subprojects {
     }
     testCompile 'io.ratpack:ratpack-test'
     testCompile 'org.assertj:assertj-core'
+
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
   }
 
 }
