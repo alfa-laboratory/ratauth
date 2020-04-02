@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component
 import ratpack.error.ServerErrorHandler
 import ratpack.form.Form
 import ratpack.func.Action
+import ratpack.func.Block
 import ratpack.handling.Chain
 import ratpack.handling.Context
 import ru.ratauth.entities.AcrValues
@@ -46,21 +47,35 @@ class AuthorizationHandlers implements Action<Chain> {
     void execute(Chain chain) throws Exception {
         chain.path('authorize') { ctx ->
             ctx.byMethod { meth ->
-                meth.get { // GET
-                    ctx.byContent { cont ->
-                        cont.html { // REDIRECT
-                            redirectToWeb(ctx)
-                        } noMatch { // PROCESS AUTHORIZATION
-                            def requestObs = Observable.just(readAuthzRequest(ctx.request.queryParams, ctx.request.headers))
-                            requestObs.bindExec()
-                            authorize(ctx, requestObs)
+                meth.get(new Block() {
+                    @Override
+                    void execute() throws Exception {
+                        ctx.byContent { cont ->
+                            cont.html(new Block() {
+                                @Override
+                                void execute() throws Exception {
+                                    redirectToWeb(ctx)
+                                }
+                            })
+                            cont.noMatch(new Block() {
+                                @Override
+                                void execute() throws Exception {
+                                    def requestObs = Observable.just(readAuthzRequest(ctx.request.queryParams, ctx.request.headers))
+                                    requestObs.bindExec()
+                                    authorize(ctx, requestObs)
+                                }
+                            })
                         }
                     }
-                } post { // POST
-                    def queryParams = ctx.parse(Form)
-                    def requestObs = observe(queryParams).map { res -> readAuthzRequest(res, ctx.request.headers) }
-                    authorize(ctx, requestObs)
-                }
+                })
+                meth.post(new Block() {
+                    @Override
+                    void execute() throws Exception {
+                        def queryParams = ctx.parse(Form)
+                        def requestObs = observe(queryParams).map { res -> readAuthzRequest(res, ctx.request.headers) }
+                        authorize(ctx, requestObs)
+                    }
+                })
             }
         }
     }

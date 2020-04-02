@@ -3,22 +3,17 @@ package ru.ratauth;
 import com.google.common.collect.ImmutableMap;
 import org.junit.After;
 import org.junit.Test;
-import org.springframework.boot.actuate.autoconfigure.ManagementServerProperties;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import ratpack.spring.config.RatpackConfiguration;
 import ratpack.spring.config.RatpackProperties;
 import ru.ratauth.server.RatAuthApplication;
 import ru.ratauth.server.autoconfig.RatpackSpringEndpointsAutoConfiguration;
 import ru.ratauth.server.configuration.IdentityProvidersConfiguration;
 import ru.ratauth.server.configuration.OpenIdConnectDefaultDiscoveryProperties;
-import ru.ratauth.server.configuration.RestrictionServiceConfiguration;
 import ru.ratauth.server.configuration.renderer.RenderedConfiguration;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static ru.ratauth.RatAuthAutoConfigurationTest.ManagementServerPropertiesExistsConfiguration.TestManagementServerProperties;
 
 public class RatAuthAutoConfigurationTest {
 
@@ -46,13 +41,6 @@ public class RatAuthAutoConfigurationTest {
         assertThat(this.context.getBean(IdentityProvidersConfiguration.class)).isNotNull();
     }
 
-    @Test
-    public void testManagementServerPropertiesAlreadyExists() {
-        registerAndRefresh(TestDefaultConfiguration.class, ManagementServerPropertiesExistsConfiguration.class);
-        assertThat(this.context.getBean(ManagementServerProperties.class)).isNotNull();
-        assertThat(this.context.getBean(ManagementServerProperties.class)).isInstanceOf(TestManagementServerProperties.class);
-    }
-
     @After
     public void close() {
         if (context != null) {
@@ -66,20 +54,6 @@ public class RatAuthAutoConfigurationTest {
                 .profiles("local")
                 .properties(DEFAULT_PROPERTIES)
                 .run();
-    }
-
-    @Configuration
-    public static class ManagementServerPropertiesExistsConfiguration {
-
-        @Bean
-        public ManagementServerProperties managementServerProperties() {
-            return new TestManagementServerProperties();
-        }
-
-        public static class TestManagementServerProperties extends ManagementServerProperties {
-
-        }
-
     }
 
 }

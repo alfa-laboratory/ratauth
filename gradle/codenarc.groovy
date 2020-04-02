@@ -195,7 +195,7 @@ ruleset {
   GrailsDuplicateMapping
   GrailsPublicControllerMethod
   GrailsServletContextReference
-  GrailsSessionReference   // DEPRECATED
+  //GrailsSessionReference   // DEPRECATED
   GrailsStatelessService
 
   // rulesets/groovyism.xml

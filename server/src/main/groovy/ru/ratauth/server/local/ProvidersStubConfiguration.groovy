@@ -4,6 +4,7 @@ import groovy.transform.CompileStatic
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import ru.ratauth.entities.AcrValues
+import ru.ratauth.entities.IdentityProvider
 import ru.ratauth.exception.AuthorizationException
 import ru.ratauth.exception.RegistrationException
 import ru.ratauth.providers.auth.Activator
@@ -14,6 +15,8 @@ import ru.ratauth.providers.registrations.RegistrationProvider
 import ru.ratauth.providers.registrations.dto.RegInput
 import ru.ratauth.providers.registrations.dto.RegResult
 import rx.Observable
+
+import java.util.stream.Collectors
 
 import static ru.ratauth.providers.auth.dto.VerifyResult.Status.SUCCESS
 
@@ -29,6 +32,32 @@ class ProvidersStubConfiguration {
     abstract class AbstractAuthProvider implements AuthProvider, RegistrationProvider {}
 
     abstract class AbstractProvider implements Activator, Verifier {}
+
+    @Bean
+    @Primary
+    IdentityProvider identityProvider(List<AbstractProvider> abstractProviders) {
+        Map<String, AbstractProvider> providersMap = new HashMap<>()
+        for (AbstractProvider el : abstractProviders) {
+            providersMap.put(el.name(), el);
+        }
+        return new IdentityProvider() {
+            @Override
+            String name() {
+                return "STUB"
+            }
+
+            @Override
+            Observable<ActivateResult> activate(ActivateInput input) {
+
+                return providersMap.get(input.getEnroll().getFirst()).activate(input)
+            }
+
+            @Override
+            Observable<VerifyResult> verify(VerifyInput input) {
+                return providersMap.get(input.getEnroll().getFirst()).verify(input)
+            }
+        }
+    }
 
     @Bean
     @Primary

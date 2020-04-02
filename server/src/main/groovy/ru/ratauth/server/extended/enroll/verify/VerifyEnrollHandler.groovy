@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component
 import ratpack.error.ServerErrorHandler
 import ratpack.form.Form
 import ratpack.func.Action
+import ratpack.func.Block
 import ratpack.handling.Chain
 import ratpack.handling.Context
 import ru.ratauth.server.handlers.readers.RequestReader
@@ -27,13 +28,16 @@ class VerifyEnrollHandler implements Action<Chain> {
     void execute(Chain chain) throws Exception {
         chain.path('verify') { Context ctx ->
             ctx.byMethod { method ->
-                method.post {
-                    def parameters = ctx.parse(Form)
-                    def request = observe(parameters)
-                            .map { form -> new RequestReader(form) }
-                            .map { requestReader -> readVerifyEnrollRequest(requestReader) }
-                    incAuthLevel(ctx, request)
-                }
+                method.post(new Block() {
+                    @Override
+                    void execute() throws Exception {
+                        def parameters = ctx.parse(Form)
+                        def request = observe(parameters)
+                                .map { form -> new RequestReader(form) }
+                                .map { requestReader -> readVerifyEnrollRequest(requestReader) }
+                        incAuthLevel(ctx, request)
+                    }
+                })
             }
         }
     }

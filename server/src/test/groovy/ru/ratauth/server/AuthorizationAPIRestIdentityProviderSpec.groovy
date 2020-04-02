@@ -1,7 +1,7 @@
 package ru.ratauth.server
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule
-import com.jayway.restassured.http.ContentType
+import io.restassured.http.ContentType
 import groovy.json.JsonOutput
 import io.netty.handler.codec.http.HttpResponseStatus
 import org.eclipse.jetty.http.HttpHeader
@@ -15,12 +15,12 @@ import ru.ratauth.interaction.AuthzResponseType
 import ru.ratauth.server.local.PersistenceServiceStubConfiguration
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*
-import static com.jayway.restassured.RestAssured.given
+import static io.restassured.RestAssured.given
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName
 import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters
-import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document
+import static org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.document
 
 class AuthorizationAPIRestIdentityProviderSpec extends BaseDocumentationSpec {
 
