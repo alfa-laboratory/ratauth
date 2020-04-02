@@ -214,12 +214,6 @@ subprojects {
 
 }
 
-project(":ratauth-spring-boot-autoconfigure") {
-  dependencies {
-    compile project(':server')
-  }
-}
-
 idea {
   project {
     jdkName '1.8'
