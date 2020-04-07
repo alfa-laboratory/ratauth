@@ -1,7 +1,7 @@
 package ru.ratauth.server
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.jayway.restassured.http.ContentType
+import io.restassured.http.ContentType
 import org.hamcrest.core.StringContains
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -14,16 +14,17 @@ import ru.ratauth.interaction.AuthzResponseType
 import ru.ratauth.interaction.GrantType
 import ru.ratauth.server.local.PersistenceServiceStubConfiguration
 
-import static com.jayway.restassured.RestAssured.given
+import static io.restassured.RestAssured.given
 import static org.hamcrest.Matchers.*
 import static org.springframework.restdocs.headers.HeaderDocumentation.*
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields
+import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters
-import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document
+import static org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.document
 
 /**
  * @author mgorelikov* @since 03/11/15
@@ -135,7 +136,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
                                 fieldWithPath('id')
                                         .description('Error identifier')
                                         .type(JsonFieldType.STRING),
-                                fieldWithPath('message')
+                                subsectionWithPath('message')
                                         .description('Different localizations of message')
                                         .type(JsonFieldType.OBJECT),
                                 fieldWithPath('base_id')
@@ -158,6 +159,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
                 .when()
                 .post("authorize")
         then:
+        result.statusCode()
         result
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
@@ -174,7 +176,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
                                 fieldWithPath('id')
                                         .description('Error identifier')
                                         .type(JsonFieldType.STRING),
-                                fieldWithPath('message')
+                                subsectionWithPath('message')
                                         .description('Different localizations of message')
                                         .type(JsonFieldType.OBJECT),
                                 fieldWithPath('base_id')
@@ -275,7 +277,7 @@ class AuthorizationAPISpec extends BaseDocumentationSpec {
                                 fieldWithPath('id')
                                         .description('Error identifier')
                                         .type(JsonFieldType.STRING),
-                                fieldWithPath('message')
+                                subsectionWithPath('message')
                                         .description('Different localizations of message')
                                         .type(JsonFieldType.OBJECT),
                                 fieldWithPath('base_id')

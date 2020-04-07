@@ -1,12 +1,12 @@
 package ru.ratauth.server.handlers
 
-import com.jayway.restassured.http.ContentType
+import io.restassured.http.ContentType
 import groovy.json.JsonSlurper
 import org.hamcrest.core.StringContains
 import org.springframework.http.HttpStatus
 import ru.ratauth.server.BaseDocumentationSpec
 
-import static com.jayway.restassured.RestAssured.given
+import static io.restassured.RestAssured.given
 import static org.springframework.http.HttpHeaders.LOCATION
 import static org.springframework.http.HttpStatus.FOUND
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY
@@ -16,7 +16,7 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.pr
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters
-import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document
+import static org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.document
 import static ru.ratauth.server.local.PersistenceServiceStubConfiguration.*
 
 class UpdateHandlerSpec extends BaseDocumentationSpec {

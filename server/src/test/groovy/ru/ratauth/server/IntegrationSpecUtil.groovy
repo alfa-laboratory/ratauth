@@ -1,6 +1,6 @@
 package ru.ratauth.server
 
-import com.jayway.restassured.response.Header
+import io.restassured.http.Header
 import org.springframework.http.HttpHeaders
 
 import java.nio.charset.Charset

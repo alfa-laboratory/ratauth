@@ -17,26 +17,23 @@ package ru.ratauth.server.autoconfig;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.EndpointAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.ManagementServerProperties;
-import org.springframework.boot.actuate.endpoint.Endpoint;
+import org.springframework.boot.actuate.autoconfigure.endpoint.EndpointAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.web.server.ManagementServerProperties;
+import org.springframework.boot.actuate.metrics.export.prometheus.PrometheusScrapeEndpoint;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.StringUtils;
 import ratpack.func.Action;
 import ratpack.handling.Chain;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Dave Syer
  * thanks Dave
  */
+
+//TODO подумать как переработать этот класс
 @Configuration
 @ConditionalOnClass({EndpointAutoConfiguration.class})
 @AutoConfigureAfter({EndpointAutoConfiguration.class})
@@ -44,41 +41,54 @@ import java.util.List;
 public class RatpackSpringEndpointsAutoConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean
-    public ManagementServerProperties managementServerProperties() {
-        return new ManagementServerProperties();
-    }
-
-    @Bean
     protected EndpointInitializer ratpackEndpointInitializer() {
         return new EndpointInitializer();
     }
 
-    private static class EndpointInitializer implements Action<Chain> {
+    public static class EndpointInitializer implements Action<Chain> {
+
+        @Autowired(required = false)
+        private PrometheusScrapeEndpoint prometheusScrapeEndpoint;
+
         @Autowired
         private ObjectMapper jacksonObjectMapper;
 
-        @Autowired
-        private List<Endpoint<?>> endpoints = Collections.emptyList();
+//        @Autowired
+//        private List<Endpoint<?>> endpoints = Collections.emptyList();
 
         @Autowired
         private ManagementServerProperties management;
 
         @Override
         public void execute(Chain chain) throws Exception {
-            String prefix = management.getContextPath();
-            if (StringUtils.hasText(prefix)) {
-                prefix = prefix.endsWith("/") ? prefix : prefix + "/";
-            } else {
-                prefix = "";
+
+            if (prometheusScrapeEndpoint != null) {
+                chain.get("actuator/prometheus", context -> context.render(prometheusScrapeEndpoint.scrape()));
             }
-            for (Endpoint<?> endpoint : endpoints) {
-                if (endpoint.isEnabled()) {
-                    chain.get(prefix + endpoint.getId(), context ->
-                            context.render(jacksonObjectMapper.writeValueAsString(endpoint.invoke()))
-                    );
-                }
-            }
+            chain.get("actuator/health", context -> context.render("OK"));
+            chain.get("health", context -> context.render("OK"));
+//            String prefix = management.getContextPath();
+//            if (StringUtils.hasText(prefix)) {
+//                prefix = prefix.endsWith("/") ? prefix : prefix + "/";
+//            } else {
+//                prefix = "";
+//            }
+//            for (Endpoint<?> endpoint : endpoints) {
+//                if (endpoint.isEnabled()) {
+//                    chain.get(prefix + endpoint.getId(), context ->
+//                            {
+//                                Object endpointResult = endpoint.invoke();
+//                                if (endpointResult.getClass().isAssignableFrom(ResponseEntity.class)) {
+//                                    ResponseEntity<?> entity = (ResponseEntity<?>) endpointResult;
+//                                    entity.getHeaders().forEach(context::header);
+//                                    context.render(entity.getBody());
+//                                } else {
+//                                    context.render(jacksonObjectMapper.writeValueAsString(endpoint.invoke()));
+//                                }
+//                            }
+//                    );
+//                }
+//            }
         }
 
     }

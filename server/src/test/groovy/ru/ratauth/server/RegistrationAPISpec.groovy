@@ -1,7 +1,7 @@
 package ru.ratauth.server
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.jayway.restassured.http.ContentType
+import io.restassured.http.ContentType
 import org.hamcrest.core.StringContains
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -13,7 +13,7 @@ import ru.ratauth.interaction.GrantType
 import ru.ratauth.server.local.PersistenceServiceStubConfiguration
 import ru.ratauth.server.local.ProvidersStubConfiguration
 
-import static com.jayway.restassured.RestAssured.given
+import static io.restassured.RestAssured.given
 import static org.hamcrest.Matchers.isEmptyOrNullString
 import static org.hamcrest.core.IsNot.not
 import static org.springframework.restdocs.headers.HeaderDocumentation.*
@@ -21,7 +21,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters
-import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document
+import static org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.document
 
 /**
  * @author djassan* @since 11/09/16

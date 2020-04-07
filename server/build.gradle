@@ -1,5 +1,5 @@
 ext {
-  snippetsDir = file("/build/docs/generated-snippets")
+  snippetsDir = file("./build/docs/generated-snippets")
   imageTagLatest = project.hasProperty('imageTagLatest')
   imageTag = "${imageTagLatest ? 'latest' : project.version.toString().replace('+', '.')}"
   imageFullName = "ratauth:$imageTag"
@@ -16,9 +16,13 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: 'com.bmuschko.docker-remote-api'
 apply plugin: 'nebula.maven-publish'
 
-bootRepackage {
-  mainClass = 'ru.ratauth.server.RatAuthApplication'
+bootJar {
+  mainClassName = 'ru.ratauth.server.RatAuthApplication'
   enabled = false
+}
+
+jar {
+  enabled = true
 }
 
 configurations.all {
@@ -50,7 +54,7 @@ dependencies {
   compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
 
   //docs/test
-  testCompile 'org.springframework.restdocs:spring-restdocs-restassured:1.1.0.RELEASE'
+  testCompile 'org.springframework.restdocs:spring-restdocs-restassured'
   testCompile 'com.github.tomakehurst:wiremock:2.5.1'
   testCompile 'org.springframework.boot:spring-boot-starter-test'
   testCompile 'org.skyscreamer:jsonassert'

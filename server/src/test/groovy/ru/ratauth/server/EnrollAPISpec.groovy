@@ -1,7 +1,7 @@
 package ru.ratauth.server
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.jayway.restassured.http.ContentType
+import io.restassured.http.ContentType
 import org.hamcrest.core.StringContains
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -11,16 +11,17 @@ import org.springframework.restdocs.payload.JsonFieldType
 import ru.ratauth.exception.AuthorizationException
 import ru.ratauth.server.local.PersistenceServiceStubConfiguration
 
-import static com.jayway.restassured.RestAssured.given
+import static io.restassured.RestAssured.given
 import static java.net.URLEncoder.encode
 import static org.hamcrest.Matchers.*
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields
+import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters
-import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document
+import static org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.document
 
 /**
  * @author djassan
@@ -96,7 +97,7 @@ class EnrollAPISpec extends BaseDocumentationSpec {
                                 .description("User data"),
                 ),
                 responseFields(
-                        fieldWithPath('data')
+                        subsectionWithPath('data')
                                 .description('Activation result from provider')
                                 .type(JsonFieldType.OBJECT)
                 )
@@ -143,7 +144,7 @@ class EnrollAPISpec extends BaseDocumentationSpec {
                         fieldWithPath('mfa_token')
                                 .description('MFA token')
                                 .type(JsonFieldType.STRING),
-                        fieldWithPath('data')
+                        subsectionWithPath('data')
                                 .description('Activation result from provider')
                                 .type(JsonFieldType.OBJECT)
                 )

@@ -8,6 +8,7 @@ import ratpack.error.ServerErrorHandler
 import ratpack.exec.Promise
 import ratpack.form.Form
 import ratpack.func.Action
+import ratpack.func.Block
 import ratpack.handling.Chain
 import ratpack.handling.Context
 import ru.ratauth.interaction.RegistrationRequest
@@ -42,17 +43,31 @@ class RegistrationHandler implements Action<Chain> {
     void execute(Chain chain) throws Exception {
         chain.path('register') { Context ctx ->
             ctx.byMethod { meth ->
-                meth.get {
-                    ctx.byContent { spec ->
-                        spec.html {
-                            redirectToWeb(ctx)
-                        }.noMatch {
-                            initRegistration(ctx)
+                meth.get(new Block() {
+                    @Override
+                    void execute() throws Exception {
+                        ctx.byContent { spec ->
+                            spec.html(new Block() {
+                                @Override
+                                void execute() throws Exception {
+                                    redirectToWeb(ctx)
+                                }
+                            })
+                            spec.noMatch(new Block() {
+                                @Override
+                                void execute() throws Exception {
+                                    initRegistration(ctx)
+                                }
+                            })
                         }
                     }
-                } post {
-                    finishRegistration(ctx)
-                }
+                })
+                meth.post(new Block() {
+                    @Override
+                    void execute() throws Exception {
+                        finishRegistration(ctx)
+                    }
+                })
             }
         }
     }
