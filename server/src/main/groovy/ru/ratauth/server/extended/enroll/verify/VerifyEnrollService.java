@@ -156,7 +156,7 @@ public class VerifyEnrollService {
     }
 
     private DeviceInfo createDeviceInfoFromRequest(Session session, VerifyEnrollRequest request) {
-        return DeviceInfo.builder()
+        DeviceInfo newDevice = DeviceInfo.builder()
                 .userId(session.getUserId())
                 .sessionToken(session.getSessionToken())
                 .deviceAppVersion(request.getDeviceAppVersion())
@@ -174,6 +174,9 @@ public class VerifyEnrollService {
                 .deviceUserAgent(request.getDeviceUserAgent())
                 .creationDate(new Date())
                 .build();
+
+        log.info("JMS new device = " + newDevice);
+        return newDevice;
     }
 
 
