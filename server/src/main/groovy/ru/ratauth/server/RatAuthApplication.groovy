@@ -2,17 +2,12 @@ package ru.ratauth.server
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import org.springframework.boot.WebApplicationType
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.context.annotation.ComponentScan
 import ratpack.spring.config.EnableRatpack
-import ru.ratauth.server.configuration.IdentityProvidersConfiguration
-import ru.ratauth.server.configuration.OpenIdConnectDefaultDiscoveryProperties
-import ru.ratauth.server.configuration.RestrictionServiceConfiguration
-import ru.ratauth.server.configuration.SessionConfiguration
-import ru.ratauth.server.configuration.UpdateServicesConfiguration
-
+import ru.ratauth.server.configuration.*
 
 @Slf4j
 @CompileStatic
@@ -32,7 +27,7 @@ class RatAuthApplication {
         log.debug 'Starting'.center(DEFAULT_PADDING, '=')
 
         new SpringApplicationBuilder(RatAuthApplication)
-                .web(false)
+                .web(WebApplicationType.NONE)
                 .run(args)
 
         log.debug 'Started'.center(DEFAULT_PADDING, '=')
