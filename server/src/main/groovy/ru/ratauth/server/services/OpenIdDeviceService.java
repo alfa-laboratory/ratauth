@@ -33,13 +33,16 @@ public class OpenIdDeviceService implements DeviceService {
         return deviceInfoService
                 .findByUserId(deviceInfo.getUserId())
                 .map(oldDevices -> {
+                            DeviceInfo lastDevice = getLastDevice(oldDevices).orElseGet(DeviceInfo::new);
+                            log.info("JMS find last device = " + lastDevice);
                             deviceInfoEventService.sendChangeDeviceInfoEvent(
                                     clientId,
                                     enroll,
                                     getLastDevice(oldDevices).orElseGet(DeviceInfo::new),
                                     deviceInfo,
                                     userInfo
-                            ).subscribeOn(Schedulers.io());
+                            ).subscribeOn(Schedulers.io())
+                            .doOnError(throwable -> log.error("Error in JMS = ", throwable));
                             return deviceInfo;
                         }
                 );
@@ -47,7 +50,7 @@ public class OpenIdDeviceService implements DeviceService {
 
     private Optional<DeviceInfo> getLastDevice(List<DeviceInfo> oldDevices) {
         return oldDevices.stream()
-                .sorted(Comparator.comparing(DeviceInfo::getCreationDate))
+                .sorted(Comparator.comparing(DeviceInfo::getCreationDate, Comparator.nullsLast(Comparator.reverseOrder())))
                 .skip(1)
                 .findFirst();
     }
