@@ -530,7 +530,7 @@ class PersistenceServiceStubConfiguration {
             }
 
             @Override
-            Observable<List<DeviceInfo>> findByUserId(String userId) {
+            Observable<List<DeviceInfo>> findByUserIdAndClientId(String userId, String clientId) {
                 return Observable.just([])
             }
         }

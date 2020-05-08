@@ -31,7 +31,7 @@ public class OpenIdDeviceService implements DeviceService {
 
     public Observable<DeviceInfo> sendDeviceInfo(String clientId, String enroll, DeviceInfo deviceInfo, Map<String, Object> userInfo) {
         return deviceInfoService
-                .findByUserId(deviceInfo.getUserId())
+                .findByUserIdAndClientId(deviceInfo.getUserId(), clientId)
                 .map(oldDevices -> {
                             DeviceInfo lastDevice = getLastDevice(oldDevices).orElseGet(DeviceInfo::new);
                             log.info("JMS find last device = " + lastDevice);
@@ -44,6 +44,10 @@ public class OpenIdDeviceService implements DeviceService {
                             ).subscribeOn(Schedulers.io())
                             .doOnError(throwable -> log.error("Error in JMS = ", throwable));
                             return deviceInfo;
+                        }
+                ).doOnError(
+                        th -> {
+                            log.info("Jms error 2 " + th.getMessage());
                         }
                 );
     }

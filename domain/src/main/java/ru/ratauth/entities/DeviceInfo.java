@@ -16,6 +16,7 @@ public class DeviceInfo {
     private String id;
     private String sessionToken;
     private String userId;
+    private String clientId;
 
     private String deviceAppVersion;
     private String deviceId;
