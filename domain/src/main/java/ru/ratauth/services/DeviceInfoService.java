@@ -9,6 +9,6 @@ public interface DeviceInfoService {
 
     Observable<DeviceInfo> create(String clientId, String enroll, DeviceInfo deviceInfo);
 
-    Observable<List<DeviceInfo>> findByUserId(String userId);
+    Observable<List<DeviceInfo>> findByUserIdAndClientId(String userId, String clientId);
 
 }
