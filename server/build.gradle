@@ -59,10 +59,6 @@ dependencies {
   testCompile 'org.springframework.boot:spring-boot-starter-test'
   testCompile 'org.skyscreamer:jsonassert'
   testCompile 'io.rest-assured:rest-assured'
-
-
-  dockerJava 'com.github.docker-java:docker-java:3.0.14'
-  dockerJava 'cglib:cglib:3.2.0'
 }
 
 compileJava.dependsOn(processResources)
@@ -94,7 +90,7 @@ docker {
 task createDockerfile(type: Dockerfile) {
   destFile = project.file('build/docker/Dockerfile')
   from 'java:8-alpine'
-  maintainer 'Tolkachev Kirill "tolk.kv@gmail.com"'
+  label(['maintainer': 'Tolkachev Kirill "tolk.kv@gmail.com"'])
   volume '/tmp'
   jar.outputs.files.filter { it.name.endsWith '.jar' } each {
     addFile it.name, "/$it.name"

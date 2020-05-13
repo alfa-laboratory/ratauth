@@ -88,6 +88,7 @@ public class ActivateEnrollService {
                 .deviceIp(request.getDeviceIp())
                 .deviceUserAgent(request.getDeviceUserAgent())
                 .creationDate(new Date())
+                .isVerified(false)
                 .build();
     }
 

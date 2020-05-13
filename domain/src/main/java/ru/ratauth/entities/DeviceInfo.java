@@ -34,4 +34,6 @@ public class DeviceInfo {
     private String deviceUserAgent;
 
     private Date creationDate = new Date();
+
+    private Boolean isVerified;
 }
