@@ -533,6 +533,11 @@ class PersistenceServiceStubConfiguration {
             Observable<List<DeviceInfo>> findByUserIdAndClientId(String userId, String clientId) {
                 return Observable.just([])
             }
+
+            @Override
+            Observable<Boolean> verifyDevice(DeviceInfo deviceInfo) {
+                return Observable.just(true)
+            }
         }
     }
 
