@@ -11,4 +11,5 @@ public interface DeviceService {
 
     Observable<DeviceInfo> sendDeviceInfo(String clientId, String authContext, DeviceInfo deviceInfo, Map<String, Object> userInfo);
 
+    Observable<Boolean> verifyDevice(DeviceInfo deviceInfo);
 }

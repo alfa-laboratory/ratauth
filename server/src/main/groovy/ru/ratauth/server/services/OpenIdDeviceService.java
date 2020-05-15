@@ -38,7 +38,7 @@ public class OpenIdDeviceService implements DeviceService {
                             deviceInfoEventService.sendChangeDeviceInfoEvent(
                                     clientId,
                                     enroll,
-                                    getLastDevice(oldDevices).orElseGet(DeviceInfo::new),
+                                    lastDevice,
                                     deviceInfo,
                                     userInfo
                             ).subscribeOn(Schedulers.io())
@@ -46,10 +46,13 @@ public class OpenIdDeviceService implements DeviceService {
                             return deviceInfo;
                         }
                 ).doOnError(
-                        th -> {
-                            log.info("Jms error 2 " + th.getMessage());
-                        }
+                        th -> log.info("Jms error 2 " + th.getMessage())
                 );
+    }
+
+    @Override
+    public Observable<Boolean> verifyDevice(DeviceInfo deviceInfo) {
+        return deviceInfoService.verifyDevice(deviceInfo);
     }
 
     private Optional<DeviceInfo> getLastDevice(List<DeviceInfo> oldDevices) {

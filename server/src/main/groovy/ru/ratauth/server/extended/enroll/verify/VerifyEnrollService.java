@@ -141,11 +141,13 @@ public class VerifyEnrollService {
                         .flatMap(response -> {
                             if (response instanceof SuccessResponse) {
                                 Session session = p.right;
+                                DeviceInfo deviceInfo = createDeviceInfoFromRequest(session, request);
+                                deviceService.verifyDevice(deviceInfo);
                                 return deviceService
                                         .sendDeviceInfo(
                                                 request.getClientId(),
                                                 Objects.toString(request.getAuthContext()),
-                                                createDeviceInfoFromRequest(session, request),
+                                                deviceInfo,
                                                 extractUserInfo(session)
                                         )
                                         .map(it -> response);

@@ -11,4 +11,5 @@ public interface DeviceInfoService {
 
     Observable<List<DeviceInfo>> findByUserIdAndClientId(String userId, String clientId);
 
+    Observable<Boolean> verifyDevice(DeviceInfo deviceInfo);
 }
