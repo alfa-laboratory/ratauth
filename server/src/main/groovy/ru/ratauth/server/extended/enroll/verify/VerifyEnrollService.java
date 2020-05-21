@@ -142,14 +142,15 @@ public class VerifyEnrollService {
                             if (response instanceof SuccessResponse) {
                                 Session session = p.right;
                                 DeviceInfo deviceInfo = createDeviceInfoFromRequest(session, request);
-                                deviceService.verifyDevice(deviceInfo);
-                                return deviceService
-                                        .sendDeviceInfo(
+                                return Observable.zip(
+                                        deviceService.verifyDevice(deviceInfo),
+                                        deviceService.sendDeviceInfo(
                                                 request.getClientId(),
                                                 Objects.toString(request.getAuthContext()),
                                                 deviceInfo,
                                                 extractUserInfo(session)
-                                        )
+                                        ),
+                                        ImmutablePair::new)
                                         .map(it -> response);
                             }
                             return Observable.just(response);
